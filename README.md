@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# OrderBook
 
-## Getting Started
+Multi-business order management and POS workspace for **WebsiteIn**. One app, one data model, every record scoped by `brand_id`.
 
-First, run the development server:
+## Stack
+
+- Next.js App Router, React, TypeScript (strict)
+- Supabase Auth + PostgreSQL (browser client under RLS)
+- Tailwind CSS + shared `--ob-*` design tokens
+
+## Routes
+
+| Route | Description |
+|-------|-------------|
+| `/login` | Business ID + password sign-in, demo entry |
+| `/demo/*` | Read-only Brewery Cafe demo workspace |
+| `/dashboard` … `/settings` | Authenticated workspace (requires Supabase session + `brand_members`) |
+
+## Environment (Railway / local)
+
+Copy `.env.example` to `.env.local`:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+NEXT_PUBLIC_SUPABASE_URL=https://vdrnkhtltpwrkfjnlasf.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Server-only (login mapping until RPC exists):
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+BRAND_AUTH_EMAIL_MAP={"BR-1":"owner@example.com","BR-2":"owner2@example.com"}
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Never commit secrets or use `service_role` in the browser.
 
-## Learn More
+See `docs/DATABASE_CONTRACT.md` for tables, RLS, and RPC expectations.
 
-To learn more about Next.js, take a look at the following resources:
+## Commands
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm install
+npm run dev      # http://localhost:3000
+npm run lint
+npm run build    # requires public Supabase env vars
+npm start
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Design
 
-## Deploy on Vercel
+Visual direction documented in `docs/DESIGN.md`. Reference inspiration: [Curated #4425](https://curated.design/sites/s/4425/) (Primeintellect listing — adapted to calm light admin UI, not copied).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Demo vs live
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Demo** (`/demo/dashboard`): isolated fixtures in `src/lib/demo/fixtures.ts`, labelled DEMO, read-only.
+- **Live**: Supabase queries + `create_order` RPC when provisioned. Missing schema surfaces inline errors, not fake data.
+
+## Blockers until Supabase is ready
+
+- `BRAND_AUTH_EMAIL_MAP` or `resolve_brand_auth_email` RPC for login
+- Tables + RLS for CRUD
+- `create_order` RPC for billing submission
+- Analytics views/RPCs for dashboard KPIs
+
+Built by WebsiteIn.
