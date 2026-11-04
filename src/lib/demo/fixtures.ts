@@ -11,7 +11,7 @@ import type {
 
 export const DEMO_BRAND: Brand = {
   id: "demo-brewery-cafe",
-  code: "DEMO",
+  code: "BR-1",
   name: "Brewery Cafe",
 };
 
@@ -19,7 +19,7 @@ export const DEMO_SETTINGS: BrandSettings = {
   brand_id: DEMO_BRAND.id,
   currency_code: "INR",
   tax_rate_percent: 5,
-  receipt_header: "Brewery Cafe — Demo",
+  receipt_header: "Brewery Cafe",
   receipt_footer: "Thank you for visiting!",
   contact_email: "hello@brewery-cafe.demo",
   contact_phone: "+91 98765 43210",

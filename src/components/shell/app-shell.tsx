@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { NAV_ITEMS, navHref, type WorkspaceMode } from "@/lib/workspace/types";
-import { Badge } from "@/components/ui/badge";
 import { logoutAction } from "@/lib/auth/actions";
 import {
   LayoutDashboard,
@@ -70,11 +69,6 @@ export function AppShell({
             </p>
             <p className="mt-1 truncate text-sm font-semibold">{brandName}</p>
             <p className="text-xs text-[var(--ob-text-muted)]">{brandCode}</p>
-            {mode === "demo" ? (
-              <Badge tone="demo" className="mt-2">
-                DEMO — read only
-              </Badge>
-            ) : null}
           </>
         ) : (
           <span className="text-xs font-bold text-[var(--ob-primary)]">OB</span>
@@ -82,7 +76,7 @@ export function AppShell({
       </div>
       <nav className="flex-1 space-y-1 overflow-y-auto p-2">
         {NAV_ITEMS.map((item) => {
-          const href = navHref(item, mode);
+          const href = navHref(item);
           const active = pathname === href || pathname.startsWith(`${href}/`);
           const Icon = icons[item.label];
           return (
@@ -109,24 +103,26 @@ export function AppShell({
             {userEmail}
           </p>
         ) : null}
-        {mode === "live" ? (
-          <form action={logoutAction}>
-            <button
-              type="submit"
-              className="flex w-full items-center gap-2 rounded-[var(--ob-radius-md)] px-3 py-2 text-sm text-[var(--ob-text-secondary)] hover:bg-[var(--ob-surface-muted)]"
-            >
-              <LogOut className="h-4 w-4" aria-hidden />
-              {!collapsed ? "Log out" : null}
-            </button>
-          </form>
-        ) : (
+        {!collapsed && mode === "demo" ? (
+          <p className="mb-2 text-xs text-[var(--ob-text-muted)]">Guest workspace</p>
+        ) : null}
+        <form action={logoutAction}>
+          <button
+            type="submit"
+            className="flex w-full items-center gap-2 rounded-[var(--ob-radius-md)] px-3 py-2 text-sm text-[var(--ob-text-secondary)] hover:bg-[var(--ob-surface-muted)]"
+          >
+            <LogOut className="h-4 w-4" aria-hidden />
+            {!collapsed ? (mode === "demo" ? "Exit workspace" : "Log out") : null}
+          </button>
+        </form>
+        {mode === "demo" && !collapsed ? (
           <Link
             href="/login"
-            className="flex items-center gap-2 rounded-[var(--ob-radius-md)] px-3 py-2 text-sm text-[var(--ob-primary)] hover:bg-[var(--ob-surface-muted)]"
+            className="mt-1 flex items-center gap-2 rounded-[var(--ob-radius-md)] px-3 py-2 text-sm text-[var(--ob-primary)] hover:bg-[var(--ob-surface-muted)]"
           >
-            {!collapsed ? "Sign in to your business" : "→"}
+            Sign in with business ID
           </Link>
-        )}
+        ) : null}
         <button
           type="button"
           className="mt-1 hidden w-full items-center gap-2 rounded-[var(--ob-radius-md)] px-3 py-2 text-sm text-[var(--ob-text-muted)] hover:bg-[var(--ob-surface-muted)] md:flex"
@@ -179,11 +175,6 @@ export function AppShell({
           </div>
           <div className="flex items-center gap-2">{headerActions}</div>
         </header>
-        {mode === "demo" ? (
-          <div className="border-b border-violet-200 bg-violet-50 px-4 py-2 text-center text-sm text-violet-900">
-            Demo mode — changes are disabled. Explore Brewery Cafe sample data.
-          </div>
-        ) : null}
         <main className="flex-1 p-4 md:p-6 ob-animate-in">{children}</main>
       </div>
     </div>

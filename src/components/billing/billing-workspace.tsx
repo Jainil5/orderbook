@@ -3,13 +3,16 @@
 import type { Customer, Product } from "@/types/database";
 import { BillingPos } from "@/components/billing/billing-pos";
 import { submitOrderAction } from "@/services/actions";
+import { submitDemoOrder } from "@/lib/demo/data";
 
-export function LiveBillingClient({
+export function BillingWorkspace({
+  mode,
   products,
   customers,
   currencyCode,
   taxRatePercent,
 }: {
+  mode: "live" | "demo";
   products: Product[];
   customers: Customer[];
   currencyCode: string;
@@ -22,6 +25,25 @@ export function LiveBillingClient({
       currencyCode={currencyCode}
       taxRatePercent={taxRatePercent}
       onSubmitOrder={async (payload) => {
+        if (mode === "demo") {
+          const result = await submitDemoOrder({
+            customerId: payload.customerId,
+            notes: payload.notes,
+            lines: payload.lines,
+            offerCode: payload.offerCode,
+            paymentMethod: payload.paymentMethod,
+            paymentStatus: "paid",
+          });
+          if (result.ok) {
+            return {
+              ok: true,
+              message: "Saved",
+              orderNumber: result.orderNumber,
+            };
+          }
+          return { ok: false, message: result.message };
+        }
+
         const result = await submitOrderAction({
           customerId: payload.customerId,
           notes: payload.notes,

@@ -1,6 +1,6 @@
-import { loadLiveWorkspace } from "@/lib/auth/actions";
+import { loadWorkspaceSession } from "@/lib/workspace/session";
 import { redirect } from "next/navigation";
-import { LiveWorkspaceProvider } from "@/components/workspace/live-workspace-provider";
+import { WorkspaceProvider } from "@/components/workspace/workspace-provider";
 
 export const dynamic = "force-dynamic";
 
@@ -9,12 +9,10 @@ export default async function WorkspaceLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const ws = await loadLiveWorkspace();
+  const ws = await loadWorkspaceSession();
   if (!ws) {
-    redirect("/login?error=membership");
+    redirect("/login");
   }
 
-  return (
-    <LiveWorkspaceProvider value={ws}>{children}</LiveWorkspaceProvider>
-  );
+  return <WorkspaceProvider value={ws}>{children}</WorkspaceProvider>;
 }

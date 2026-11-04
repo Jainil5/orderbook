@@ -8,11 +8,24 @@ import type {
   Product,
 } from "@/types/database";
 import { loadLiveWorkspace } from "@/lib/auth/actions";
+import {
+  clampPage,
+  clampPageSize,
+  escapeIlikePattern,
+  sanitizeOrderStatus,
+  sanitizePaymentStatus,
+} from "@/lib/security/input";
+import { validateCreateOrderInput } from "@/lib/security/validate-order";
 
 async function requireBrandId() {
   const ws = await loadLiveWorkspace();
   if (!ws) throw new Error("Unauthorized");
   return ws.brand.id;
+}
+
+function publicDataError(detail?: string): string {
+  if (process.env.NODE_ENV === "development" && detail) return detail;
+  return "Unable to load data.";
 }
 
 export async function listProducts(filters?: {
@@ -33,21 +46,23 @@ export async function listProducts(filters?: {
 
     if (filters?.activeOnly !== false) query = query.eq("is_active", true);
     if (filters?.category && filters.category !== "all") {
-      query = query.eq("category", filters.category);
+      const category = filters.category.trim().slice(0, 80);
+      query = query.eq("category", category);
     }
     if (filters?.search) {
-      query = query.or(
-        `name.ilike.%${filters.search}%,sku.ilike.%${filters.search}%`,
-      );
+      const term = escapeIlikePattern(filters.search);
+      if (term) {
+        query = query.or(`name.ilike.%${term}%,sku.ilike.%${term}%`);
+      }
     }
 
     const { data, error } = await query;
-    if (error) return { data: [], error: error.message };
+    if (error) return { data: [], error: publicDataError(error.message) };
     return { data: (data ?? []) as Product[] };
   } catch (e) {
     return {
       data: [],
-      error: e instanceof Error ? e.message : "Failed to load products",
+      error: publicDataError(e instanceof Error ? e.message : undefined),
     };
   }
 }
@@ -62,8 +77,8 @@ export async function listOrders(params: {
   try {
     const brandId = await requireBrandId();
     const supabase = await createSupabaseServerClient();
-    const page = params.page ?? 1;
-    const pageSize = params.pageSize ?? 20;
+    const page = clampPage(params.page);
+    const pageSize = clampPageSize(params.pageSize);
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
@@ -77,26 +92,31 @@ export async function listOrders(params: {
       .order("created_at", { ascending: false })
       .range(from, to);
 
-    if (params.status && params.status !== "all") {
-      query = query.eq("status", params.status);
+    const status = sanitizeOrderStatus(params.status);
+    if (status && status !== "all") {
+      query = query.eq("status", status);
     }
-    if (params.paymentStatus && params.paymentStatus !== "all") {
-      query = query.eq("payment_status", params.paymentStatus);
+    const paymentStatus = sanitizePaymentStatus(params.paymentStatus);
+    if (paymentStatus && paymentStatus !== "all") {
+      query = query.eq("payment_status", paymentStatus);
     }
     if (params.search) {
-      query = query.or(
-        `order_number.ilike.%${params.search}%,customer_name_snapshot.ilike.%${params.search}%`,
-      );
+      const term = escapeIlikePattern(params.search);
+      if (term) {
+        query = query.or(
+          `order_number.ilike.%${term}%,customer_name_snapshot.ilike.%${term}%`,
+        );
+      }
     }
 
     const { data, error, count } = await query;
-    if (error) return { data: [], count: 0, error: error.message };
+    if (error) return { data: [], count: 0, error: publicDataError(error.message) };
     return { data: (data ?? []) as Order[], count: count ?? 0 };
   } catch (e) {
     return {
       data: [],
       count: 0,
-      error: e instanceof Error ? e.message : "Failed to load orders",
+      error: publicDataError(e instanceof Error ? e.message : undefined),
     };
   }
 }
@@ -115,18 +135,21 @@ export async function listCustomers(search?: string): Promise<{
       .order("name");
 
     if (search) {
-      query = query.or(
-        `name.ilike.%${search}%,email.ilike.%${search}%,phone.ilike.%${search}%`,
-      );
+      const term = escapeIlikePattern(search);
+      if (term) {
+        query = query.or(
+          `name.ilike.%${term}%,email.ilike.%${term}%,phone.ilike.%${term}%`,
+        );
+      }
     }
 
     const { data, error } = await query;
-    if (error) return { data: [], error: error.message };
+    if (error) return { data: [], error: publicDataError(error.message) };
     return { data: (data ?? []) as Customer[] };
   } catch (e) {
     return {
       data: [],
-      error: e instanceof Error ? e.message : "Failed to load customers",
+      error: publicDataError(e instanceof Error ? e.message : undefined),
     };
   }
 }
@@ -137,15 +160,17 @@ export async function listOffers(): Promise<{ data: Offer[]; error?: string }> {
     const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase
       .from("offers")
-      .select("*")
+      .select(
+        "id, brand_id, name, code, discount_type, discount_value, scope, scope_value, min_order_amount, max_discount, starts_at, ends_at, is_active, redemption_count, usage_limit",
+      )
       .eq("brand_id", brandId)
       .order("name");
-    if (error) return { data: [], error: error.message };
+    if (error) return { data: [], error: publicDataError(error.message) };
     return { data: (data ?? []) as Offer[] };
   } catch (e) {
     return {
       data: [],
-      error: e instanceof Error ? e.message : "Failed to load offers",
+      error: publicDataError(e instanceof Error ? e.message : undefined),
     };
   }
 }
@@ -153,6 +178,11 @@ export async function listOffers(): Promise<{ data: Offer[]; error?: string }> {
 export async function submitOrder(
   input: CreateOrderInput,
 ): Promise<CreateOrderResult> {
+  const validation = validateCreateOrderInput(input);
+  if (!validation.ok) {
+    return { ok: false, code: "VALIDATION", message: validation.message };
+  }
+
   try {
     await requireBrandId();
     const supabase = await createSupabaseServerClient();
@@ -175,7 +205,14 @@ export async function submitOrder(
             "Order submission is not configured yet. Add the create_order RPC in Supabase.",
         };
       }
-      return { ok: false, code: "UNKNOWN", message: error.message };
+      return {
+        ok: false,
+        code: "UNKNOWN",
+        message:
+          process.env.NODE_ENV === "development"
+            ? error.message
+            : "Order could not be saved.",
+      };
     }
 
     const row = data as { order_id: string; order_number: string };
@@ -188,7 +225,10 @@ export async function submitOrder(
     return {
       ok: false,
       code: "UNKNOWN",
-      message: e instanceof Error ? e.message : "Order failed",
+      message:
+        process.env.NODE_ENV === "development" && e instanceof Error
+          ? e.message
+          : "Order could not be saved.",
     };
   }
 }

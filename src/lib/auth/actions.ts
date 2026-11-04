@@ -1,7 +1,14 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { clearDemoWorkspaceCookie } from "@/lib/auth/demo";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  consumeRateLimit,
+  rateLimitKeyFromHeaders,
+} from "@/lib/security/rate-limit";
+import { isValidBrandCode } from "@/lib/security/input";
 import type { Brand, BrandMember, BrandSettings } from "@/types/database";
 
 export type LoginState =
@@ -9,12 +16,17 @@ export type LoginState =
   | { ok: false; error: string };
 
 function resolveAuthEmailFromBrandCode(brandCode: string): string | null {
+  if (!isValidBrandCode(brandCode)) return null;
   const normalized = brandCode.trim().toUpperCase();
   const raw = process.env.BRAND_AUTH_EMAIL_MAP;
   if (!raw) return null;
   try {
     const map = JSON.parse(raw) as Record<string, string>;
-    return map[normalized] ?? map[brandCode.trim()] ?? null;
+    const email = map[normalized];
+    if (!email || typeof email !== "string") return null;
+    const trimmed = email.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return null;
+    return trimmed;
   } catch {
     return null;
   }
@@ -31,12 +43,39 @@ export async function loginWithBrandCode(
     return { ok: false, error: "Enter your business ID and password." };
   }
 
-  const email = resolveAuthEmailFromBrandCode(brandCode);
-  if (!email) {
+  if (password.length > 256) {
+    return { ok: false, error: "Invalid business ID or password. Please try again." };
+  }
+
+  const headerList = await headers();
+  const rateKey = `login:${rateLimitKeyFromHeaders(headerList)}`;
+  const limited = consumeRateLimit(rateKey);
+  if (!limited.allowed) {
     return {
       ok: false,
-      error:
-        "Sign-in mapping is not configured yet. Set BRAND_AUTH_EMAIL_MAP on the server or add the resolve_brand_auth_email RPC. See docs/DATABASE_CONTRACT.md.",
+      error: `Too many sign-in attempts. Try again in ${limited.retryAfterSec} seconds.`,
+    };
+  }
+
+  if (!isValidBrandCode(brandCode)) {
+    return {
+      ok: false,
+      error: "Invalid business ID or password. Please try again.",
+    };
+  }
+
+  const email = resolveAuthEmailFromBrandCode(brandCode);
+  if (!email) {
+    if (process.env.NODE_ENV === "development") {
+      return {
+        ok: false,
+        error:
+          "Sign-in mapping is not configured. Set BRAND_AUTH_EMAIL_MAP in .env.local. See docs/DATABASE_CONTRACT.md.",
+      };
+    }
+    return {
+      ok: false,
+      error: "Invalid business ID or password. Please try again.",
     };
   }
 
@@ -59,12 +98,14 @@ export async function loginWithBrandCode(
     };
   }
 
+  await clearDemoWorkspaceCookie();
   redirect("/dashboard");
 }
 
 export async function logoutAction() {
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
+  await clearDemoWorkspaceCookie();
   redirect("/login");
 }
 

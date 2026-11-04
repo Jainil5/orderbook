@@ -1,11 +1,53 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getPublicEnv } from "@/lib/env";
+import { applySecurityHeaders } from "@/lib/security/headers";
+import { safeInternalPath } from "@/lib/security/input";
+import {
+  DEMO_WORKSPACE_COOKIE,
+  demoPathToAppPath,
+  isWorkspacePath,
+} from "@/lib/workspace/constants";
+
+const PROBE_PATH =
+  /^\/(\.env|wp-admin|wp-login|xmlrpc|phpmyadmin|admin\.php|\.git)/i;
+
+function attachDemoCookie(response: NextResponse) {
+  response.cookies.set(DEMO_WORKSPACE_COOKIE, "1", {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  });
+  return response;
+}
 
 export async function updateSession(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+
+  if (PROBE_PATH.test(path)) {
+    return applySecurityHeaders(
+      request,
+      new NextResponse(null, { status: 404 }),
+    );
+  }
+
+  if (path === "/demo" || path.startsWith("/demo/")) {
+    const url = request.nextUrl.clone();
+    url.pathname = demoPathToAppPath(path);
+    url.search = request.nextUrl.search;
+    return applySecurityHeaders(
+      request,
+      attachDemoCookie(NextResponse.redirect(url)),
+    );
+  }
+
+  const demoCookie = request.cookies.get(DEMO_WORKSPACE_COOKIE)?.value === "1";
+
   const env = getPublicEnv();
   if ("ok" in env) {
-    return NextResponse.next({ request });
+    const res = NextResponse.next({ request });
+    return applySecurityHeaders(request, res);
   }
 
   let supabaseResponse = NextResponse.next({ request });
@@ -35,24 +77,44 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const path = request.nextUrl.pathname;
   const isPublic =
     path === "/login" ||
-    path.startsWith("/demo") ||
+    path === "/" ||
     path.startsWith("/api/auth");
 
-  if (!user && !isPublic && !path.startsWith("/_next")) {
+  if (
+    !user &&
+    !demoCookie &&
+    !isPublic &&
+    !path.startsWith("/_next") &&
+    isWorkspacePath(path)
+  ) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    url.searchParams.set("next", path);
-    return NextResponse.redirect(url);
+    url.searchParams.set("next", safeInternalPath(path));
+    return applySecurityHeaders(request, NextResponse.redirect(url));
+  }
+
+  if (
+    !user &&
+    !demoCookie &&
+    !isPublic &&
+    !path.startsWith("/_next")
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.searchParams.set("next", safeInternalPath(path));
+    return applySecurityHeaders(request, NextResponse.redirect(url));
   }
 
   if (user && path === "/login") {
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
+    url.pathname = safeInternalPath(url.searchParams.get("next"));
+    url.search = "";
+    const res = NextResponse.redirect(url);
+    res.cookies.delete(DEMO_WORKSPACE_COOKIE);
+    return applySecurityHeaders(request, res);
   }
 
-  return supabaseResponse;
+  return applySecurityHeaders(request, supabaseResponse);
 }

@@ -1,9 +1,9 @@
 "use client";
 
 import { AppShell } from "@/components/shell/app-shell";
-import { useDemoWorkspace } from "@/components/workspace/demo-workspace-provider";
+import { useWorkspace } from "@/components/workspace/workspace-provider";
 
-export function DemoPageShell({
+export function PageShell({
   title,
   headerActions,
   children,
@@ -12,12 +12,13 @@ export function DemoPageShell({
   headerActions?: React.ReactNode;
   children: React.ReactNode;
 }) {
-  const { brand } = useDemoWorkspace();
+  const ws = useWorkspace();
   return (
     <AppShell
-      mode="demo"
-      brandName={brand.name}
-      brandCode={brand.code}
+      mode={ws.mode}
+      brandName={ws.brand.name}
+      brandCode={ws.brand.code}
+      userEmail={ws.userEmail}
       pageTitle={title}
       headerActions={headerActions}
     >

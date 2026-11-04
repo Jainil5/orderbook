@@ -8,6 +8,38 @@ Multi-business order management and POS workspace for **WebsiteIn**. One app, on
 - Supabase Auth + PostgreSQL (browser client under RLS)
 - Tailwind CSS + shared `--ob-*` design tokens
 
+## Local development (`.env.local`)
+
+Local secrets live in **`.env.local`** — gitignored. Never commit this file.
+
+```bash
+npm install
+npm run setup:env          # creates .env.local from .env.example (once)
+```
+
+Edit `.env.local`:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://vdrnkhtltpwrkfjnlasf.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...   # from Supabase dashboard
+
+# Server-only — login until DB RPC exists (use your Auth user emails, not passwords)
+BRAND_AUTH_EMAIL_MAP={"BR-1":"cafe-owner@example.com","BR-2":"furniture-owner@example.com"}
+```
+
+Run the app (`predev` checks that `.env.local` exists):
+
+```bash
+npm run dev                  # http://localhost:3000
+npm run check:env            # manual env validation
+```
+
+**Demo without login:** `/demo/dashboard` works even while you finish Supabase setup.
+
+**Railway:** set the same variables in the project environment (not in Git).
+
+See `docs/SECURITY.md` for hardening details.
+
 ## Routes
 
 | Route | Description |
@@ -16,20 +48,13 @@ Multi-business order management and POS workspace for **WebsiteIn**. One app, on
 | `/demo/*` | Read-only Brewery Cafe demo workspace |
 | `/dashboard` … `/settings` | Authenticated workspace (requires Supabase session + `brand_members`) |
 
-## Environment (Railway / local)
+## Environment reference
 
-Copy `.env.example` to `.env.local`:
-
-```bash
-NEXT_PUBLIC_SUPABASE_URL=https://vdrnkhtltpwrkfjnlasf.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
-```
-
-Server-only (login mapping until RPC exists):
-
-```bash
-BRAND_AUTH_EMAIL_MAP={"BR-1":"owner@example.com","BR-2":"owner2@example.com"}
-```
+| Variable | Where | Purpose |
+|----------|--------|---------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Browser + server | Supabase project URL (`*.supabase.co` only) |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Browser + server | Publishable key (RLS-enforced) |
+| `BRAND_AUTH_EMAIL_MAP` | **Server only** | JSON map of brand code → Auth email |
 
 Never commit secrets or use `service_role` in the browser.
 
@@ -38,27 +63,19 @@ See `docs/DATABASE_CONTRACT.md` for tables, RLS, and RPC expectations.
 ## Commands
 
 ```bash
-npm install
-npm run dev      # http://localhost:3000
 npm run lint
-npm run build    # requires public Supabase env vars
+npm run build                # requires public Supabase env vars
 npm start
 ```
 
 ## Design
 
-Visual direction documented in `docs/DESIGN.md`. Reference inspiration: [Curated #4425](https://curated.design/sites/s/4425/) (Primeintellect listing — adapted to calm light admin UI, not copied).
+Visual direction documented in `docs/DESIGN.md`.
 
 ## Demo vs live
 
-- **Demo** (`/demo/dashboard`): isolated fixtures in `src/lib/demo/fixtures.ts`, labelled DEMO, read-only.
-- **Live**: Supabase queries + `create_order` RPC when provisioned. Missing schema surfaces inline errors, not fake data.
-
-## Blockers until Supabase is ready
-
-- `BRAND_AUTH_EMAIL_MAP` or `resolve_brand_auth_email` RPC for login
-- Tables + RLS for CRUD
-- `create_order` RPC for billing submission
-- Analytics views/RPCs for dashboard KPIs
+- **Explore Demo Brand** opens the **same routes** as sign-in (`/dashboard`, `/billing`, …) with Brewery Cafe (**BR-1**) sample data via a secure httpOnly session cookie.
+- **Sign in** uses Supabase Auth + `brand_members` and clears the demo cookie.
+- Billing is fully interactive in demo (cart + local bill confirmation); live orders use Supabase when configured.
 
 Built by WebsiteIn.

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
+import { Plus } from "lucide-react";
 
 export type CartLine = {
   product: Product;
@@ -28,15 +29,13 @@ export function BillingPos({
   customers,
   currencyCode,
   taxRatePercent = 0,
-  readOnly,
   onSubmitOrder,
 }: {
   products: Product[];
   customers: Customer[];
   currencyCode: string;
   taxRatePercent?: number;
-  readOnly?: boolean;
-  onSubmitOrder?: (payload: {
+  onSubmitOrder: (payload: {
     lines: { productId: string; quantity: number }[];
     customerId: string | null;
     notes: string;
@@ -54,6 +53,13 @@ export function BillingPos({
   const [mobileCartOpen, setMobileCartOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [flashProductId, setFlashProductId] = useState<string | null>(null);
+
+  const cartQtyByProduct = useMemo(() => {
+    const map = new Map<string, number>();
+    cart.forEach((l) => map.set(l.product.id, l.quantity));
+    return map;
+  }, [cart]);
 
   const filtered = useMemo(() => {
     let rows = products.filter((p) => p.is_active);
@@ -78,9 +84,9 @@ export function BillingPos({
   const subtotal = cart.reduce((s, l) => s + lineTotal(l), 0);
   const tax = subtotal * (taxRatePercent / 100);
   const grandTotal = subtotal + tax;
+  const itemCount = cart.reduce((s, l) => s + l.quantity, 0);
 
   function addProduct(product: Product) {
-    if (readOnly) return;
     setCart((prev) => {
       const existing = prev.find((l) => l.product.id === product.id);
       if (existing) {
@@ -92,10 +98,12 @@ export function BillingPos({
       }
       return [...prev, { product, quantity: 1 }];
     });
+    setFlashProductId(product.id);
+    window.setTimeout(() => setFlashProductId(null), 450);
+    setFeedback(null);
   }
 
   function setQty(productId: string, quantity: number) {
-    if (readOnly) return;
     if (quantity <= 0) {
       setCart((prev) => prev.filter((l) => l.product.id !== productId));
       return;
@@ -106,10 +114,6 @@ export function BillingPos({
   }
 
   async function handleSubmit() {
-    if (readOnly || !onSubmitOrder) {
-      setFeedback("Demo mode — changes are disabled.");
-      return;
-    }
     if (!cart.length) {
       setFeedback("Add at least one item to the bill.");
       return;
@@ -129,19 +133,30 @@ export function BillingPos({
     setSubmitting(false);
     if (result.ok) {
       setCart([]);
-      setFeedback(`Order ${result.orderNumber} saved.`);
+      setFeedback(
+        result.orderNumber
+          ? `Bill ${result.orderNumber} saved successfully.`
+          : "Bill saved successfully.",
+      );
     } else {
       setFeedback(result.message);
     }
   }
 
   const cartPanel = (
-    <Card className="flex h-full flex-col">
-      <h2 className="text-base font-semibold">Current bill</h2>
+    <Card className="flex h-full flex-col shadow-[var(--ob-shadow-md)]">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-base font-semibold">Current bill</h2>
+        {itemCount > 0 ? (
+          <span className="rounded-full bg-[var(--ob-primary)] px-2.5 py-0.5 text-xs font-medium text-white">
+            {itemCount} items
+          </span>
+        ) : null}
+      </div>
       <div className="mt-4 flex-1 space-y-3 overflow-y-auto">
         {cart.length === 0 ? (
           <p className="text-sm text-[var(--ob-text-muted)]">
-            Add items from the catalogue.
+            Tap <strong>Add to bill</strong> on menu items to build the order.
           </p>
         ) : (
           cart.map((line) => (
@@ -159,9 +174,8 @@ export function BillingPos({
               <div className="flex items-center gap-1">
                 <button
                   type="button"
-                  className="h-8 w-8 rounded border border-[var(--ob-border)]"
+                  className="h-8 w-8 rounded border border-[var(--ob-border)] hover:bg-[var(--ob-surface-muted)]"
                   onClick={() => setQty(line.product.id, line.quantity - 1)}
-                  disabled={readOnly}
                   aria-label="Decrease quantity"
                 >
                   −
@@ -172,14 +186,12 @@ export function BillingPos({
                   onChange={(e) =>
                     setQty(line.product.id, Number(e.target.value) || 0)
                   }
-                  disabled={readOnly}
                   aria-label="Quantity"
                 />
                 <button
                   type="button"
-                  className="h-8 w-8 rounded border border-[var(--ob-border)]"
+                  className="h-8 w-8 rounded border border-[var(--ob-border)] hover:bg-[var(--ob-surface-muted)]"
                   onClick={() => setQty(line.product.id, line.quantity + 1)}
-                  disabled={readOnly}
                   aria-label="Increase quantity"
                 >
                   +
@@ -201,7 +213,6 @@ export function BillingPos({
             className="mt-1 w-full ob-input"
             value={customerId}
             onChange={(e) => setCustomerId(e.target.value)}
-            disabled={readOnly}
           >
             <option value="">Walk-in</option>
             {customers.map((c) => (
@@ -218,7 +229,6 @@ export function BillingPos({
           <Input
             value={offerCode}
             onChange={(e) => setOfferCode(e.target.value)}
-            disabled={readOnly}
             placeholder="Optional"
             className="mt-1"
           />
@@ -230,7 +240,6 @@ export function BillingPos({
           <Input
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            disabled={readOnly}
             className="mt-1"
           />
         </label>
@@ -242,7 +251,6 @@ export function BillingPos({
             className="mt-1 w-full ob-input"
             value={paymentMethod}
             onChange={(e) => setPaymentMethod(e.target.value)}
-            disabled={readOnly}
           >
             <option value="UPI">UPI</option>
             <option value="Card">Card</option>
@@ -262,7 +270,15 @@ export function BillingPos({
           <span>{formatMoney(grandTotal, currencyCode)}</span>
         </div>
         {feedback ? (
-          <p className="text-sm text-[var(--ob-text-secondary)]" role="status">
+          <p
+            className={cn(
+              "text-sm",
+              feedback.includes("saved")
+                ? "text-[var(--ob-success)]"
+                : "text-[var(--ob-text-secondary)]",
+            )}
+            role="status"
+          >
             {feedback}
           </p>
         ) : null}
@@ -270,7 +286,7 @@ export function BillingPos({
           className="w-full"
           onClick={handleSubmit}
           loading={submitting}
-          disabled={readOnly}
+          disabled={!cart.length}
         >
           Confirm & save order
         </Button>
@@ -279,16 +295,14 @@ export function BillingPos({
   );
 
   return (
-    <div className="relative flex flex-col gap-4 lg:flex-row lg:items-start">
+    <div className="relative flex flex-col gap-4 pb-24 lg:flex-row lg:items-start lg:pb-0">
       <section className="min-w-0 flex-1 space-y-4 lg:w-[68%]">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <Input
-            placeholder="Search products…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            aria-label="Search products"
-          />
-        </div>
+        <Input
+          placeholder="Search menu…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          aria-label="Search products"
+        />
         <div className="flex flex-wrap gap-2">
           {categories.map((cat) => (
             <button
@@ -306,25 +320,49 @@ export function BillingPos({
             </button>
           ))}
         </div>
-        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-          {filtered.map((product) => (
-            <button
-              key={product.id}
-              type="button"
-              onClick={() => addProduct(product)}
-              className="ob-card flex flex-col items-start p-4 text-left transition hover:border-[var(--ob-border-strong)]"
-            >
-              <p className="font-medium">{product.name}</p>
-              {product.description ? (
-                <p className="mt-1 line-clamp-2 text-sm text-[var(--ob-text-muted)]">
-                  {product.description}
-                </p>
-              ) : null}
-              <p className="mt-3 text-sm font-semibold text-[var(--ob-primary)]">
-                {formatMoney(product.price, currencyCode)}
-              </p>
-            </button>
-          ))}
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {filtered.map((product) => {
+            const inCart = cartQtyByProduct.get(product.id) ?? 0;
+            const flashing = flashProductId === product.id;
+            return (
+              <div
+                key={product.id}
+                className={cn(
+                  "ob-card flex flex-col p-4 transition",
+                  flashing && "ring-2 ring-[var(--ob-accent)] ring-offset-2",
+                  inCart > 0 && "border-[var(--ob-primary)]",
+                )}
+              >
+                <div className="flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-medium leading-snug">{product.name}</p>
+                    {inCart > 0 ? (
+                      <span className="shrink-0 rounded-full bg-[var(--ob-surface-muted)] px-2 py-0.5 text-xs font-medium">
+                        ×{inCart}
+                      </span>
+                    ) : null}
+                  </div>
+                  {product.description ? (
+                    <p className="mt-1 line-clamp-2 text-sm text-[var(--ob-text-muted)]">
+                      {product.description}
+                    </p>
+                  ) : null}
+                  <p className="mt-3 text-sm font-semibold text-[var(--ob-primary)]">
+                    {formatMoney(product.price, currencyCode)}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant={inCart > 0 ? "secondary" : "primary"}
+                  className="mt-4 w-full"
+                  onClick={() => addProduct(product)}
+                >
+                  <Plus className="h-4 w-4" aria-hidden />
+                  {inCart > 0 ? "Add another" : "Add to bill"}
+                </Button>
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -332,18 +370,18 @@ export function BillingPos({
         {cartPanel}
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--ob-border)] bg-[var(--ob-surface)] p-3 lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--ob-border)] bg-[var(--ob-surface)] p-3 shadow-[var(--ob-shadow-md)] lg:hidden">
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs text-[var(--ob-text-muted)]">
-              {cart.length} items
+              {itemCount} items in bill
             </p>
-            <p className="font-semibold">
+            <p className="text-lg font-semibold">
               {formatMoney(grandTotal, currencyCode)}
             </p>
           </div>
           <Button variant="secondary" onClick={() => setMobileCartOpen(true)}>
-            View bill
+            Open bill
           </Button>
         </div>
       </div>
@@ -356,7 +394,7 @@ export function BillingPos({
             aria-label="Close bill"
             onClick={() => setMobileCartOpen(false)}
           />
-          <div className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-2xl bg-[var(--ob-bg)] p-4">
+          <div className="absolute inset-x-0 bottom-0 max-h-[90vh] overflow-y-auto rounded-t-2xl bg-[var(--ob-bg)] p-4">
             {cartPanel}
           </div>
         </div>

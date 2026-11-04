@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { LivePageShell } from "@/components/workspace/live-page-shell";
+import { PageShell } from "@/components/workspace/page-shell";
+import { getDemoCustomer } from "@/lib/demo/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { loadLiveWorkspace } from "@/lib/auth/actions";
+import { loadWorkspaceSession } from "@/lib/workspace/session";
 import { Card } from "@/components/ui/card";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export default async function CustomerDetailPage({
   params,
@@ -11,8 +12,30 @@ export default async function CustomerDetailPage({
   params: Promise<{ customerId: string }>;
 }) {
   const { customerId } = await params;
-  const ws = await loadLiveWorkspace();
-  if (!ws) notFound();
+  const ws = await loadWorkspaceSession();
+  if (!ws) redirect("/login");
+
+  if (ws.mode === "demo") {
+    const customer = getDemoCustomer(customerId);
+    if (!customer) notFound();
+    return (
+      <PageShell
+        title={customer.name}
+        headerActions={
+          <Link href="/customers" className="text-sm text-[var(--ob-primary)]">
+            Back
+          </Link>
+        }
+      >
+        <Card>
+          <p className="text-sm text-[var(--ob-text-muted)]">Phone</p>
+          <p>{customer.phone ?? "—"}</p>
+          <p className="mt-4 text-sm text-[var(--ob-text-muted)]">Email</p>
+          <p>{customer.email ?? "—"}</p>
+        </Card>
+      </PageShell>
+    );
+  }
 
   const supabase = await createSupabaseServerClient();
   const { data: customer } = await supabase
@@ -25,7 +48,7 @@ export default async function CustomerDetailPage({
   if (!customer) notFound();
 
   return (
-    <LivePageShell
+    <PageShell
       title={customer.name}
       headerActions={
         <Link href="/customers" className="text-sm text-[var(--ob-primary)]">
@@ -37,6 +60,6 @@ export default async function CustomerDetailPage({
         <p>{customer.phone ?? "No phone"}</p>
         <p className="mt-2">{customer.email ?? "No email"}</p>
       </Card>
-    </LivePageShell>
+    </PageShell>
   );
 }

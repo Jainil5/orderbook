@@ -124,11 +124,13 @@ export function demoWorkspaceMeta() {
 }
 
 export async function submitDemoOrder(
-  _input: CreateOrderInput,
+  input: CreateOrderInput,
 ): Promise<CreateOrderResult> {
+  void input;
+  const suffix = Math.floor(1000 + Math.random() * 9000);
   return {
-    ok: false,
-    code: "NOT_CONFIGURED",
-    message: "Demo mode is read-only. Sign in to place live orders.",
+    ok: true,
+    orderId: `demo-order-${Date.now()}`,
+    orderNumber: `BC-${suffix}`,
   };
 }

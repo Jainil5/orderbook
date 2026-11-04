@@ -1,3 +1,5 @@
+import { isTrustedSupabaseUrl } from "@/lib/security/input";
+
 export type PublicEnv = {
   supabaseUrl: string;
   supabasePublishableKey: string;
@@ -22,9 +24,28 @@ export function getPublicEnv(): PublicEnv | PublicEnvError {
     return { ok: false, missing };
   }
 
+  const url = supabaseUrl!;
+  const key = supabasePublishableKey!;
+
+  if (!isTrustedSupabaseUrl(url)) {
+    return { ok: false, missing: ["NEXT_PUBLIC_SUPABASE_URL (invalid host)"] };
+  }
+
+  if (
+    process.env.NODE_ENV === "production" &&
+    /placeholder|your_supabase/i.test(key)
+  ) {
+    return {
+      ok: false,
+      missing: [
+        "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (placeholder not allowed in production)",
+      ],
+    };
+  }
+
   return {
-    supabaseUrl: supabaseUrl!,
-    supabasePublishableKey: supabasePublishableKey!,
+    supabaseUrl: url,
+    supabasePublishableKey: key,
   };
 }
 
