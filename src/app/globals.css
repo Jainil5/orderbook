@@ -1,28 +1,32 @@
 @import "tailwindcss";
 
 :root {
-  --ob-bg: #f6f7f9;
+  --ob-bg: #eef2f6;
   --ob-surface: #ffffff;
-  --ob-surface-muted: #f0f2f5;
-  --ob-border: #e2e6ec;
+  --ob-surface-muted: #f3f6f9;
+  --ob-border: #e3e8ef;
   --ob-border-strong: #cfd6e0;
-  --ob-text: #111827;
-  --ob-text-secondary: #4b5563;
-  --ob-text-muted: #6b7280;
-  --ob-primary: #1f3a5f;
-  --ob-primary-hover: #162b47;
+  --ob-text: #121826;
+  --ob-text-secondary: #3e4a5c;
+  --ob-text-muted: #6b7789;
+  --ob-primary: #1b3654;
+  --ob-primary-hover: #14283f;
   --ob-primary-foreground: #ffffff;
   --ob-accent: #0f766e;
   --ob-focus: #2563eb;
   --ob-success: #047857;
   --ob-warning: #b45309;
   --ob-danger: #b91c1c;
-  --ob-demo: #7c3aed;
+  --ob-demo: #6d28d9;
+  --ob-sidebar: #121a27;
+  --ob-sidebar-text: #f5f7fb;
+  --ob-sidebar-muted: #9aa8bc;
+  --ob-sidebar-line: rgb(255 255 255 / 0.08);
   --ob-radius-sm: 0.375rem;
-  --ob-radius-md: 0.5rem;
-  --ob-radius-lg: 0.75rem;
-  --ob-shadow-sm: 0 1px 2px rgb(17 24 39 / 0.04);
-  --ob-shadow-md: 0 4px 16px rgb(17 24 39 / 0.06);
+  --ob-radius-md: 0.625rem;
+  --ob-radius-lg: 1rem;
+  --ob-shadow-sm: 0 1px 2px rgb(18 26 39 / 0.04);
+  --ob-shadow-md: 0 12px 32px rgb(18 26 39 / 0.06);
   --ob-space-1: 0.25rem;
   --ob-space-2: 0.5rem;
   --ob-space-3: 0.75rem;
@@ -49,6 +53,16 @@ body {
   background: var(--ob-bg);
   color: var(--ob-text);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+}
+
+.ob-workspace {
+  font-size: 1.0625rem;
+  background:
+    radial-gradient(900px 420px at 100% -10%, rgb(27 54 84 / 0.07), transparent 55%),
+    radial-gradient(700px 360px at 0% 100%, rgb(15 118 110 / 0.06), transparent 50%),
+    var(--ob-bg);
 }
 
 *:focus-visible {
@@ -61,6 +75,55 @@ body {
   border: 1px solid var(--ob-border);
   border-radius: var(--ob-radius-lg);
   box-shadow: var(--ob-shadow-sm);
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s ease,
+    border-color 0.2s ease;
+}
+
+.ob-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--ob-shadow-md);
+  border-color: color-mix(in srgb, var(--ob-primary) 18%, var(--ob-border));
+}
+
+@media (hover: none), (pointer: coarse) {
+  .ob-card:hover {
+    transform: none;
+    box-shadow: var(--ob-shadow-sm);
+    border-color: var(--ob-border);
+  }
+
+  .ob-tile:hover img {
+    transform: none;
+  }
+}
+
+.ob-scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+.ob-safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.ob-safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.ob-touch-target {
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+}
+
+.ob-card table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.ob-card table tbody tr:hover {
+  background: color-mix(in srgb, var(--ob-primary) 4%, white);
 }
 
 .ob-input {
@@ -68,8 +131,8 @@ body {
   border: 1px solid var(--ob-border);
   border-radius: var(--ob-radius-md);
   background: var(--ob-surface);
-  padding: 0.625rem 0.75rem;
-  font-size: 0.9375rem;
+  padding: 0.75rem 0.875rem;
+  font-size: 1rem;
   transition: border-color 0.15s ease;
 }
 
@@ -86,7 +149,7 @@ body {
 @keyframes ob-fade-in {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(14px);
   }
   to {
     opacity: 1;
@@ -94,8 +157,262 @@ body {
   }
 }
 
-.ob-animate-in {
-  animation: ob-fade-in 0.2s ease-out;
+@keyframes ob-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ob-slide-in {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes ob-scrim {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ob-sheen {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes ob-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.035);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.ob-animate-in,
+.ob-page-enter {
+  animation: ob-fade-in 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* `backwards` fills the stagger delay; `both` would keep the end transform
+   applied forever, which overrides any hover or tilt transform on the child. */
+.ob-stagger > * {
+  animation: ob-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.ob-stagger > *:nth-child(1) {
+  animation-delay: 0.02s;
+}
+.ob-stagger > *:nth-child(2) {
+  animation-delay: 0.07s;
+}
+.ob-stagger > *:nth-child(3) {
+  animation-delay: 0.12s;
+}
+.ob-stagger > *:nth-child(4) {
+  animation-delay: 0.17s;
+}
+.ob-stagger > *:nth-child(5) {
+  animation-delay: 0.22s;
+}
+.ob-stagger > *:nth-child(6) {
+  animation-delay: 0.27s;
+}
+.ob-stagger > *:nth-child(n + 7) {
+  animation-delay: 0.32s;
+}
+
+.ob-nav-link {
+  position: relative;
+  overflow: hidden;
+}
+
+.ob-nav-link::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  border-radius: 999px;
+  background: #fff;
+  transform: scaleY(0);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ob-nav-link[data-active="true"]::before,
+.ob-nav-link:hover::before {
+  transform: scaleY(1);
+}
+
+.ob-nav-link svg {
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ob-nav-link:hover svg,
+.ob-nav-link[data-active="true"] svg {
+  transform: translateX(2px) scale(1.06);
+}
+
+.ob-press {
+  transition:
+    transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.18s ease,
+    box-shadow 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.ob-press:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.ob-press:active:not(:disabled) {
+  transform: translateY(1px) scale(0.98);
+}
+
+.ob-tile img {
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ob-tile:hover img {
+  transform: scale(1.08);
+}
+
+/* Counter tiles lean toward the pointer. The handler only writes two custom
+   properties, so the transform itself stays declarative. The compound selector
+   has to out-specify `.ob-card:hover`, whose translateY would otherwise win. */
+.ob-card.ob-tilt {
+  transform:
+    perspective(680px) rotateX(var(--ob-tilt-rx, 0deg))
+    rotateY(var(--ob-tilt-ry, 0deg)) translateY(var(--ob-tilt-lift, 0px))
+    scale(var(--ob-tilt-scale, 1));
+  transition:
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.3s ease,
+    border-color 0.2s ease;
+}
+
+.ob-card.ob-tilt[data-tilting="true"] {
+  transition: box-shadow 0.3s ease, border-color 0.2s ease;
+}
+
+/*
+ * Photo-less product, drawn from the shop's own materials: ruled stock, a
+ * punched hang-tag hole, initials in the receipt monospace. The tint follows
+ * the category, so an unphotographed shelf still reads as one group.
+ */
+.ob-tag {
+  position: relative;
+  background-image: repeating-linear-gradient(
+    var(--ob-tag-angle, 38deg),
+    rgb(18 26 39 / 0.06) 0 1px,
+    transparent 1px 6px
+  );
+}
+
+.ob-tag-navy {
+  background-color: rgb(27 56 84 / 0.1);
+}
+.ob-tag-teal {
+  background-color: rgb(15 118 110 / 0.11);
+}
+.ob-tag-amber {
+  background-color: rgb(180 83 9 / 0.1);
+}
+.ob-tag-violet {
+  background-color: rgb(109 40 217 / 0.09);
+}
+.ob-tag-slate {
+  background-color: rgb(107 119 137 / 0.12);
+}
+
+.ob-tag::after {
+  content: "";
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--ob-border-strong);
+  background: var(--ob-surface);
+}
+
+.ob-tile.ob-pop {
+  animation: ob-pop 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ob-mark {
+  background: linear-gradient(120deg, #1b3654, #0f766e, #1b3654);
+  background-size: 200% 200%;
+  animation: ob-sheen 8s ease infinite;
+}
+
+.ob-drawer {
+  animation: ob-slide-in 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ob-scrim {
+  animation: ob-scrim 0.25s ease;
+}
+
+.ob-ambient {
+  position: relative;
+}
+
+.ob-ambient::before {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: auto -8rem -10rem auto;
+  width: 28rem;
+  height: 28rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgb(15 118 110 / 0.16), transparent 68%);
+  animation: ob-sheen 14s ease infinite;
+  z-index: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ob-animate-in,
+  .ob-page-enter,
+  .ob-stagger > *,
+  .ob-mark,
+  .ob-drawer,
+  .ob-scrim,
+  .ob-tile.ob-pop,
+  .ob-ambient::before {
+    animation: none !important;
+  }
+
+  .ob-card:hover,
+  .ob-press:hover:not(:disabled),
+  .ob-press:active:not(:disabled),
+  .ob-tile:hover img,
+  .ob-card.ob-tilt,
+  .ob-nav-link:hover svg,
+  .ob-nav-link[data-active="true"] svg {
+    transform: none;
+  }
 }
 
 @media print {

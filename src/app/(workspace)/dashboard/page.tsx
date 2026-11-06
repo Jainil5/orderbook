@@ -1,63 +1,92 @@
-import { PageShell } from "@/components/workspace/page-shell";
-import { Card } from "@/components/ui/card";
-import { getDemoAnalytics } from "@/lib/demo/data";
-import { formatMoney } from "@/lib/format";
+import { Suspense } from "react";
+import { DashboardHome } from "@/components/dashboard/dashboard-home";
+import {
+  createdAtRangeQuery,
+  orderInCalendarRange,
+  resolveRange,
+} from "@/lib/analytics/date-range";
+import { snapshotFromOrderRecords } from "@/lib/analytics/snapshot";
+import {
+  getDemoOrderItems,
+  listDemoOrders,
+  listDemoProductsMerged,
+  toDemoBrandCode,
+} from "@/lib/demo/data";
+import { isOpenQuote, isOpenReceivable } from "@/lib/orders/order-rules";
+import {
+  listOrderItemsForOrders,
+  listOrders,
+  listProducts,
+} from "@/services/data";
+import { listOpenQuotesAndReceivables } from "@/services/order-operations";
 import { loadWorkspaceSession } from "@/lib/workspace/session";
 import { redirect } from "next/navigation";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ range?: string; from?: string; to?: string }>;
+}) {
   const ws = await loadWorkspaceSession();
   if (!ws) redirect("/login");
 
+  const range = resolveRange(await searchParams);
+
+  // Open quotes and receivables are an action queue, not a period report,
+  // so they stay all-time regardless of the selected range.
   if (ws.mode === "demo") {
-    const a = getDemoAnalytics();
-    const currency = ws.settings.currency_code;
+    const code = toDemoBrandCode(ws.brand.code);
+    const allOrders = await listDemoOrders(undefined, code);
+    const orders = allOrders.filter((o) =>
+      orderInCalendarRange(o.created_at, range.from, range.to),
+    );
+    const [itemGroups, products] = await Promise.all([
+      Promise.all(orders.map((o) => getDemoOrderItems(o.id, code))),
+      listDemoProductsMerged({}, code),
+    ]);
+    const openOrders = allOrders
+      .filter((o) => isOpenQuote(o) || isOpenReceivable(o))
+      .slice(0, 20);
+
     return (
-      <PageShell title="Dashboard">
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {[
-            { label: "Net sales", value: formatMoney(a.netSales, currency) },
-            { label: "Orders", value: a.orderCount.toString() },
-            {
-              label: "Avg. order value",
-              value: formatMoney(a.averageOrderValue, currency),
-            },
-            { label: "Discounts", value: formatMoney(a.discountTotal, currency) },
-          ].map((kpi) => (
-            <Card key={kpi.label}>
-              <p className="text-xs font-medium uppercase tracking-wide text-[var(--ob-text-muted)]">
-                {kpi.label}
-              </p>
-              <p className="mt-2 text-2xl font-semibold">{kpi.value}</p>
-            </Card>
-          ))}
-        </div>
-      </PageShell>
+      <Suspense fallback={null}>
+        <DashboardHome
+          snapshot={snapshotFromOrderRecords({
+            orders,
+            items: itemGroups.flat(),
+            products,
+            currencyCode: ws.settings.currency_code,
+          })}
+          range={range}
+          openOrders={openOrders}
+          orderNumberColumn={ws.profile.ordersNumberColumn}
+        />
+      </Suspense>
     );
   }
 
+  const { dateFrom, dateTo } = createdAtRangeQuery(range.from, range.to);
+  const ordersRes = await listOrders({ page: 1, pageSize: 500, dateFrom, dateTo });
+  const [openRes, itemsRes, productsRes] = await Promise.all([
+    listOpenQuotesAndReceivables(),
+    listOrderItemsForOrders(ordersRes.data.map((o) => o.id)),
+    listProducts({ activeOnly: false }),
+  ]);
+
   return (
-    <PageShell title="Dashboard">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {["Net sales", "Orders", "Avg. order value", "Pending payments"].map(
-          (label) => (
-            <Card key={label}>
-              <p className="text-xs font-medium uppercase tracking-wide text-[var(--ob-text-muted)]">
-                {label}
-              </p>
-              <p className="mt-2 text-2xl font-semibold text-[var(--ob-text-muted)]">
-                —
-              </p>
-            </Card>
-          ),
-        )}
-      </div>
-      <Card className="mt-6">
-        <p className="text-sm text-[var(--ob-text-secondary)]">
-          Connected as <strong>{ws.brand.name}</strong> ({ws.brand.code}).
-          Analytics RPCs or secured views populate KPIs when configured.
-        </p>
-      </Card>
-    </PageShell>
+    <Suspense fallback={null}>
+      <DashboardHome
+        snapshot={snapshotFromOrderRecords({
+          orders: ordersRes.data,
+          items: itemsRes.data,
+          products: productsRes.data,
+          currencyCode: ws.settings.currency_code,
+        })}
+        range={range}
+        notice={ordersRes.error}
+        openOrders={openRes.data}
+        orderNumberColumn={ws.profile.ordersNumberColumn}
+      />
+    </Suspense>
   );
 }

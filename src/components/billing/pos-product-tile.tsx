@@ -1,0 +1,119 @@
+"use client";
+
+import type { PointerEvent } from "react";
+import type { Product } from "@/types/database";
+import { ProductPrice } from "@/components/products/product-price";
+import { ProductThumbnail } from "@/components/products/product-thumbnail";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/cn";
+import { Plus } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+
+const TILT_DEG = 7;
+
+/**
+ * Writing custom properties keeps the transform in CSS, which means
+ * `prefers-reduced-motion` can switch it off without the handler knowing.
+ * Touch devices are skipped: a finger resting mid-card would tilt the tile
+ * while the cashier only meant to tap it.
+ */
+function onPointerMove(event: PointerEvent<HTMLDivElement>) {
+  const el = event.currentTarget;
+  if (event.pointerType !== "mouse") return;
+  const rect = el.getBoundingClientRect();
+  const x = (event.clientX - rect.left) / rect.width - 0.5;
+  const y = (event.clientY - rect.top) / rect.height - 0.5;
+  el.dataset.tilting = "true";
+  el.style.setProperty("--ob-tilt-ry", `${(x * TILT_DEG * 2).toFixed(2)}deg`);
+  el.style.setProperty("--ob-tilt-rx", `${(-y * TILT_DEG * 2).toFixed(2)}deg`);
+  el.style.setProperty("--ob-tilt-lift", "-3px");
+  el.style.setProperty("--ob-tilt-scale", "1.025");
+}
+
+function onPointerRest(event: PointerEvent<HTMLDivElement>) {
+  const el = event.currentTarget;
+  delete el.dataset.tilting;
+  el.style.removeProperty("--ob-tilt-ry");
+  el.style.removeProperty("--ob-tilt-rx");
+  el.style.removeProperty("--ob-tilt-lift");
+  el.style.removeProperty("--ob-tilt-scale");
+}
+
+/** Desktop/tablet POS catalog tile. */
+export function PosProductTileWithButton({
+  product,
+  currencyCode,
+  inCartQty,
+  flashing,
+  addLabel,
+  addAnotherLabel,
+  stockLabel,
+  lowStock,
+  onAdd,
+  onPeek,
+}: {
+  product: Product;
+  currencyCode: string;
+  inCartQty: number;
+  flashing: boolean;
+  addLabel: string;
+  addAnotherLabel: string;
+  stockLabel?: string | null;
+  lowStock?: boolean;
+  onAdd: () => void;
+  onPeek: () => void;
+}) {
+  return (
+    <div
+      className={cn(
+        "ob-card ob-tile ob-tilt flex h-full flex-col overflow-hidden p-0",
+        flashing && "ob-pop ring-2 ring-[var(--ob-accent)] ring-offset-2",
+        inCartQty > 0 && "border-[var(--ob-primary)]",
+      )}
+      onPointerMove={onPointerMove}
+      onPointerLeave={onPointerRest}
+      onPointerCancel={onPointerRest}
+    >
+      <button
+        type="button"
+        onClick={onPeek}
+        aria-label={`Enlarge photo of ${product.name}`}
+        className="relative block w-full border-0 bg-transparent p-0 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ob-accent)]"
+      >
+        <ProductThumbnail
+          name={product.name}
+          imageUrl={product.image_url}
+          category={product.category}
+          size="square"
+        />
+        {inCartQty > 0 ? (
+          <span className="absolute right-2 top-2 rounded-full bg-[var(--ob-primary)] px-2 py-0.5 text-xs font-semibold text-white shadow-sm">
+            ×{inCartQty}
+          </span>
+        ) : null}
+      </button>
+      <div className="flex flex-1 flex-col gap-2 p-3">
+        <p className="line-clamp-2 min-h-[2.5rem] text-sm font-semibold leading-snug">
+          {product.name}
+        </p>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <ProductPrice product={product} currencyCode={currencyCode} size="sm" />
+          {stockLabel ? (
+            <Badge tone={lowStock ? "warning" : "neutral"} className="text-[10px]">
+              {stockLabel}
+            </Badge>
+          ) : null}
+        </div>
+        <Button
+          type="button"
+          variant={inCartQty > 0 ? "secondary" : "primary"}
+          className="mt-auto min-h-11 w-full py-2 text-xs"
+          onClick={onAdd}
+        >
+          <Plus className="h-3.5 w-3.5" aria-hidden />
+          {inCartQty > 0 ? addAnotherLabel : addLabel}
+        </Button>
+      </div>
+    </div>
+  );
+}
