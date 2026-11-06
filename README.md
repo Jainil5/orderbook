@@ -34,7 +34,7 @@ npm run dev                  # http://localhost:3000
 npm run check:env            # manual env validation
 ```
 
-**Demo without login:** `/demo/dashboard` works even while you finish Supabase setup.
+**Demo without login:** `/demo/dashboard` (Brewery Cafe) or `/demo/dashboard?brand=BR-2` (Cubig Furniture), or use the buttons on `/login`.
 
 **Railway:** set the same variables in the project environment (not in Git).
 
@@ -45,7 +45,7 @@ See `docs/SECURITY.md` for hardening details.
 | Route | Description |
 |-------|-------------|
 | `/login` | Business ID + password sign-in, demo entry |
-| `/demo/*` | Read-only Brewery Cafe demo workspace |
+| `/demo/*` | Read-only demo workspace (default **BR-1**; use `?brand=BR-2` for Cubig) |
 | `/dashboard` … `/settings` | Authenticated workspace (requires Supabase session + `brand_members`) |
 
 ## Environment reference
@@ -60,21 +60,24 @@ Never commit secrets or use `service_role` in the browser.
 
 See `docs/DATABASE_CONTRACT.md` for tables, RLS, and RPC expectations.
 
+## Documentation
+
+- [`docs/SECURITY.md`](docs/SECURITY.md) — Security architecture, hardening, and audit reports
+- [`docs/DATABASE_CONTRACT.md`](docs/DATABASE_CONTRACT.md) — Supabase schema, RLS, and RPC expectations
+- [`docs/DESIGN.md`](docs/DESIGN.md) — Visual direction and design tokens
+
 ## Commands
 
 ```bash
-npm run lint
-npm run build                # requires public Supabase env vars
-npm start
+npm run lint                 # ESLint check
+npm test                     # Vitest test suite
+npm run build                # Production Next.js build
+npm start                    # Start production server
 ```
-
-## Design
-
-Visual direction documented in `docs/DESIGN.md`.
 
 ## Demo vs live
 
-- **Explore Demo Brand** opens the **same routes** as sign-in (`/dashboard`, `/billing`, …) with Brewery Cafe (**BR-1**) sample data via a secure httpOnly session cookie.
+- **Explore demo** on `/login` opens the full workspace for **Brewery Cafe (BR-1)** or **Cubig Furniture (BR-2)** with brand-specific sample data via a secure httpOnly cookie.
 - **Sign in** uses Supabase Auth + `brand_members` and clears the demo cookie.
 - Billing is fully interactive in demo (cart + local bill confirmation); live orders use Supabase when configured.
 

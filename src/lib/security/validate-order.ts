@@ -1,9 +1,13 @@
 import type { CreateOrderInput } from "@/types/database";
-import { sanitizePaymentMethod } from "@/lib/security/input";
+import {
+  isValidOptionalCustomerPhone,
+  sanitizePaymentMethod,
+} from "@/lib/security/input";
 
 const MAX_LINES = 50;
 const MAX_QTY = 10_000;
 const MAX_NOTE_LENGTH = 500;
+const MAX_ORDER_DISCOUNT = 10_000_000;
 
 export function validateCreateOrderInput(
   input: CreateOrderInput,
@@ -36,12 +40,44 @@ export function validateCreateOrderInput(
     return { ok: false, message: "Customer name is too long." };
   }
 
+  if (!isValidOptionalCustomerPhone(input.customerPhone ?? undefined)) {
+    return { ok: false, message: "Enter a valid mobile number (8–15 digits)." };
+  }
+
   if (input.offerCode && input.offerCode.length > 64) {
     return { ok: false, message: "Invalid offer code." };
   }
 
   if (!sanitizePaymentMethod(input.paymentMethod)) {
     return { ok: false, message: "Invalid payment method." };
+  }
+
+  const od = input.orderDiscount;
+  if (od) {
+    if (od.type !== "percent" && od.type !== "fixed") {
+      return { ok: false, message: "Invalid order discount." };
+    }
+    if (!Number.isFinite(od.value) || od.value < 0) {
+      return { ok: false, message: "Invalid order discount value." };
+    }
+    if (od.type === "percent" && od.value > 100) {
+      return { ok: false, message: "Order discount percent cannot exceed 100." };
+    }
+    if (od.type === "fixed" && od.value > MAX_ORDER_DISCOUNT) {
+      return { ok: false, message: "Order discount amount is too large." };
+    }
+  }
+
+  for (const line of input.lines) {
+    if (line.lineDiscount != null) {
+      if (
+        !Number.isFinite(line.lineDiscount) ||
+        line.lineDiscount < 0 ||
+        line.lineDiscount > MAX_ORDER_DISCOUNT
+      ) {
+        return { ok: false, message: "Invalid line discount." };
+      }
+    }
   }
 
   return { ok: true };

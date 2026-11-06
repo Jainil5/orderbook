@@ -1,9 +1,9 @@
 import { PageShell } from "@/components/workspace/page-shell";
-import { listDemoPayments } from "@/lib/demo/data";
+import { PaymentsTable } from "@/components/payments/payments-table";
+import { listDemoPayments, toDemoBrandCode } from "@/lib/demo/data";
+import { listPayments } from "@/services/data";
 import { loadWorkspaceSession } from "@/lib/workspace/session";
-import { formatDate, formatMoney } from "@/lib/format";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Badge } from "@/components/ui/badge";
 import { redirect } from "next/navigation";
 
 export default async function PaymentsPage() {
@@ -11,45 +11,36 @@ export default async function PaymentsPage() {
   if (!ws) redirect("/login");
 
   if (ws.mode === "demo") {
-    const payments = listDemoPayments();
+    const payments = await listDemoPayments(toDemoBrandCode(ws.brand.code));
     return (
       <PageShell title="Payments">
-        <div className="overflow-x-auto ob-card">
-          <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-[var(--ob-border)] text-xs uppercase text-[var(--ob-text-muted)]">
-              <tr>
-                <th className="px-4 py-3">Method</th>
-                <th className="px-4 py-3">Amount</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {payments.map((p) => (
-                <tr key={p.id} className="border-b border-[var(--ob-border)]">
-                  <td className="px-4 py-3">{p.method}</td>
-                  <td className="px-4 py-3">
-                    {formatMoney(p.amount, ws.settings.currency_code)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge tone="success">{p.status}</Badge>
-                  </td>
-                  <td className="px-4 py-3">{formatDate(p.created_at)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <PaymentsTable
+          payments={payments}
+          currencyCode={ws.settings.currency_code}
+        />
       </PageShell>
     );
   }
 
+  const { data, error } = await listPayments();
+
   return (
     <PageShell title="Payments">
-      <EmptyState
-        title="Payments list pending schema"
-        description="Connect the payments table under RLS to list settlement records here."
-      />
+      {error ? (
+        <p className="mb-4 text-sm text-[var(--ob-danger)]">{error}</p>
+      ) : null}
+      {data.length === 0 ? (
+        <EmptyState
+          title="No payments yet"
+          description="Record payments from an order detail page."
+        />
+      ) : (
+        <PaymentsTable
+          payments={data}
+          currencyCode={ws.settings.currency_code}
+          showOrderLink
+        />
+      )}
     </PageShell>
   );
 }

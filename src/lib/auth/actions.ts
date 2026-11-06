@@ -149,7 +149,7 @@ export async function loadLiveWorkspace() {
   const { data: settings } = await supabase
     .from("brand_settings")
     .select(
-      "brand_id, currency_code, tax_rate_percent, receipt_header, receipt_footer, contact_email, contact_phone",
+      "brand_id, currency_code, tax_rate_percent, receipt_header, receipt_footer, contact_email, contact_phone, quotation_builder_enabled, brand_website_url",
     )
     .eq("brand_id", member.brand_id)
     .maybeSingle();

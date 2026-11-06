@@ -40,3 +40,12 @@ Defense in depth — **Supabase RLS is the authority**; the app adds transport a
 3. `npm run dev` (runs env check first)
 
 Replace in-memory rate limits with Redis/edge limits for multi-instance production if needed.
+
+## Security audit & reports
+
+- [Security Audit Report](./SECURITY_AUDIT.md) — Comprehensive vulnerability analysis & methodology
+- [Security Checklist](./SECURITY_CHECKLIST.md) — Verification checklist before production rollout
+- [Security Fixes](./SECURITY_FIXES.md) — Remediation details and code changes
+- [Remaining Security Risks](./SECURITY_REMAINING_RISKS.md) — Open risks and external infrastructure dependencies
+- [Recommended Supabase RLS](./SUPABASE_RLS_RECOMMENDED.sql) & [Apply Script](./SUPABASE_RLS_APPLY.sql) — Tenant isolation policies
+- [Supabase Extensions & RPCs](./SUPABASE_EXTENSIONS.sql) — Required database functions

@@ -6,6 +6,7 @@ import { enterDemoWorkspace } from "@/lib/auth/demo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import type { DemoBrandCode } from "@/lib/workspace/constants";
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -13,16 +14,16 @@ export function LoginForm() {
     loginWithBrandCode,
     null,
   );
-  const [demoPending, setDemoPending] = useState(false);
+  const [demoPending, setDemoPending] = useState<DemoBrandCode | null>(null);
 
-  async function onExploreDemo() {
-    setDemoPending(true);
-    await enterDemoWorkspace();
+  async function onExploreDemo(brandCode: DemoBrandCode) {
+    setDemoPending(brandCode);
+    await enterDemoWorkspace(brandCode);
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-12">
-      <div className="ob-card p-8">
+    <div className="mx-auto flex min-h-[100dvh] max-w-md flex-col justify-center px-4 py-8 ob-safe-top ob-safe-bottom sm:py-12">
+      <div className="ob-card p-6 sm:p-8">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--ob-text-muted)]">
           WebsiteIn
         </p>
@@ -39,7 +40,7 @@ export function LoginForm() {
             <Input
               id="brandCode"
               name="brandCode"
-              placeholder="e.g. BR-1"
+              placeholder="e.g. BR-1 or BR-2"
               autoComplete="organization"
               className="mt-1"
               required
@@ -76,17 +77,29 @@ export function LoginForm() {
           </Button>
         </form>
 
+        <p className="mt-6 text-center text-xs font-medium uppercase tracking-wide text-[var(--ob-text-muted)]">
+          Explore without signing in
+        </p>
         <Button
           type="button"
           variant="secondary"
-          className="mt-4 w-full"
-          loading={demoPending}
-          onClick={onExploreDemo}
+          className="mt-3 w-full"
+          loading={demoPending === "BR-1"}
+          onClick={() => onExploreDemo("BR-1")}
         >
-          Explore Demo Brand
+          Brewery Cafe (BR-1)
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          className="mt-2 w-full"
+          loading={demoPending === "BR-2"}
+          onClick={() => onExploreDemo("BR-2")}
+        >
+          Cubig Furniture (BR-2)
         </Button>
         <p className="mt-2 text-center text-xs text-[var(--ob-text-muted)]">
-          Opens Brewery Cafe (BR-1) in the full workspace — same app as sign-in.
+          Full workspace with sample products, quotes, bills, and analytics.
         </p>
       </div>
       <p className="mt-6 text-center text-xs text-[var(--ob-text-muted)]">

@@ -2,6 +2,10 @@
 
 import { AppShell } from "@/components/shell/app-shell";
 import { useWorkspace } from "@/components/workspace/workspace-provider";
+import {
+  WorkspaceBrandWebsiteLink,
+  WorkspaceSettingsFeaturesLink,
+} from "@/components/workspace/workspace-brand-website-link";
 
 export function PageShell({
   title,
@@ -19,8 +23,17 @@ export function PageShell({
       brandName={ws.brand.name}
       brandCode={ws.brand.code}
       userEmail={ws.userEmail}
+      profile={ws.profile}
       pageTitle={title}
-      headerActions={headerActions}
+      headerActions={
+        <>
+          <span className="hidden sm:contents">
+            <WorkspaceBrandWebsiteLink />
+            <WorkspaceSettingsFeaturesLink />
+          </span>
+          {headerActions}
+        </>
+      }
     >
       {children}
     </AppShell>

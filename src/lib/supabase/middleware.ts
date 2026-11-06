@@ -5,15 +5,21 @@ import { applySecurityHeaders } from "@/lib/security/headers";
 import { safeInternalPath } from "@/lib/security/input";
 import {
   DEMO_WORKSPACE_COOKIE,
+  DEFAULT_DEMO_BRAND_CODE,
   demoPathToAppPath,
+  isDemoWorkspaceCookieValue,
   isWorkspacePath,
 } from "@/lib/workspace/constants";
+import { resolveDemoBrandCode } from "@/lib/demo/brands";
 
 const PROBE_PATH =
   /^\/(\.env|wp-admin|wp-login|xmlrpc|phpmyadmin|admin\.php|\.git)/i;
 
-function attachDemoCookie(response: NextResponse) {
-  response.cookies.set(DEMO_WORKSPACE_COOKIE, "1", {
+function attachDemoCookie(
+  response: NextResponse,
+  brandCode = DEFAULT_DEMO_BRAND_CODE,
+) {
+  response.cookies.set(DEMO_WORKSPACE_COOKIE, brandCode, {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
@@ -33,19 +39,40 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (path === "/demo" || path.startsWith("/demo/")) {
+    const brandParam = request.nextUrl.searchParams.get("brand");
+    const brandCode = resolveDemoBrandCode(brandParam ?? undefined);
     const url = request.nextUrl.clone();
     url.pathname = demoPathToAppPath(path);
     url.search = request.nextUrl.search;
+    url.searchParams.delete("brand");
     return applySecurityHeaders(
       request,
-      attachDemoCookie(NextResponse.redirect(url)),
+      attachDemoCookie(NextResponse.redirect(url), brandCode),
     );
   }
 
-  const demoCookie = request.cookies.get(DEMO_WORKSPACE_COOKIE)?.value === "1";
+  const demoCookieRaw = request.cookies.get(DEMO_WORKSPACE_COOKIE)?.value;
+  const demoCookie = isDemoWorkspaceCookieValue(demoCookieRaw);
+
+  const isPublic =
+    path === "/login" ||
+    path === "/" ||
+    path.startsWith("/quote/") ||
+    path.startsWith("/api/auth");
 
   const env = getPublicEnv();
   if ("ok" in env) {
+    if (
+      !demoCookie &&
+      !isPublic &&
+      !path.startsWith("/_next") &&
+      (isWorkspacePath(path) || path.startsWith("/print"))
+    ) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("next", safeInternalPath(path));
+      return applySecurityHeaders(request, NextResponse.redirect(url));
+    }
     const res = NextResponse.next({ request });
     return applySecurityHeaders(request, res);
   }
@@ -77,17 +104,12 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isPublic =
-    path === "/login" ||
-    path === "/" ||
-    path.startsWith("/api/auth");
-
   if (
     !user &&
     !demoCookie &&
     !isPublic &&
     !path.startsWith("/_next") &&
-    isWorkspacePath(path)
+    (isWorkspacePath(path) || path.startsWith("/print"))
   ) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";

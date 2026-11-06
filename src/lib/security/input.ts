@@ -77,6 +77,34 @@ export function safeInternalPath(next: string | null | undefined): string {
   return next.split("?")[0] ?? "/dashboard";
 }
 
+/** Normalize POS mobile input for order snapshot / customer lookup. */
+export function normalizeCustomerPhone(raw: string): string | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  const compact = trimmed.replace(/[^\d+]/g, "").slice(0, 20);
+  const digits = compact.replace(/\D/g, "");
+  if (digits.length < 8 || digits.length > 15) return null;
+  return trimmed.slice(0, 20);
+}
+
+export function isValidOptionalCustomerPhone(phone: string | null | undefined): boolean {
+  if (!phone?.trim()) return true;
+  return normalizeCustomerPhone(phone) !== null;
+}
+
+/** Brand / catalog link stored on brand_settings (HTTPS only). */
+export function normalizeBrandWebsiteUrl(raw: string): string | null {
+  const trimmed = raw.trim().slice(0, 2048);
+  if (!trimmed) return null;
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== "https:") return null;
+    return trimmed;
+  } catch {
+    return null;
+  }
+}
+
 export function isTrustedSupabaseUrl(url: string): boolean {
   try {
     const parsed = new URL(url);

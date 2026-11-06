@@ -8,13 +8,13 @@ OrderBook integrates against this logical model. **Do not create or migrate tabl
 |-------|---------|
 | `brands` | Business profile; includes human-readable brand code (e.g. `BR-1`) |
 | `brand_members` | Maps `auth.users.id` → `brand_id` + `role` |
-| `brand_settings` | Currency, tax, receipt details |
-| `products` | `brand_id`, name, description, sku, category (text or FK), price, cost, unit, active |
-| `customers` | `brand_id`, contact fields |
-| `orders` | `brand_id`, order/bill number, status, payment status, totals, customer snapshot, notes |
-| `order_items` | Line items with historical unit prices and discount snapshots |
-| `offers` | Discount rules, codes, scopes, limits |
-| `payments` | Optional payment records |
+| `brand_settings` | Currency, tax, receipt details, optional `quotation_builder_enabled`, optional `brand_website_url` (HTTPS) |
+| `products` | … optional `default_discount_percent`, optional `image_url`, optional `stock_qty`, `low_stock_threshold`, `wholesale_price`, `modifiers_json` |
+| `customers` | `brand_id`, contact fields, optional `price_tier` (`retail` \| `wholesale`) |
+| `orders` | … optional `amount_paid`, `public_token`, `parent_order_id`, `order_kind` (`sale` \| `credit_note`) |
+| `order_items` | … optional `modifier_labels` |
+| `payments` | Optional payment records; optional `split_label`, `notes`, negative `amount` for refunds |
+| `stock_adjustments` | Audit log: `product_id`, `delta_qty`, `reason` |
 
 Optional: `offer_products`, `offer_categories`, `offer_redemptions`, `refunds`.
 
@@ -44,7 +44,9 @@ Until configured: app uses `src/lib/demo/fixtures.ts` (local read-only adapter).
 
 | Name | Purpose |
 |------|---------|
-| `create_order(...)` | Transactional order + items + validation |
+| `create_order(...)` | Transactional order + items + validation; accepts `p_customer_phone` for walk-in / POS mobile capture |
+| `accept_quote_by_token(p_token)` | Public (anon) quote accept → confirmed order; see `docs/SUPABASE_EXTENSIONS.sql` |
+| `analytics_orders_snapshot(p_from, p_to)` | Date-range KPIs for live Analytics |
 | `analytics_*` or secured views | KPIs and charts without full table scans in the browser |
 
 ## Blockers when missing
