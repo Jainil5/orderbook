@@ -79,3 +79,5 @@ Thumbs.db
 .gemini/
 scratch/
 .cursor/
+.worktrees/
+.superpowers/
