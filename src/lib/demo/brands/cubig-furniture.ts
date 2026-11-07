@@ -1,5 +1,6 @@
 import type { DemoBrandPack } from "@/lib/demo/brands/types";
 import { DEMO_FURNITURE_IMAGES } from "@/lib/demo/product-image-urls";
+import type { StaffMember } from "@/types/manager";
 
 const BRAND_ID = "demo-cubig-furniture";
 
@@ -373,6 +374,52 @@ export const CUBIG_FURNITURE_DEMO: DemoBrandPack = {
       created_at: new Date(Date.now() - 1000 * 60 * 60 * 118).toISOString(),
     },
   ],
+  staff: [
+    {
+      id: "cf-staff-1",
+      brand_id: "demo-cubig-furniture",
+      name: "Kiran Shetty",
+      role: "manager",
+      phone: "+91 98000 22001",
+      email: null,
+      status: "active",
+      availability: "available",
+      created_at: "2026-10-01T09:00:00.000Z",
+    },
+    {
+      id: "cf-staff-2",
+      brand_id: "demo-cubig-furniture",
+      name: "Farhan Ali",
+      role: "technician",
+      phone: "+91 98000 22002",
+      email: null,
+      status: "active",
+      availability: "busy",
+      created_at: "2026-10-02T09:00:00.000Z",
+    },
+    {
+      id: "cf-staff-3",
+      brand_id: "demo-cubig-furniture",
+      name: "Suresh Rao",
+      role: "technician",
+      phone: null,
+      email: null,
+      status: "active",
+      availability: "available",
+      created_at: "2026-10-02T09:00:00.000Z",
+    },
+    {
+      id: "cf-staff-4",
+      brand_id: "demo-cubig-furniture",
+      name: "Lakshmi Iyer",
+      role: "sales",
+      phone: "+91 98000 22004",
+      email: null,
+      status: "active",
+      availability: "off",
+      created_at: "2026-10-08T09:00:00.000Z",
+    },
+  ] satisfies StaffMember[],
   analytics: {
     grossSales: 627103.6,
     netSales: 588595.6,

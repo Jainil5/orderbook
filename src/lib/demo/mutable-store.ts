@@ -10,6 +10,7 @@ import type {
   Refund,
   StockAdjustment,
 } from "@/types/database";
+import type { StaffMember } from "@/types/manager";
 
 export const DEMO_MUTABLE_COOKIE = "ob_demo_mutable_v1";
 
@@ -22,6 +23,8 @@ export type DemoMutableBucket = {
   auditLog: AuditLogEntry[];
   stockAdjustments: StockAdjustment[];
   refunds: Refund[];
+  staff: StaffMember[];
+  staffOverrides: Record<string, Partial<StaffMember>>;
 };
 
 type DemoMutableStore = Partial<Record<DemoBrandCode, DemoMutableBucket>>;
@@ -36,6 +39,8 @@ function emptyBucket(): DemoMutableBucket {
     auditLog: [],
     stockAdjustments: [],
     refunds: [],
+    staff: [],
+    staffOverrides: {},
   };
 }
 

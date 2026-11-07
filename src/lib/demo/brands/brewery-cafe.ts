@@ -1,5 +1,6 @@
 import type { DemoBrandPack } from "@/lib/demo/brands/types";
 import { DEMO_CAFE_IMAGES } from "@/lib/demo/product-image-urls";
+import type { StaffMember } from "@/types/manager";
 
 export const BREWERY_CAFE_DEMO: DemoBrandPack = {
   brand: {
@@ -335,6 +336,52 @@ export const BREWERY_CAFE_DEMO: DemoBrandPack = {
       created_at: new Date(Date.now() - 1000 * 60 * 60 * 28).toISOString(),
     },
   ],
+  staff: [
+    {
+      id: "bc-staff-1",
+      brand_id: "demo-brewery-cafe",
+      name: "Asha Menon",
+      role: "manager",
+      phone: "+91 98000 11001",
+      email: null,
+      status: "active",
+      availability: "available",
+      created_at: "2026-10-01T09:00:00.000Z",
+    },
+    {
+      id: "bc-staff-2",
+      brand_id: "demo-brewery-cafe",
+      name: "Rohan Pillai",
+      role: "cashier",
+      phone: "+91 98000 11002",
+      email: null,
+      status: "active",
+      availability: "busy",
+      created_at: "2026-10-01T09:00:00.000Z",
+    },
+    {
+      id: "bc-staff-3",
+      brand_id: "demo-brewery-cafe",
+      name: "Meera Nair",
+      role: "kitchen",
+      phone: null,
+      email: null,
+      status: "active",
+      availability: "available",
+      created_at: "2026-10-05T09:00:00.000Z",
+    },
+    {
+      id: "bc-staff-4",
+      brand_id: "demo-brewery-cafe",
+      name: "Devan Kurup",
+      role: "kitchen",
+      phone: null,
+      email: null,
+      status: "active",
+      availability: "off",
+      created_at: "2026-10-05T09:00:00.000Z",
+    },
+  ] satisfies StaffMember[],
   analytics: {
     grossSales: 1115,
     netSales: 1047.5,
