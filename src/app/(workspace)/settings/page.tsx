@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { PageShell } from "@/components/workspace/page-shell";
 import { QuotationBuilderSetting } from "@/components/settings/quotation-builder-setting";
+import { ManagerModulesSetting } from "@/components/settings/manager-modules-setting";
 import { BrandWebsiteSetting } from "@/components/settings/brand-website-setting";
 import { ReceiptSettingsCard } from "@/components/settings/receipt-settings";
 import { useWorkspace } from "@/components/workspace/workspace-provider";
@@ -144,6 +145,7 @@ export default function SettingsPage() {
               initialEnabled={Boolean(ws.settings.quotation_builder_enabled)}
               canEdit={canEdit}
             />
+            <ManagerModulesSetting hidden={ws.hiddenManagerModules} canEdit={canEdit} />
           </Card>
         ) : null}
 
