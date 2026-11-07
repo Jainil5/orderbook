@@ -161,7 +161,7 @@ export function AppShell({
                         href={child.href}
                         onClick={() => setMobileOpen(false)}
                         className={cn(
-                          "block rounded-[var(--ob-radius-md)] px-3 py-2 text-sm transition-colors",
+                          "ob-touch-target block rounded-[var(--ob-radius-md)] px-3 py-2 text-sm transition-colors",
                           childActive
                             ? "bg-white/10 font-medium text-white"
                             : "text-[var(--ob-sidebar-muted)] hover:bg-white/5 hover:text-white",
