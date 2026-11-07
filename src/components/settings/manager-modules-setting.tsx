@@ -21,15 +21,20 @@ export function ManagerModulesSetting({
     if (!canEdit || pending) return;
     setPending(true);
     setError(null);
-    const result = await setManagerModuleHidden(key, !visible);
-    setPending(false);
-    if (result.ok) {
-      setHiddenState((prev) =>
-        visible ? prev.filter((k) => k !== key) : [...prev, key],
-      );
-      router.refresh();
-    } else {
-      setError(result.message);
+    try {
+      const result = await setManagerModuleHidden(key, !visible);
+      if (result.ok) {
+        setHiddenState((prev) =>
+          visible ? prev.filter((k) => k !== key) : [...prev, key],
+        );
+        router.refresh();
+      } else {
+        setError(result.message);
+      }
+    } catch {
+      setError("Could not save. Try again.");
+    } finally {
+      setPending(false);
     }
   }
 
