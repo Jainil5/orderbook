@@ -1,4 +1,8 @@
 import { cookies } from "next/headers";
+import {
+  parseHiddenManagerModules,
+  type ManagerModuleKey,
+} from "@/lib/workspace/manager-modules";
 
 export const WORKSPACE_PREFS_COOKIE = "ob_workspace_prefs";
 
@@ -11,6 +15,7 @@ type PrefsStore = Record<
     receiptFooter?: string | null;
     contactEmail?: string | null;
     contactPhone?: string | null;
+    hiddenManagerModules?: string[];
   }
 >;
 
@@ -115,6 +120,33 @@ export async function writeReceiptSettingsPref(
     receiptFooter: values.receiptFooter,
     contactEmail: values.contactEmail,
     contactPhone: values.contactPhone,
+  };
+  cookieStore.set(WORKSPACE_PREFS_COOKIE, JSON.stringify(store), {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+  });
+}
+
+export async function readManagerModulesPref(
+  brandCode: string,
+): Promise<ManagerModuleKey[] | undefined> {
+  const cookieStore = await cookies();
+  const store = parseStore(cookieStore.get(WORKSPACE_PREFS_COOKIE)?.value);
+  const raw = store[brandCode.toUpperCase()]?.hiddenManagerModules;
+  return raw === undefined ? undefined : parseHiddenManagerModules(raw);
+}
+
+export async function writeManagerModulesPref(
+  brandCode: string,
+  hidden: ManagerModuleKey[],
+): Promise<void> {
+  const cookieStore = await cookies();
+  const store = parseStore(cookieStore.get(WORKSPACE_PREFS_COOKIE)?.value);
+  store[brandCode.toUpperCase()] = {
+    ...store[brandCode.toUpperCase()],
+    hiddenManagerModules: hidden,
   };
   cookieStore.set(WORKSPACE_PREFS_COOKIE, JSON.stringify(store), {
     httpOnly: true,

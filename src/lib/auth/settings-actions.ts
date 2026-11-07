@@ -3,9 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { loadLiveWorkspace } from "@/lib/auth/actions";
 import {
+  readManagerModulesPref,
   writeBrandWebsitePref,
+  writeManagerModulesPref,
   writeQuotationBuilderPref,
 } from "@/lib/workspace/prefs";
+import { isManagerModuleKey } from "@/lib/workspace/manager-modules";
 import { normalizeBrandWebsiteUrl } from "@/lib/security/input";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { canEditBrandSettings } from "@/lib/security/authorization";
@@ -144,5 +147,41 @@ export async function setReceiptSettings(input: {
   });
   revalidatePath("/settings");
   revalidatePath("/billing");
+  return { ok: true as const };
+}
+
+export async function setManagerModuleHidden(moduleKey: string, hidden: boolean) {
+  if (!isManagerModuleKey(moduleKey)) {
+    return { ok: false as const, message: "Unknown module." };
+  }
+
+  const live = await loadLiveWorkspace();
+  if (live && !canEditBrandSettings(live.member.role)) {
+    return { ok: false as const, message: "Not allowed." };
+  }
+
+  // No brand_settings column exists for this yet; the cookie pref is the
+  // store for both modes until the live schema catches up.
+  const brandCode = live
+    ? live.brand.code
+    : await (async () => {
+        const { cookies } = await import("next/headers");
+        const { DEMO_WORKSPACE_COOKIE, parseDemoBrandCodeFromCookie } =
+          await import("@/lib/workspace/constants");
+        const cookieStore = await cookies();
+        return (
+          parseDemoBrandCodeFromCookie(
+            cookieStore.get(DEMO_WORKSPACE_COOKIE)?.value,
+          ) ?? "BR-1"
+        );
+      })();
+
+  const current = (await readManagerModulesPref(brandCode)) ?? [];
+  const next = hidden
+    ? Array.from(new Set([...current, moduleKey]))
+    : current.filter((k) => k !== moduleKey);
+  await writeManagerModulesPref(brandCode, next);
+  revalidatePath("/settings");
+  revalidatePath("/manager");
   return { ok: true as const };
 }
