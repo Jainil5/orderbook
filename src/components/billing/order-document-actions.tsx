@@ -19,6 +19,9 @@ export function OrderDocumentActions({
   const [pdfBusy, setPdfBusy] = useState(false);
   const [waHint, setWaHint] = useState<string | null>(null);
 
+  const customerName = document.customerName?.trim() ?? "";
+  const customerPhone = document.customerPhone?.trim() ?? "";
+
   const pdfLabel =
     document.kind === "quotation" ? "Download quotation PDF" : "Save bill PDF";
 
@@ -55,6 +58,22 @@ export function OrderDocumentActions({
         {document.kind === "quotation" ? "Quotation saved" : "Bill saved"} —{" "}
         {document.orderNumber}
       </p>
+      {customerName || customerPhone ? (
+        <p className="text-xs text-[var(--ob-text-muted)]">
+          {customerName ? (
+            <span className="font-medium text-[var(--ob-text)]">
+              {customerName}
+            </span>
+          ) : null}
+          {customerName && customerPhone ? " · " : null}
+          {customerPhone ? (
+            <span>
+              {customerName ? null : "Mobile "}
+              {customerPhone}
+            </span>
+          ) : null}
+        </p>
+      ) : null}
       <p className="text-xs text-[var(--ob-text-muted)]">
         Optional: send on WhatsApp or save a PDF. The order is already stored in
         Orders.

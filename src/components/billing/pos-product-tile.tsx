@@ -6,7 +6,7 @@ import { ProductPrice } from "@/components/products/product-price";
 import { ProductThumbnail } from "@/components/products/product-thumbnail";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
-import { Plus } from "lucide-react";
+import { Info, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 const TILT_DEG = 7;
@@ -74,28 +74,43 @@ export function PosProductTileWithButton({
       onPointerLeave={onPointerRest}
       onPointerCancel={onPointerRest}
     >
-      <button
-        type="button"
-        onClick={onPeek}
-        aria-label={`Enlarge photo of ${product.name}`}
-        className="relative block w-full border-0 bg-transparent p-0 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ob-accent)]"
-      >
-        <ProductThumbnail
-          name={product.name}
-          imageUrl={product.image_url}
-          category={product.category}
-          size="square"
-        />
-        {inCartQty > 0 ? (
-          <span className="absolute right-2 top-2 rounded-full bg-[var(--ob-primary)] px-2 py-0.5 text-xs font-semibold text-white shadow-sm">
-            ×{inCartQty}
-          </span>
-        ) : null}
-      </button>
-      <div className="flex flex-1 flex-col gap-2 p-3">
-        <p className="line-clamp-2 min-h-[2.5rem] text-sm font-semibold leading-snug">
+      <div className="relative">
+        <button
+          type="button"
+          onClick={onPeek}
+          aria-label={`View details of ${product.name}`}
+          className="block w-full border-0 bg-transparent p-0 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ob-accent)]"
+        >
+          <ProductThumbnail
+            name={product.name}
+            imageUrl={product.image_url}
+            category={product.category}
+            size="wide"
+          />
+          {inCartQty > 0 ? (
+            <span className="absolute right-2 top-2 rounded-full bg-[var(--ob-primary)] px-2 py-0.5 text-xs font-semibold text-white shadow-sm">
+              ×{inCartQty}
+            </span>
+          ) : null}
+        </button>
+        <button
+          type="button"
+          onClick={onPeek}
+          aria-label={`Show full details of ${product.name}`}
+          className="absolute left-1.5 top-1.5 flex h-11 w-11 items-center justify-center rounded-full border border-[var(--ob-border)] bg-[var(--ob-surface)]/90 text-[var(--ob-text-muted)] transition hover:bg-[var(--ob-surface)]"
+        >
+          <Info className="h-4 w-4" aria-hidden />
+        </button>
+      </div>
+      <div className="flex flex-1 flex-col gap-1 p-2">
+        <p className="line-clamp-1 text-sm font-semibold leading-tight">
           {product.name}
         </p>
+        {product.description?.trim() ? (
+          <p className="line-clamp-1 text-xs leading-snug text-[var(--ob-text-muted)]">
+            {product.description}
+          </p>
+        ) : null}
         <div className="flex flex-wrap items-center gap-1.5">
           <ProductPrice product={product} currencyCode={currencyCode} size="sm" />
           {stockLabel ? (

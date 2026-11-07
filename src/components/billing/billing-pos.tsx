@@ -43,6 +43,11 @@ import type { CartLine } from "@/components/billing/types";
 import { OrderDocumentActions } from "@/components/billing/order-document-actions";
 import { buildBillDocumentFromCheckout } from "@/lib/documents/build-bill-document";
 import type { BillDocument } from "@/lib/documents/types";
+import {
+  categoryLabel,
+  groupCategories,
+  groupProductsByCategory,
+} from "@/lib/products/catalog-groups";
 import type { BrandSettings } from "@/types/database";
 
 export type BillBrandSettings = Pick<
@@ -51,12 +56,6 @@ export type BillBrandSettings = Pick<
 >;
 
 export type { CartLine } from "@/components/billing/types";
-
-export function groupCategories(products: Product[]): string[] {
-  const set = new Set<string>();
-  products.forEach((p) => set.add(p.category ?? "Uncategorized"));
-  return ["All", ...Array.from(set).sort()];
-}
 
 function lineTotal(
   line: CartLine,
@@ -207,9 +206,7 @@ export function BillingPos({
   const filtered = useMemo(() => {
     let rows = products.filter((p) => p.is_active);
     if (category !== "All") {
-      rows = rows.filter(
-        (p) => (p.category ?? "Uncategorized") === category,
-      );
+      rows = rows.filter((p) => categoryLabel(p) === category);
     }
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -854,6 +851,31 @@ export function BillingPos({
     </Card>
   );
 
+  const productTile = (product: Product) => {
+    const inCart = cartQtyByProduct.get(product.id) ?? 0;
+    const flashing = flashProductId === product.id;
+    const available = stockAvailable(product);
+    const stockLabel = available != null ? `Stock ${available}` : null;
+    const displayProduct = pricedProductForCartLine(product, priceTier, []);
+    return (
+      <PosProductTileWithButton
+        key={product.id}
+        product={displayProduct}
+        currencyCode={currencyCode}
+        inCartQty={inCart}
+        flashing={flashing}
+        addLabel={copy.addButton}
+        addAnotherLabel={copy.addAnotherButton}
+        stockLabel={stockLabel}
+        lowStock={isLowStock(product)}
+        onAdd={() => tryAddProduct(product)}
+        onPeek={() => setPeekProduct(displayProduct)}
+      />
+    );
+  };
+
+  const gridClass = "ob-stagger grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4";
+
   const catalogSection = (
       <section className="min-w-0 flex-1 space-y-4 lg:w-[68%]">
         <Input
@@ -879,35 +901,25 @@ export function BillingPos({
             </button>
           ))}
         </div>
-        <div className="ob-stagger grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
-          {filtered.map((product) => {
-            const inCart = cartQtyByProduct.get(product.id) ?? 0;
-            const flashing = flashProductId === product.id;
-            const available = stockAvailable(product);
-            const stockLabel =
-              available != null ? `Stock ${available}` : null;
-            const displayProduct = pricedProductForCartLine(
-              product,
-              priceTier,
-              [],
-            );
-            return (
-              <PosProductTileWithButton
-                key={product.id}
-                product={displayProduct}
-                currencyCode={currencyCode}
-                inCartQty={inCart}
-                flashing={flashing}
-                addLabel={copy.addButton}
-                addAnotherLabel={copy.addAnotherButton}
-                stockLabel={stockLabel}
-                lowStock={isLowStock(product)}
-                onAdd={() => tryAddProduct(product)}
-                onPeek={() => setPeekProduct(displayProduct)}
-              />
-            );
-          })}
-        </div>
+        {category === "All" && !search.trim() ? (
+          <div className="space-y-5">
+            {groupProductsByCategory(filtered).map((group) => (
+              <section key={group.category}>
+                <div className="mb-2 flex items-baseline gap-2">
+                  <h3 className="text-sm font-semibold">{group.category}</h3>
+                  <span className="text-xs text-[var(--ob-text-muted)]">
+                    {group.products.length}
+                  </span>
+                </div>
+                <div className={gridClass}>
+                  {group.products.map(productTile)}
+                </div>
+              </section>
+            ))}
+          </div>
+        ) : (
+          <div className={gridClass}>{filtered.map(productTile)}</div>
+        )}
       </section>
   );
 

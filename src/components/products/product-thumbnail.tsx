@@ -18,6 +18,8 @@ const sizeClasses = {
   md: "h-12 w-14 rounded-[var(--ob-radius-md)]",
   /** POS catalog tile, full-bleed top block */
   square: "aspect-square w-full border-0 rounded-none",
+  /** POS catalog tile, shortened banner above the description */
+  wide: "aspect-[2/1] w-full border-0 rounded-none",
 } as const;
 
 const tagTones = [
@@ -56,7 +58,7 @@ export function ProductThumbnail({
 }) {
   const [failed, setFailed] = useState(false);
   const showImage = Boolean(imageUrl?.trim()) && !failed;
-  const labelled = size === "square";
+  const labelled = size === "square" || size === "wide";
 
   return (
     <div
