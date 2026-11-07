@@ -96,7 +96,12 @@ export async function setStaffAvailabilityAction(
     return { ok: false as const, message: "Invalid availability." };
   }
   const live = await loadLiveWorkspace();
-  if (live) return LIVE_UNAVAILABLE;
+  if (live) {
+    if (!canEditBrandSettings(live.member.role)) {
+      return { ok: false as const, message: "Not allowed." };
+    }
+    return LIVE_UNAVAILABLE;
+  }
   const code = await resolveDemoBrandCode();
   await updateDemoMutableBucket(code, (bucket) => ({
     ...bucket,
@@ -114,7 +119,12 @@ export async function setStaffStatusAction(id: string, status: "active" | "inact
     return { ok: false as const, message: "Invalid status." };
   }
   const live = await loadLiveWorkspace();
-  if (live) return LIVE_UNAVAILABLE;
+  if (live) {
+    if (!canEditBrandSettings(live.member.role)) {
+      return { ok: false as const, message: "Not allowed." };
+    }
+    return LIVE_UNAVAILABLE;
+  }
   const code = await resolveDemoBrandCode();
   await updateDemoMutableBucket(code, (bucket) => ({
     ...bucket,
