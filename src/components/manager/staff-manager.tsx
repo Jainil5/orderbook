@@ -47,31 +47,50 @@ export function StaffManager({
     setPending(true);
     setError(null);
     const input = { name, role, phone, email };
-    const result = editing
-      ? await updateStaffAction(editing.id, input)
-      : await createStaffAction(input);
-    setPending(false);
-    if (result.ok) {
-      startEdit(null);
-      router.refresh();
-    } else {
-      setError(result.message);
+    try {
+      const result = editing
+        ? await updateStaffAction(editing.id, input)
+        : await createStaffAction(input);
+      if (result.ok) {
+        startEdit(null);
+        router.refresh();
+      } else {
+        setError(result.message);
+      }
+    } catch {
+      setError("Could not save. Try again.");
+    } finally {
+      setPending(false);
     }
   }
 
   async function onAvailability(id: string, value: StaffAvailability) {
-    const result = await setStaffAvailabilityAction(id, value);
-    if (!result.ok) setError(result.message);
-    else router.refresh();
+    try {
+      const result = await setStaffAvailabilityAction(id, value);
+      if (!result.ok) setError(result.message);
+      else {
+        setError(null);
+        router.refresh();
+      }
+    } catch {
+      setError("Could not save. Try again.");
+    }
   }
 
   async function onToggleStatus(member: StaffMember) {
-    const result = await setStaffStatusAction(
-      member.id,
-      member.status === "active" ? "inactive" : "active",
-    );
-    if (!result.ok) setError(result.message);
-    else router.refresh();
+    try {
+      const result = await setStaffStatusAction(
+        member.id,
+        member.status === "active" ? "inactive" : "active",
+      );
+      if (!result.ok) setError(result.message);
+      else {
+        setError(null);
+        router.refresh();
+      }
+    } catch {
+      setError("Could not save. Try again.");
+    }
   }
 
   return (
