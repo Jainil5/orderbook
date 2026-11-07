@@ -12,7 +12,7 @@ export function ManagerSubnav({ activeHref }: { activeHref: string }) {
     ...visibleManagerModules(ws.hiddenManagerModules),
   ];
   return (
-    <div className="-mx-3 mb-4 overflow-x-auto px-3 sm:mx-0 sm:px-0">
+    <nav aria-label="Management" className="-mx-3 mb-4 overflow-x-auto px-3 sm:mx-0 sm:px-0">
       <div className="flex min-w-max gap-1 border-b border-[var(--ob-border)] pb-px">
         {tabs.map((tab) => {
           const active = tab.href === activeHref;
@@ -20,6 +20,7 @@ export function ManagerSubnav({ activeHref }: { activeHref: string }) {
             <Link
               key={tab.href}
               href={tab.href}
+              aria-current={active ? "page" : undefined}
               className={cn(
                 "ob-touch-target inline-flex items-center whitespace-nowrap rounded-t-md border-b-2 px-3 text-sm transition-colors",
                 active
@@ -32,6 +33,6 @@ export function ManagerSubnav({ activeHref }: { activeHref: string }) {
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 }
