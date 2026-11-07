@@ -23,6 +23,8 @@ import {
   Menu,
   FileText,
   FileCheck2,
+  ClipboardList,
+  ChevronDown,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { CommandPalette } from "@/components/workspace/command-palette";
@@ -34,6 +36,7 @@ const icons = {
   Bill: FileCheck2,
   Orders: ShoppingBag,
   Products: Package,
+  Manager: ClipboardList,
   Analytics: LineChart,
   Customers: Users,
   Payments: CreditCard,
@@ -64,9 +67,11 @@ export function AppShell({
   const navItems = buildWorkspaceNavItems(
     Boolean(ws.settings.quotation_builder_enabled),
     profile,
+    ws.hiddenManagerModules,
   );
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -109,22 +114,66 @@ export function AppShell({
           const href = item.href;
           const active = pathname === href || pathname.startsWith(`${href}/`);
           const Icon = icons[item.iconKey];
+          const hasChildren = Boolean(item.children?.length);
+          const expanded = hasChildren && (expandedGroups[href] ?? active);
           return (
-            <Link
-              key={href}
-              href={href}
-              onClick={() => setMobileOpen(false)}
-              data-active={active ? "true" : "false"}
-              className={cn(
-                "ob-nav-link flex items-center gap-3 rounded-[var(--ob-radius-md)] px-3 py-2.5 text-base transition-colors duration-200",
-                active
-                  ? "bg-white/10 font-medium text-white"
-                  : "text-[var(--ob-sidebar-muted)] hover:bg-white/5 hover:text-white",
-              )}
-            >
-              <Icon className="h-5 w-5 shrink-0" aria-hidden />
-              {!collapsed ? item.label : null}
-            </Link>
+            <div key={href}>
+              <div className="flex items-center">
+                <Link
+                  href={href}
+                  onClick={() => setMobileOpen(false)}
+                  data-active={active ? "true" : "false"}
+                  className={cn(
+                    "ob-nav-link flex flex-1 items-center gap-3 rounded-[var(--ob-radius-md)] px-3 py-2.5 text-base transition-colors duration-200",
+                    active
+                      ? "bg-white/10 font-medium text-white"
+                      : "text-[var(--ob-sidebar-muted)] hover:bg-white/5 hover:text-white",
+                  )}
+                >
+                  <Icon className="h-5 w-5 shrink-0" aria-hidden />
+                  {!collapsed ? item.label : null}
+                </Link>
+                {hasChildren && !collapsed ? (
+                  <button
+                    type="button"
+                    className="ob-touch-target grid shrink-0 place-items-center rounded-md px-1 text-[var(--ob-sidebar-muted)] hover:text-white"
+                    aria-label={expanded ? `Collapse ${item.label}` : `Expand ${item.label}`}
+                    aria-expanded={expanded}
+                    onClick={() =>
+                      setExpandedGroups((prev) => ({ ...prev, [href]: !expanded }))
+                    }
+                  >
+                    <ChevronDown
+                      className={cn("h-4 w-4 transition-transform", expanded && "rotate-180")}
+                      aria-hidden
+                    />
+                  </button>
+                ) : null}
+              </div>
+              {hasChildren && expanded && !collapsed ? (
+                <div className="mt-0.5 space-y-0.5 pl-8">
+                  {item.children!.map((child) => {
+                    const childActive =
+                      pathname === child.href || pathname.startsWith(`${child.href}/`);
+                    return (
+                      <Link
+                        key={child.href}
+                        href={child.href}
+                        onClick={() => setMobileOpen(false)}
+                        className={cn(
+                          "block rounded-[var(--ob-radius-md)] px-3 py-2 text-sm transition-colors",
+                          childActive
+                            ? "bg-white/10 font-medium text-white"
+                            : "text-[var(--ob-sidebar-muted)] hover:bg-white/5 hover:text-white",
+                        )}
+                      >
+                        {child.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </div>
           );
         })}
       </nav>

@@ -10,6 +10,8 @@ const LINKS = [
   { href: "/quotation", label: "Quotation" },
   { href: "/products", label: "Products" },
   { href: "/products?tab=offers", label: "Offers & discounts" },
+  { href: "/manager", label: "Manager overview" },
+  { href: "/manager/staff", label: "Staff" },
   { href: "/orders", label: "Orders" },
   { href: "/kitchen", label: "Kitchen board" },
   { href: "/customers", label: "Customers" },
