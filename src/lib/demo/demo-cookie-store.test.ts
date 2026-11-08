@@ -31,6 +31,11 @@ import {
   readDemoOrderStore,
 } from "./order-store";
 import { readDemoMutableBucket, updateDemoMutableBucket } from "./mutable-store";
+import {
+  readChunkedCookie,
+  writeChunkedCookie,
+  type CookieJar,
+} from "./chunked-cookie";
 
 function order(n: number): Order {
   return {
@@ -151,5 +156,45 @@ describe("demo cookie stores beyond the 4KB per-cookie limit", () => {
     const bucket = await readDemoMutableBucket("BR-1");
     expect(bucket.auditLog).toHaveLength(20);
     expect(bucket.auditLog[0].id).toBe("audit-20");
+  });
+
+  it("preserves orders whose notes overflow a raw chunk once URL-encoded", async () => {
+    const multibyte = order(1);
+    // Each ₹ encodes to 9 chars (%E2%82%B9): 700 of them blow past 4096
+    // encoded bytes inside a single 1200-code-unit chunk.
+    multibyte.notes = "₹".repeat(700);
+    await appendDemoOrderRecord("BR-1", multibyte, items(1));
+    const bucket = await readDemoOrderStore("BR-1");
+    expect(bucket.orders.map((o) => o.id)).toEqual(["order-1"]);
+    expect(bucket.orders[0].notes).toBe(multibyte.notes);
+  });
+
+  it("chunks by encoded length and never splits surrogate pairs", () => {
+    const value = "🎉".repeat(1500) + "₹".repeat(1500) + "ascii".repeat(300);
+    writeChunkedCookie(jar, "ob_unit", value);
+    expect(readChunkedCookie(jar, "ob_unit")).toBe(value);
+    for (const [name, stored] of jar.map) {
+      if (name.startsWith("ob_unit")) {
+        expect(encodeURIComponent(stored).length).toBeLessThanOrEqual(4096);
+      }
+    }
+  });
+
+  it("keeps the legacy cookie when the browser drops a shard write", () => {
+    const map = new Map<string, string>([["ob_guard", "legacy-complete-store"]]);
+    const droppingJar: CookieJar = {
+      get: (name) => (map.has(name) ? { value: map.get(name)! } : undefined),
+      set: (name, value) => {
+        // Simulate the browser silently dropping one shard.
+        if (name === "ob_guard_c1") return;
+        map.set(name, value);
+      },
+      delete: (name) => {
+        map.delete(name);
+      },
+    };
+    writeChunkedCookie(droppingJar, "ob_guard", "x".repeat(5000));
+    expect(map.get("ob_guard")).toBe("legacy-complete-store");
+    expect(readChunkedCookie(droppingJar, "ob_guard")).toBe("legacy-complete-store");
   });
 });

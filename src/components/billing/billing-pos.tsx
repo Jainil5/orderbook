@@ -840,7 +840,7 @@ export function BillingPos({
           </p>
         ) : null}
         <Button
-          className="w-full min-h-11"
+          className="ob-touch-target w-full"
           onClick={() => handleSubmit(savingAsQuote)}
           loading={submitting}
           disabled={!cart.length}
