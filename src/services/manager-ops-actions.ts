@@ -25,9 +25,13 @@ import {
   type ServiceInput,
   type ServiceJobInput,
 } from "@/lib/manager/services";
+import {
+  validateTaskInput,
+  type TaskInput,
+} from "@/lib/manager/tasks";
 import { canEditBrandSettings } from "@/lib/security/authorization";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
-import type { Appointment, Service, ServiceJob } from "@/types/operations";
+import type { Appointment, Service, ServiceJob, Task, TaskStatus } from "@/types/operations";
 
 const LIVE_UNAVAILABLE = {
   ok: false as const,
@@ -247,5 +251,45 @@ export async function deleteAppointmentAction(id: string) {
   if (!guard.ok) return guard;
   await patchOps(guard.code, "appointmentOverrides", id, { deleted: true });
   revalidateOps("/manager/appointments");
+  return { ok: true as const };
+}
+
+export async function saveTaskAction(id: string | null, input: TaskInput) {
+  const guard = await guardOps();
+  if (!guard.ok) return guard;
+  const parsed = validateTaskInput(input, await knownIds(guard.code));
+  if (!parsed.ok) return parsed;
+  if (id) {
+    await patchOps(guard.code, "taskOverrides", id, parsed.value);
+  } else {
+    const task: Task = {
+      id: newOpsId("task"),
+      brand_id: guard.brandId,
+      ...parsed.value,
+      status: "open",
+    };
+    await appendOps(guard.code, "tasks", task);
+    await auditOps(guard, "task.created", "task", task.id, task.title);
+  }
+  revalidateOps("/manager/tasks");
+  return { ok: true as const };
+}
+
+export async function setTaskStatusAction(id: string, status: TaskStatus) {
+  if (!["open", "in_progress", "done"].includes(status)) {
+    return { ok: false as const, message: "Invalid status." };
+  }
+  const guard = await guardOps();
+  if (!guard.ok) return guard;
+  await patchOps(guard.code, "taskOverrides", id, { status });
+  revalidateOps("/manager/tasks");
+  return { ok: true as const };
+}
+
+export async function deleteTaskAction(id: string) {
+  const guard = await guardOps();
+  if (!guard.ok) return guard;
+  await patchOps(guard.code, "taskOverrides", id, { deleted: true });
+  revalidateOps("/manager/tasks");
   return { ok: true as const };
 }
