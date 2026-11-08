@@ -51,8 +51,9 @@ export function ServicesManager({
   const [svcPrice, setSvcPrice] = useState("");
 
   const [editingJob, setEditingJob] = useState<ServiceJob | null>(null);
-  const [jobService, setJobService] = useState("");
-  const [jobCustomer, setJobCustomer] = useState("");
+  // Initialize from the first option so an untouched select submits a real ID.
+  const [jobService, setJobService] = useState(services[0]?.id ?? "");
+  const [jobCustomer, setJobCustomer] = useState(customers[0]?.id ?? "");
   const [jobStaff, setJobStaff] = useState<string[]>([]);
   const [jobWhen, setJobWhen] = useState("");
   const [jobNotes, setJobNotes] = useState("");
