@@ -30,9 +30,14 @@ import {
   validateTaskInput,
   type TaskInput,
 } from "@/lib/manager/tasks";
+import {
+  validateVisitInput,
+  visitTransitionError,
+  type VisitInput,
+} from "@/lib/manager/visits";
 import { canEditBrandSettings } from "@/lib/security/authorization";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
-import type { Appointment, Service, ServiceJob, Shift, Task, TaskStatus } from "@/types/operations";
+import type { Appointment, FieldVisit, Service, ServiceJob, Shift, Task, TaskStatus } from "@/types/operations";
 
 const LIVE_UNAVAILABLE = {
   ok: false as const,
@@ -316,5 +321,72 @@ export async function deleteShiftAction(id: string) {
   if (!guard.ok) return guard;
   await patchOps(guard.code, "shiftOverrides", id, { deleted: true });
   revalidateOps("/manager/schedules");
+  return { ok: true as const };
+}
+
+export async function saveVisitAction(id: string | null, input: VisitInput) {
+  const guard = await guardOps();
+  if (!guard.ok) return guard;
+  const parsed = validateVisitInput(input, await knownIds(guard.code));
+  if (!parsed.ok) return parsed;
+  if (id) {
+    await patchOps(guard.code, "visitOverrides", id, parsed.value);
+  } else {
+    const visit: FieldVisit = {
+      id: newOpsId("visit"),
+      brand_id: guard.brandId,
+      ...parsed.value,
+      status: "planned",
+      checkInAt: null,
+      checkOutAt: null,
+      report: null,
+    };
+    await appendOps(guard.code, "visits", visit);
+    await auditOps(guard, "visit.created", "visit", visit.id, visit.purpose);
+  }
+  revalidateOps("/manager/visits");
+  return { ok: true as const };
+}
+
+export async function checkInVisitAction(id: string) {
+  const guard = await guardOps();
+  if (!guard.ok) return guard;
+  const pack = getDemoBrandPack(guard.code);
+  const ops = mergeOperations(pack, await readDemoMutableBucket(guard.code));
+  const visit = ops.visits.find((v) => v.id === id);
+  if (!visit) return { ok: false as const, message: "Visit not found." };
+  const error = visitTransitionError(visit, "check_in");
+  if (error) return { ok: false as const, message: error };
+  await patchOps(guard.code, "visitOverrides", id, {
+    status: "checked_in",
+    checkInAt: new Date().toISOString(),
+  });
+  revalidateOps("/manager/visits");
+  return { ok: true as const };
+}
+
+export async function checkOutVisitAction(id: string, report: string) {
+  const guard = await guardOps();
+  if (!guard.ok) return guard;
+  const pack = getDemoBrandPack(guard.code);
+  const ops = mergeOperations(pack, await readDemoMutableBucket(guard.code));
+  const visit = ops.visits.find((v) => v.id === id);
+  if (!visit) return { ok: false as const, message: "Visit not found." };
+  const error = visitTransitionError(visit, "check_out", report);
+  if (error) return { ok: false as const, message: error };
+  await patchOps(guard.code, "visitOverrides", id, {
+    status: "completed",
+    checkOutAt: new Date().toISOString(),
+    report: report.trim().slice(0, 500),
+  });
+  revalidateOps("/manager/visits");
+  return { ok: true as const };
+}
+
+export async function deleteVisitAction(id: string) {
+  const guard = await guardOps();
+  if (!guard.ok) return guard;
+  await patchOps(guard.code, "visitOverrides", id, { deleted: true });
+  revalidateOps("/manager/visits");
   return { ok: true as const };
 }
