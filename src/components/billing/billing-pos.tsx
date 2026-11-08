@@ -840,7 +840,7 @@ export function BillingPos({
           </p>
         ) : null}
         <Button
-          className="w-full"
+          className="w-full min-h-11"
           onClick={() => handleSubmit(savingAsQuote)}
           loading={submitting}
           disabled={!cart.length}
@@ -952,7 +952,7 @@ export function BillingPos({
   );
 
   const cartAside = (
-      <div className="hidden w-full lg:block lg:w-[32%] xl:w-[28%] lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)]">
+      <div className="hidden w-full lg:block lg:w-[32%] xl:w-[28%] lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto">
         {cartPanel}
       </div>
   );

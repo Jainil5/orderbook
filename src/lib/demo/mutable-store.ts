@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
+import { readChunkedCookie, writeChunkedCookie } from "./chunked-cookie";
 import type {
   AuditLogEntry,
   Customer,
@@ -57,13 +58,13 @@ export async function readDemoMutableBucket(
   brandCode: DemoBrandCode,
 ): Promise<DemoMutableBucket> {
   const cookieStore = await cookies();
-  const store = parseStore(cookieStore.get(DEMO_MUTABLE_COOKIE)?.value);
+  const store = parseStore(readChunkedCookie(cookieStore, DEMO_MUTABLE_COOKIE));
   return store[brandCode] ?? emptyBucket();
 }
 
 async function writeDemoMutableStore(store: DemoMutableStore): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.set(DEMO_MUTABLE_COOKIE, JSON.stringify(store), {
+  writeChunkedCookie(cookieStore, DEMO_MUTABLE_COOKIE, JSON.stringify(store), {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
@@ -76,7 +77,7 @@ export async function updateDemoMutableBucket(
   mutate: (bucket: DemoMutableBucket) => DemoMutableBucket,
 ): Promise<void> {
   const cookieStore = await cookies();
-  const store = parseStore(cookieStore.get(DEMO_MUTABLE_COOKIE)?.value);
+  const store = parseStore(readChunkedCookie(cookieStore, DEMO_MUTABLE_COOKIE));
   const current = store[brandCode] ?? emptyBucket();
   store[brandCode] = mutate(current);
   await writeDemoMutableStore(store);
