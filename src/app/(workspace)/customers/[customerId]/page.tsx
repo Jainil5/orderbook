@@ -2,6 +2,9 @@ import Link from "next/link";
 import { PageShell } from "@/components/workspace/page-shell";
 import { CustomerOrdersTable } from "@/components/customers/customer-orders-table";
 import { CustomerEditor } from "@/components/customers/customer-editor";
+import { CustomerOperationsTimeline } from "@/components/customers/customer-operations-timeline";
+import { loadDemoOperations } from "@/lib/demo/operations-data";
+import { customerOperationsTimeline } from "@/lib/manager/ops-selectors";
 import {
   getDemoCustomer,
   listDemoOrdersForCustomer,
@@ -27,6 +30,12 @@ export default async function CustomerDetailPage({
     const customer = await getDemoCustomer(customerId, code);
     if (!customer) notFound();
     const orders = await listDemoOrdersForCustomer(customerId, code);
+    const ops = await loadDemoOperations(code);
+    const operationsRows = customerOperationsTimeline(
+      customerId,
+      { appointments: ops.appointments, visits: ops.visits, jobs: ops.serviceJobs, tasks: ops.tasks },
+      Object.fromEntries(ops.services.map((s) => [s.id, s.name])),
+    );
 
     return (
       <PageShell
@@ -49,6 +58,8 @@ export default async function CustomerDetailPage({
           currencyCode={ws.settings.currency_code}
           orderNumberColumn={ws.profile.ordersNumberColumn}
         />
+        <h2 className="mb-3 mt-6 text-sm font-semibold">Operations</h2>
+        <CustomerOperationsTimeline rows={operationsRows} />
       </PageShell>
     );
   }

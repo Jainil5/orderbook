@@ -7,16 +7,18 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { listDemoStaff } from "@/lib/demo/staff-data";
 import { toDemoBrandCode } from "@/lib/demo/data";
 import { staffAvailabilitySummary } from "@/lib/manager/staff";
+import { loadDemoOperations } from "@/lib/demo/operations-data";
+import { overviewRollups } from "@/lib/manager/ops-selectors";
 import { visibleManagerModules } from "@/lib/workspace/manager-modules";
 import { loadWorkspaceSession } from "@/lib/workspace/session";
 
 const MODULE_DESCRIPTIONS: Record<string, string> = {
   staff: "Profiles, roles and availability.",
-  services: "Not built yet — planned for Phase 2.",
-  appointments: "Not built yet — planned for Phase 2.",
-  visits: "Not built yet — planned for Phase 2.",
-  schedules: "Not built yet — planned for Phase 2.",
-  tasks: "Not built yet — planned for Phase 2.",
+  services: "Service catalogue, requests and work orders.",
+  appointments: "Meetings, tastings and scheduled sessions.",
+  visits: "Field visits with check-in and reports.",
+  schedules: "Staff shifts and the weekly rota.",
+  tasks: "To-dos with priorities and due dates.",
 };
 
 export default async function ManagerPage() {
@@ -39,6 +41,18 @@ export default async function ManagerPage() {
 
   const staff = await listDemoStaff(toDemoBrandCode(ws.brand.code));
   const summary = staffAvailabilitySummary(staff);
+  const ops = await loadDemoOperations(toDemoBrandCode(ws.brand.code));
+  const rollups = overviewRollups(
+    { appointments: ops.appointments, tasks: ops.tasks, shifts: ops.shifts, visits: ops.visits, jobs: ops.serviceJobs },
+    new Date(),
+  );
+  const rollupCards = [
+    { label: "Today's appointments", value: rollups.todayAppointments, href: "/manager/appointments" },
+    { label: "Overdue tasks", value: rollups.overdueTasks, href: "/manager/tasks" },
+    { label: "On shift now", value: rollups.onShiftNow, href: "/manager/schedules" },
+    { label: "Active visits", value: rollups.activeVisits, href: "/manager/visits" },
+    { label: "Open jobs", value: rollups.openJobs, href: "/manager/services" },
+  ];
   const stats = [
     { label: "Active staff", value: summary.active },
     { label: "Available now", value: summary.available },
@@ -55,6 +69,16 @@ export default async function ManagerPage() {
             <p className="text-sm text-[var(--ob-text-muted)]">{stat.label}</p>
             <p className="mt-1 text-2xl font-semibold">{stat.value}</p>
           </Card>
+        ))}
+      </div>
+      <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
+        {rollupCards.map((card) => (
+          <Link key={card.label} href={card.href} className="ob-touch-target block">
+            <Card className="h-full p-4 transition-shadow hover:shadow-[var(--ob-shadow-sm)]">
+              <p className="text-sm text-[var(--ob-text-muted)]">{card.label}</p>
+              <p className="mt-1 text-2xl font-semibold">{card.value}</p>
+            </Card>
+          </Link>
         ))}
       </div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
