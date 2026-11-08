@@ -12,6 +12,10 @@ import {
 } from "@/lib/demo/mutable-store";
 import { mergeOperations } from "@/lib/demo/operations-data";
 import { listDemoStaff } from "@/lib/demo/staff-data";
+import {
+  validateAppointmentInput,
+  type AppointmentInput,
+} from "@/lib/manager/appointments";
 import { newOpsId } from "@/lib/manager/ops-shared";
 import {
   jobAdvanceError,
@@ -23,7 +27,7 @@ import {
 } from "@/lib/manager/services";
 import { canEditBrandSettings } from "@/lib/security/authorization";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
-import type { Service, ServiceJob } from "@/types/operations";
+import type { Appointment, Service, ServiceJob } from "@/types/operations";
 
 const LIVE_UNAVAILABLE = {
   ok: false as const,
@@ -199,5 +203,49 @@ export async function deleteServiceJobAction(id: string) {
   if (!guard.ok) return guard;
   await patchOps(guard.code, "serviceJobOverrides", id, { deleted: true });
   revalidateOps("/manager/services");
+  return { ok: true as const };
+}
+
+export async function saveAppointmentAction(id: string | null, input: AppointmentInput) {
+  const guard = await guardOps();
+  if (!guard.ok) return guard;
+  const parsed = validateAppointmentInput(input, await knownIds(guard.code));
+  if (!parsed.ok) return parsed;
+  if (id) {
+    await patchOps(guard.code, "appointmentOverrides", id, parsed.value);
+  } else {
+    const appointment: Appointment = {
+      id: newOpsId("apt"),
+      brand_id: guard.brandId,
+      ...parsed.value,
+      status: "scheduled",
+    };
+    await appendOps(guard.code, "appointments", appointment);
+    await auditOps(guard, "appointment.created", "appointment", appointment.id, appointment.title);
+  }
+  revalidateOps("/manager/appointments");
+  return { ok: true as const };
+}
+
+export async function setAppointmentStatusAction(id: string, status: "completed" | "cancelled") {
+  const guard = await guardOps();
+  if (!guard.ok) return guard;
+  const pack = getDemoBrandPack(guard.code);
+  const ops = mergeOperations(pack, await readDemoMutableBucket(guard.code));
+  const appointment = ops.appointments.find((a) => a.id === id);
+  if (!appointment) return { ok: false as const, message: "Appointment not found." };
+  if (appointment.status !== "scheduled") {
+    return { ok: false as const, message: "Only scheduled appointments can change status." };
+  }
+  await patchOps(guard.code, "appointmentOverrides", id, { status });
+  revalidateOps("/manager/appointments");
+  return { ok: true as const };
+}
+
+export async function deleteAppointmentAction(id: string) {
+  const guard = await guardOps();
+  if (!guard.ok) return guard;
+  await patchOps(guard.code, "appointmentOverrides", id, { deleted: true });
+  revalidateOps("/manager/appointments");
   return { ok: true as const };
 }

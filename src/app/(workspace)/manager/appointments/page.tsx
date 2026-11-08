@@ -1,19 +1,46 @@
 import { redirect } from "next/navigation";
 import { PageShell } from "@/components/workspace/page-shell";
 import { ManagerSubnav } from "@/components/manager/manager-subnav";
+import { AppointmentsManager } from "@/components/manager/appointments-manager";
 import { EmptyState } from "@/components/ui/empty-state";
+import { getDemoBrandPack } from "@/lib/demo/brands";
+import { toDemoBrandCode } from "@/lib/demo/data";
+import { mergeDemoCustomers } from "@/lib/demo/merge-entities";
+import { readDemoMutableBucket } from "@/lib/demo/mutable-store";
+import { loadDemoOperations } from "@/lib/demo/operations-data";
+import { listDemoStaff } from "@/lib/demo/staff-data";
 import { loadWorkspaceSession } from "@/lib/workspace/session";
 
 export default async function AppointmentsPage() {
   const ws = await loadWorkspaceSession();
   if (!ws) redirect("/login");
   if (ws.hiddenManagerModules.includes("appointments")) redirect("/manager");
+
+  if (ws.mode !== "demo") {
+    return (
+      <PageShell title="Meetings & Appointments">
+        <ManagerSubnav activeHref="/manager/appointments" />
+        <EmptyState
+          title="Appointments is not connected to live workspaces yet"
+          description="Meetings and appointments need the operations tables in the live database. Demo workspaces have full scheduling today."
+        />
+      </PageShell>
+    );
+  }
+
+  const code = toDemoBrandCode(ws.brand.code);
+  const ops = await loadDemoOperations(code);
+  const staff = await listDemoStaff(code);
+  const customers = mergeDemoCustomers(getDemoBrandPack(code).customers, await readDemoMutableBucket(code));
   return (
     <PageShell title="Meetings & Appointments">
       <ManagerSubnav activeHref="/manager/appointments" />
-      <EmptyState
-        title="Meetings & Appointments"
-        description="Booking calendar and appointments are not built yet — planned for Phase 2."
+      <AppointmentsManager
+        appointments={ops.appointments}
+        customers={customers.map((c) => ({ id: c.id, name: c.name }))}
+        staff={staff.filter((s) => s.status === "active").map((s) => ({ id: s.id, name: s.name }))}
+        services={ops.services.filter((s) => s.isActive).map((s) => ({ id: s.id, name: s.name }))}
+        canEdit
       />
     </PageShell>
   );
