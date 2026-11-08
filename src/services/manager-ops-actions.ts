@@ -17,6 +17,7 @@ import {
   type AppointmentInput,
 } from "@/lib/manager/appointments";
 import { newOpsId } from "@/lib/manager/ops-shared";
+import { validateShiftInput, type ShiftInput } from "@/lib/manager/schedules";
 import {
   jobAdvanceError,
   nextJobStatus,
@@ -31,7 +32,7 @@ import {
 } from "@/lib/manager/tasks";
 import { canEditBrandSettings } from "@/lib/security/authorization";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
-import type { Appointment, Service, ServiceJob, Task, TaskStatus } from "@/types/operations";
+import type { Appointment, Service, ServiceJob, Shift, Task, TaskStatus } from "@/types/operations";
 
 const LIVE_UNAVAILABLE = {
   ok: false as const,
@@ -291,5 +292,29 @@ export async function deleteTaskAction(id: string) {
   if (!guard.ok) return guard;
   await patchOps(guard.code, "taskOverrides", id, { deleted: true });
   revalidateOps("/manager/tasks");
+  return { ok: true as const };
+}
+
+export async function saveShiftAction(id: string | null, input: ShiftInput) {
+  const guard = await guardOps();
+  if (!guard.ok) return guard;
+  const parsed = validateShiftInput(input, (await knownIds(guard.code)).staffIds);
+  if (!parsed.ok) return parsed;
+  if (id) {
+    await patchOps(guard.code, "shiftOverrides", id, parsed.value);
+  } else {
+    const shift: Shift = { id: newOpsId("shift"), brand_id: guard.brandId, ...parsed.value };
+    await appendOps(guard.code, "shifts", shift);
+    await auditOps(guard, "shift.created", "shift", shift.id, `${shift.date} ${shift.start}-${shift.end}`);
+  }
+  revalidateOps("/manager/schedules");
+  return { ok: true as const };
+}
+
+export async function deleteShiftAction(id: string) {
+  const guard = await guardOps();
+  if (!guard.ok) return guard;
+  await patchOps(guard.code, "shiftOverrides", id, { deleted: true });
+  revalidateOps("/manager/schedules");
   return { ok: true as const };
 }
