@@ -2,6 +2,12 @@ import type { DemoBrandPack } from "@/lib/demo/brands/types";
 import { DEMO_CAFE_IMAGES } from "@/lib/demo/product-image-urls";
 import type { StaffMember } from "@/types/manager";
 
+const opsToday = new Date().toISOString().slice(0, 10);
+const tastingStart = new Date();
+tastingStart.setHours(16, 0, 0, 0);
+const tastingEnd = new Date();
+tastingEnd.setHours(17, 0, 0, 0);
+
 export const BREWERY_CAFE_DEMO: DemoBrandPack = {
   brand: {
     id: "demo-brewery-cafe",
@@ -373,6 +379,26 @@ export const BREWERY_CAFE_DEMO: DemoBrandPack = {
       created_at: "2026-10-05T09:00:00.000Z",
     },
   ] satisfies StaffMember[],
+  services: [
+    { id: "bc-svc-1", brand_id: "demo-brewery-cafe", name: "Catering Coffee Bar", description: "Pop-up espresso bar for events", durationMinutes: 120, price: 5000, isActive: true },
+  ],
+  serviceJobs: [
+    { id: "bc-job-1", brand_id: "demo-brewery-cafe", serviceId: "bc-svc-1", customerId: "c2", staffIds: ["bc-staff-1", "bc-staff-2"], status: "scheduled", scheduledAt: new Date(Date.now() + 2 * 86400000).toISOString(), notes: "Corporate tasting for 20 guests" },
+  ],
+  appointments: [
+    { id: "bc-apt-1", brand_id: "demo-brewery-cafe", title: "Coffee tasting — Ananya", customerId: "c2", staffIds: ["bc-staff-1"], startsAt: tastingStart.toISOString(), endsAt: tastingEnd.toISOString(), location: "Cafe counter", serviceId: null, status: "scheduled", notes: "Single-origin flight" },
+  ],
+  visits: [
+    { id: "bc-visit-1", brand_id: "demo-brewery-cafe", customerId: "c3", staffId: "bc-staff-1", purpose: "Supplier meeting — next roast lot", status: "planned", checkInAt: null, checkOutAt: null, report: null },
+  ],
+  shifts: [
+    { id: "bc-shift-1", brand_id: "demo-brewery-cafe", staffId: "bc-staff-2", date: opsToday, start: "08:00", end: "16:00", note: "Bar" },
+    { id: "bc-shift-2", brand_id: "demo-brewery-cafe", staffId: "bc-staff-3", date: opsToday, start: "10:00", end: "18:00", note: "Kitchen" },
+  ],
+  tasks: [
+    { id: "bc-task-1", brand_id: "demo-brewery-cafe", title: "Restock oat milk", description: "Check fridge count before evening rush", assigneeStaffId: "bc-staff-3", customerId: null, priority: "high", dueAt: new Date(Date.now() - 86400000).toISOString(), status: "open" },
+    { id: "bc-task-2", brand_id: "demo-brewery-cafe", title: "Deep clean espresso machine", description: "", assigneeStaffId: "bc-staff-2", customerId: null, priority: "medium", dueAt: new Date(Date.now() + 86400000).toISOString(), status: "open" },
+  ],
   analytics: {
     grossSales: 1115,
     netSales: 1047.5,

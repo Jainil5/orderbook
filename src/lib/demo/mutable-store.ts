@@ -12,6 +12,7 @@ import type {
   StockAdjustment,
 } from "@/types/database";
 import type { StaffMember } from "@/types/manager";
+import type { Appointment, FieldVisit, Service, ServiceJob, Shift, Task } from "@/types/operations";
 
 export const DEMO_MUTABLE_COOKIE = "ob_demo_mutable_v1";
 
@@ -26,6 +27,18 @@ export type DemoMutableBucket = {
   refunds: Refund[];
   staff: StaffMember[];
   staffOverrides: Record<string, Partial<StaffMember>>;
+  services: Service[];
+  serviceOverrides: Record<string, Partial<Service> & { deleted?: boolean }>;
+  serviceJobs: ServiceJob[];
+  serviceJobOverrides: Record<string, Partial<ServiceJob> & { deleted?: boolean }>;
+  appointments: Appointment[];
+  appointmentOverrides: Record<string, Partial<Appointment> & { deleted?: boolean }>;
+  tasks: Task[];
+  taskOverrides: Record<string, Partial<Task> & { deleted?: boolean }>;
+  shifts: Shift[];
+  shiftOverrides: Record<string, Partial<Shift> & { deleted?: boolean }>;
+  visits: FieldVisit[];
+  visitOverrides: Record<string, Partial<FieldVisit> & { deleted?: boolean }>;
 };
 
 type DemoMutableStore = Partial<Record<DemoBrandCode, DemoMutableBucket>>;
@@ -42,6 +55,18 @@ function emptyBucket(): DemoMutableBucket {
     refunds: [],
     staff: [],
     staffOverrides: {},
+    services: [],
+    serviceOverrides: {},
+    serviceJobs: [],
+    serviceJobOverrides: {},
+    appointments: [],
+    appointmentOverrides: {},
+    tasks: [],
+    taskOverrides: {},
+    shifts: [],
+    shiftOverrides: {},
+    visits: [],
+    visitOverrides: {},
   };
 }
 
