@@ -9,6 +9,7 @@ import {
 import {
   mergeDemoCustomers,
   mergeDemoOffers,
+  mergeDemoProducts,
 } from "@/lib/demo/merge-entities";
 import { getDemoBrandPack, resolveDemoBrandCode } from "@/lib/demo/brands";
 import {
@@ -32,6 +33,8 @@ import type {
   Order,
   OrderStatus,
   PaymentStatus,
+  Product,
+  ProductUpsertInput,
   RecordPaymentInput,
   RecordRefundInput,
   StockAdjustmentInput,
@@ -78,16 +81,138 @@ async function demoOffers(code: DemoBrandCode): Promise<Offer[]> {
   return mergeDemoOffers(pack.offers, bucket);
 }
 
+function numOrNull(v: number | null | string | undefined): number | null {
+  if (v === null || v === undefined || v === "") return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+function productFromInput(
+  pack: ReturnType<typeof getDemoBrandPack>,
+  id: string,
+  input: ProductUpsertInput,
+): Product {
+  return {
+    id,
+    brand_id: pack.brand.id,
+    name: input.name.trim(),
+    description: input.description ?? null,
+    sku: input.sku ?? null,
+    category: input.category ?? null,
+    price: Number(input.price),
+    cost_price: numOrNull(input.cost_price),
+    unit: input.unit ?? null,
+    is_active: input.is_active !== false,
+    default_discount_percent: numOrNull(input.default_discount_percent),
+    image_url: input.image_url ?? null,
+    stock_qty: numOrNull(input.stock_qty),
+    low_stock_threshold: numOrNull(input.low_stock_threshold),
+    wholesale_price: numOrNull(input.wholesale_price),
+    modifiers_json: input.modifiers_json ?? null,
+  };
+}
+
+/** Editable fields only — id/brand_id never change, so keep them out of the cookie. */
+function productOverrideFields(
+  pack: ReturnType<typeof getDemoBrandPack>,
+  id: string,
+  input: ProductUpsertInput,
+): Partial<Product> {
+  const fields: Partial<Product> = { ...productFromInput(pack, id, input) };
+  delete fields.id;
+  delete fields.brand_id;
+  return fields;
+}
+
+/**
+ * Persist a demo product edit. Existing (pack) products get a partial
+ * override in `productOverrides`; products created in the demo workspace are
+ * stored in full in `bucket.products` so Billing/catalog pages see them too.
+ */
+export async function saveDemoProduct(
+  productId: string | null,
+  input: ProductUpsertInput,
+): Promise<{ ok: true; product: Product } | { ok: false; error: string }> {
+  const code = await activeDemoBrandCode();
+  const pack = getDemoBrandPack(code);
+  if (!input.name.trim()) return { ok: false, error: "Name is required." };
+  if (!Number.isFinite(Number(input.price)) || Number(input.price) < 0) {
+    return { ok: false, error: "Price must be a valid number." };
+  }
+  const bucket = await readDemoMutableBucket(code);
+  const base = pack.products.find((p) => p.id === productId);
+  const existing =
+    base ?? bucket.products.find((p) => p.id === productId) ?? null;
+
+  if (productId && existing) {
+    const id = productId;
+    const product = productFromInput(pack, id, input);
+    const fields = productOverrideFields(pack, id, input);
+    await updateDemoMutableBucket(code, (b) => {
+      if (base) {
+        return {
+          ...b,
+          productOverrides: {
+            ...b.productOverrides,
+            [id]: { ...b.productOverrides[id], ...fields },
+          },
+        };
+      }
+      return {
+        ...b,
+        products: b.products.map((p) => (p.id === id ? product : p)),
+      };
+    });
+    revalidateAll();
+    revalidatePath("/products");
+    return { ok: true, product };
+  }
+
+  const id = `demo-prod-${Date.now()}`;
+  const product = productFromInput(pack, id, input);
+  await updateDemoMutableBucket(code, (b) => ({
+    ...b,
+    products: [...b.products, product],
+  }));
+  revalidateAll();
+  revalidatePath("/products");
+  return { ok: true, product };
+}
+
+export async function setDemoProductActive(
+  productId: string,
+  isActive: boolean,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const code = await activeDemoBrandCode();
+  const pack = getDemoBrandPack(code);
+  if (pack.products.some((p) => p.id === productId)) {
+    await updateDemoMutableBucket(code, (b) => ({
+      ...b,
+      productOverrides: {
+        ...b.productOverrides,
+        [productId]: { ...b.productOverrides[productId], is_active: isActive },
+      },
+    }));
+  } else {
+    await updateDemoMutableBucket(code, (b) => ({
+      ...b,
+      products: b.products.map((p) =>
+        p.id === productId ? { ...p, is_active: isActive } : p,
+      ),
+    }));
+  }
+  revalidateAll();
+  revalidatePath("/products");
+  return { ok: true };
+}
+
 export async function submitDemoOrder(
   input: CreateOrderInput,
 ): Promise<CreateOrderResult> {
   const code = await activeDemoBrandCode();
   const pack = getDemoBrandPack(code);
   const bucket = await readDemoMutableBucket(code);
-  const products = pack.products.map((p) => ({
-    ...p,
-    ...(bucket.productOverrides[p.id] ?? {}),
-  }));
+  const products = mergeDemoProducts(pack.products, bucket);
 
   let customers = await demoCustomers(code);
   let customerId = input.customerId;

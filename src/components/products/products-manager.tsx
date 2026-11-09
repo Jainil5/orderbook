@@ -192,71 +192,21 @@ export function ProductsManager({
     const input = formToInput(form);
 
     if (mode === "demo") {
-      if (editingId) {
-        setProducts((prev) =>
-          prev.map((p) =>
-            p.id === editingId
-              ? ({
-                  ...p,
-                  ...input,
-                  price: Number(input.price),
-                  cost_price:
-                    input.cost_price != null ? Number(input.cost_price) : null,
-                  default_discount_percent:
-                    input.default_discount_percent != null
-                      ? Number(input.default_discount_percent)
-                      : null,
-                  image_url: input.image_url ?? null,
-                  stock_qty:
-                    input.stock_qty != null ? Number(input.stock_qty) : null,
-                  low_stock_threshold:
-                    input.low_stock_threshold != null
-                      ? Number(input.low_stock_threshold)
-                      : null,
-                  wholesale_price:
-                    input.wholesale_price != null
-                      ? Number(input.wholesale_price)
-                      : null,
-                  modifiers_json: input.modifiers_json ?? null,
-                } as Product)
-              : p,
-          ),
-        );
-      } else {
-        setProducts((prev) => [
-          ...prev,
-          {
-            id: `local-${Date.now()}`,
-            brand_id: "demo",
-            name: input.name,
-            description: input.description ?? null,
-            sku: input.sku ?? null,
-            category: input.category ?? null,
-            price: Number(input.price),
-            cost_price:
-              input.cost_price != null ? Number(input.cost_price) : null,
-            unit: input.unit ?? null,
-            is_active: input.is_active !== false,
-            default_discount_percent:
-              input.default_discount_percent != null
-                ? Number(input.default_discount_percent)
-                : null,
-            image_url: input.image_url ?? null,
-            stock_qty:
-              input.stock_qty != null ? Number(input.stock_qty) : null,
-            low_stock_threshold:
-              input.low_stock_threshold != null
-                ? Number(input.low_stock_threshold)
-                : null,
-            wholesale_price:
-              input.wholesale_price != null
-                ? Number(input.wholesale_price)
-                : null,
-            modifiers_json: input.modifiers_json ?? null,
-          },
-        ]);
-      }
+      // Persist through the demo cookie bucket so Billing/catalog see the
+      // change immediately and across reloads; local state keeps the list
+      // in sync without a full refresh.
+      const result = await saveProductAction(editingId, input);
       setSaving(false);
+      if (!result.ok) {
+        setFormError(result.error);
+        return;
+      }
+      const product = result.product;
+      setProducts((prev) =>
+        editingId
+          ? prev.map((p) => (p.id === editingId ? product : p))
+          : [...prev, product],
+      );
       closeDialog();
       return;
     }
@@ -277,12 +227,15 @@ export function ProductsManager({
     setRowBusy(product.id);
 
     if (mode === "demo") {
-      setProducts((prev) =>
-        prev.map((p) =>
-          p.id === product.id ? { ...p, is_active: next } : p,
-        ),
-      );
+      const result = await toggleProductActiveAction(product.id, next);
       setRowBusy(null);
+      if (result.ok) {
+        setProducts((prev) =>
+          prev.map((p) =>
+            p.id === product.id ? { ...p, is_active: next } : p,
+          ),
+        );
+      }
       return;
     }
 
@@ -521,7 +474,9 @@ export function ProductsManager({
           </h2>
           <p className="mt-1 text-sm text-[var(--ob-text-muted)]">
             Changes apply to Billing and new orders.
-            {mode === "demo" ? " Demo edits stay in this session only." : ""}
+            {mode === "demo"
+              ? " Demo edits persist in this browser (cookie-backed demo data)."
+              : ""}
           </p>
 
           <div className="mt-5 space-y-3">

@@ -21,6 +21,8 @@ export type DemoMutableBucket = {
   offers: Offer[];
   payments: Payment[];
   orderPatches: Record<string, Partial<Order>>;
+  /** Full product rows created in the demo workspace (beyond the pack). */
+  products: Product[];
   productOverrides: Record<string, Partial<Product>>;
   auditLog: AuditLogEntry[];
   stockAdjustments: StockAdjustment[];
@@ -49,6 +51,7 @@ function emptyBucket(): DemoMutableBucket {
     offers: [],
     payments: [],
     orderPatches: {},
+    products: [],
     productOverrides: {},
     auditLog: [],
     stockAdjustments: [],
@@ -84,7 +87,9 @@ export async function readDemoMutableBucket(
 ): Promise<DemoMutableBucket> {
   const cookieStore = await cookies();
   const store = parseStore(readChunkedCookie(cookieStore, DEMO_MUTABLE_COOKIE));
-  return store[brandCode] ?? emptyBucket();
+  // Spread over the empty bucket so cookies written before newer fields
+  // (e.g. `products`) still read back with complete shapes.
+  return { ...emptyBucket(), ...store[brandCode] };
 }
 
 async function writeDemoMutableStore(store: DemoMutableStore): Promise<void> {
@@ -103,7 +108,7 @@ export async function updateDemoMutableBucket(
 ): Promise<void> {
   const cookieStore = await cookies();
   const store = parseStore(readChunkedCookie(cookieStore, DEMO_MUTABLE_COOKIE));
-  const current = store[brandCode] ?? emptyBucket();
+  const current = { ...emptyBucket(), ...store[brandCode] };
   store[brandCode] = mutate(current);
   await writeDemoMutableStore(store);
 }

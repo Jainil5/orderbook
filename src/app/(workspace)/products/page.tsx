@@ -1,6 +1,6 @@
 import { PageShell } from "@/components/workspace/page-shell";
 import { ProductsWorkspace } from "@/components/products/products-workspace";
-import { listDemoOffers, listDemoProducts, toDemoBrandCode } from "@/lib/demo/data";
+import { listDemoOffers, listDemoProductsMerged, toDemoBrandCode } from "@/lib/demo/data";
 import { listOffers, listProducts } from "@/services/data";
 import { loadWorkspaceSession } from "@/lib/workspace/session";
 import { redirect } from "next/navigation";
@@ -18,13 +18,16 @@ export default async function ProductsPage({
 
   if (ws.mode === "demo") {
     const demoCode = toDemoBrandCode(ws.brand.code);
-    const offers = await listDemoOffers(demoCode);
+    const [offers, products] = await Promise.all([
+      listDemoOffers(demoCode),
+      listDemoProductsMerged({ activeOnly: false }, demoCode),
+    ]);
     return (
       <PageShell title="Products">
         <ProductsWorkspace
           mode="demo"
           initialTab={initialTab}
-          products={listDemoProducts({ activeOnly: false }, demoCode)}
+          products={products}
           offers={offers}
           currencyCode={ws.settings.currency_code}
           userRole="owner"

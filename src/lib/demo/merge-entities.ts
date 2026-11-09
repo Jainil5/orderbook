@@ -48,10 +48,22 @@ export function mergeDemoProducts(
   base: Product[],
   bucket: DemoMutableBucket,
 ): Product[] {
-  return base.map((product) => ({
-    ...product,
-    ...(bucket.productOverrides[product.id] ?? {}),
-  }));
+  const byId = new Map<string, Product>();
+  for (const product of base) {
+    byId.set(product.id, {
+      ...product,
+      ...(bucket.productOverrides[product.id] ?? {}),
+    });
+  }
+  // Products created in the demo workspace are stored in full in the bucket;
+  // legacy buckets may predate the field.
+  for (const product of bucket.products ?? []) {
+    byId.set(product.id, {
+      ...product,
+      ...(bucket.productOverrides[product.id] ?? {}),
+    });
+  }
+  return Array.from(byId.values());
 }
 
 export function listDemoAudit(bucket: DemoMutableBucket) {
