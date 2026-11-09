@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { isOnShift, weekDays } from "@/lib/manager/schedules";
+import { localDayKey } from "@/lib/manager/time";
 import { useMounted } from "@/lib/use-mounted";
 import { deleteShiftAction, saveShiftAction } from "@/services/manager-ops-actions";
 import type { Shift } from "@/types/operations";
@@ -53,7 +54,7 @@ export function SchedulesManager({
   function startEdit(shift: Shift | null) {
     setEditing(shift);
     setStaffId(shift?.staffId ?? staff[0]?.id ?? "");
-    setDate(shift?.date ?? new Date().toISOString().slice(0, 10));
+    setDate(shift?.date ?? localDayKey(new Date()));
     setStart(shift?.start ?? "09:00");
     setEnd(shift?.end ?? "17:00");
     setNote(shift?.note ?? "");
@@ -65,7 +66,7 @@ export function SchedulesManager({
   const mounted = useMounted();
   const days = mounted ? weekDays(anchor) : [];
   const now = new Date();
-  const weekHasToday = mounted && days.includes(now.toISOString().slice(0, 10));
+  const weekHasToday = mounted && days.includes(localDayKey(now));
   const dayLabel = (day: string) =>
     new Date(`${day}T12:00:00`).toLocaleDateString(undefined, { weekday: "short", day: "numeric" });
 

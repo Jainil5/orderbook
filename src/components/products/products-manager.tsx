@@ -189,7 +189,10 @@ export function ProductsManager({
     e.preventDefault();
     if (!canEdit) return;
     setSaving(true);
+    // Clear both banners: a stale row error must not sit next to a later
+    // successful save (and vice versa for the toggle below).
     setFormError(null);
+    setActionError(null);
     const input = formToInput(form);
 
     if (mode === "demo") {
@@ -234,6 +237,7 @@ export function ProductsManager({
     const next = !product.is_active;
     setRowBusy(product.id);
     setActionError(null);
+    setFormError(null);
 
     if (mode === "demo") {
       try {

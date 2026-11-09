@@ -2,6 +2,7 @@ import type { Appointment, FieldVisit, ServiceJob, Shift, Task } from "@/types/o
 import { appointmentsForDay } from "./appointments";
 import { isOnShift } from "./schedules";
 import { isTaskOverdue } from "./tasks";
+import { localDayKey } from "./time";
 
 export type OpsTimelineRow = {
   kind: "appointment" | "visit" | "job" | "task";
@@ -50,7 +51,7 @@ export function overviewRollups(
   data: { appointments: Appointment[]; tasks: Task[]; shifts: Shift[]; visits: FieldVisit[]; jobs: ServiceJob[] },
   now: Date,
 ): { todayAppointments: number; overdueTasks: number; onShiftNow: number; activeVisits: number; openJobs: number } {
-  const today = now.toISOString().slice(0, 10);
+  const today = localDayKey(now);
   return {
     todayAppointments: appointmentsForDay(data.appointments, today).filter((a) => a.status === "scheduled").length,
     overdueTasks: data.tasks.filter((t) => isTaskOverdue(t, now)).length,

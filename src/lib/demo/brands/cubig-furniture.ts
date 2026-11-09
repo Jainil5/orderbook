@@ -1,10 +1,13 @@
 import type { DemoBrandPack } from "@/lib/demo/brands/types";
 import { DEMO_FURNITURE_IMAGES } from "@/lib/demo/product-image-urls";
+import { localDayKey } from "@/lib/manager/time";
 import type { StaffMember } from "@/types/manager";
 
 const BRAND_ID = "demo-cubig-furniture";
 
-const opsToday = new Date().toISOString().slice(0, 10);
+// Fixture shift dates are keyed by the server's local day so they line up with
+// the local day keys the manager grid uses.
+const opsToday = localDayKey(new Date());
 
 export const CUBIG_FURNITURE_DEMO: DemoBrandPack = {
   brand: {

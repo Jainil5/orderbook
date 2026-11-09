@@ -3,9 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { getDemoBrandPack } from "@/lib/demo/brands";
 import { appendDemoAudit, updateDemoMutableBucket } from "@/lib/demo/mutable-store";
+import { listDemoStaff } from "@/lib/demo/staff-data";
 import { validateStaffInput, type StaffInput } from "@/lib/manager/staff";
 import { loadLiveWorkspace } from "@/lib/auth/actions";
 import { canEditBrandSettings } from "@/lib/security/authorization";
+import type { DemoBrandCode } from "@/lib/workspace/constants";
 import type { StaffAvailability, StaffMember } from "@/types/manager";
 
 const LIVE_UNAVAILABLE = {
@@ -29,6 +31,17 @@ function revalidateManager() {
   revalidatePath("/manager");
   revalidatePath("/manager/staff");
 }
+
+/**
+ * Existence guard for the override writers: a stale row in another tab would
+ * otherwise write an override for an id that no longer resolves and report a
+ * dishonest success.
+ */
+async function hasStaffRecord(code: DemoBrandCode, id: string) {
+  return (await listDemoStaff(code)).some((member) => member.id === id);
+}
+
+const STAFF_NOT_FOUND = { ok: false as const, message: "Staff member not found." };
 
 export async function createStaffAction(input: StaffInput) {
   const live = await loadLiveWorkspace();
@@ -77,6 +90,7 @@ export async function updateStaffAction(id: string, input: StaffInput) {
   const parsed = validateStaffInput(input);
   if (!parsed.ok) return parsed;
   const code = await resolveDemoBrandCode();
+  if (!(await hasStaffRecord(code, id))) return STAFF_NOT_FOUND;
   await updateDemoMutableBucket(code, (bucket) => ({
     ...bucket,
     staffOverrides: {
@@ -103,6 +117,7 @@ export async function setStaffAvailabilityAction(
     return LIVE_UNAVAILABLE;
   }
   const code = await resolveDemoBrandCode();
+  if (!(await hasStaffRecord(code, id))) return STAFF_NOT_FOUND;
   await updateDemoMutableBucket(code, (bucket) => ({
     ...bucket,
     staffOverrides: {
@@ -126,6 +141,7 @@ export async function setStaffStatusAction(id: string, status: "active" | "inact
     return LIVE_UNAVAILABLE;
   }
   const code = await resolveDemoBrandCode();
+  if (!(await hasStaffRecord(code, id))) return STAFF_NOT_FOUND;
   await updateDemoMutableBucket(code, (bucket) => ({
     ...bucket,
     staffOverrides: {

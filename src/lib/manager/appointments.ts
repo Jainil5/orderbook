@@ -1,4 +1,5 @@
 import type { Appointment, AppointmentStatus } from "@/types/operations";
+import { localDayKey } from "./time";
 
 export const APPOINTMENT_STATUS_LABELS: Record<AppointmentStatus, string> = {
   scheduled: "Scheduled",
@@ -58,8 +59,9 @@ export function validateAppointmentInput(
 }
 
 export function appointmentsForDay(list: Appointment[], day: string): Appointment[] {
+  // `day` is a local day key (see `localDayKey`); stored starts are UTC ISO.
   return list
-    .filter((a) => a.startsAt.slice(0, 10) === day)
+    .filter((a) => localDayKey(new Date(a.startsAt)) === day)
     .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
 }
 
@@ -67,11 +69,11 @@ export function groupAppointments(
   list: Appointment[],
   now: Date,
 ): { today: Appointment[]; upcoming: Appointment[]; past: Appointment[] } {
-  const today = now.toISOString().slice(0, 10);
+  const today = localDayKey(now);
   const sorted = [...list].sort((a, b) => a.startsAt.localeCompare(b.startsAt));
   return {
-    today: sorted.filter((a) => a.startsAt.slice(0, 10) === today),
-    upcoming: sorted.filter((a) => a.startsAt.slice(0, 10) > today),
-    past: sorted.filter((a) => a.startsAt.slice(0, 10) < today),
+    today: sorted.filter((a) => localDayKey(new Date(a.startsAt)) === today),
+    upcoming: sorted.filter((a) => localDayKey(new Date(a.startsAt)) > today),
+    past: sorted.filter((a) => localDayKey(new Date(a.startsAt)) < today),
   };
 }

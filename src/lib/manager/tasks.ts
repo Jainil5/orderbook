@@ -1,4 +1,5 @@
 import type { Task, TaskPriority, TaskStatus } from "@/types/operations";
+import { dueAtMs } from "./time";
 
 export const TASK_PRIORITIES: TaskPriority[] = ["low", "medium", "high"];
 
@@ -62,5 +63,6 @@ export function validateTaskInput(
 }
 
 export function isTaskOverdue(task: Task, now: Date): boolean {
-  return task.status !== "done" && task.dueAt !== null && new Date(task.dueAt).getTime() < now.getTime();
+  if (task.status === "done" || task.dueAt === null) return false;
+  return dueAtMs(task.dueAt) < now.getTime();
 }

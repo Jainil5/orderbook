@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { isTaskOverdue, TASK_PRIORITIES, TASK_PRIORITY_LABELS, TASK_STATUS_LABELS } from "@/lib/manager/tasks";
+import { toLocalInputValue } from "@/lib/manager/time";
 import { useMounted } from "@/lib/use-mounted";
 import { deleteTaskAction, saveTaskAction, setTaskStatusAction } from "@/services/manager-ops-actions";
 import type { Task, TaskStatus } from "@/types/operations";
@@ -16,13 +17,6 @@ const PRIORITY_STYLES: Record<Task["priority"], string> = {
   medium: "bg-[#fdf1e3] text-[#b45309]",
   low: "bg-[var(--ob-surface-muted)] text-[var(--ob-text-muted)]",
 };
-
-// datetime-local inputs need LOCAL time; stored timestamps are ISO/UTC.
-function toLocalInput(iso: string): string {
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
 
 export function TasksManager({
   tasks,
@@ -74,7 +68,7 @@ export function TasksManager({
     setAssignee(task?.assigneeStaffId ?? "");
     setCustomerId(task?.customerId ?? "");
     setPriority(task?.priority ?? "medium");
-    setDueAt(task?.dueAt ? toLocalInput(task.dueAt) : "");
+    setDueAt(task?.dueAt ? toLocalInputValue(task.dueAt) : "");
     setError(null);
   }
 

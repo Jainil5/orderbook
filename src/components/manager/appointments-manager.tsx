@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { APPOINTMENT_STATUS_LABELS, groupAppointments } from "@/lib/manager/appointments";
+import { toLocalInputValue } from "@/lib/manager/time";
 import { useMounted } from "@/lib/use-mounted";
 import {
   deleteAppointmentAction,
@@ -13,13 +14,6 @@ import {
 import type { Appointment } from "@/types/operations";
 
 type Option = { id: string; name: string };
-
-// datetime-local inputs need LOCAL time; stored timestamps are ISO/UTC.
-function toLocalInput(iso: string): string {
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
 
 export function AppointmentsManager({
   appointments,
@@ -72,8 +66,8 @@ export function AppointmentsManager({
     setTitle(appointment?.title ?? "");
     setCustomerId(appointment?.customerId ?? "");
     setStaffIds(appointment?.staffIds ?? []);
-    setStartsAt(appointment ? toLocalInput(appointment.startsAt) : "");
-    setEndsAt(appointment ? toLocalInput(appointment.endsAt) : "");
+    setStartsAt(appointment ? toLocalInputValue(appointment.startsAt) : "");
+    setEndsAt(appointment ? toLocalInputValue(appointment.endsAt) : "");
     setLocation(appointment?.location ?? "");
     setServiceId(appointment?.serviceId ?? "");
     setNotes(appointment?.notes ?? "");

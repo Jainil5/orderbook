@@ -1,4 +1,5 @@
 import type { Shift } from "@/types/operations";
+import { localDayKey, localTimeKey } from "./time";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -38,18 +39,19 @@ export function validateShiftInput(
 }
 
 export function isOnShift(shift: Shift, now: Date): boolean {
-  const iso = now.toISOString();
-  if (shift.date !== iso.slice(0, 10)) return false;
-  const hm = iso.slice(11, 16);
+  // Shift windows are wall-clock times in the manager's zone, so the day and
+  // the HH:mm comparison both have to come from local getters.
+  if (shift.date !== localDayKey(now)) return false;
+  const hm = localTimeKey(now);
   return shift.start <= hm && hm < shift.end;
 }
 
 export function weekDays(anchor: Date): string[] {
-  const d = new Date(Date.UTC(anchor.getUTCFullYear(), anchor.getUTCMonth(), anchor.getUTCDate()));
-  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+  const monday = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate());
+  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
   return Array.from({ length: 7 }, (_, i) => {
-    const day = new Date(d);
-    day.setUTCDate(d.getUTCDate() + i);
-    return day.toISOString().slice(0, 10);
+    const day = new Date(monday);
+    day.setDate(monday.getDate() + i);
+    return localDayKey(day);
   });
 }

@@ -98,6 +98,20 @@ async function appendOps(code: DemoBrandCode, key: OpsListKey, entity: { id: str
   );
 }
 
+async function loadMergedOps(code: DemoBrandCode) {
+  return mergeOperations(getDemoBrandPack(code), await readDemoMutableBucket(code));
+}
+
+/**
+ * Existence guard for the tombstone/override writers. Without it a stale row in
+ * one tab wrote `{ deleted: true }` (or an override) for an id that no longer
+ * resolves and the UI reported a dishonest success.
+ */
+async function hasOpsRecord(code: DemoBrandCode, list: OpsListKey, id: string) {
+  const ops = await loadMergedOps(code);
+  return ops[list].some((entity) => entity.id === id);
+}
+
 async function patchOps(
   code: DemoBrandCode,
   key: OpsOverrideKey,
@@ -160,6 +174,8 @@ export async function saveServiceAction(id: string | null, input: ServiceInput) 
 export async function deleteServiceAction(id: string) {
   const guard = await guardOps();
   if (!guard.ok) return guard;
+  if (!(await hasOpsRecord(guard.code, "services", id)))
+    return { ok: false as const, message: "Service not found." };
   await patchOps(guard.code, "serviceOverrides", id, { deleted: true });
   revalidateOps("/manager/services");
   return { ok: true as const };
@@ -168,6 +184,8 @@ export async function deleteServiceAction(id: string) {
 export async function toggleServiceActiveAction(id: string, isActive: boolean) {
   const guard = await guardOps();
   if (!guard.ok) return guard;
+  if (!(await hasOpsRecord(guard.code, "services", id)))
+    return { ok: false as const, message: "Service not found." };
   await patchOps(guard.code, "serviceOverrides", id, { isActive });
   revalidateOps("/manager/services");
   return { ok: true as const };
@@ -197,8 +215,7 @@ export async function saveServiceJobAction(id: string | null, input: ServiceJobI
 export async function advanceServiceJobAction(id: string) {
   const guard = await guardOps();
   if (!guard.ok) return guard;
-  const pack = getDemoBrandPack(guard.code);
-  const ops = mergeOperations(pack, await readDemoMutableBucket(guard.code));
+  const ops = await loadMergedOps(guard.code);
   const job = ops.serviceJobs.find((j) => j.id === id);
   if (!job) return { ok: false as const, message: "Job not found." };
   const error = jobAdvanceError(job);
@@ -211,6 +228,8 @@ export async function advanceServiceJobAction(id: string) {
 export async function deleteServiceJobAction(id: string) {
   const guard = await guardOps();
   if (!guard.ok) return guard;
+  if (!(await hasOpsRecord(guard.code, "serviceJobs", id)))
+    return { ok: false as const, message: "Job not found." };
   await patchOps(guard.code, "serviceJobOverrides", id, { deleted: true });
   revalidateOps("/manager/services");
   return { ok: true as const };
@@ -240,8 +259,7 @@ export async function saveAppointmentAction(id: string | null, input: Appointmen
 export async function setAppointmentStatusAction(id: string, status: "completed" | "cancelled") {
   const guard = await guardOps();
   if (!guard.ok) return guard;
-  const pack = getDemoBrandPack(guard.code);
-  const ops = mergeOperations(pack, await readDemoMutableBucket(guard.code));
+  const ops = await loadMergedOps(guard.code);
   const appointment = ops.appointments.find((a) => a.id === id);
   if (!appointment) return { ok: false as const, message: "Appointment not found." };
   if (appointment.status !== "scheduled") {
@@ -255,6 +273,8 @@ export async function setAppointmentStatusAction(id: string, status: "completed"
 export async function deleteAppointmentAction(id: string) {
   const guard = await guardOps();
   if (!guard.ok) return guard;
+  if (!(await hasOpsRecord(guard.code, "appointments", id)))
+    return { ok: false as const, message: "Appointment not found." };
   await patchOps(guard.code, "appointmentOverrides", id, { deleted: true });
   revalidateOps("/manager/appointments");
   return { ok: true as const };
@@ -287,6 +307,8 @@ export async function setTaskStatusAction(id: string, status: TaskStatus) {
   }
   const guard = await guardOps();
   if (!guard.ok) return guard;
+  if (!(await hasOpsRecord(guard.code, "tasks", id)))
+    return { ok: false as const, message: "Task not found." };
   await patchOps(guard.code, "taskOverrides", id, { status });
   revalidateOps("/manager/tasks");
   return { ok: true as const };
@@ -295,6 +317,8 @@ export async function setTaskStatusAction(id: string, status: TaskStatus) {
 export async function deleteTaskAction(id: string) {
   const guard = await guardOps();
   if (!guard.ok) return guard;
+  if (!(await hasOpsRecord(guard.code, "tasks", id)))
+    return { ok: false as const, message: "Task not found." };
   await patchOps(guard.code, "taskOverrides", id, { deleted: true });
   revalidateOps("/manager/tasks");
   return { ok: true as const };
@@ -319,6 +343,8 @@ export async function saveShiftAction(id: string | null, input: ShiftInput) {
 export async function deleteShiftAction(id: string) {
   const guard = await guardOps();
   if (!guard.ok) return guard;
+  if (!(await hasOpsRecord(guard.code, "shifts", id)))
+    return { ok: false as const, message: "Shift not found." };
   await patchOps(guard.code, "shiftOverrides", id, { deleted: true });
   revalidateOps("/manager/schedules");
   return { ok: true as const };
@@ -351,8 +377,7 @@ export async function saveVisitAction(id: string | null, input: VisitInput) {
 export async function checkInVisitAction(id: string) {
   const guard = await guardOps();
   if (!guard.ok) return guard;
-  const pack = getDemoBrandPack(guard.code);
-  const ops = mergeOperations(pack, await readDemoMutableBucket(guard.code));
+  const ops = await loadMergedOps(guard.code);
   const visit = ops.visits.find((v) => v.id === id);
   if (!visit) return { ok: false as const, message: "Visit not found." };
   const error = visitTransitionError(visit, "check_in");
@@ -368,8 +393,7 @@ export async function checkInVisitAction(id: string) {
 export async function checkOutVisitAction(id: string, report: string) {
   const guard = await guardOps();
   if (!guard.ok) return guard;
-  const pack = getDemoBrandPack(guard.code);
-  const ops = mergeOperations(pack, await readDemoMutableBucket(guard.code));
+  const ops = await loadMergedOps(guard.code);
   const visit = ops.visits.find((v) => v.id === id);
   if (!visit) return { ok: false as const, message: "Visit not found." };
   const error = visitTransitionError(visit, "check_out", report);
@@ -386,6 +410,8 @@ export async function checkOutVisitAction(id: string, report: string) {
 export async function deleteVisitAction(id: string) {
   const guard = await guardOps();
   if (!guard.ok) return guard;
+  if (!(await hasOpsRecord(guard.code, "visits", id)))
+    return { ok: false as const, message: "Visit not found." };
   await patchOps(guard.code, "visitOverrides", id, { deleted: true });
   revalidateOps("/manager/visits");
   return { ok: true as const };

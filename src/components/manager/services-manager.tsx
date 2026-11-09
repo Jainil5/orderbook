@@ -8,6 +8,7 @@ import {
   SERVICE_JOB_STATUS_LABELS,
   nextJobStatus,
 } from "@/lib/manager/services";
+import { toLocalInputValue } from "@/lib/manager/time";
 import {
   advanceServiceJobAction,
   deleteServiceAction,
@@ -20,13 +21,6 @@ import { useMounted } from "@/lib/use-mounted";
 import type { Service, ServiceJob } from "@/types/operations";
 
 type Person = { id: string; name: string };
-
-// datetime-local inputs need LOCAL time; stored timestamps are ISO/UTC.
-function toLocalInput(iso: string): string {
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
 
 export function ServicesManager({
   services,
@@ -93,7 +87,7 @@ export function ServicesManager({
     setJobService(job?.serviceId ?? services[0]?.id ?? "");
     setJobCustomer(job?.customerId ?? customers[0]?.id ?? "");
     setJobStaff(job?.staffIds ?? []);
-    setJobWhen(job?.scheduledAt ? toLocalInput(job.scheduledAt) : "");
+    setJobWhen(job?.scheduledAt ? toLocalInputValue(job.scheduledAt) : "");
     setJobNotes(job?.notes ?? "");
     setError(null);
   }

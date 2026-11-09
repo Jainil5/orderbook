@@ -1,3 +1,7 @@
+// Appointments are bucketed by the manager's local day (₹/IST demo), so the
+// 00:00–05:30 IST window must not fall into the previous UTC day.
+process.env.TZ = "Asia/Kolkata";
+
 import { describe, expect, it } from "vitest";
 import { appointmentsForDay, groupAppointments, validateAppointmentInput } from "./appointments";
 import type { Appointment } from "@/types/operations";
@@ -38,5 +42,27 @@ describe("day helpers", () => {
     expect(g.past.map((a) => a.id)).toEqual(["p"]);
     expect(g.today.map((a) => a.id)).toEqual(["t1", "t2"]);
     expect(g.upcoming.map((a) => a.id)).toEqual(["u"]);
+  });
+});
+
+describe("day helpers on the IST clock", () => {
+  // Stored timestamps are always UTC ISO (the validators normalize them):
+  // 01:00 IST on 8 Nov is 2026-11-07T19:30:00.000Z.
+  const earlyMorning = apt("night", "2026-11-07T19:30:00.000Z");
+  it("appointmentsForDay buckets pre-05:30 bookings into the local day", () => {
+    expect(appointmentsForDay([earlyMorning], "2026-11-08").map((a) => a.id)).toEqual(["night"]);
+    expect(appointmentsForDay([earlyMorning], "2026-11-07")).toEqual([]);
+  });
+  it("groupAppointments treats pre-05:30 bookings as today", () => {
+    const g = groupAppointments([earlyMorning], new Date("2026-11-08T12:00:00+05:30"));
+    expect(g.today.map((a) => a.id)).toEqual(["night"]);
+    expect(g.past).toEqual([]);
+  });
+  it("keeps late-evening bookings out of the next local day", () => {
+    // 23:30 IST on 8 Nov is 2026-11-08T18:00:00.000Z; with `now` at 00:30 IST
+    // on 9 Nov (19:00 UTC on 8 Nov) it must read as yesterday, not today.
+    const g = groupAppointments([apt("late", "2026-11-08T18:00:00.000Z")], new Date("2026-11-09T00:30:00+05:30"));
+    expect(g.today).toEqual([]);
+    expect(g.past.map((a) => a.id)).toEqual(["late"]);
   });
 });
