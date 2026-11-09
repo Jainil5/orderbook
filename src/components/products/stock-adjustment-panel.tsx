@@ -21,9 +21,15 @@ export function StockAdjustmentPanel({
   const [message, setMessage] = useState<string | null>(null);
 
   // Rendered inside the product edit dialog's <form>; must not nest a second
-  // <form> (invalid HTML + React hydration errors), so submit via button.
+  // <form> (invalid HTML) and must not add `required` inputs either — the
+  // browser's constraint validation would then block the parent form's
+  // product save. This panel validates in submit() instead.
   async function submit() {
-    if (busy || !delta.trim() || !reason.trim()) return;
+    if (busy) return;
+    if (!delta.trim() || !reason.trim()) {
+      setMessage("Enter a quantity change and a reason.");
+      return;
+    }
     setBusy(true);
     setMessage(null);
     const result = await recordStockAdjustmentAction({
@@ -55,7 +61,6 @@ export function StockAdjustmentPanel({
               void submit();
             }
           }}
-          required
         />
         <Input
           placeholder="Reason"
@@ -67,7 +72,6 @@ export function StockAdjustmentPanel({
               void submit();
             }
           }}
-          required
         />
         <Button type="button" variant="secondary" loading={busy} onClick={submit}>
           Log adjustment
