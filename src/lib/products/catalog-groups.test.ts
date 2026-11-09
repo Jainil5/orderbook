@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Product } from "@/types/database";
 import {
+  categoryTint,
   groupCategories,
   groupProductsByCategory,
 } from "@/lib/products/catalog-groups";
@@ -80,5 +81,34 @@ describe("groupProductsByCategory", () => {
 
   it("returns no groups for an empty list", () => {
     expect(groupProductsByCategory([])).toEqual([]);
+  });
+});
+
+describe("categoryTint", () => {
+  it("returns the same tint for the same category on every call", () => {
+    expect(categoryTint("Coffee")).toEqual(categoryTint("Coffee"));
+  });
+
+  it("ignores case and surrounding whitespace", () => {
+    expect(categoryTint("  COFFEE ")).toEqual(categoryTint("Coffee"));
+  });
+
+  it("treats blank categories as Uncategorized", () => {
+    expect(categoryTint("")).toEqual(categoryTint("Uncategorized"));
+    expect(categoryTint("   ")).toEqual(categoryTint("Uncategorized"));
+  });
+
+  it("returns a soft background and a distinct readable accent", () => {
+    const tint = categoryTint("Coffee");
+    expect(tint.background).toMatch(/^#[0-9a-f]{6}$/i);
+    expect(tint.accent).toMatch(/^#[0-9a-f]{6}$/i);
+    expect(tint.accent).not.toBe(tint.background);
+  });
+
+  it("spreads typical catalog categories across more than one tint", () => {
+    const tints = ["Coffee", "Food", "Beverages", "Furniture"].map(
+      (c) => categoryTint(c).background,
+    );
+    expect(new Set(tints).size).toBeGreaterThan(1);
   });
 });

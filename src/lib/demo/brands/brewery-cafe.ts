@@ -1,5 +1,15 @@
 import type { DemoBrandPack } from "@/lib/demo/brands/types";
 import { DEMO_CAFE_IMAGES } from "@/lib/demo/product-image-urls";
+import { localDayKey } from "@/lib/manager/time";
+import type { StaffMember } from "@/types/manager";
+
+// Fixture shift dates are keyed by the server's local day so they line up with
+// the local day keys the manager grid uses.
+const opsToday = localDayKey(new Date());
+const tastingStart = new Date();
+tastingStart.setHours(16, 0, 0, 0);
+const tastingEnd = new Date();
+tastingEnd.setHours(17, 0, 0, 0);
 
 export const BREWERY_CAFE_DEMO: DemoBrandPack = {
   brand: {
@@ -72,25 +82,12 @@ export const BREWERY_CAFE_DEMO: DemoBrandPack = {
       image_url: DEMO_CAFE_IMAGES.granola,
     },
     {
-      id: "p5",
-      brand_id: "demo-brewery-cafe",
-      name: "House IPA",
-      description: "Citrus hop, 5.8% ABV",
-      sku: "BV-DR-001",
-      category: "Beverages",
-      price: 450,
-      cost_price: 120,
-      unit: "pint",
-      is_active: true,
-      image_url: DEMO_CAFE_IMAGES.beer,
-    },
-    {
       id: "p6",
       brand_id: "demo-brewery-cafe",
       name: "Seasonal Pastry",
       description: "Ask barista for today’s bake",
       sku: "BV-MS-001",
-      category: null,
+      category: "Desserts",
       price: 150,
       cost_price: 40,
       unit: "piece",
@@ -189,6 +186,18 @@ export const BREWERY_CAFE_DEMO: DemoBrandPack = {
       is_active: true,
       image_url: DEMO_CAFE_IMAGES.hotChocolate,
     },
+    { id: "p14", brand_id: "demo-brewery-cafe", name: "Mango Smoothie", description: "Alphonso pulp, yogurt, a little honey", sku: "BV-BV-002", category: "Beverages", price: 270, cost_price: 80, unit: "glass", is_active: true, image_url: DEMO_CAFE_IMAGES.mangoSmoothie },
+    { id: "p15", brand_id: "demo-brewery-cafe", name: "Fresh Lime Soda", description: "Sweet, salted or mixed — your call", sku: "BV-BV-003", category: "Beverages", price: 180, cost_price: 40, unit: "glass", is_active: true, image_url: DEMO_CAFE_IMAGES.limeSoda },
+    { id: "p16", brand_id: "demo-brewery-cafe", name: "Bombay Grilled Sandwich", description: "Chutney, cheese, masala toast", sku: "BV-FD-003", category: "Food", price: 260, cost_price: 85, unit: "plate", is_active: true, image_url: DEMO_CAFE_IMAGES.bombaySandwich },
+    { id: "p17", brand_id: "demo-brewery-cafe", name: "Pesto Penne Pasta", description: "Basil pesto, parmesan, cherry tomatoes", sku: "BV-FD-004", category: "Food", price: 340, cost_price: 110, unit: "plate", is_active: true, image_url: DEMO_CAFE_IMAGES.pestoPasta },
+    { id: "p18", brand_id: "demo-brewery-cafe", name: "Peri Peri Fries", description: "Crisp fries, peri peri dust", sku: "BV-SD-001", category: "Sides & Dips", price: 180, cost_price: 50, unit: "plate", is_active: true, image_url: DEMO_CAFE_IMAGES.periPeriFries },
+    { id: "p19", brand_id: "demo-brewery-cafe", name: "Cheesy Garlic Bread", description: "Toasted, herbed, pull-apart", sku: "BV-SD-002", category: "Sides & Dips", price: 220, cost_price: 65, unit: "plate", is_active: true, image_url: DEMO_CAFE_IMAGES.garlicBread },
+    { id: "p20", brand_id: "demo-brewery-cafe", name: "Nachos & Salsa", description: "Warm tortilla chips, house salsa", sku: "BV-SD-003", category: "Sides & Dips", price: 260, cost_price: 75, unit: "plate", is_active: true, image_url: DEMO_CAFE_IMAGES.nachos },
+    { id: "p21", brand_id: "demo-brewery-cafe", name: "Hummus & Pita", description: "Olive oil, za'atar, warm pita", sku: "BV-SD-004", category: "Sides & Dips", price: 240, cost_price: 70, unit: "plate", is_active: true, image_url: DEMO_CAFE_IMAGES.hummusPita },
+    { id: "p22", brand_id: "demo-brewery-cafe", name: "Garlic Aioli", description: "House dip for the fries", sku: "BV-SD-005", category: "Sides & Dips", price: 60, cost_price: 15, unit: "dip", is_active: true, image_url: DEMO_CAFE_IMAGES.garlicAioli },
+    { id: "p23", brand_id: "demo-brewery-cafe", name: "Chipotle Mayo", description: "Smoky heat, small bowl", sku: "BV-SD-006", category: "Sides & Dips", price: 70, cost_price: 18, unit: "dip", is_active: true, image_url: DEMO_CAFE_IMAGES.chipotleMayo },
+    { id: "p24", brand_id: "demo-brewery-cafe", name: "Chocolate Brownie", description: "Fudgy centre, served warm", sku: "BV-DS-001", category: "Desserts", price: 180, cost_price: 50, unit: "piece", is_active: true, image_url: DEMO_CAFE_IMAGES.brownie },
+    { id: "p25", brand_id: "demo-brewery-cafe", name: "Basque Cheesecake", description: "Burnt top, molten middle", sku: "BV-DS-002", category: "Desserts", price: 260, cost_price: 85, unit: "slice", is_active: true, image_url: DEMO_CAFE_IMAGES.cheesecake },
   ],
   customers: [
     {
@@ -268,16 +277,8 @@ export const BREWERY_CAFE_DEMO: DemoBrandPack = {
       line_discount: 68,
       line_total: 252,
     },
-    {
-      id: "oi3",
-      order_id: "o2",
-      product_id: "p5",
-      product_name_snapshot: "House IPA",
-      quantity: 1,
-      unit_price: 450,
-      line_discount: 0,
-      line_total: 450,
-    },
+    { id: "oi3", order_id: "o2", product_id: "p14", product_name_snapshot: "Mango Smoothie", quantity: 1, unit_price: 270, line_discount: 0, line_total: 270 },
+    { id: "oi4", order_id: "o2", product_id: "p18", product_name_snapshot: "Peri Peri Fries", quantity: 1, unit_price: 180, line_discount: 0, line_total: 180 },
   ],
   offers: [
     {
@@ -335,6 +336,72 @@ export const BREWERY_CAFE_DEMO: DemoBrandPack = {
       created_at: new Date(Date.now() - 1000 * 60 * 60 * 28).toISOString(),
     },
   ],
+  staff: [
+    {
+      id: "bc-staff-1",
+      brand_id: "demo-brewery-cafe",
+      name: "Asha Menon",
+      role: "manager",
+      phone: "+91 98000 11001",
+      email: null,
+      status: "active",
+      availability: "available",
+      created_at: "2026-10-01T09:00:00.000Z",
+    },
+    {
+      id: "bc-staff-2",
+      brand_id: "demo-brewery-cafe",
+      name: "Rohan Pillai",
+      role: "cashier",
+      phone: "+91 98000 11002",
+      email: null,
+      status: "active",
+      availability: "busy",
+      created_at: "2026-10-01T09:00:00.000Z",
+    },
+    {
+      id: "bc-staff-3",
+      brand_id: "demo-brewery-cafe",
+      name: "Meera Nair",
+      role: "kitchen",
+      phone: null,
+      email: null,
+      status: "active",
+      availability: "available",
+      created_at: "2026-10-05T09:00:00.000Z",
+    },
+    {
+      id: "bc-staff-4",
+      brand_id: "demo-brewery-cafe",
+      name: "Devan Kurup",
+      role: "kitchen",
+      phone: null,
+      email: null,
+      status: "active",
+      availability: "off",
+      created_at: "2026-10-05T09:00:00.000Z",
+    },
+  ] satisfies StaffMember[],
+  services: [
+    { id: "bc-svc-1", brand_id: "demo-brewery-cafe", name: "Catering Coffee Bar", description: "Pop-up espresso bar for events", durationMinutes: 120, price: 5000, isActive: true },
+  ],
+  serviceJobs: [
+    { id: "bc-job-1", brand_id: "demo-brewery-cafe", serviceId: "bc-svc-1", customerId: "c2", staffIds: ["bc-staff-1", "bc-staff-2"], status: "scheduled", scheduledAt: new Date(Date.now() + 2 * 86400000).toISOString(), notes: "Corporate tasting for 20 guests" },
+  ],
+  appointments: [
+    { id: "bc-apt-1", brand_id: "demo-brewery-cafe", title: "Coffee tasting — Ananya", customerId: "c2", staffIds: ["bc-staff-1"], startsAt: tastingStart.toISOString(), endsAt: tastingEnd.toISOString(), location: "Cafe counter", serviceId: null, status: "scheduled", notes: "Single-origin flight" },
+  ],
+  visits: [
+    { id: "bc-visit-1", brand_id: "demo-brewery-cafe", customerId: "c3", staffId: "bc-staff-1", purpose: "Supplier meeting — next roast lot", status: "planned", checkInAt: null, checkOutAt: null, report: null },
+  ],
+  shifts: [
+    { id: "bc-shift-1", brand_id: "demo-brewery-cafe", staffId: "bc-staff-2", date: opsToday, start: "08:00", end: "16:00", note: "Bar" },
+    { id: "bc-shift-2", brand_id: "demo-brewery-cafe", staffId: "bc-staff-3", date: opsToday, start: "10:00", end: "18:00", note: "Kitchen" },
+  ],
+  tasks: [
+    { id: "bc-task-1", brand_id: "demo-brewery-cafe", title: "Restock oat milk", description: "Check fridge count before evening rush", assigneeStaffId: "bc-staff-3", customerId: null, priority: "high", dueAt: new Date(Date.now() - 86400000).toISOString(), status: "open" },
+    { id: "bc-task-2", brand_id: "demo-brewery-cafe", title: "Deep clean espresso machine", description: "", assigneeStaffId: "bc-staff-2", customerId: null, priority: "medium", dueAt: new Date(Date.now() + 86400000).toISOString(), status: "open" },
+  ],
   analytics: {
     grossSales: 1115,
     netSales: 1047.5,
@@ -347,7 +414,8 @@ export const BREWERY_CAFE_DEMO: DemoBrandPack = {
     salesByCategory: [
       { category: "Coffee", total: 360 },
       { category: "Food", total: 252 },
-      { category: "Beverages", total: 450 },
+      { category: "Beverages", total: 270 },
+      { category: "Sides & Dips", total: 180 },
     ],
     salesOverTime: [
       { date: "Mon", total: 320, orders: 0 },
@@ -360,7 +428,7 @@ export const BREWERY_CAFE_DEMO: DemoBrandPack = {
     ],
     topProducts: [
       { name: "Flat White", qty: 24 },
-      { name: "House IPA", qty: 18 },
+      { name: "Mango Smoothie", qty: 18 },
       { name: "Avocado Toast", qty: 15 },
       { name: "Cold Brew", qty: 11 },
       { name: "Banana Bread", qty: 9 },

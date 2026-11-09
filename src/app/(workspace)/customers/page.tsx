@@ -62,7 +62,7 @@ export default async function CustomersPage({
         </div>
       </div>
       {error ? (
-        <p className="mb-4 text-sm text-[var(--ob-danger)]">{error}</p>
+        <p role="alert" className="mb-4 text-sm text-[var(--ob-danger)]">{error}</p>
       ) : null}
       {customers.length === 0 ? (
         <EmptyState

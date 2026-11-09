@@ -20,8 +20,16 @@ export function StockAdjustmentPanel({
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  // Rendered inside the product edit dialog's <form>; must not nest a second
+  // <form> (invalid HTML) and must not add `required` inputs either — the
+  // browser's constraint validation would then block the parent form's
+  // product save. This panel validates in submit() instead.
+  async function submit() {
+    if (busy) return;
+    if (!delta.trim() || !reason.trim()) {
+      setMessage("Enter a quantity change and a reason.");
+      return;
+    }
     setBusy(true);
     setMessage(null);
     const result = await recordStockAdjustmentAction({
@@ -42,25 +50,35 @@ export function StockAdjustmentPanel({
   return (
     <div className="mt-4 border-t border-[var(--ob-border)] pt-4">
       <h3 className="text-sm font-semibold">Stock adjustment</h3>
-      <form onSubmit={onSubmit} className="mt-2 grid gap-2 sm:grid-cols-3">
+      <div className="mt-2 grid gap-2 sm:grid-cols-3">
         <Input
           placeholder="Qty change (+ receive, − sale)"
           value={delta}
           onChange={(e) => setDelta(e.target.value)}
-          required
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              void submit();
+            }
+          }}
         />
         <Input
           placeholder="Reason"
           value={reason}
           onChange={(e) => setReason(e.target.value)}
-          required
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              void submit();
+            }
+          }}
         />
-        <Button type="submit" variant="secondary" loading={busy}>
+        <Button type="button" variant="secondary" loading={busy} onClick={submit}>
           Log adjustment
         </Button>
-      </form>
+      </div>
       {message ? (
-        <p className="mt-2 text-xs text-[var(--ob-danger)]">{message}</p>
+        <p role="alert" className="mt-2 text-xs text-[var(--ob-danger)]">{message}</p>
       ) : null}
       {recent.length ? (
         <ul className="mt-3 space-y-1 text-xs text-[var(--ob-text-muted)]">

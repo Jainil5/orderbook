@@ -8,6 +8,15 @@ import type {
   Payment,
   Product,
 } from "@/types/database";
+import type { StaffMember } from "@/types/manager";
+import type {
+  Appointment,
+  FieldVisit,
+  Service,
+  ServiceJob,
+  Shift,
+  Task,
+} from "@/types/operations";
 
 export type DemoAnalytics = {
   grossSales: number;
@@ -33,6 +42,13 @@ export type DemoBrandPack = {
   orderItems: OrderItem[];
   offers: Offer[];
   payments: Payment[];
+  staff: StaffMember[];
+  services: Service[];
+  serviceJobs: ServiceJob[];
+  appointments: Appointment[];
+  visits: FieldVisit[];
+  shifts: Shift[];
+  tasks: Task[];
   analytics: DemoAnalytics;
   /** Prefix for demo order numbers, e.g. BC or CF */
   orderNumberPrefix: string;

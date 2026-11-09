@@ -55,7 +55,7 @@ export default async function OrdersPage() {
       }
     >
       {error ? (
-        <p className="mb-4 text-sm text-[var(--ob-danger)]">{error}</p>
+        <p role="alert" className="mb-4 text-sm text-[var(--ob-danger)]">{error}</p>
       ) : null}
       {itemsRes.error ? (
         <p className="mb-4 text-sm text-[var(--ob-warning)]">{itemsRes.error}</p>

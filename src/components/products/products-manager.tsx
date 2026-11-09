@@ -134,6 +134,7 @@ export function ProductsManager({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm());
   const [formError, setFormError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [rowBusy, setRowBusy] = useState<string | null>(null);
 
@@ -188,76 +189,36 @@ export function ProductsManager({
     e.preventDefault();
     if (!canEdit) return;
     setSaving(true);
+    // Clear both banners: a stale row error must not sit next to a later
+    // successful save (and vice versa for the toggle below).
     setFormError(null);
+    setActionError(null);
     const input = formToInput(form);
 
     if (mode === "demo") {
-      if (editingId) {
+      // Persist through the demo cookie bucket so Billing/catalog see the
+      // change immediately and across reloads; local state keeps the list
+      // in sync without a full refresh.
+      try {
+        const result = await saveProductAction(editingId, input);
+        if (!result.ok) {
+          setFormError(result.error);
+          return;
+        }
+        const product = result.product;
         setProducts((prev) =>
-          prev.map((p) =>
-            p.id === editingId
-              ? ({
-                  ...p,
-                  ...input,
-                  price: Number(input.price),
-                  cost_price:
-                    input.cost_price != null ? Number(input.cost_price) : null,
-                  default_discount_percent:
-                    input.default_discount_percent != null
-                      ? Number(input.default_discount_percent)
-                      : null,
-                  image_url: input.image_url ?? null,
-                  stock_qty:
-                    input.stock_qty != null ? Number(input.stock_qty) : null,
-                  low_stock_threshold:
-                    input.low_stock_threshold != null
-                      ? Number(input.low_stock_threshold)
-                      : null,
-                  wholesale_price:
-                    input.wholesale_price != null
-                      ? Number(input.wholesale_price)
-                      : null,
-                  modifiers_json: input.modifiers_json ?? null,
-                } as Product)
-              : p,
-          ),
+          editingId
+            ? prev.map((p) => (p.id === editingId ? product : p))
+            : [...prev, product],
         );
-      } else {
-        setProducts((prev) => [
-          ...prev,
-          {
-            id: `local-${Date.now()}`,
-            brand_id: "demo",
-            name: input.name,
-            description: input.description ?? null,
-            sku: input.sku ?? null,
-            category: input.category ?? null,
-            price: Number(input.price),
-            cost_price:
-              input.cost_price != null ? Number(input.cost_price) : null,
-            unit: input.unit ?? null,
-            is_active: input.is_active !== false,
-            default_discount_percent:
-              input.default_discount_percent != null
-                ? Number(input.default_discount_percent)
-                : null,
-            image_url: input.image_url ?? null,
-            stock_qty:
-              input.stock_qty != null ? Number(input.stock_qty) : null,
-            low_stock_threshold:
-              input.low_stock_threshold != null
-                ? Number(input.low_stock_threshold)
-                : null,
-            wholesale_price:
-              input.wholesale_price != null
-                ? Number(input.wholesale_price)
-                : null,
-            modifiers_json: input.modifiers_json ?? null,
-          },
-        ]);
+        closeDialog();
+      } catch {
+        // Network / 500 / server-action failure: surface it the same way as a
+        // rejected result so the spinner never sticks.
+        setFormError("Could not save. Try again.");
+      } finally {
+        setSaving(false);
       }
-      setSaving(false);
-      closeDialog();
       return;
     }
 
@@ -275,14 +236,26 @@ export function ProductsManager({
     if (!canEdit) return;
     const next = !product.is_active;
     setRowBusy(product.id);
+    setActionError(null);
+    setFormError(null);
 
     if (mode === "demo") {
-      setProducts((prev) =>
-        prev.map((p) =>
-          p.id === product.id ? { ...p, is_active: next } : p,
-        ),
-      );
-      setRowBusy(null);
+      try {
+        const result = await toggleProductActiveAction(product.id, next);
+        if (result.ok) {
+          setProducts((prev) =>
+            prev.map((p) =>
+              p.id === product.id ? { ...p, is_active: next } : p,
+            ),
+          );
+        } else {
+          setActionError(result.error);
+        }
+      } catch {
+        setActionError("Could not save. Try again.");
+      } finally {
+        setRowBusy(null);
+      }
       return;
     }
 
@@ -294,7 +267,11 @@ export function ProductsManager({
   return (
     <div className="space-y-4">
       {loadError ? (
-        <p className="text-sm text-[var(--ob-danger)]">{loadError}</p>
+        <p role="alert" className="text-sm text-[var(--ob-danger)]">{loadError}</p>
+      ) : null}
+
+      {actionError ? (
+        <p role="alert" className="text-sm text-[var(--ob-danger)]">{actionError}</p>
       ) : null}
 
       {!canEdit && mode === "live" ? (
@@ -521,7 +498,9 @@ export function ProductsManager({
           </h2>
           <p className="mt-1 text-sm text-[var(--ob-text-muted)]">
             Changes apply to Billing and new orders.
-            {mode === "demo" ? " Demo edits stay in this session only." : ""}
+            {mode === "demo"
+              ? " Demo edits persist in this browser (cookie-backed demo data)."
+              : ""}
           </p>
 
           <div className="mt-5 space-y-3">

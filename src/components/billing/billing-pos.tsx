@@ -45,6 +45,7 @@ import { buildBillDocumentFromCheckout } from "@/lib/documents/build-bill-docume
 import type { BillDocument } from "@/lib/documents/types";
 import {
   categoryLabel,
+  categoryTint,
   groupCategories,
   groupProductsByCategory,
 } from "@/lib/products/catalog-groups";
@@ -492,7 +493,12 @@ export function BillingPos({
                 />
               ) : null}
               <div className="min-w-0 flex-1">
-                <p className="font-medium">{line.product.name}</p>
+                <div className="flex items-start justify-between gap-2">
+                  <p className="min-w-0 font-medium">{line.product.name}</p>
+                  <p className="shrink-0 font-medium">
+                    {formatMoney(lineTotal(line, priceTier), currencyCode)}
+                  </p>
+                </div>
                 {line.modifierIds.length ? (
                   <p className="text-xs text-[var(--ob-text-muted)]">
                     {parseProductModifiers(line.product)
@@ -501,65 +507,66 @@ export function BillingPos({
                       .join(", ")}
                   </p>
                 ) : null}
-                <ProductPrice
-                  product={pricedProductForCartLine(
-                    line.product,
-                    priceTier,
-                    line.modifierIds,
-                  )}
-                  currencyCode={currencyCode}
-                  size="sm"
-                  className="mt-0.5"
-                />
-                <p className="text-xs text-[var(--ob-text-muted)]">
-                  {line.product.unit ?? "unit"} · qty {line.quantity}
-                </p>
+                <div className="mt-1 flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <ProductPrice
+                      product={pricedProductForCartLine(
+                        line.product,
+                        priceTier,
+                        line.modifierIds,
+                      )}
+                      currencyCode={currencyCode}
+                      size="sm"
+                    />
+                    <p className="text-xs text-[var(--ob-text-muted)]">
+                      {line.product.unit ?? "unit"} · qty {line.quantity}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <button
+                      type="button"
+                      className="ob-touch-target flex h-11 w-11 shrink-0 items-center justify-center rounded border border-[var(--ob-border)] hover:bg-[var(--ob-surface-muted)]"
+                      onClick={() =>
+                        setQty(
+                          line.product.id,
+                          line.quantity - 1,
+                          line.modifierIds,
+                        )
+                      }
+                      aria-label="Decrease quantity"
+                    >
+                      −
+                    </button>
+                    <input
+                      className="ob-input py-2 text-center"
+                      style={{ width: "3.5rem" }}
+                      value={line.quantity}
+                      onChange={(e) =>
+                        setQty(
+                          line.product.id,
+                          Number(e.target.value) || 0,
+                          line.modifierIds,
+                        )
+                      }
+                      aria-label="Quantity"
+                    />
+                    <button
+                      type="button"
+                      className="ob-touch-target flex h-11 w-11 shrink-0 items-center justify-center rounded border border-[var(--ob-border)] hover:bg-[var(--ob-surface-muted)]"
+                      onClick={() =>
+                        setQty(
+                          line.product.id,
+                          line.quantity + 1,
+                          line.modifierIds,
+                        )
+                      }
+                      aria-label="Increase quantity"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  className="ob-touch-target flex h-11 w-11 items-center justify-center rounded border border-[var(--ob-border)] hover:bg-[var(--ob-surface-muted)]"
-                  onClick={() =>
-                    setQty(
-                      line.product.id,
-                      line.quantity - 1,
-                      line.modifierIds,
-                    )
-                  }
-                  aria-label="Decrease quantity"
-                >
-                  −
-                </button>
-                <input
-                  className="w-14 ob-input py-2 text-center"
-                  value={line.quantity}
-                  onChange={(e) =>
-                    setQty(
-                      line.product.id,
-                      Number(e.target.value) || 0,
-                      line.modifierIds,
-                    )
-                  }
-                  aria-label="Quantity"
-                />
-                <button
-                  type="button"
-                  className="ob-touch-target flex h-11 w-11 items-center justify-center rounded border border-[var(--ob-border)] hover:bg-[var(--ob-surface-muted)]"
-                  onClick={() =>
-                    setQty(
-                      line.product.id,
-                      line.quantity + 1,
-                      line.modifierIds,
-                    )
-                  }
-                  aria-label="Increase quantity"
-                >
-                  +
-                </button>
-              </div>
-              <p className="w-20 text-right font-medium">
-                {formatMoney(lineTotal(line, priceTier), currencyCode)}
-              </p>
             </div>
           ))
         )}
@@ -754,7 +761,7 @@ export function BillingPos({
             ) : null}
           </div>
           {!parsedOrderDiscount.ok ? (
-            <p className="mt-2 text-xs text-[var(--ob-danger)]">
+            <p role="alert" className="mt-2 text-xs text-[var(--ob-danger)]">
               {parsedOrderDiscount.message}
             </p>
           ) : null}
@@ -833,7 +840,7 @@ export function BillingPos({
           </p>
         ) : null}
         <Button
-          className="w-full"
+          className="ob-touch-target w-full"
           onClick={() => handleSubmit(savingAsQuote)}
           loading={submitting}
           disabled={!cart.length}
@@ -875,9 +882,11 @@ export function BillingPos({
   };
 
   const gridClass = "ob-stagger grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4";
+  const allItemsGridClass =
+    "ob-stagger grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6";
 
   const catalogSection = (
-      <section className="min-w-0 flex-1 space-y-4 lg:w-[68%]">
+      <section className="min-w-0 flex-1 space-y-4 lg:w-[68%] xl:w-[72%]">
         <Input
           placeholder={copy.searchPlaceholder}
           value={search}
@@ -891,31 +900,50 @@ export function BillingPos({
               type="button"
               onClick={() => setCategory(cat)}
               className={cn(
-                "rounded-full border px-3 py-1 text-sm transition",
+                "flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition",
                 category === cat
                   ? "border-[var(--ob-primary)] bg-[var(--ob-primary)] text-white"
                   : "border-[var(--ob-border)] bg-[var(--ob-surface)] hover:bg-[var(--ob-surface-muted)]",
               )}
             >
+              {cat !== "All" ? (
+                <span
+                  aria-hidden
+                  className="h-2 w-2 rounded-full"
+                  style={{ backgroundColor: categoryTint(cat).accent }}
+                />
+              ) : null}
               {cat}
             </button>
           ))}
         </div>
         {category === "All" && !search.trim() ? (
           <div className="space-y-5">
-            {groupProductsByCategory(filtered).map((group) => (
-              <section key={group.category}>
-                <div className="mb-2 flex items-baseline gap-2">
-                  <h3 className="text-sm font-semibold">{group.category}</h3>
-                  <span className="text-xs text-[var(--ob-text-muted)]">
-                    {group.products.length}
-                  </span>
-                </div>
-                <div className={gridClass}>
-                  {group.products.map(productTile)}
-                </div>
-              </section>
-            ))}
+            {groupProductsByCategory(filtered).map((group) => {
+              const tint = categoryTint(group.category);
+              return (
+                <section
+                  key={group.category}
+                  className="rounded-[var(--ob-radius-lg)] p-3"
+                  style={{ backgroundColor: tint.background }}
+                >
+                  <div className="mb-2 flex items-baseline gap-2">
+                    <h3
+                      className="text-sm font-semibold"
+                      style={{ color: tint.accent }}
+                    >
+                      {group.category}
+                    </h3>
+                    <span className="text-xs text-[var(--ob-text-muted)]">
+                      {group.products.length}
+                    </span>
+                  </div>
+                  <div className={allItemsGridClass}>
+                    {group.products.map(productTile)}
+                  </div>
+                </section>
+              );
+            })}
           </div>
         ) : (
           <div className={gridClass}>{filtered.map(productTile)}</div>
@@ -924,7 +952,7 @@ export function BillingPos({
   );
 
   const cartAside = (
-      <div className="hidden w-full lg:block lg:w-[32%] lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)]">
+      <div className="hidden w-full lg:block lg:w-[32%] xl:w-[28%] lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto">
         {cartPanel}
       </div>
   );

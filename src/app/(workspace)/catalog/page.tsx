@@ -3,7 +3,7 @@ import { ProductsManager } from "@/components/products/products-manager";
 import { OffersManager } from "@/components/offers/offers-manager";
 import {
   listDemoOffers,
-  listDemoProducts,
+  listDemoProductsMerged,
   listDemoStockAdjustments,
   toDemoBrandCode,
 } from "@/lib/demo/data";
@@ -30,16 +30,17 @@ export default async function CatalogPage() {
 
   if (ws.mode === "demo") {
     const demoCode = toDemoBrandCode(ws.brand.code);
-    const [offers, adjustments] = await Promise.all([
+    const [offers, adjustments, products] = await Promise.all([
       listDemoOffers(demoCode),
       listDemoStockAdjustments(demoCode),
+      listDemoProductsMerged({ activeOnly: false }, demoCode),
     ]);
     return (
       <PageShell title="Catalog">
         <div className="space-y-6">
           <ProductsManager
             mode="demo"
-            initialProducts={listDemoProducts({ activeOnly: false }, demoCode)}
+            initialProducts={products}
             currencyCode={ws.settings.currency_code}
             userRole="owner"
             stockAdjustmentsByProductId={groupAdjustmentsByProduct(adjustments)}

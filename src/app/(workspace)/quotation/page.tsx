@@ -62,7 +62,7 @@ export default async function QuotationPage() {
   return (
     <PageShell title={pageTitle}>
       {productsRes.error ? (
-        <p className="mb-4 text-sm text-[var(--ob-danger)]">{productsRes.error}</p>
+        <p role="alert" className="mb-4 text-sm text-[var(--ob-danger)]">{productsRes.error}</p>
       ) : null}
       <BillingWorkspace
         mode="live"

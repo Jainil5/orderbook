@@ -57,7 +57,7 @@ export function QuotationBuilderSetting({
         </p>
       ) : null}
       {error ? (
-        <p className="mt-2 text-sm text-[var(--ob-danger)]">{error}</p>
+        <p role="alert" className="mt-2 text-sm text-[var(--ob-danger)]">{error}</p>
       ) : null}
       <div className="mt-4">
         <Link

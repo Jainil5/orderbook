@@ -9,9 +9,11 @@ import {
 } from "@/lib/workspace/constants";
 import {
   readBrandWebsitePref,
+  readManagerModulesPref,
   readQuotationBuilderPref,
   readReceiptSettingsPref,
 } from "@/lib/workspace/prefs";
+import type { ManagerModuleKey } from "@/lib/workspace/manager-modules";
 import type { Brand, BrandMember, BrandRole, BrandSettings } from "@/types/database";
 
 async function mergeBrandSettings(
@@ -49,6 +51,7 @@ export type WorkspaceSession =
       member: BrandMember;
       role: BrandRole;
       profile: WorkspaceProfile;
+      hiddenManagerModules: ManagerModuleKey[];
     }
   | {
       mode: "demo";
@@ -57,6 +60,7 @@ export type WorkspaceSession =
       userEmail: null;
       role: "owner";
       profile: WorkspaceProfile;
+      hiddenManagerModules: ManagerModuleKey[];
     };
 
 export async function isDemoWorkspaceCookieSet(): Promise<boolean> {
@@ -70,6 +74,8 @@ export async function loadWorkspaceSession(): Promise<WorkspaceSession | null> {
   const live = await loadLiveWorkspace();
   if (live) {
     const settings = await mergeBrandSettings(live.settings, live.brand.code);
+    const hiddenManagerModules =
+      (await readManagerModulesPref(live.brand.code)) ?? [];
     return {
       mode: "live",
       brand: live.brand,
@@ -78,12 +84,15 @@ export async function loadWorkspaceSession(): Promise<WorkspaceSession | null> {
       member: live.member,
       role: live.member.role,
       profile: getWorkspaceProfile(live.brand.code),
+      hiddenManagerModules,
     };
   }
 
   if (await isDemoWorkspaceCookieSet()) {
     const meta = await demoWorkspaceMeta();
     const settings = await mergeBrandSettings(meta.settings, meta.brand.code);
+    const hiddenManagerModules =
+      (await readManagerModulesPref(meta.brand.code)) ?? [];
     return {
       mode: "demo",
       brand: meta.brand,
@@ -91,6 +100,7 @@ export async function loadWorkspaceSession(): Promise<WorkspaceSession | null> {
       userEmail: null,
       role: "owner",
       profile: getWorkspaceProfile(meta.brand.code),
+      hiddenManagerModules,
     };
   }
 

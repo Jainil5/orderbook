@@ -89,7 +89,7 @@ export function BrandWebsiteSetting({
           Only owners and managers can change this in live workspaces.
         </p>
       ) : null}
-      {error ? <p className="text-xs text-[var(--ob-danger)]">{error}</p> : null}
+      {error ? <p role="alert" className="text-xs text-[var(--ob-danger)]">{error}</p> : null}
     </div>
   );
 }

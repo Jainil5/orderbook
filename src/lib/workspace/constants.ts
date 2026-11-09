@@ -29,6 +29,7 @@ export const WORKSPACE_ROUTE_PREFIXES = [
   "/products",
   "/offers",
   "/catalog",
+  "/manager",
   "/analytics",
   "/customers",
   "/settings",

@@ -27,7 +27,7 @@ export default async function PaymentsPage() {
   return (
     <PageShell title="Payments">
       {error ? (
-        <p className="mb-4 text-sm text-[var(--ob-danger)]">{error}</p>
+        <p role="alert" className="mb-4 text-sm text-[var(--ob-danger)]">{error}</p>
       ) : null}
       {data.length === 0 ? (
         <EmptyState

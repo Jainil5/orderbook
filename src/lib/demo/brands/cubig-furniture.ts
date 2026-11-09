@@ -1,7 +1,13 @@
 import type { DemoBrandPack } from "@/lib/demo/brands/types";
 import { DEMO_FURNITURE_IMAGES } from "@/lib/demo/product-image-urls";
+import { localDayKey } from "@/lib/manager/time";
+import type { StaffMember } from "@/types/manager";
 
 const BRAND_ID = "demo-cubig-furniture";
+
+// Fixture shift dates are keyed by the server's local day so they line up with
+// the local day keys the manager grid uses.
+const opsToday = localDayKey(new Date());
 
 export const CUBIG_FURNITURE_DEMO: DemoBrandPack = {
   brand: {
@@ -372,6 +378,75 @@ export const CUBIG_FURNITURE_DEMO: DemoBrandPack = {
       status: "partial",
       created_at: new Date(Date.now() - 1000 * 60 * 60 * 118).toISOString(),
     },
+  ],
+  staff: [
+    {
+      id: "cf-staff-1",
+      brand_id: "demo-cubig-furniture",
+      name: "Kiran Shetty",
+      role: "manager",
+      phone: "+91 98000 22001",
+      email: null,
+      status: "active",
+      availability: "available",
+      created_at: "2026-10-01T09:00:00.000Z",
+    },
+    {
+      id: "cf-staff-2",
+      brand_id: "demo-cubig-furniture",
+      name: "Farhan Ali",
+      role: "technician",
+      phone: "+91 98000 22002",
+      email: null,
+      status: "active",
+      availability: "busy",
+      created_at: "2026-10-02T09:00:00.000Z",
+    },
+    {
+      id: "cf-staff-3",
+      brand_id: "demo-cubig-furniture",
+      name: "Suresh Rao",
+      role: "technician",
+      phone: null,
+      email: null,
+      status: "active",
+      availability: "available",
+      created_at: "2026-10-02T09:00:00.000Z",
+    },
+    {
+      id: "cf-staff-4",
+      brand_id: "demo-cubig-furniture",
+      name: "Lakshmi Iyer",
+      role: "sales",
+      phone: "+91 98000 22004",
+      email: null,
+      status: "active",
+      availability: "off",
+      created_at: "2026-10-08T09:00:00.000Z",
+    },
+  ] satisfies StaffMember[],
+  services: [
+    { id: "cf-svc-1", brand_id: "demo-cubig-furniture", name: "Furniture Delivery", description: "Doorstep delivery and placement", durationMinutes: 90, price: 1500, isActive: true },
+    { id: "cf-svc-2", brand_id: "demo-cubig-furniture", name: "Installation & Assembly", description: "On-site assembly by technician", durationMinutes: 120, price: 2500, isActive: true },
+  ],
+  serviceJobs: [
+    { id: "cf-job-1", brand_id: "demo-cubig-furniture", serviceId: "cf-svc-2", customerId: "fc2", staffIds: ["cf-staff-2"], status: "in_progress", scheduledAt: new Date(Date.now() - 3600000).toISOString(), notes: "Luna sofa + wardrobe, 3rd floor" },
+    { id: "cf-job-2", brand_id: "demo-cubig-furniture", serviceId: "cf-svc-1", customerId: "fc4", staffIds: [], status: "requested", scheduledAt: null, notes: "Oslo dining table delivery" },
+  ],
+  appointments: [
+    { id: "cf-apt-1", brand_id: "demo-cubig-furniture", title: "Showroom walkthrough — Priya Homes", customerId: "fc2", staffIds: ["cf-staff-4"], startsAt: new Date(Date.now() + 86400000).toISOString(), endsAt: new Date(Date.now() + 86400000 + 3600000).toISOString(), location: "Cubig showroom", serviceId: null, status: "scheduled", notes: "Office fit-out shortlist" },
+  ],
+  visits: [
+    { id: "cf-visit-1", brand_id: "demo-cubig-furniture", customerId: "fc2", staffId: "cf-staff-2", purpose: "Site measurement — living room", status: "completed", checkInAt: new Date(Date.now() - 2 * 86400000).toISOString(), checkOutAt: new Date(Date.now() - 2 * 86400000 + 3600000).toISOString(), report: "Room 4.2m x 5.1m. Sofa fits along east wall; lift access confirmed." },
+    { id: "cf-visit-2", brand_id: "demo-cubig-furniture", customerId: "fc4", staffId: "cf-staff-3", purpose: "Delivery site check", status: "planned", checkInAt: null, checkOutAt: null, report: null },
+  ],
+  shifts: [
+    { id: "cf-shift-1", brand_id: "demo-cubig-furniture", staffId: "cf-staff-2", date: opsToday, start: "09:00", end: "18:00", note: "Field installs" },
+    { id: "cf-shift-2", brand_id: "demo-cubig-furniture", staffId: "cf-staff-3", date: opsToday, start: "09:00", end: "18:00", note: "Delivery van" },
+  ],
+  tasks: [
+    { id: "cf-task-1", brand_id: "demo-cubig-furniture", title: "Send sofa care guide to Priya Homes", description: "", assigneeStaffId: "cf-staff-4", customerId: "fc2", priority: "medium", dueAt: new Date(Date.now() + 86400000).toISOString(), status: "open" },
+    { id: "cf-task-2", brand_id: "demo-cubig-furniture", title: "Confirm lift booking for Shah delivery", description: "Tower B, service lift", assigneeStaffId: "cf-staff-1", customerId: "fc4", priority: "high", dueAt: new Date(Date.now() - 86400000).toISOString(), status: "open" },
   ],
   analytics: {
     grossSales: 627103.6,

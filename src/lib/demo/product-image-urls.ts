@@ -9,9 +9,7 @@ export const DEMO_CAFE_IMAGES = {
   toast: "/demo/products/avocado-toast.jpg",
   granola:
     "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=240&h=180&fit=crop",
-  beer: "https://images.unsplash.com/photo-1608270586620-248524c67de9?w=240&h=180&fit=crop",
-  pastry:
-    "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=240&h=180&fit=crop",
+  pastry: "/demo/products/seasonal-pastry.jpg",
   // Pulled from the delivered Coffee Cups site (websitein.com/coffee-cups).
   espresso: "/demo/products/espresso.jpg",
   cappuccino: "/demo/products/cappuccino.jpg",
@@ -20,6 +18,18 @@ export const DEMO_CAFE_IMAGES = {
   frappe: "/demo/products/frappe.jpg",
   icedLatte: "/demo/products/iced-latte.jpg",
   hotChocolate: "/demo/products/hot-chocolate.jpg",
+  mangoSmoothie: "/demo/products/mango-smoothie.jpg",
+  limeSoda: "/demo/products/fresh-lime-soda.jpg",
+  bombaySandwich: "/demo/products/bombay-grilled-sandwich.jpg",
+  pestoPasta: "/demo/products/pesto-penne-pasta.jpg",
+  periPeriFries: "/demo/products/peri-peri-fries.jpg",
+  garlicBread: "/demo/products/cheesy-garlic-bread.jpg",
+  nachos: "/demo/products/nachos-salsa.jpg",
+  hummusPita: "/demo/products/hummus-pita.jpg",
+  garlicAioli: "/demo/products/garlic-aioli.jpg",
+  chipotleMayo: "/demo/products/chipotle-mayo.jpg",
+  brownie: "/demo/products/chocolate-brownie.jpg",
+  cheesecake: "/demo/products/basque-cheesecake.jpg",
 } as const;
 
 export const DEMO_FURNITURE_IMAGES = {
