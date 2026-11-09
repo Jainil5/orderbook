@@ -134,6 +134,7 @@ export function ProductsManager({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm());
   const [formError, setFormError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [rowBusy, setRowBusy] = useState<string | null>(null);
 
@@ -195,19 +196,26 @@ export function ProductsManager({
       // Persist through the demo cookie bucket so Billing/catalog see the
       // change immediately and across reloads; local state keeps the list
       // in sync without a full refresh.
-      const result = await saveProductAction(editingId, input);
-      setSaving(false);
-      if (!result.ok) {
-        setFormError(result.error);
-        return;
+      try {
+        const result = await saveProductAction(editingId, input);
+        if (!result.ok) {
+          setFormError(result.error);
+          return;
+        }
+        const product = result.product;
+        setProducts((prev) =>
+          editingId
+            ? prev.map((p) => (p.id === editingId ? product : p))
+            : [...prev, product],
+        );
+        closeDialog();
+      } catch {
+        // Network / 500 / server-action failure: surface it the same way as a
+        // rejected result so the spinner never sticks.
+        setFormError("Could not save. Try again.");
+      } finally {
+        setSaving(false);
       }
-      const product = result.product;
-      setProducts((prev) =>
-        editingId
-          ? prev.map((p) => (p.id === editingId ? product : p))
-          : [...prev, product],
-      );
-      closeDialog();
       return;
     }
 
@@ -225,16 +233,24 @@ export function ProductsManager({
     if (!canEdit) return;
     const next = !product.is_active;
     setRowBusy(product.id);
+    setActionError(null);
 
     if (mode === "demo") {
-      const result = await toggleProductActiveAction(product.id, next);
-      setRowBusy(null);
-      if (result.ok) {
-        setProducts((prev) =>
-          prev.map((p) =>
-            p.id === product.id ? { ...p, is_active: next } : p,
-          ),
-        );
+      try {
+        const result = await toggleProductActiveAction(product.id, next);
+        if (result.ok) {
+          setProducts((prev) =>
+            prev.map((p) =>
+              p.id === product.id ? { ...p, is_active: next } : p,
+            ),
+          );
+        } else {
+          setActionError(result.error);
+        }
+      } catch {
+        setActionError("Could not save. Try again.");
+      } finally {
+        setRowBusy(null);
       }
       return;
     }
@@ -248,6 +264,10 @@ export function ProductsManager({
     <div className="space-y-4">
       {loadError ? (
         <p role="alert" className="text-sm text-[var(--ob-danger)]">{loadError}</p>
+      ) : null}
+
+      {actionError ? (
+        <p role="alert" className="text-sm text-[var(--ob-danger)]">{actionError}</p>
       ) : null}
 
       {!canEdit && mode === "live" ? (
