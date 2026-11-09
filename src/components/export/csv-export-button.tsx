@@ -48,7 +48,7 @@ export function CsvExportButton({
         <span className="sm:hidden">Export</span>
       </Button>
       {error ? (
-        <span className="text-xs text-[var(--ob-danger)]">{error}</span>
+        <span role="alert" className="text-xs text-[var(--ob-danger)]">{error}</span>
       ) : null}
     </div>
   );

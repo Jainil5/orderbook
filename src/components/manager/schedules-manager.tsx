@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { isOnShift, weekDays } from "@/lib/manager/schedules";
+import { useMounted } from "@/lib/use-mounted";
 import { deleteShiftAction, saveShiftAction } from "@/services/manager-ops-actions";
 import type { Shift } from "@/types/operations";
 
@@ -59,8 +60,12 @@ export function SchedulesManager({
     setError(null);
   }
 
-  const days = weekDays(anchor);
+  // Week labels and the on-shift badge depend on the browser clock/timezone;
+  // render them only after mount so SSR output stays stable.
+  const mounted = useMounted();
+  const days = mounted ? weekDays(anchor) : [];
   const now = new Date();
+  const weekHasToday = mounted && days.includes(now.toISOString().slice(0, 10));
   const dayLabel = (day: string) =>
     new Date(`${day}T12:00:00`).toLocaleDateString(undefined, { weekday: "short", day: "numeric" });
 
@@ -107,8 +112,18 @@ export function SchedulesManager({
             </button>
             {editing ? (
               <>
-                <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm" disabled={pending} onClick={() => run(() => deleteShiftAction(editing.id))}>Delete</button>
-                <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm" onClick={() => startEdit(null)}>Cancel</button>
+                <button
+                  type="button"
+                  className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm disabled:opacity-50"
+                  disabled={!canEdit || pending}
+                  onClick={async () => {
+                    const ok = await run(() => deleteShiftAction(editing.id));
+                    if (ok) startEdit(null);
+                  }}
+                >
+                  Delete
+                </button>
+                <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm disabled:opacity-50" disabled={pending} onClick={() => startEdit(null)}>Cancel</button>
               </>
             ) : null}
           </div>
@@ -117,7 +132,7 @@ export function SchedulesManager({
       <div className="min-w-0 lg:col-span-2">
         <div className="mb-3 flex items-center justify-between gap-2">
           <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" onClick={() => setAnchor(new Date(anchor.getTime() - 7 * 86400000))}>← Prev week</button>
-          <p className="text-sm font-medium">{dayLabel(days[0])} – {dayLabel(days[6])}</p>
+          <p className="text-sm font-medium">{mounted ? `${dayLabel(days[0])} – ${dayLabel(days[6])}` : "…"}</p>
           <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" onClick={() => setAnchor(new Date(anchor.getTime() + 7 * 86400000))}>Next week →</button>
         </div>
         <div className="overflow-x-auto rounded-lg border border-[var(--ob-border)]">
@@ -134,7 +149,7 @@ export function SchedulesManager({
               {staff.length === 0 ? (
                 <tr><td colSpan={8} className="p-3 text-[var(--ob-text-muted)]">No active staff. Add staff first.</td></tr>
               ) : staff.map((member) => {
-                const onShift = shifts.some((s) => s.staffId === member.id && isOnShift(s, now));
+                const onShift = weekHasToday && shifts.some((s) => s.staffId === member.id && isOnShift(s, now));
                 return (
                   <tr key={member.id} className="border-t border-[var(--ob-border)]">
                     <td className="p-2 align-top font-medium">
@@ -151,7 +166,8 @@ export function SchedulesManager({
                             <button
                               key={s.id}
                               type="button"
-                              className="mb-1 block w-full rounded bg-[var(--ob-surface-muted)] px-2 py-1 text-left text-xs hover:bg-[var(--ob-border)]"
+                              className="ob-touch-target mb-1 block w-full rounded bg-[var(--ob-surface-muted)] px-2 py-1 text-left text-xs hover:bg-[var(--ob-border)] disabled:opacity-50"
+                              disabled={pending}
                               onClick={() => startEdit(s)}
                               title={s.note || undefined}
                             >

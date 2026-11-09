@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import type { OpsTimelineRow } from "@/lib/manager/ops-selectors";
+import { useMounted } from "@/lib/use-mounted";
 
 const KIND_LABELS: Record<OpsTimelineRow["kind"], string> = {
   appointment: "Appointment",
@@ -10,6 +13,9 @@ const KIND_LABELS: Record<OpsTimelineRow["kind"], string> = {
 };
 
 export function CustomerOperationsTimeline({ rows }: { rows: OpsTimelineRow[] }) {
+  // Locale time strings depend on the browser timezone; render them only
+  // after mount so SSR output stays stable.
+  const mounted = useMounted();
   if (rows.length === 0) {
     return (
       <Card className="p-4 text-sm text-[var(--ob-text-muted)]">
@@ -26,7 +32,7 @@ export function CustomerOperationsTimeline({ rows }: { rows: OpsTimelineRow[] })
               <p className="font-medium">{row.title}</p>
               <p className="text-sm text-[var(--ob-text-muted)]">
                 {KIND_LABELS[row.kind]} · {row.status.replace(/_/g, " ")}
-                {row.when ? ` · ${new Date(row.when).toLocaleString()}` : ""}
+                {mounted && row.when ? ` · ${new Date(row.when).toLocaleString()}` : ""}
               </p>
             </div>
           </Card>

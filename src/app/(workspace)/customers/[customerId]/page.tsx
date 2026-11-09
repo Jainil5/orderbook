@@ -86,7 +86,7 @@ export default async function CustomerDetailPage({
       }
     >
       {error ? (
-        <p className="mb-4 text-sm text-[var(--ob-danger)]">{error}</p>
+        <p role="alert" className="mb-4 text-sm text-[var(--ob-danger)]">{error}</p>
       ) : null}
       <Card className="mb-6 p-4">
         <h2 className="font-semibold">Edit customer</h2>

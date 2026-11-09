@@ -16,6 +16,7 @@ import {
   saveServiceJobAction,
   toggleServiceActiveAction,
 } from "@/services/manager-ops-actions";
+import { useMounted } from "@/lib/use-mounted";
 import type { Service, ServiceJob } from "@/types/operations";
 
 type Person = { id: string; name: string };
@@ -98,6 +99,9 @@ export function ServicesManager({
   }
 
   const nameOf = (list: Person[], id: string) => list.find((p) => p.id === id)?.name ?? "Unknown";
+  // Locale schedule strings depend on the browser timezone; render them only
+  // after mount so SSR output stays stable.
+  const mounted = useMounted();
 
   return (
     <div className="grid gap-4 lg:grid-cols-3">
@@ -142,7 +146,7 @@ export function ServicesManager({
                 {pending ? "Saving…" : editingService ? "Save changes" : "Add service"}
               </button>
               {editingService ? (
-                <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm" onClick={() => startServiceEdit(null)}>Cancel</button>
+                <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm disabled:opacity-50" disabled={pending} onClick={() => startServiceEdit(null)}>Cancel</button>
               ) : null}
             </div>
           </form>
@@ -207,7 +211,7 @@ export function ServicesManager({
                 {pending ? "Saving…" : editingJob ? "Save job" : "Request job"}
               </button>
               {editingJob ? (
-                <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm" onClick={() => startJobEdit(null)}>Cancel</button>
+                <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm disabled:opacity-50" disabled={pending} onClick={() => startJobEdit(null)}>Cancel</button>
               ) : null}
             </div>
           </form>
@@ -232,9 +236,9 @@ export function ServicesManager({
                   </div>
                   {canEdit ? (
                     <div className="flex flex-wrap gap-2">
-                      <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" onClick={() => run(() => toggleServiceActiveAction(s.id, !s.isActive))}>{s.isActive ? "Deactivate" : "Activate"}</button>
-                      <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" onClick={() => startServiceEdit(s)}>Edit</button>
-                      <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" onClick={() => run(() => deleteServiceAction(s.id))}>Delete</button>
+                      <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm disabled:opacity-50" disabled={pending} onClick={() => run(() => toggleServiceActiveAction(s.id, !s.isActive))}>{s.isActive ? "Deactivate" : "Activate"}</button>
+                      <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm disabled:opacity-50" disabled={pending} onClick={() => startServiceEdit(s)}>Edit</button>
+                      <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm disabled:opacity-50" disabled={pending} onClick={() => run(() => deleteServiceAction(s.id))}>Delete</button>
                     </div>
                   ) : null}
                 </div>
@@ -259,7 +263,7 @@ export function ServicesManager({
                           <p className="font-medium">{nameOf(services, j.serviceId)} — {nameOf(customers, j.customerId)}</p>
                           <p className="text-sm text-[var(--ob-text-muted)]">
                             {j.staffIds.length > 0 ? j.staffIds.map((id) => nameOf(staff, id)).join(", ") : "Unassigned"}
-                            {j.scheduledAt ? ` · ${new Date(j.scheduledAt).toLocaleString()}` : ""}
+                            {mounted && j.scheduledAt ? ` · ${new Date(j.scheduledAt).toLocaleString()}` : ""}
                           </p>
                           {j.notes ? <p className="text-sm text-[var(--ob-text-muted)]">{j.notes}</p> : null}
                         </div>
@@ -270,8 +274,8 @@ export function ServicesManager({
                                 Mark {SERVICE_JOB_STATUS_LABELS[nextJobStatus(j.status)!].toLowerCase()}
                               </button>
                             ) : null}
-                            <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" onClick={() => startJobEdit(j)}>Edit</button>
-                            <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" onClick={() => run(() => deleteServiceJobAction(j.id))}>Delete</button>
+                            <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm disabled:opacity-50" disabled={pending} onClick={() => startJobEdit(j)}>Edit</button>
+                            <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm disabled:opacity-50" disabled={pending} onClick={() => run(() => deleteServiceJobAction(j.id))}>Delete</button>
                           </div>
                         ) : null}
                       </div>

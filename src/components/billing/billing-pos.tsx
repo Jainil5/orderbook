@@ -761,7 +761,7 @@ export function BillingPos({
             ) : null}
           </div>
           {!parsedOrderDiscount.ok ? (
-            <p className="mt-2 text-xs text-[var(--ob-danger)]">
+            <p role="alert" className="mt-2 text-xs text-[var(--ob-danger)]">
               {parsedOrderDiscount.message}
             </p>
           ) : null}

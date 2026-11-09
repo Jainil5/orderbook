@@ -9,6 +9,7 @@ import {
   deleteVisitAction,
   saveVisitAction,
 } from "@/services/manager-ops-actions";
+import { useMounted } from "@/lib/use-mounted";
 import type { FieldVisit } from "@/types/operations";
 
 type Option = { id: string; name: string };
@@ -27,6 +28,10 @@ export function VisitsManager({
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Card actions report errors next to the list / inside the checkout form,
+  // not in the remote plan/edit form card.
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [editing, setEditing] = useState<FieldVisit | null>(null);
   // Selects have no empty option: default to the first available choice.
   const [customerId, setCustomerId] = useState(customers[0]?.id ?? "");
@@ -35,20 +40,23 @@ export function VisitsManager({
   const [checkoutId, setCheckoutId] = useState<string | null>(null);
   const [report, setReport] = useState("");
 
-  async function run(fn: () => Promise<{ ok: boolean; message?: string }>) {
+  async function run(
+    fn: () => Promise<{ ok: boolean; message?: string }>,
+    setErr: (value: string | null) => void = setError,
+  ) {
     if (pending) return false;
     setPending(true);
-    setError(null);
+    setErr(null);
     try {
       const result = await fn();
       if (result.ok) {
         router.refresh();
         return true;
       }
-      setError(result.message ?? "Could not save.");
+      setErr(result.message ?? "Could not save.");
       return false;
     } catch {
-      setError("Could not save. Try again.");
+      setErr("Could not save. Try again.");
       return false;
     } finally {
       setPending(false);
@@ -64,6 +72,9 @@ export function VisitsManager({
   }
 
   const nameOf = (list: Option[], id: string) => list.find((p) => p.id === id)?.name ?? "Unknown";
+  // Locale check-in/out strings depend on the browser timezone; render them
+  // only after mount so SSR output stays stable.
+  const mounted = useMounted();
   const groups = [
     { status: "planned" as const, label: "Planned" },
     { status: "checked_in" as const, label: "Checked in" },
@@ -104,12 +115,13 @@ export function VisitsManager({
               {pending ? "Saving…" : editing ? "Save changes" : "Plan visit"}
             </button>
             {editing ? (
-              <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm" onClick={() => startEdit(null)}>Cancel</button>
+              <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm disabled:opacity-50" disabled={pending} onClick={() => startEdit(null)}>Cancel</button>
             ) : null}
           </div>
         </form>
       </Card>
       <div className="min-w-0 space-y-4 lg:col-span-2">
+        {actionError ? <p role="alert" className="text-sm text-[var(--ob-danger)]">{actionError}</p> : null}
         {groups.map((group) => {
           const items = visits.filter((v) => v.status === group.status);
           return (
@@ -124,23 +136,23 @@ export function VisitsManager({
                       <p className="font-medium">{v.purpose}</p>
                       <p className="text-sm text-[var(--ob-text-muted)]">
                         {nameOf(customers, v.customerId)} · {nameOf(staff, v.staffId)}
-                        {v.checkInAt ? ` · in ${new Date(v.checkInAt).toLocaleString()}` : ""}
-                        {v.checkOutAt ? ` · out ${new Date(v.checkOutAt).toLocaleString()}` : ""}
+                        {mounted && v.checkInAt ? ` · in ${new Date(v.checkInAt).toLocaleString()}` : ""}
+                        {mounted && v.checkOutAt ? ` · out ${new Date(v.checkOutAt).toLocaleString()}` : ""}
                       </p>
                       {v.report ? <p className="mt-1 text-sm">{v.report}</p> : null}
                     </div>
                     {canEdit ? (
                       <div className="flex flex-wrap gap-2">
                         {v.status === "planned" ? (
-                          <button type="button" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-3 text-sm font-medium text-white disabled:opacity-50" disabled={pending} onClick={() => run(() => checkInVisitAction(v.id))}>Check in</button>
+                          <button type="button" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-3 text-sm font-medium text-white disabled:opacity-50" disabled={pending} onClick={() => run(() => checkInVisitAction(v.id), setActionError)}>Check in</button>
                         ) : null}
                         {v.status === "checked_in" ? (
-                          <button type="button" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-3 text-sm font-medium text-white disabled:opacity-50" disabled={pending} onClick={() => { setCheckoutId(v.id); setReport(""); setError(null); }}>Check out</button>
+                          <button type="button" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-3 text-sm font-medium text-white disabled:opacity-50" disabled={pending} onClick={() => { setCheckoutId(v.id); setReport(""); setCheckoutError(null); }}>Check out</button>
                         ) : null}
                         {v.status === "planned" ? (
-                          <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" onClick={() => startEdit(v)}>Edit</button>
+                          <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm disabled:opacity-50" disabled={pending} onClick={() => startEdit(v)}>Edit</button>
                         ) : null}
-                        <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" disabled={pending} onClick={() => run(() => deleteVisitAction(v.id))}>Delete</button>
+                        <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm disabled:opacity-50" disabled={pending} onClick={() => run(() => deleteVisitAction(v.id), setActionError)}>Delete</button>
                       </div>
                     ) : null}
                   </div>
@@ -149,17 +161,21 @@ export function VisitsManager({
                       className="mt-3 space-y-2"
                       onSubmit={async (e) => {
                         e.preventDefault();
-                        const ok = await run(() => checkOutVisitAction(v.id, report));
-                        if (ok) setCheckoutId(null);
+                        const ok = await run(() => checkOutVisitAction(v.id, report), setCheckoutError);
+                        if (ok) {
+                          setCheckoutId(null);
+                          setCheckoutError(null);
+                        }
                       }}
                     >
                       <label className="block text-sm">
                         <span className="text-[var(--ob-text-muted)]">Visit report (required)</span>
-                        <textarea className="ob-input mt-1 w-full" rows={3} value={report} onChange={(e) => setReport(e.target.value)} maxLength={500} disabled={pending} />
+                        <textarea className="ob-input mt-1 w-full" rows={3} value={report} onChange={(e) => setReport(e.target.value)} required maxLength={500} disabled={pending} />
                       </label>
+                      {checkoutError ? <p role="alert" className="text-sm text-[var(--ob-danger)]">{checkoutError}</p> : null}
                       <div className="flex gap-2">
                         <button type="submit" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-white disabled:opacity-50" disabled={pending}>Complete visit</button>
-                        <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm" onClick={() => setCheckoutId(null)}>Cancel</button>
+                        <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm disabled:opacity-50" disabled={pending} onClick={() => { setCheckoutId(null); setCheckoutError(null); }}>Cancel</button>
                       </div>
                     </form>
                   ) : null}

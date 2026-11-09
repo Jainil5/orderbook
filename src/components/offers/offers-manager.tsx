@@ -59,7 +59,7 @@ export function OffersManager({
   return (
     <div className="space-y-6">
       {loadError ? (
-        <p className="text-sm text-[var(--ob-danger)]">{loadError}</p>
+        <p role="alert" className="text-sm text-[var(--ob-danger)]">{loadError}</p>
       ) : null}
       {canEdit ? (
         <form
@@ -88,7 +88,7 @@ export function OffersManager({
             Add offer
           </Button>
           {feedback ? (
-            <p className="sm:col-span-2 text-sm text-[var(--ob-danger)]">
+            <p role="alert" className="sm:col-span-2 text-sm text-[var(--ob-danger)]">
               {feedback}
             </p>
           ) : null}

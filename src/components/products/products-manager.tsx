@@ -294,7 +294,7 @@ export function ProductsManager({
   return (
     <div className="space-y-4">
       {loadError ? (
-        <p className="text-sm text-[var(--ob-danger)]">{loadError}</p>
+        <p role="alert" className="text-sm text-[var(--ob-danger)]">{loadError}</p>
       ) : null}
 
       {!canEdit && mode === "live" ? (

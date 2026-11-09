@@ -651,7 +651,7 @@ export function AnalyticsStudio({
             <div className="mt-4">
               <h2 className="mb-3 text-sm font-semibold">Payment records</h2>
               {paymentsNotice ? (
-                <p className="mb-3 text-sm text-[var(--ob-danger)]">{paymentsNotice}</p>
+                <p role="alert" className="mb-3 text-sm text-[var(--ob-danger)]">{paymentsNotice}</p>
               ) : null}
               <AnalyticsPaymentsTable
                 payments={payments}

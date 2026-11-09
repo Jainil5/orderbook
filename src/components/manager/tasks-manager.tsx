@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { isTaskOverdue, TASK_PRIORITIES, TASK_PRIORITY_LABELS, TASK_STATUS_LABELS } from "@/lib/manager/tasks";
+import { useMounted } from "@/lib/use-mounted";
 import { deleteTaskAction, saveTaskAction, setTaskStatusAction } from "@/services/manager-ops-actions";
 import type { Task, TaskStatus } from "@/types/operations";
 
@@ -79,10 +80,13 @@ export function TasksManager({
 
   const nameOf = (list: Option[], id: string | null) =>
     id ? list.find((p) => p.id === id)?.name ?? "Unknown" : null;
+  // Overdue flags and locale due-date strings depend on the browser clock;
+  // evaluate them only after mount so SSR output stays stable.
+  const mounted = useMounted();
   const now = new Date();
   const visible = tasks.filter((t) => {
     if (filter === "all") return true;
-    if (filter === "overdue") return isTaskOverdue(t, now);
+    if (filter === "overdue") return mounted && isTaskOverdue(t, now);
     return t.status === filter;
   });
   const filters: { key: Filter; label: string }[] = [
@@ -154,7 +158,7 @@ export function TasksManager({
               {pending ? "Saving…" : editing ? "Save changes" : "Add task"}
             </button>
             {editing ? (
-              <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm" onClick={() => startEdit(null)}>Cancel</button>
+              <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm disabled:opacity-50" disabled={pending} onClick={() => startEdit(null)}>Cancel</button>
             ) : null}
           </div>
         </form>
@@ -176,7 +180,8 @@ export function TasksManager({
           {visible.length === 0 ? (
             <Card className="p-4 text-sm text-[var(--ob-text-muted)]">No tasks match this filter.</Card>
           ) : visible.map((t) => {
-            const overdue = isTaskOverdue(t, now);
+            const overdue = mounted && isTaskOverdue(t, now);
+            const customerName = nameOf(customers, t.customerId);
             return (
               <Card key={t.id} className={`p-4 ${overdue ? "border border-[#be123c]!" : ""}`}>
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -188,8 +193,8 @@ export function TasksManager({
                     </p>
                     <p className="text-sm text-[var(--ob-text-muted)]">
                       {nameOf(staff, t.assigneeStaffId) ?? "Unassigned"}
-                      {nameOf(customers, t.customerId) ? ` · ${nameOf(customers, t.customerId)}` : ""}
-                      {t.dueAt ? ` · due ${new Date(t.dueAt).toLocaleString()}` : ""}
+                      {customerName ? ` · ${customerName}` : ""}
+                      {mounted && t.dueAt ? ` · due ${new Date(t.dueAt).toLocaleString()}` : ""}
                       {overdue ? " · OVERDUE" : ""}
                     </p>
                     {t.description ? <p className="text-sm text-[var(--ob-text-muted)]">{t.description}</p> : null}
@@ -204,7 +209,7 @@ export function TasksManager({
                       ) : (
                         <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" disabled={pending} onClick={() => run(() => setTaskStatusAction(t.id, "open"))}>Reopen</button>
                       )}
-                      <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" onClick={() => startEdit(t)}>Edit</button>
+                      <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm disabled:opacity-50" disabled={pending} onClick={() => startEdit(t)}>Edit</button>
                       <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" disabled={pending} onClick={() => run(() => deleteTaskAction(t.id))}>Delete</button>
                     </div>
                   ) : null}

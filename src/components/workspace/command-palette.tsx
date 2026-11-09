@@ -4,14 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
+import { useWorkspace } from "@/components/workspace/workspace-provider";
+import { visibleManagerModules } from "@/lib/workspace/manager-modules";
 
 const LINKS = [
   { href: "/billing", label: "Open billing / bill" },
   { href: "/quotation", label: "Quotation" },
   { href: "/products", label: "Products" },
   { href: "/products?tab=offers", label: "Offers & discounts" },
-  { href: "/manager", label: "Manager overview" },
-  { href: "/manager/staff", label: "Staff" },
   { href: "/orders", label: "Orders" },
   { href: "/kitchen", label: "Kitchen board" },
   { href: "/customers", label: "Customers" },
@@ -23,6 +23,14 @@ export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const router = useRouter();
+  const ws = useWorkspace();
+  const links = useMemo(() => {
+    const managerLinks = [
+      { href: "/manager", label: "Manager overview" },
+      ...visibleManagerModules(ws.hiddenManagerModules).map((m) => ({ href: m.href, label: m.label })),
+    ];
+    return [...LINKS, ...managerLinks];
+  }, [ws.hiddenManagerModules]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -38,9 +46,9 @@ export function CommandPalette() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return LINKS;
-    return LINKS.filter((l) => l.label.toLowerCase().includes(q));
-  }, [query]);
+    if (!q) return links;
+    return links.filter((l) => l.label.toLowerCase().includes(q));
+  }, [query, links]);
 
   if (!open) return null;
 

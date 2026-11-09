@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { APPOINTMENT_STATUS_LABELS, groupAppointments } from "@/lib/manager/appointments";
+import { useMounted } from "@/lib/use-mounted";
 import {
   deleteAppointmentAction,
   saveAppointmentAction,
@@ -81,12 +82,17 @@ export function AppointmentsManager({
 
   const nameOf = (list: Option[], id: string | null) =>
     id ? list.find((p) => p.id === id)?.name ?? "Unknown" : null;
-  const groups = groupAppointments(appointments, new Date());
-  const sections = [
-    { label: "Today", items: groups.today },
-    { label: "Upcoming", items: groups.upcoming },
-    { label: "Past", items: groups.past },
-  ];
+  // Grouping and locale time strings depend on the browser clock/timezone;
+  // evaluate them only after mount so SSR output stays stable.
+  const mounted = useMounted();
+  const groups = mounted ? groupAppointments(appointments, new Date()) : null;
+  const sections = groups
+    ? [
+        { label: "Today", items: groups.today },
+        { label: "Upcoming", items: groups.upcoming },
+        { label: "Past", items: groups.past },
+      ]
+    : null;
 
   return (
     <div className="grid gap-4 lg:grid-cols-3">
@@ -164,13 +170,15 @@ export function AppointmentsManager({
               {pending ? "Saving…" : editing ? "Save changes" : "Schedule"}
             </button>
             {editing ? (
-              <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm" onClick={() => startEdit(null)}>Cancel</button>
+              <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm disabled:opacity-50" disabled={pending} onClick={() => startEdit(null)}>Cancel</button>
             ) : null}
           </div>
         </form>
       </Card>
       <div className="space-y-4 lg:col-span-2">
-        {sections.map((section) => (
+        {sections === null ? (
+          <p className="text-sm text-[var(--ob-text-muted)]">Loading appointments…</p>
+        ) : sections.map((section) => (
           <section key={section.label}>
             <h2 className="mb-2 text-sm font-semibold">{section.label} ({section.items.length})</h2>
             {section.items.length === 0 ? (
@@ -200,7 +208,7 @@ export function AppointmentsManager({
                           <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" disabled={pending} onClick={() => run(() => setAppointmentStatusAction(a.id, "cancelled"))}>Cancel</button>
                         </>
                       ) : null}
-                      <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" onClick={() => startEdit(a)}>Edit</button>
+                      <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm disabled:opacity-50" disabled={pending} onClick={() => startEdit(a)}>Edit</button>
                       <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" disabled={pending} onClick={() => run(() => deleteAppointmentAction(a.id))}>Delete</button>
                     </div>
                   ) : null}

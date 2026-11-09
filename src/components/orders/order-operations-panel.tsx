@@ -102,6 +102,7 @@ export function OrderOperationsPanel({
       return;
     }
     setBusy("refund");
+    setMessage(null);
     const result = await recordRefundAction({
       orderId: order.id,
       amount: value,

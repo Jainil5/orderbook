@@ -60,7 +60,7 @@ export function StockAdjustmentPanel({
         </Button>
       </form>
       {message ? (
-        <p className="mt-2 text-xs text-[var(--ob-danger)]">{message}</p>
+        <p role="alert" className="mt-2 text-xs text-[var(--ob-danger)]">{message}</p>
       ) : null}
       {recent.length ? (
         <ul className="mt-3 space-y-1 text-xs text-[var(--ob-text-muted)]">

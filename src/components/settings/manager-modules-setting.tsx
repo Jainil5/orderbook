@@ -65,7 +65,7 @@ export function ManagerModulesSetting({
           );
         })}
       </div>
-      {error ? <p className="mt-2 text-sm text-[var(--ob-danger)]">{error}</p> : null}
+      {error ? <p role="alert" className="mt-2 text-sm text-[var(--ob-danger)]">{error}</p> : null}
     </div>
   );
 }

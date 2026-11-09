@@ -145,7 +145,7 @@ export function StaffManager({
               disabled={!canEdit || pending}
             />
           </label>
-          {error ? <p className="text-sm text-[var(--ob-danger)]">{error}</p> : null}
+          {error ? <p role="alert" className="text-sm text-[var(--ob-danger)]">{error}</p> : null}
           <div className="flex gap-2">
             <button
               type="submit"
