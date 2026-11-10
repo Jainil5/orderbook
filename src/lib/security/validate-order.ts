@@ -48,7 +48,8 @@ export function validateCreateOrderInput(
     return { ok: false, message: "Invalid offer code." };
   }
 
-  if (!sanitizePaymentMethod(input.paymentMethod)) {
+  // Empty method = payment-pending intent; recorded when the order completes.
+  if (input.paymentMethod?.trim() && !sanitizePaymentMethod(input.paymentMethod)) {
     return { ok: false, message: "Invalid payment method." };
   }
 

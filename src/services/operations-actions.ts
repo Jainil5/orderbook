@@ -17,6 +17,7 @@ import {
 } from "@/services/data";
 import {
   createCreditNoteLive,
+  completeOrderLive,
   listOpenQuotesAndReceivables,
   recordRefundLive,
   recordStockAdjustmentLive,
@@ -24,6 +25,8 @@ import {
 } from "@/services/order-operations";
 import { listDemoOrders, toDemoBrandCode } from "@/lib/demo/data";
 import { isOpenQuote, isOpenReceivable } from "@/lib/orders/order-rules";
+import { ORDER_TYPE_LABELS } from "@/lib/orders/order-labels";
+import { localDayKey } from "@/lib/manager/time";
 import type {
   CustomerUpsertInput,
   OfferUpsertInput,
@@ -82,6 +85,20 @@ export async function updateOrderStatusAction(
   const result = await updateOrderStatus(orderId, status);
   if (result.ok) revalidateOps();
   return result;
+}
+
+export async function completeOrderAction(orderId: string) {
+  const ws = await loadWorkspaceSession();
+  if (!ws) return { ok: false as const, message: "Not signed in." };
+  try {
+    if (ws.mode === "demo") {
+      const { completeDemoOrder } = await import("@/lib/demo/server");
+      return await completeDemoOrder(orderId);
+    }
+    return await completeOrderLive(orderId);
+  } catch {
+    return { ok: false as const, message: "Could not save. Try again." };
+  }
 }
 
 export async function recordPaymentAction(input: RecordPaymentInput) {
@@ -152,33 +169,35 @@ export async function loadOpenQuotesAction() {
 export async function exportOrdersCsvAction() {
   const ws = await loadWorkspaceSession();
   if (!ws) return { ok: false as const, message: "Not signed in." };
+  const header = [
+    "Order #",
+    "Customer",
+    "Total",
+    "Status",
+    "Payment",
+    "Method",
+    "Type",
+    "Date",
+    "Created",
+  ];
+  const orderRow = (o: import("@/types/database").Order) => [
+    o.order_number,
+    o.customer_name_snapshot,
+    o.grand_total,
+    o.status,
+    o.payment_status,
+    o.payment_method ?? "",
+    o.order_type ? ORDER_TYPE_LABELS[o.order_type] : "",
+    o.service_date ?? localDayKey(new Date(o.created_at)),
+    o.created_at,
+  ];
   if (ws.mode === "demo") {
     const orders = await listDemoOrders(undefined, toDemoBrandCode(ws.brand.code));
-    const csv = rowsToCsv(
-      ["Order #", "Customer", "Total", "Status", "Payment", "Created"],
-      orders.map((o) => [
-        o.order_number,
-        o.customer_name_snapshot,
-        o.grand_total,
-        o.status,
-        o.payment_status,
-        o.created_at,
-      ]),
-    );
+    const csv = rowsToCsv(header, orders.map(orderRow));
     return { ok: true as const, csv, filename: "orders.csv" };
   }
   const { data } = await listOrders({ page: 1, pageSize: 500 });
-  const csv = rowsToCsv(
-    ["Order #", "Customer", "Total", "Status", "Payment", "Created"],
-    data.map((o) => [
-      o.order_number,
-      o.customer_name_snapshot,
-      o.grand_total,
-      o.status,
-      o.payment_status,
-      o.created_at,
-    ]),
-  );
+  const csv = rowsToCsv(header, data.map(orderRow));
   return { ok: true as const, csv, filename: "orders.csv" };
 }
 

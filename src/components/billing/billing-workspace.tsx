@@ -60,19 +60,24 @@ export function BillingWorkspace({
       blockOversell={blockOversell}
       onSubmitOrder={async (payload) => {
         const input = {
-          customerId: payload.customerId,
+          customerId: null,
           customerPhone: payload.customerPhone,
           walkInName: payload.walkInName,
           notes: payload.notes,
           lines: payload.lines,
           offerCode: payload.offerCode,
           paymentMethod: payload.paymentMethod,
-          paymentStatus: payload.saveAsQuote ? ("pending" as const) : ("paid" as const),
+          paymentStatus: "pending" as const,
+          saveAsQuote: payload.saveAsQuote,
           orderDiscount: payload.orderDiscount,
           tableTag: payload.tableTag,
           deliveryNotes: payload.deliveryNotes,
           depositPercent: payload.depositPercent,
-          saveNewCustomer: payload.saveNewCustomer,
+          orderType: payload.orderType,
+          serviceDate: payload.serviceDate,
+          guests: payload.guests,
+          deliveryAddress: payload.deliveryAddress,
+          paymentReference: payload.paymentReference,
         };
         if (mode === "demo") {
           const result = await submitDemoOrder(input);

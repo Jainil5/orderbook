@@ -1,6 +1,7 @@
 import type { DemoBrandPack } from "@/lib/demo/brands/types";
 import { DEMO_FURNITURE_IMAGES } from "@/lib/demo/product-image-urls";
 import { localDayKey } from "@/lib/manager/time";
+import { buildOrderHistory, type HistoryConfig } from "@/lib/demo/brands/history";
 import type { StaffMember } from "@/types/manager";
 
 const BRAND_ID = "demo-cubig-furniture";
@@ -9,7 +10,7 @@ const BRAND_ID = "demo-cubig-furniture";
 // the local day keys the manager grid uses.
 const opsToday = localDayKey(new Date());
 
-export const CUBIG_FURNITURE_DEMO: DemoBrandPack = {
+const CUBIG_FURNITURE_DEMO_BASE: DemoBrandPack = {
   brand: {
     id: BRAND_ID,
     code: "BR-2",
@@ -486,4 +487,44 @@ export const CUBIG_FURNITURE_DEMO: DemoBrandPack = {
     ],
   },
   orderNumberPrefix: "CF",
+};
+
+// Same growth-and-dip shape as Brewery Cafe, scaled to showroom volume (~15
+// orders/month). Seeded independently so the two brands reproduce separately.
+export const CUBIG_FURNITURE_HISTORY_CFG: HistoryConfig = {
+  brandId: CUBIG_FURNITURE_DEMO_BASE.brand.id,
+  prefix: CUBIG_FURNITURE_DEMO_BASE.orderNumberPrefix,
+  products: CUBIG_FURNITURE_DEMO_BASE.products,
+  offers: CUBIG_FURNITURE_DEMO_BASE.offers,
+  taxRatePercent: CUBIG_FURNITURE_DEMO_BASE.settings.tax_rate_percent ?? 0,
+  rngSeed: 20261110,
+  customerCount: 25,
+  pendingCount: 1,
+  months: [
+    { year: 2026, month: 4, target: 8 },
+    { year: 2026, month: 5, target: 9 },
+    { year: 2026, month: 6, target: 11 },
+    { year: 2026, month: 7, target: 12 },
+    { year: 2026, month: 8, target: 13 },
+    { year: 2026, month: 9, target: 15 },
+  ],
+};
+
+const CUBIG_FURNITURE_HISTORY = buildOrderHistory(CUBIG_FURNITURE_HISTORY_CFG);
+
+export const CUBIG_FURNITURE_DEMO: DemoBrandPack = {
+  ...CUBIG_FURNITURE_DEMO_BASE,
+  customers: [
+    ...CUBIG_FURNITURE_DEMO_BASE.customers,
+    ...CUBIG_FURNITURE_HISTORY.customers,
+  ],
+  orders: [...CUBIG_FURNITURE_DEMO_BASE.orders, ...CUBIG_FURNITURE_HISTORY.orders],
+  orderItems: [
+    ...CUBIG_FURNITURE_DEMO_BASE.orderItems,
+    ...CUBIG_FURNITURE_HISTORY.orderItems,
+  ],
+  payments: [
+    ...CUBIG_FURNITURE_DEMO_BASE.payments,
+    ...CUBIG_FURNITURE_HISTORY.payments,
+  ],
 };

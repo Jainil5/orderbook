@@ -1,5 +1,5 @@
 import { PageShell } from "@/components/workspace/page-shell";
-import { OrdersTable } from "@/components/orders/orders-table";
+import { OrdersBoard } from "@/components/orders/orders-board";
 import { CsvExportButton } from "@/components/export/csv-export-button";
 import { exportOrdersCsvAction } from "@/services/operations-actions";
 import {
@@ -32,7 +32,7 @@ export default async function OrdersPage() {
         {orders.length === 0 ? (
           <EmptyState title="No orders yet" />
         ) : (
-          <OrdersTable
+          <OrdersBoard
             orders={orders}
             orderItems={orderItems}
             currencyCode={ws.settings.currency_code}
@@ -66,7 +66,7 @@ export default async function OrdersPage() {
           description="Orders appear here once your Supabase schema and RLS are configured."
         />
       ) : (
-        <OrdersTable
+        <OrdersBoard
           orders={orders}
           orderItems={itemsRes.data}
           currencyCode={ws.settings.currency_code}

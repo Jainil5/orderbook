@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { snapshotFromOrderRecords } from "@/lib/analytics/snapshot";
+import { revenueOrders } from "@/lib/orders/order-rules";
 import type { Order, OrderItem, Payment, Product } from "@/types/database";
 
 function order(over: Partial<Order> = {}): Order {
@@ -165,5 +166,25 @@ describe("snapshotFromOrderRecords", () => {
       { name: "Card", value: 472.5 },
       { name: "UPI", value: 300 },
     ]);
+  });
+
+  it("earns only completed orders once the caller filters via revenueOrders", () => {
+    const mixed = [
+      order({ id: "o1", status: "completed", payment_status: "paid" }),
+      order({ id: "o2", status: "pending", grand_total: 500, payment_status: "pending" }),
+      order({ id: "o3", status: "draft", grand_total: 999 }),
+      order({ id: "o4", status: "cancelled", grand_total: 700 }),
+      order({ id: "o5", status: "completed", payment_status: "pending", grand_total: 300 }),
+    ];
+    const snapshot = snapshotFromOrderRecords({
+      orders: revenueOrders(mixed),
+      currencyCode: "INR",
+    });
+    // Two completed rows earn; the pending/draft/cancelled totals never enter.
+    expect(snapshot.orderCount).toBe(2);
+    expect(snapshot.netSales).toBe(600);
+    // A completed-but-unpaid bill still reads as an open balance.
+    expect(snapshot.pendingAmount).toBe(300);
+    expect(snapshot.paidAmount).toBe(300);
   });
 });

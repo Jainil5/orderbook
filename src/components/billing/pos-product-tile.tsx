@@ -69,6 +69,7 @@ export function PosProductTileWithButton({
         "ob-card ob-tile ob-tilt flex h-full flex-col overflow-hidden p-0",
         flashing && "ob-pop ring-2 ring-[var(--ob-accent)] ring-offset-2",
         inCartQty > 0 && "border-[var(--ob-primary)]",
+        product.unavailable && "opacity-50",
       )}
       onPointerMove={onPointerMove}
       onPointerLeave={onPointerRest}
@@ -118,16 +119,31 @@ export function PosProductTileWithButton({
               {stockLabel}
             </Badge>
           ) : null}
+          <Badge
+            tone={product.unavailable ? "danger" : "success"}
+            className="text-[10px]"
+          >
+            {product.unavailable ? "NA" : "A"}
+          </Badge>
         </div>
-        <Button
-          type="button"
-          variant={inCartQty > 0 ? "secondary" : "primary"}
-          className="mt-auto min-h-11 w-full py-2 text-xs"
-          onClick={onAdd}
-        >
-          <Plus className="h-3.5 w-3.5" aria-hidden />
-          {inCartQty > 0 ? addAnotherLabel : addLabel}
-        </Button>
+        {product.unavailable ? (
+          <p
+            aria-disabled
+            className="mt-auto flex min-h-11 items-center justify-center rounded-[var(--ob-radius-md)] bg-[var(--ob-surface-muted)] py-2 text-xs font-medium text-[var(--ob-text-muted)]"
+          >
+            Unavailable
+          </p>
+        ) : (
+          <Button
+            type="button"
+            variant={inCartQty > 0 ? "secondary" : "primary"}
+            className="mt-auto min-h-11 w-full py-2 text-xs"
+            onClick={onAdd}
+          >
+            <Plus className="h-3.5 w-3.5" aria-hidden />
+            {inCartQty > 0 ? addAnotherLabel : addLabel}
+          </Button>
+        )}
       </div>
     </div>
   );

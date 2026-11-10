@@ -1,4 +1,6 @@
 import type { Appointment, FieldVisit, ServiceJob, Shift, Task } from "@/types/operations";
+import type { Order } from "@/types/database";
+import { isPendingOrder } from "@/lib/orders/order-rules";
 import { appointmentsForDay } from "./appointments";
 import { isOnShift } from "./schedules";
 import { isTaskOverdue } from "./tasks";
@@ -59,4 +61,9 @@ export function overviewRollups(
     activeVisits: data.visits.filter((v) => v.status === "checked_in").length,
     openJobs: data.jobs.filter((j) => j.status !== "completed").length,
   };
+}
+
+/** Bills captured but not yet completed — the Overview's "Ongoing orders". */
+export function ongoingOrderCount(orders: Order[]): number {
+  return orders.filter(isPendingOrder).length;
 }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Customer, Order } from "@/types/database";
 import { Card } from "@/components/ui/card";
 import { formatDate } from "@/lib/format";
+import { ORDER_TYPE_LABELS } from "@/lib/orders/order-labels";
 
 export function OrderCustomerDetails({
   order,
@@ -57,10 +58,48 @@ export function OrderCustomerDetails({
             <dd className="mt-0.5">{notes}</dd>
           </div>
         ) : null}
+        {order.order_type ? (
+          <div>
+            <dt className="text-[var(--ob-text-muted)]">Order type</dt>
+            <dd className="mt-0.5 font-medium">
+              {ORDER_TYPE_LABELS[order.order_type]}
+            </dd>
+          </div>
+        ) : null}
+        {order.service_date ? (
+          <div>
+            <dt className="text-[var(--ob-text-muted)]">Service date</dt>
+            <dd className="mt-0.5 font-medium">{order.service_date}</dd>
+          </div>
+        ) : null}
+        {order.guests != null ? (
+          <div>
+            <dt className="text-[var(--ob-text-muted)]">Guests</dt>
+            <dd className="mt-0.5 font-medium">{order.guests}</dd>
+          </div>
+        ) : null}
+        {order.payment_method ? (
+          <div>
+            <dt className="text-[var(--ob-text-muted)]">Payment method</dt>
+            <dd className="mt-0.5 font-medium">{order.payment_method}</dd>
+          </div>
+        ) : null}
+        {order.payment_reference ? (
+          <div>
+            <dt className="text-[var(--ob-text-muted)]">Payment reference</dt>
+            <dd className="mt-0.5 font-medium">{order.payment_reference}</dd>
+          </div>
+        ) : null}
         {order.table_tag?.trim() ? (
           <div>
             <dt className="text-[var(--ob-text-muted)]">Table / tag</dt>
             <dd className="mt-0.5 font-medium">{order.table_tag}</dd>
+          </div>
+        ) : null}
+        {order.delivery_address?.trim() ? (
+          <div className="sm:col-span-2">
+            <dt className="text-[var(--ob-text-muted)]">Delivery address</dt>
+            <dd className="mt-0.5">{order.delivery_address}</dd>
           </div>
         ) : null}
         {order.delivery_notes?.trim() ? (

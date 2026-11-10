@@ -5,6 +5,7 @@ import { listOrders } from "@/services/data";
 import { loadWorkspaceSession } from "@/lib/workspace/session";
 import { formatDate, formatMoney } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
+import { isPendingOrder } from "@/lib/orders/order-rules";
 import { redirect } from "next/navigation";
 
 export default async function KitchenPage() {
@@ -14,7 +15,8 @@ export default async function KitchenPage() {
   const orders =
     ws.mode === "demo"
       ? (await listDemoOrders(undefined, toDemoBrandCode(ws.brand.code))).filter(
-          (o) => o.status === "confirmed" || o.status === "draft",
+          (o) =>
+            isPendingOrder(o) || o.status === "confirmed" || o.status === "draft",
         )
       : (
           await listOrders({

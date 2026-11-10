@@ -205,6 +205,29 @@ export async function setProductActive(
   }
 }
 
+export async function setProductUnavailable(
+  productId: string,
+  unavailable: boolean,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const brandId = await requireProductManagerBrandId();
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase
+      .from("products")
+      .update({ unavailable })
+      .eq("id", productId)
+      .eq("brand_id", brandId);
+
+    if (error) return { ok: false, error: mutationError(error.message) };
+    return { ok: true };
+  } catch (e) {
+    return {
+      ok: false,
+      error: mutationError(e instanceof Error ? e.message : undefined),
+    };
+  }
+}
+
 export async function listOrders(params: {
   search?: string;
   status?: string;

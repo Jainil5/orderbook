@@ -46,6 +46,8 @@ export function allowedStatusTransitions(
   switch (from) {
     case "draft":
       return ["confirmed", "cancelled"];
+    case "pending":
+      return ["completed", "cancelled"];
     case "confirmed":
       return ["completed", "cancelled", "refunded"];
     case "completed":
@@ -57,4 +59,17 @@ export function allowedStatusTransitions(
     default:
       return [];
   }
+}
+
+export function isPendingOrder(order: Pick<Order, "status">): boolean {
+  return order.status === "pending";
+}
+
+/** Revenue counting rule — only completed orders earn. */
+export function isRevenueOrder(order: Pick<Order, "status">): boolean {
+  return order.status === "completed";
+}
+
+export function revenueOrders<T extends Pick<Order, "status">>(orders: T[]): T[] {
+  return orders.filter(isRevenueOrder);
 }

@@ -7,6 +7,7 @@ import {
   updateDemoMutableBucket,
 } from "@/lib/demo/mutable-store";
 import {
+  applyOrderPatches,
   mergeDemoCustomers,
   mergeDemoOffers,
   mergeDemoProducts,
@@ -17,6 +18,8 @@ import {
   readDemoOrderStore,
 } from "@/lib/demo/order-store";
 import { buildOrderRecord } from "@/lib/orders/build-order-record";
+import { allowedStatusTransitions } from "@/lib/orders/order-rules";
+import { matchOrCreateCustomerId } from "@/lib/demo/customer-identity";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
 import {
   DEMO_WORKSPACE_COOKIE,
@@ -206,6 +209,46 @@ export async function setDemoProductActive(
   return { ok: true };
 }
 
+export async function setDemoProductUnavailable(
+  productId: string,
+  unavailable: boolean,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const code = await activeDemoBrandCode();
+  const pack = getDemoBrandPack(code);
+  const bucket = await readDemoMutableBucket(code);
+  const inPack = pack.products.some((p) => p.id === productId);
+  const inBucket = bucket.products.some((p) => p.id === productId);
+  if (!inPack && !inBucket) return { ok: false, error: "Product not found." };
+
+  if (inPack) {
+    await updateDemoMutableBucket(code, (b) => ({
+      ...b,
+      productOverrides: {
+        ...b.productOverrides,
+        [productId]: { ...b.productOverrides[productId], unavailable },
+      },
+    }));
+  } else {
+    await updateDemoMutableBucket(code, (b) => ({
+      ...b,
+      products: b.products.map((p) =>
+        p.id === productId ? { ...p, unavailable } : p,
+      ),
+    }));
+  }
+  await appendDemoAudit(code, {
+    brand_id: pack.brand.id,
+    actor_email: null,
+    action: "product.updated",
+    entity_type: "product",
+    entity_id: productId,
+    detail: `unavailable:${unavailable}`,
+  });
+  revalidateAll();
+  revalidatePath("/products");
+  return { ok: true };
+}
+
 export async function submitDemoOrder(
   input: CreateOrderInput,
 ): Promise<CreateOrderResult> {
@@ -217,29 +260,26 @@ export async function submitDemoOrder(
   let customers = await demoCustomers(code);
   let customerId = input.customerId;
 
-  if (
-    !customerId &&
-    input.saveNewCustomer &&
-    (input.walkInName?.trim() || input.customerPhone)
-  ) {
-    const newCustomer: Customer = {
-      id: `demo-cust-${Date.now()}`,
-      brand_id: pack.brand.id,
-      name: input.walkInName?.trim() || "Walk-in customer",
-      email: null,
-      phone: input.customerPhone ?? null,
-      notes: null,
-    };
-    await updateDemoMutableBucket(code, (b) => ({
-      ...b,
-      customers: [newCustomer, ...b.customers],
-    }));
-    customers = await demoCustomers(code);
-    customerId = newCustomer.id;
+  if (!customerId && input.customerPhone) {
+    const identity = matchOrCreateCustomerId(
+      customers,
+      input.customerPhone,
+      input.walkInName,
+      pack.brand.id,
+    );
+    if (identity.created) {
+      const created = identity.created;
+      await updateDemoMutableBucket(code, (b) => ({
+        ...b,
+        customers: [created, ...b.customers],
+      }));
+      customers = await demoCustomers(code);
+    }
+    customerId = identity.id;
   }
 
   const suffix = Math.floor(1000 + Math.random() * 9000);
-  const isQuote = input.paymentStatus === "pending";
+  const isQuote = input.saveAsQuote === true;
   const prefix = isQuote
     ? `${pack.orderNumberPrefix}-Q`
     : pack.orderNumberPrefix;
@@ -496,6 +536,83 @@ export async function recordDemoPayment(input: RecordPaymentInput) {
 
 function roundMoney(amount: number) {
   return Math.round(amount * 100) / 100;
+}
+
+export async function completeDemoOrder(orderId: string) {
+  const code = await activeDemoBrandCode();
+  const pack = getDemoBrandPack(code);
+  const bucket = await readDemoMutableBucket(code);
+  const stored = await readDemoOrderStore(code);
+  const orders = applyOrderPatches(
+    [...pack.orders, ...stored.orders],
+    bucket,
+  );
+  const order = orders.find((o) => o.id === orderId);
+  if (!order) return { ok: false as const, message: "Order not found." };
+  if (!allowedStatusTransitions(order.status).includes("completed")) {
+    return {
+      ok: false as const,
+      message:
+        order.status === "cancelled"
+          ? "Order is already cancelled."
+          : "Order is already completed.",
+    };
+  }
+
+  const method = order.payment_method?.trim() || null;
+  const patch: Partial<Order> = {
+    status: "completed",
+    ...(method
+      ? { payment_status: "paid" as PaymentStatus, amount_paid: order.grand_total }
+      : {}),
+  };
+  const patched = await patchDemoOrderInStore(code, order.id, patch);
+  if (!patched) {
+    await updateDemoMutableBucket(code, (b) => ({
+      ...b,
+      orderPatches: {
+        ...b.orderPatches,
+        [order.id]: { ...b.orderPatches[order.id], ...patch },
+      },
+    }));
+  }
+
+  if (method) {
+    const payment = {
+      id: `demo-pay-${Date.now()}`,
+      brand_id: pack.brand.id,
+      order_id: order.id,
+      amount: order.grand_total,
+      method,
+      status: "paid" as PaymentStatus,
+      created_at: new Date().toISOString(),
+      split_label: null,
+      notes: "Auto-recorded at completion",
+    };
+    await updateDemoMutableBucket(code, (b) => ({
+      ...b,
+      payments: [payment, ...b.payments],
+    }));
+    await appendDemoAudit(code, {
+      brand_id: pack.brand.id,
+      actor_email: null,
+      action: "payment.recorded",
+      entity_type: "order",
+      entity_id: order.id,
+      detail: `auto:${method}`,
+    });
+  }
+
+  await appendDemoAudit(code, {
+    brand_id: pack.brand.id,
+    actor_email: null,
+    action: "order.status",
+    entity_type: "order",
+    entity_id: order.id,
+    detail: "completed",
+  });
+  revalidateAll();
+  return { ok: true as const, orderNumber: order.order_number };
 }
 
 export async function updateDemoOrderNotes(orderId: string, notes: string) {
