@@ -335,3 +335,105 @@ export function Sparkline({
     </div>
   );
 }
+
+/**
+ * Compact line/area chart sized for the Overview carousel's mini-chart row.
+ * No axes or grid — just the filled shape plus a hover tooltip, so every
+ * mini card in the row reads at the same height.
+ */
+export function MiniTrend({
+  data,
+  metric,
+  currency,
+}: {
+  data: TrendPoint[];
+  metric: Metric;
+  currency: string;
+}) {
+  const gradientId = `mini-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
+  const color = metric === "revenue" ? "var(--ob-series-1)" : "var(--ob-series-2)";
+  if (data.length < 2) {
+    return <p className="flex h-28 items-center justify-center text-xs text-[var(--ob-text-muted)]">Not enough data.</p>;
+  }
+  return (
+    <div className="h-28">
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={data} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
+          <defs>
+            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={color} stopOpacity={0.32} />
+              <stop offset="100%" stopColor={color} stopOpacity={0.03} />
+            </linearGradient>
+          </defs>
+          <Tooltip
+            cursor={{ stroke: color, strokeWidth: 1, strokeDasharray: "4 4" }}
+            content={<Tip currency={currency} />}
+          />
+          <Area
+            type="monotone"
+            dataKey={metric}
+            name={metric === "revenue" ? "Revenue" : "Orders"}
+            stroke={color}
+            strokeWidth={2}
+            fill={`url(#${gradientId})`}
+            dot={false}
+            animationDuration={900}
+            style={{ filter: `drop-shadow(0 0 5px ${color})` }}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+/**
+ * Compact donut for the mini-chart row: a thinner ring and a small centered
+ * label, matching MiniTrend's height so the carousel cards stay uniform.
+ */
+export function MiniDonut({
+  data,
+  centerLabel,
+  centerValue,
+}: {
+  data: (Slice & { color: string })[];
+  centerLabel: string;
+  centerValue: string;
+}) {
+  if (!data.length) {
+    return <p className="flex h-28 items-center justify-center text-xs text-[var(--ob-text-muted)]">No data.</p>;
+  }
+  return (
+    <div className="relative h-28">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="name"
+            innerRadius="58%"
+            outerRadius="78%"
+            paddingAngle={data.length > 1 ? 2 : 0}
+            cornerRadius={4}
+            stroke="none"
+            animationDuration={900}
+          >
+            {data.map((entry) => (
+              <Cell key={entry.name} fill={entry.color} />
+            ))}
+          </Pie>
+          <Tooltip
+            formatter={(value) =>
+              typeof value === "number" ? value.toLocaleString("en-IN") : value
+            }
+          />
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-[10px] uppercase tracking-wide text-[var(--ob-text-muted)]">
+          {centerLabel}
+        </span>
+        <span className="max-w-[6rem] text-center text-xs font-semibold">{centerValue}</span>
+      </div>
+    </div>
+  );
+}

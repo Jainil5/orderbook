@@ -70,7 +70,10 @@ export function LoopRow({
       className="flex w-max shrink-0 gap-4 pr-4"
     >
       {items.map((item, index) => (
-        <div key={index} className={`shrink-0 ${itemClassName ?? ""}`}>
+        <div
+          key={index}
+          className={`shrink-0 [&>*]:h-full ${itemClassName ?? ""}`}
+        >
           {item}
         </div>
       ))}
@@ -120,7 +123,10 @@ export function LoopRow({
         {copy}
         <div aria-hidden className="pointer-events-none flex w-max shrink-0 gap-4 pr-4">
           {items.map((item, index) => (
-            <div key={index} className={`shrink-0 ${itemClassName ?? ""}`}>
+            <div
+              key={index}
+              className={`shrink-0 [&>*]:h-full ${itemClassName ?? ""}`}
+            >
               {item}
             </div>
           ))}

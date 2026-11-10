@@ -27,6 +27,14 @@ const ShareDonut = dynamic(
   () => import("@/components/analytics/charts").then((m) => m.ShareDonut),
   { ssr: false, loading: () => <ChartFrame /> },
 );
+const MiniTrend = dynamic(
+  () => import("@/components/analytics/charts").then((m) => m.MiniTrend),
+  { ssr: false, loading: () => <div className="h-28" /> },
+);
+const MiniDonut = dynamic(
+  () => import("@/components/analytics/charts").then((m) => m.MiniDonut),
+  { ssr: false, loading: () => <div className="h-28" /> },
+);
 function RankBars({
   data,
 }: {
@@ -263,6 +271,13 @@ export function AnalyticsStudio({
 
   const currency = snapshot.currencyCode;
   const money = (value: number) => formatMoney(value, currency);
+  const moneyCompact = (value: number) =>
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency,
+      notation: "compact",
+      maximumFractionDigits: 1,
+    }).format(value);
   const trend = useMemo(
     () => filterTrend(snapshot.salesOverTime, dayPart),
     [snapshot.salesOverTime, dayPart],
@@ -545,13 +560,40 @@ export function AnalyticsStudio({
     </Card>
   );
 
+  // Compact Collections for the carousel tile row (the full collectionsCard,
+  // with its donut and breakdown, stays in the Payments tab).
+  const collectionsTile = (
+    <Card>
+      <h2 className="text-sm font-semibold">Collections</h2>
+      <p className="mt-1 text-2xl font-semibold tracking-tight">
+        {collectionRate.toFixed(0)}%
+      </p>
+      <p className="text-xs text-[var(--ob-text-muted)]">of billed value marked paid</p>
+      <div className="mt-4 h-3 overflow-hidden rounded-full bg-[var(--ob-surface-muted)]">
+        <div
+          className="h-full rounded-full bg-[var(--ob-accent)]"
+          style={{ width: `${Math.min(collectionRate, 100)}%` }}
+        />
+      </div>
+      <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+        <div>
+          <dt className="text-xs text-[var(--ob-text-muted)]">Paid</dt>
+          <dd className="font-medium">{money(snapshot.paidAmount)}</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-[var(--ob-text-muted)]">Still open</dt>
+          <dd className="font-medium">{money(snapshot.pendingAmount)}</dd>
+        </div>
+      </dl>
+    </Card>
+  );
+
   const paymentsGrid = (
     <div className="grid gap-4 lg:grid-cols-2">
       {tenderMix}
       {collectionsCard}
     </div>
   );
-
   const paymentRecords = (
     <div>
       <h2 className="mb-3 text-sm font-semibold">Payment records</h2>
@@ -723,20 +765,89 @@ export function AnalyticsStudio({
   ];
 
   const overviewTiles = [
-    ...(show("payments") ? [collectionsCard] : []),
+    ...(show("payments") ? [collectionsTile] : []),
     ...(marginTileCard ? [marginTileCard] : []),
     ...(show("categories") && categoryListTile ? [categoryListTile] : []),
     ...(show("trend") && bestDayTile ? [bestDayTile] : []),
     ...(show("trend") ? [momentumTile] : []),
   ];
 
-  const overviewCharts = [
-    ...(show("trend") ? [trendCard] : []),
-    ...(show("categories") ? [categoriesMix] : []),
-    ...(show("orders") ? [statusMix] : []),
-    ...(show("payments") ? [tenderMix] : []),
-    ...(show("products") ? [productsCard] : []),
+  const miniCard = (key: string, title: string, body: ReactNode) => (
+    <Card key={key} className="flex h-full flex-col">
+      <h3 className="text-xs font-semibold text-[var(--ob-text-secondary)]">
+        {title}
+      </h3>
+      <div className="mt-2 flex-1">{body}</div>
+    </Card>
+  );
+
+  // Row 3 of the Overview carousel: small pie charts and small line charts,
+  // all the same compact size so the row reads as one uniform strip.
+  const miniCharts = [
+    ...(show("trend")
+      ? [
+          miniCard(
+            "mini-revenue",
+            "Revenue trend",
+            <MiniTrend data={trend} metric="revenue" currency={currency} />,
+          ),
+          miniCard(
+            "mini-orders",
+            "Orders trend",
+            <MiniTrend data={trend} metric="orders" currency={currency} />,
+          ),
+        ]
+      : []),
+    ...(show("categories")
+      ? [
+          miniCard(
+            "mini-categories",
+            "By category",
+            <MiniDonut
+              data={visibleCategories}
+              centerLabel="Categories"
+              centerValue={moneyCompact(sum(visibleCategories))}
+            />,
+          ),
+        ]
+      : []),
+    ...(show("orders")
+      ? [
+          miniCard(
+            "mini-status",
+            "By status",
+            <MiniDonut
+              data={statuses}
+              centerLabel="Orders"
+              centerValue={String(sum(statuses))}
+            />,
+          ),
+        ]
+      : []),
+    ...(show("payments")
+      ? [
+          miniCard(
+            "mini-tender",
+            "Tender mix",
+            <MiniDonut
+              data={visibleMethods}
+              centerLabel="Collected"
+              centerValue={moneyCompact(sum(visibleMethods))}
+            />,
+          ),
+        ]
+      : []),
   ];
+
+  // Full-size charts sit below the carousel on Overview.
+  const bigCharts = (
+    <div className="space-y-4">
+      {show("trend") ? trendCard : null}
+      {show("categories") || show("orders") ? mixGrid : null}
+      {show("payments") ? tenderMix : null}
+      {show("products") ? productsCard : null}
+    </div>
+  );
 
   const empty = snapshot.orderCount === 0 && snapshot.netSales === 0;
 
@@ -879,7 +990,7 @@ export function AnalyticsStudio({
               <LoopRow
                 ariaLabel="Key metrics"
                 speed={30}
-                itemClassName="w-64 sm:w-72"
+                itemClassName="w-72 sm:w-80"
                 items={overviewMetrics}
               />
               <LoopRow
@@ -889,11 +1000,15 @@ export function AnalyticsStudio({
                 items={overviewTiles}
               />
               <LoopRow
-                ariaLabel="Analysis charts"
+                ariaLabel="Mini charts"
                 speed={18}
-                itemClassName="w-[min(88vw,34rem)]"
-                items={overviewCharts}
+                itemClassName="w-72 sm:w-80"
+                items={miniCharts}
               />
+              <div>
+                <h2 className="mb-3 text-sm font-semibold">Charts</h2>
+                {bigCharts}
+              </div>
             </div>
           ) : null}
 
