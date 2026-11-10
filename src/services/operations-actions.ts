@@ -17,6 +17,7 @@ import {
 } from "@/services/data";
 import {
   createCreditNoteLive,
+  completeOrderLive,
   listOpenQuotesAndReceivables,
   recordRefundLive,
   recordStockAdjustmentLive,
@@ -82,6 +83,20 @@ export async function updateOrderStatusAction(
   const result = await updateOrderStatus(orderId, status);
   if (result.ok) revalidateOps();
   return result;
+}
+
+export async function completeOrderAction(orderId: string) {
+  const ws = await loadWorkspaceSession();
+  if (!ws) return { ok: false as const, message: "Not signed in." };
+  try {
+    if (ws.mode === "demo") {
+      const { completeDemoOrder } = await import("@/lib/demo/server");
+      return await completeDemoOrder(orderId);
+    }
+    return await completeOrderLive(orderId);
+  } catch {
+    return { ok: false as const, message: "Could not save. Try again." };
+  }
 }
 
 export async function recordPaymentAction(input: RecordPaymentInput) {

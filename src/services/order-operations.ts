@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import {
+  allowedStatusTransitions,
   canEditOrderNotes,
   isOpenQuote,
   isOpenReceivable,
@@ -277,5 +278,40 @@ export async function recordStockAdjustmentLive(input: {
     return { ok: true, stockQty: next };
   } catch {
     return { ok: false, message: "Could not adjust stock." };
+  }
+}
+
+export async function completeOrderLive(
+  orderId: string,
+): Promise<{ ok: true; orderNumber: string } | { ok: false; message: string }> {
+  try {
+    const live = await requireOrderOpsBrand();
+    const supabase = await createSupabaseServerClient();
+    const { data: order } = await supabase
+      .from("orders")
+      .select("id, order_number, status")
+      .eq("id", orderId)
+      .eq("brand_id", live.brand.id)
+      .maybeSingle();
+    if (!order) return { ok: false, message: "Order not found." };
+    if (!allowedStatusTransitions(order.status).includes("completed")) {
+      return {
+        ok: false,
+        message:
+          order.status === "cancelled"
+            ? "Order is already cancelled."
+            : "Order is already completed.",
+      };
+    }
+    const { error } = await supabase
+      .from("orders")
+      .update({ status: "completed" })
+      .eq("id", orderId)
+      .eq("brand_id", live.brand.id);
+    if (error) return { ok: false, message: error.message };
+    revalidateOrderViews();
+    return { ok: true, orderNumber: order.order_number };
+  } catch {
+    return { ok: false, message: "Could not save. Try again." };
   }
 }

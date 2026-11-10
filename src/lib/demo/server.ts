@@ -7,6 +7,7 @@ import {
   updateDemoMutableBucket,
 } from "@/lib/demo/mutable-store";
 import {
+  applyOrderPatches,
   mergeDemoCustomers,
   mergeDemoOffers,
   mergeDemoProducts,
@@ -17,6 +18,7 @@ import {
   readDemoOrderStore,
 } from "@/lib/demo/order-store";
 import { buildOrderRecord } from "@/lib/orders/build-order-record";
+import { allowedStatusTransitions } from "@/lib/orders/order-rules";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
 import {
   DEMO_WORKSPACE_COOKIE,
@@ -496,6 +498,83 @@ export async function recordDemoPayment(input: RecordPaymentInput) {
 
 function roundMoney(amount: number) {
   return Math.round(amount * 100) / 100;
+}
+
+export async function completeDemoOrder(orderId: string) {
+  const code = await activeDemoBrandCode();
+  const pack = getDemoBrandPack(code);
+  const bucket = await readDemoMutableBucket(code);
+  const stored = await readDemoOrderStore(code);
+  const orders = applyOrderPatches(
+    [...pack.orders, ...stored.orders],
+    bucket,
+  );
+  const order = orders.find((o) => o.id === orderId);
+  if (!order) return { ok: false as const, message: "Order not found." };
+  if (!allowedStatusTransitions(order.status).includes("completed")) {
+    return {
+      ok: false as const,
+      message:
+        order.status === "cancelled"
+          ? "Order is already cancelled."
+          : "Order is already completed.",
+    };
+  }
+
+  const method = order.payment_method?.trim() || null;
+  const patch: Partial<Order> = {
+    status: "completed",
+    ...(method
+      ? { payment_status: "paid" as PaymentStatus, amount_paid: order.grand_total }
+      : {}),
+  };
+  const patched = await patchDemoOrderInStore(code, order.id, patch);
+  if (!patched) {
+    await updateDemoMutableBucket(code, (b) => ({
+      ...b,
+      orderPatches: {
+        ...b.orderPatches,
+        [order.id]: { ...b.orderPatches[order.id], ...patch },
+      },
+    }));
+  }
+
+  if (method) {
+    const payment = {
+      id: `demo-pay-${Date.now()}`,
+      brand_id: pack.brand.id,
+      order_id: order.id,
+      amount: order.grand_total,
+      method,
+      status: "paid" as PaymentStatus,
+      created_at: new Date().toISOString(),
+      split_label: null,
+      notes: "Auto-recorded at completion",
+    };
+    await updateDemoMutableBucket(code, (b) => ({
+      ...b,
+      payments: [payment, ...b.payments],
+    }));
+    await appendDemoAudit(code, {
+      brand_id: pack.brand.id,
+      actor_email: null,
+      action: "payment.recorded",
+      entity_type: "order",
+      entity_id: order.id,
+      detail: `auto:${method}`,
+    });
+  }
+
+  await appendDemoAudit(code, {
+    brand_id: pack.brand.id,
+    actor_email: null,
+    action: "order.status",
+    entity_type: "order",
+    entity_id: order.id,
+    detail: "completed",
+  });
+  revalidateAll();
+  return { ok: true as const, orderNumber: order.order_number };
 }
 
 export async function updateDemoOrderNotes(orderId: string, notes: string) {
