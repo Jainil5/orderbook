@@ -8,6 +8,9 @@ import { useEffect, useState } from "react";
 export function useMounted(): boolean {
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
+    // Intentional: the first client render must also report false to match the
+    // server HTML, so we flip it in an effect rather than read it eagerly.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
   return mounted;

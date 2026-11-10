@@ -7,8 +7,14 @@ export function mergeOpsEntities<T extends { id: string }>(
 ): T[] {
   const byId = new Map<string, T>();
   for (const entity of [...base, ...additions]) {
-    const { deleted: _deleted, ...patch } = overrides[entity.id] ?? {};
-    byId.set(entity.id, { ...entity, ...patch });
+    const override = overrides[entity.id];
+    if (override) {
+      const patch = { ...override };
+      delete patch.deleted;
+      byId.set(entity.id, { ...entity, ...patch });
+    } else {
+      byId.set(entity.id, entity);
+    }
   }
   return Array.from(byId.values()).filter((e) => !overrides[e.id]?.deleted);
 }
