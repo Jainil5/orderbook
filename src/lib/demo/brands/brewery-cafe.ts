@@ -1,6 +1,7 @@
 import type { DemoBrandPack } from "@/lib/demo/brands/types";
 import { DEMO_CAFE_IMAGES } from "@/lib/demo/product-image-urls";
 import { localDayKey } from "@/lib/manager/time";
+import { buildOrderHistory } from "@/lib/demo/brands/history";
 import type { StaffMember } from "@/types/manager";
 
 // Fixture shift dates are keyed by the server's local day so they line up with
@@ -11,7 +12,7 @@ tastingStart.setHours(16, 0, 0, 0);
 const tastingEnd = new Date();
 tastingEnd.setHours(17, 0, 0, 0);
 
-export const BREWERY_CAFE_DEMO: DemoBrandPack = {
+const BREWERY_CAFE_DEMO_BASE: DemoBrandPack = {
   brand: {
     id: "demo-brewery-cafe",
     code: "BR-1",
@@ -440,4 +441,37 @@ export const BREWERY_CAFE_DEMO: DemoBrandPack = {
     ],
   },
   orderNumberPrefix: "BC",
+};
+
+// Deterministic 6-month history (May–Oct complete, current month partial with a
+// daily-rate dip and a trailing-week rebound). Seeded and pure, so every process
+// start reproduces the same rows — the fixtures carry it at zero cookie cost.
+const BREWERY_CAFE_HISTORY = buildOrderHistory({
+  brandId: BREWERY_CAFE_DEMO_BASE.brand.id,
+  prefix: BREWERY_CAFE_DEMO_BASE.orderNumberPrefix,
+  products: BREWERY_CAFE_DEMO_BASE.products,
+  offers: BREWERY_CAFE_DEMO_BASE.offers,
+  taxRatePercent: BREWERY_CAFE_DEMO_BASE.settings.tax_rate_percent ?? 0,
+  rngSeed: 20261109,
+  customerCount: 40,
+  pendingCount: 3,
+  months: [
+    { year: 2026, month: 4, target: 30 },
+    { year: 2026, month: 5, target: 34 },
+    { year: 2026, month: 6, target: 39 },
+    { year: 2026, month: 7, target: 44 },
+    { year: 2026, month: 8, target: 50 },
+    { year: 2026, month: 9, target: 56 },
+  ],
+});
+
+export const BREWERY_CAFE_DEMO: DemoBrandPack = {
+  ...BREWERY_CAFE_DEMO_BASE,
+  customers: [...BREWERY_CAFE_DEMO_BASE.customers, ...BREWERY_CAFE_HISTORY.customers],
+  orders: [...BREWERY_CAFE_DEMO_BASE.orders, ...BREWERY_CAFE_HISTORY.orders],
+  orderItems: [
+    ...BREWERY_CAFE_DEMO_BASE.orderItems,
+    ...BREWERY_CAFE_HISTORY.orderItems,
+  ],
+  payments: [...BREWERY_CAFE_DEMO_BASE.payments, ...BREWERY_CAFE_HISTORY.payments],
 };
