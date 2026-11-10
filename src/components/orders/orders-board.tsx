@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import type { Order, OrderItem, OrderType } from "@/types/database";
+import type { Order, OrderItem } from "@/types/database";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -16,17 +16,11 @@ import {
 import { groupBoardOrders } from "@/lib/orders/board-grouping";
 import { paymentBadgeTone } from "@/lib/orders/payment-badge";
 import { isPendingOrder } from "@/lib/orders/order-rules";
+import { ORDER_TYPE_LABELS } from "@/lib/orders/order-labels";
 import { minutesSince } from "@/lib/manager/time";
 import { completeOrderAction } from "@/services/operations-actions";
 import { useMounted } from "@/lib/use-mounted";
 import { cn } from "@/lib/cn";
-
-const ORDER_TYPE_LABELS: Record<OrderType, string> = {
-  dine_in: "Dine-in",
-  takeaway: "Take-away",
-  delivery: "Delivery",
-  online: "Online order",
-};
 
 type Tab = "ongoing" | "all";
 

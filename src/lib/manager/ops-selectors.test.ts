@@ -2,8 +2,13 @@
 process.env.TZ = "Asia/Kolkata";
 
 import { describe, expect, it } from "vitest";
-import { customerOperationsTimeline, overviewRollups } from "./ops-selectors";
+import {
+  customerOperationsTimeline,
+  ongoingOrderCount,
+  overviewRollups,
+} from "./ops-selectors";
 import type { Appointment, FieldVisit, ServiceJob, Shift, Task } from "@/types/operations";
+import type { Order } from "@/types/database";
 
 const now = new Date("2026-11-08T12:00:00+05:30");
 const apt: Appointment = { id: "a1", brand_id: "b", title: "Tasting", customerId: "c1", staffIds: [], startsAt: "2026-11-08T15:00:00.000Z", endsAt: "2026-11-08T16:00:00.000Z", location: "", serviceId: null, status: "scheduled", notes: "" };
@@ -47,5 +52,14 @@ describe("overviewRollups", () => {
       new Date("2026-11-08T20:00:00+05:30"),
     );
     expect(r).toEqual({ todayAppointments: 1, overdueTasks: 0, onShiftNow: 1, activeVisits: 0, openJobs: 0 });
+  });
+});
+
+describe("ongoingOrderCount", () => {
+  it("counts only pending bills", () => {
+    const o = (status: Order["status"]): Order => ({ status } as Order);
+    expect(
+      ongoingOrderCount([o("pending"), o("pending"), o("confirmed"), o("completed"), o("draft")]),
+    ).toBe(2);
   });
 });

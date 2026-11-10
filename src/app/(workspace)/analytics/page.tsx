@@ -7,6 +7,7 @@ import {
 } from "@/lib/analytics/date-range";
 import { computeMarginSnapshot } from "@/lib/analytics/margin";
 import { snapshotFromOrderRecords } from "@/lib/analytics/snapshot";
+import { revenueOrders } from "@/lib/orders/order-rules";
 import {
   getDemoOrderItems,
   listDemoOrders,
@@ -78,8 +79,11 @@ export default async function AnalyticsPage({
       orderIds.map((id) => getDemoOrderItems(id, code)),
     );
     const orderItems = itemGroups.flat();
+    // Only completed bills earn — trend, mix, margin and collection all read
+    // from this revenue set while the receivables list stays all-status.
+    const revenue = revenueOrders(orders);
     const marginSnapshot = computeMarginSnapshot({
-      orders,
+      orders: revenue,
       orderItems,
       products,
     });
@@ -92,7 +96,7 @@ export default async function AnalyticsPage({
           rangeTo={to}
           rangePreset={range.preset}
           snapshot={snapshotFromOrderRecords({
-            orders,
+            orders: revenue,
             items: orderItems,
             products,
             payments,
@@ -119,14 +123,15 @@ export default async function AnalyticsPage({
   const filteredPayments = paymentsRes.data.filter((payment) =>
     inRangeOrderIds.has(payment.order_id),
   );
+  const liveRevenue = revenueOrders(ordersRes.data);
   const marginSnapshot = computeMarginSnapshot({
-    orders: ordersRes.data,
+    orders: liveRevenue,
     orderItems: itemsRes.data,
     products: productsRes.data,
   });
 
   let snapshot = snapshotFromOrderRecords({
-    orders: ordersRes.data,
+    orders: liveRevenue,
     items: itemsRes.data,
     products: productsRes.data,
     payments: filteredPayments,

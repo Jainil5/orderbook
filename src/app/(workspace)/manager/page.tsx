@@ -5,10 +5,10 @@ import { ManagerSubnav } from "@/components/manager/manager-subnav";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { listDemoStaff } from "@/lib/demo/staff-data";
-import { toDemoBrandCode } from "@/lib/demo/data";
+import { listDemoOrders, toDemoBrandCode } from "@/lib/demo/data";
 import { staffAvailabilitySummary } from "@/lib/manager/staff";
 import { loadDemoOperations } from "@/lib/demo/operations-data";
-import { overviewRollups } from "@/lib/manager/ops-selectors";
+import { ongoingOrderCount, overviewRollups } from "@/lib/manager/ops-selectors";
 import { visibleManagerModules, type ManagerModuleKey } from "@/lib/workspace/manager-modules";
 import { loadWorkspaceSession } from "@/lib/workspace/session";
 
@@ -47,6 +47,9 @@ export default async function ManagerPage() {
     { appointments: ops.appointments, tasks: ops.tasks, shifts: ops.shifts, visits: ops.visits, jobs: ops.serviceJobs },
     new Date(),
   );
+  // Bills captured today but not yet completed — surfaced on every manager's
+  // overview regardless of which operations modules are visible.
+  const ongoing = ongoingOrderCount(await listDemoOrders(undefined, brandCode));
   const rollupCards: { label: string; value: number; href: string; module: ManagerModuleKey }[] = [
     { label: "Today's appointments", value: rollups.todayAppointments, href: "/manager/appointments", module: "appointments" },
     { label: "Overdue tasks", value: rollups.overdueTasks, href: "/manager/tasks", module: "tasks" },
@@ -76,6 +79,12 @@ export default async function ManagerPage() {
         </div>
       ) : null}
       <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
+        <Link href="/orders" className="ob-touch-target block">
+          <Card className="h-full p-4 transition-shadow hover:shadow-[var(--ob-shadow-sm)]">
+            <p className="text-sm text-[var(--ob-text-muted)]">Ongoing orders</p>
+            <p className="mt-1 text-2xl font-semibold">{ongoing}</p>
+          </Card>
+        </Link>
         {visibleRollupCards.map((card) => (
           <Link key={card.label} href={card.href} className="ob-touch-target block">
             <Card className="h-full p-4 transition-shadow hover:shadow-[var(--ob-shadow-sm)]">

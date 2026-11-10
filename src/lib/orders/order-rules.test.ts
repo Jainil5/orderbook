@@ -3,6 +3,7 @@ import {
   allowedStatusTransitions,
   isPendingOrder,
   isRevenueOrder,
+  revenueOrders,
 } from "./order-rules";
 
 describe("lifecycle rules", () => {
@@ -24,5 +25,15 @@ describe("lifecycle rules", () => {
     expect(isPendingOrder({ status: "pending" })).toBe(true);
     expect(isPendingOrder({ status: "confirmed" })).toBe(false);
     expect(isPendingOrder({ status: "completed" })).toBe(false);
+  });
+  it("revenueOrders keeps only completed rows", () => {
+    const orders = [
+      { id: "a", status: "completed" as const },
+      { id: "b", status: "pending" as const },
+      { id: "c", status: "draft" as const },
+      { id: "d", status: "cancelled" as const },
+      { id: "e", status: "completed" as const },
+    ];
+    expect(revenueOrders(orders).map((o) => o.id)).toEqual(["a", "e"]);
   });
 });

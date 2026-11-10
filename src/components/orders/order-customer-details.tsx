@@ -1,14 +1,8 @@
 import Link from "next/link";
-import type { Customer, Order, OrderType } from "@/types/database";
+import type { Customer, Order } from "@/types/database";
 import { Card } from "@/components/ui/card";
 import { formatDate } from "@/lib/format";
-
-const ORDER_TYPE_LABELS: Record<OrderType, string> = {
-  dine_in: "Dine-in",
-  takeaway: "Take-away",
-  delivery: "Delivery",
-  online: "Online order",
-};
+import { ORDER_TYPE_LABELS } from "@/lib/orders/order-labels";
 
 export function OrderCustomerDetails({
   order,

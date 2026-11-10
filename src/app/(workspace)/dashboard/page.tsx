@@ -9,10 +9,15 @@ import { snapshotFromOrderRecords } from "@/lib/analytics/snapshot";
 import {
   getDemoOrderItems,
   listDemoOrders,
+  listDemoPayments,
   listDemoProductsMerged,
   toDemoBrandCode,
 } from "@/lib/demo/data";
-import { isOpenQuote, isOpenReceivable } from "@/lib/orders/order-rules";
+import {
+  isOpenQuote,
+  isOpenReceivable,
+  revenueOrders,
+} from "@/lib/orders/order-rules";
 import {
   listOrderItemsForOrders,
   listOrders,
@@ -37,12 +42,16 @@ export default async function DashboardPage({
   if (ws.mode === "demo") {
     const code = toDemoBrandCode(ws.brand.code);
     const allOrders = await listDemoOrders(undefined, code);
-    const orders = allOrders.filter((o) =>
+    const rangedOrders = allOrders.filter((o) =>
       orderInCalendarRange(o.created_at, range.from, range.to),
     );
-    const [itemGroups, products] = await Promise.all([
+    // Only completed bills earn; pending/draft/cancelled stay out of the trend
+    // and the collection widget, while open balances below still surface them.
+    const orders = revenueOrders(rangedOrders);
+    const [itemGroups, products, payments] = await Promise.all([
       Promise.all(orders.map((o) => getDemoOrderItems(o.id, code))),
       listDemoProductsMerged({}, code),
+      listDemoPayments(code),
     ]);
     const openOrders = allOrders
       .filter((o) => isOpenQuote(o) || isOpenReceivable(o))
@@ -55,6 +64,7 @@ export default async function DashboardPage({
             orders,
             items: itemGroups.flat(),
             products,
+            payments,
             currencyCode: ws.settings.currency_code,
           })}
           range={range}
@@ -77,7 +87,7 @@ export default async function DashboardPage({
     <Suspense fallback={null}>
       <DashboardHome
         snapshot={snapshotFromOrderRecords({
-          orders: ordersRes.data,
+          orders: revenueOrders(ordersRes.data),
           items: itemsRes.data,
           products: productsRes.data,
           currencyCode: ws.settings.currency_code,
