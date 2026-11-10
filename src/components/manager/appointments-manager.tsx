@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { APPOINTMENT_STATUS_LABELS, groupAppointments } from "@/lib/manager/appointments";
 import { toLocalInputValue } from "@/lib/manager/time";
@@ -183,7 +184,7 @@ export function AppointmentsManager({
                   <div className="min-w-0">
                     <p className="font-medium">
                       {a.title}
-                      <span className="ml-2 rounded bg-[var(--ob-surface-muted)] px-1.5 py-0.5 text-xs text-[var(--ob-text-muted)]">{APPOINTMENT_STATUS_LABELS[a.status]}</span>
+                      <Badge tone={a.status === "completed" ? "success" : a.status === "cancelled" ? "danger" : "warning"} className="ml-2">{APPOINTMENT_STATUS_LABELS[a.status]}</Badge>
                     </p>
                     <p className="text-sm text-[var(--ob-text-muted)]">
                       {new Date(a.startsAt).toLocaleString()} – {new Date(a.endsAt).toLocaleTimeString()}

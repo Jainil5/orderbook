@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { isTaskOverdue, TASK_PRIORITIES, TASK_PRIORITY_LABELS, TASK_STATUS_LABELS } from "@/lib/manager/tasks";
 import { toLocalInputValue } from "@/lib/manager/time";
@@ -12,10 +13,10 @@ import type { Task, TaskStatus } from "@/types/operations";
 type Option = { id: string; name: string };
 type Filter = "all" | TaskStatus | "overdue";
 
-const PRIORITY_STYLES: Record<Task["priority"], string> = {
-  high: "bg-[#fbeaec] text-[#be123c]",
-  medium: "bg-[#fdf1e3] text-[#b45309]",
-  low: "bg-[var(--ob-surface-muted)] text-[var(--ob-text-muted)]",
+const PRIORITY_TONE: Record<Task["priority"], "danger" | "warning" | "neutral"> = {
+  high: "danger",
+  medium: "warning",
+  low: "neutral",
 };
 
 export function TasksManager({
@@ -177,13 +178,13 @@ export function TasksManager({
             const overdue = mounted && isTaskOverdue(t, now);
             const customerName = nameOf(customers, t.customerId);
             return (
-              <Card key={t.id} className={`p-4 ${overdue ? "border border-[#be123c]!" : ""}`}>
+              <Card key={t.id} className={`p-4 ${overdue ? "border border-[var(--ob-danger)]!" : ""}`}>
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-medium">
                       {t.title}
-                      <span className={`ml-2 rounded px-1.5 py-0.5 text-xs ${PRIORITY_STYLES[t.priority]}`}>{TASK_PRIORITY_LABELS[t.priority]}</span>
-                      <span className="ml-2 rounded bg-[var(--ob-surface-muted)] px-1.5 py-0.5 text-xs text-[var(--ob-text-muted)]">{TASK_STATUS_LABELS[t.status]}</span>
+                      <Badge tone={PRIORITY_TONE[t.priority]} className="ml-2">{TASK_PRIORITY_LABELS[t.priority]}</Badge>
+                      <Badge tone={t.status === "done" ? "success" : t.status === "in_progress" ? "warning" : "neutral"} className="ml-2">{TASK_STATUS_LABELS[t.status]}</Badge>
                     </p>
                     <p className="text-sm text-[var(--ob-text-muted)]">
                       {nameOf(staff, t.assigneeStaffId) ?? "Unassigned"}

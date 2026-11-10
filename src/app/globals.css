@@ -90,7 +90,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-fraunces);
   --font-mono: var(--font-geist-mono);
   --color-ob-surface: var(--ob-surface);
   --color-ob-border: var(--ob-border);
@@ -102,7 +103,7 @@
 body {
   background: var(--ob-bg);
   color: var(--ob-text);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
   font-size: 1.0625rem;
   line-height: 1.55;
 }
@@ -609,6 +610,19 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .ob-grow-bar {
+    animation: none;
+  }
+}
+
+/* Blinking caret for the landing hero typewriter. */
+@keyframes ob-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [style*="ob-caret"] {
     animation: none;
   }
 }

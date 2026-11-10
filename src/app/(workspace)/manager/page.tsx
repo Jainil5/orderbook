@@ -49,56 +49,53 @@ export default async function ManagerPage() {
   );
   // Bills captured today but not yet completed — surfaced on every manager's
   // overview regardless of which operations modules are visible.
-  const ongoing = ongoingOrderCount(await listDemoOrders(undefined, brandCode));
-  const rollupCards: { label: string; value: number; href: string; module: ManagerModuleKey }[] = [
-    { label: "Today's appointments", value: rollups.todayAppointments, href: "/manager/appointments", module: "appointments" },
-    { label: "Overdue tasks", value: rollups.overdueTasks, href: "/manager/tasks", module: "tasks" },
-    { label: "On shift now", value: rollups.onShiftNow, href: "/manager/schedules", module: "schedules" },
-    { label: "Active visits", value: rollups.activeVisits, href: "/manager/visits", module: "visits" },
-    { label: "Open jobs", value: rollups.openJobs, href: "/manager/services", module: "services" },
+  const orders = await listDemoOrders(undefined, brandCode);
+  const ongoing = ongoingOrderCount(orders);
+  const openTasks = ops.tasks.filter((t) => t.status !== "done").length;
+  const count = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+  const detailCards: { label: string; value: number; detail: string; href: string }[] = [
+    { label: "Ongoing orders", value: ongoing, detail: `of ${count(orders.length, "captured bill")}`, href: "/orders" },
   ];
-  const visibleRollupCards = rollupCards.filter((card) => modules.some((m) => m.key === card.module));
-  const stats = [
-    { label: "Active staff", value: summary.active },
-    { label: "Available now", value: summary.available },
-    { label: "Busy", value: summary.busy },
-    { label: "Off duty", value: summary.off },
+  if (!ws.hiddenManagerModules.includes("staff")) {
+    detailCards.push({
+      label: "Active staff",
+      value: summary.active,
+      detail: `Available ${summary.available} · Busy ${summary.busy} · Off duty ${summary.off}`,
+      href: "/manager/staff",
+    });
+  }
+  const rollupCards: { label: string; value: number; detail: string; module: ManagerModuleKey; href: string }[] = [
+    { label: "Today's appointments", value: rollups.todayAppointments, detail: `of ${ops.appointments.length} booked`, href: "/manager/appointments", module: "appointments" },
+    { label: "Overdue tasks", value: rollups.overdueTasks, detail: `of ${count(openTasks, "open task")}`, href: "/manager/tasks", module: "tasks" },
+    { label: "On shift now", value: rollups.onShiftNow, detail: `of ${count(ops.shifts.length, "rostered shift")}`, href: "/manager/schedules", module: "schedules" },
+    { label: "Active visits", value: rollups.activeVisits, detail: `of ${count(ops.visits.length, "field visit")}`, href: "/manager/visits", module: "visits" },
+    { label: "Open jobs", value: rollups.openJobs, detail: `of ${count(ops.serviceJobs.length, "service job")}`, href: "/manager/services", module: "services" },
+  ];
+  const cards = [
+    ...detailCards,
+    ...rollupCards.filter((card) => modules.some((m) => m.key === card.module)),
   ];
 
   return (
     <PageShell title="Management Overview">
       <ManagerSubnav activeHref="/manager" />
-      {!ws.hiddenManagerModules.includes("staff") ? (
-        <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {stats.map((stat) => (
-            <Card key={stat.label} className="p-4">
-              <p className="text-sm text-[var(--ob-text-muted)]">{stat.label}</p>
-              <p className="mt-1 text-2xl font-semibold">{stat.value}</p>
-            </Card>
-          ))}
-        </div>
-      ) : null}
-      <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
-        <Link href="/orders" className="ob-touch-target block">
-          <Card className="h-full p-4 transition-shadow hover:shadow-[var(--ob-shadow-sm)]">
-            <p className="text-sm text-[var(--ob-text-muted)]">Ongoing orders</p>
-            <p className="mt-1 text-2xl font-semibold">{ongoing}</p>
-          </Card>
-        </Link>
-        {visibleRollupCards.map((card) => (
+      <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {cards.map((card) => (
           <Link key={card.label} href={card.href} className="ob-touch-target block">
             <Card className="h-full p-4 transition-shadow hover:shadow-[var(--ob-shadow-sm)]">
-              <p className="text-sm text-[var(--ob-text-muted)]">{card.label}</p>
-              <p className="mt-1 text-2xl font-semibold">{card.value}</p>
+              <p className="text-sm font-medium text-[var(--ob-text-secondary)]">{card.label}</p>
+              <p className="mt-1 font-display text-3xl font-semibold tracking-tight">{card.value}</p>
+              <p className="mt-1 text-xs text-[var(--ob-text-muted)]">{card.detail}</p>
             </Card>
           </Link>
         ))}
       </div>
+      <h2 className="mb-3 font-display text-lg font-semibold tracking-tight">Modules</h2>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {modules.map((module) => (
           <Link key={module.key} href={module.href} className="block">
             <Card className="h-full p-4 transition-shadow hover:shadow-[var(--ob-shadow-sm)]">
-              <p className="font-medium">{module.label}</p>
+              <p className="font-display text-lg font-semibold tracking-tight">{module.label}</p>
               <p className="mt-1 text-sm text-[var(--ob-text-muted)]">
                 {MODULE_DESCRIPTIONS[module.key]}
               </p>

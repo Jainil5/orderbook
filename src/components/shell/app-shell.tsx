@@ -315,7 +315,7 @@ export function AppShell({
                 <span className="sr-only sm:not-sr-only sm:inline">Menu</span>
               </button>
               <div className="min-w-0 flex-1">
-                <h1 className="truncate text-lg font-semibold sm:text-xl">
+                <h1 className="truncate font-display text-2xl font-semibold tracking-tight sm:text-[1.75rem]">
                   {pageTitle}
                 </h1>
                 <p className="hidden truncate text-sm text-[var(--ob-text-muted)] sm:block">

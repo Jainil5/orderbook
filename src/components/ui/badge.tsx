@@ -9,17 +9,20 @@ export function Badge({
   tone?: "neutral" | "success" | "warning" | "demo" | "danger";
   className?: string;
 }) {
+  const tint = (token: string) =>
+    `bg-[color-mix(in_srgb,var(${token})_14%,transparent)] text-[var(${token})] ring-1 ring-inset ring-[color-mix(in_srgb,var(${token})_30%,transparent)]`;
   const tones = {
-    neutral: "bg-[var(--ob-surface-muted)] text-[var(--ob-text-secondary)]",
-    success: "bg-emerald-50 text-[var(--ob-success)]",
-    warning: "bg-amber-50 text-[var(--ob-warning)]",
-    demo: "bg-violet-50 text-[var(--ob-demo)]",
-    danger: "bg-red-50 text-[var(--ob-danger)]",
+    neutral:
+      "bg-[var(--ob-surface-muted)] text-[var(--ob-text-secondary)] ring-1 ring-inset ring-[var(--ob-border)]",
+    success: tint("--ob-success"),
+    warning: tint("--ob-warning"),
+    demo: tint("--ob-demo"),
+    danger: tint("--ob-danger"),
   };
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+        "inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-semibold",
         tones[tone],
         className,
       )}

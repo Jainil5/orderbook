@@ -24,7 +24,7 @@ export function ManagerSubnav({ activeHref }: { activeHref: string }) {
               className={cn(
                 "ob-touch-target inline-flex items-center whitespace-nowrap rounded-t-md border-b-2 px-3 text-sm transition-colors",
                 active
-                  ? "border-[var(--ob-primary)] font-medium text-[var(--ob-text)]"
+                  ? "border-[var(--ob-primary)] font-semibold text-[var(--ob-text)]"
                   : "border-transparent text-[var(--ob-text-muted)] hover:text-[var(--ob-text)]",
               )}
             >

@@ -14,6 +14,7 @@ import {
   STAFF_ROLE_LABELS,
 } from "@/lib/manager/staff";
 import type { StaffAvailability, StaffMember } from "@/types/manager";
+import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
 export function StaffManager({
@@ -174,9 +175,9 @@ export function StaffManager({
                 <p className="font-medium">
                   {member.name}
                   {member.status === "inactive" ? (
-                    <span className="ml-2 rounded bg-[var(--ob-surface-muted)] px-1.5 py-0.5 text-xs text-[var(--ob-text-muted)]">
+                    <Badge tone="neutral" className="ml-2">
                       Inactive
-                    </span>
+                    </Badge>
                   ) : null}
                 </p>
                 <p className="text-sm text-[var(--ob-text-muted)]">

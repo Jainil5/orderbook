@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import {
   SERVICE_JOB_STATUSES,
@@ -224,7 +225,7 @@ export function ServicesManager({
                   <div className="min-w-0">
                     <p className="font-medium">
                       {s.name}
-                      {!s.isActive ? <span className="ml-2 rounded bg-[var(--ob-surface-muted)] px-1.5 py-0.5 text-xs text-[var(--ob-text-muted)]">Inactive</span> : null}
+                      {!s.isActive ? <Badge tone="neutral" className="ml-2">Inactive</Badge> : null}
                     </p>
                     <p className="text-sm text-[var(--ob-text-muted)]">{s.durationMinutes} min · ₹{s.price}{s.description ? ` · ${s.description}` : ""}</p>
                   </div>

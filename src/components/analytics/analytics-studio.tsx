@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/workspace/page-shell";
 import { AnalyticsPaymentsTable } from "@/components/analytics/analytics-payments-table";
 import { RangeSelector } from "@/components/workspace/range-selector";
+import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { StatCard } from "@/components/ui/stat-card";
@@ -15,7 +16,7 @@ import { CHART_COLORS } from "@/components/analytics/charts";
 import { formatMoney } from "@/lib/format";
 import type { AnalyticsSnapshot, Slice, TrendPoint } from "@/lib/analytics/snapshot";
 import type { MarginSnapshot } from "@/lib/analytics/margin";
-import type { RangePreset } from "@/lib/analytics/date-range";
+import { presetLabel, type RangePreset } from "@/lib/analytics/date-range";
 import type { Payment } from "@/types/database";
 import { SlidersHorizontal } from "lucide-react";
 
@@ -305,6 +306,12 @@ export function AnalyticsStudio({
   const collected = snapshot.paidAmount + snapshot.pendingAmount;
   const collectionRate = collected ? (snapshot.paidAmount / collected) * 100 : 0;
   const bestDay = [...snapshot.salesOverTime].sort((a, b) => b.revenue - a.revenue)[0];
+  const dayPartLabel = DAY_PARTS.find((d) => d.id === dayPart)?.label ?? dayPart;
+  const rangeLabel = rangePreset
+    ? presetLabel(rangePreset)
+    : rangeFrom && rangeTo
+      ? `${rangeFrom} – ${rangeTo}`
+      : "All time";
 
   function toggleMetric(metric: Metric) {
     setMetrics((current) => {
@@ -385,7 +392,7 @@ export function AnalyticsStudio({
     <Card>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-sm font-semibold">Sales trend</h2>
+          <h2 className="font-display text-base font-semibold">Sales trend</h2>
           <p className="text-xs text-[var(--ob-text-muted)]">
             {dayPart === "week"
               ? "Entire sample"
@@ -488,7 +495,7 @@ export function AnalyticsStudio({
 
   const productsCard = (
     <Card>
-      <h2 className="text-sm font-semibold">Top products</h2>
+      <h2 className="font-display text-base font-semibold">Top products</h2>
       <p className="mb-4 text-xs text-[var(--ob-text-muted)]">
         Tap a product to hide it from the ranking.
       </p>
@@ -518,7 +525,7 @@ export function AnalyticsStudio({
 
   const collectionsCard = (
     <Card>
-      <h2 className="text-sm font-semibold">Collections</h2>
+      <h2 className="font-display text-base font-semibold">Collections</h2>
       <p className="mt-1 text-2xl font-semibold tracking-tight">
         {collectionRate.toFixed(0)}%
       </p>
@@ -564,7 +571,7 @@ export function AnalyticsStudio({
   // with its donut and breakdown, stays in the Payments tab).
   const collectionsTile = (
     <Card>
-      <h2 className="text-sm font-semibold">Collections</h2>
+      <h2 className="font-display text-base font-semibold">Collections</h2>
       <p className="mt-1 text-2xl font-semibold tracking-tight">
         {collectionRate.toFixed(0)}%
       </p>
@@ -596,7 +603,7 @@ export function AnalyticsStudio({
   );
   const paymentRecords = (
     <div>
-      <h2 className="mb-3 text-sm font-semibold">Payment records</h2>
+      <h2 className="mb-3 font-display text-base font-semibold">Payment records</h2>
       {paymentsNotice ? (
         <p role="alert" className="mb-3 text-sm text-[var(--ob-danger)]">{paymentsNotice}</p>
       ) : null}
@@ -644,7 +651,7 @@ export function AnalyticsStudio({
         />
       </div>
       <Card>
-        <h2 className="text-sm font-semibold">Top lines by margin</h2>
+        <h2 className="font-display text-base font-semibold">Top lines by margin</h2>
         {marginSnapshot.lines.length ? (
           <div className="mt-4 overflow-x-auto">
             <table className="min-w-full text-left text-sm">
@@ -685,7 +692,7 @@ export function AnalyticsStudio({
 
   const marginTileCard = marginSnapshot ? (
     <Card>
-      <h2 className="text-sm font-semibold">Margin snapshot</h2>
+      <h2 className="font-display text-base font-semibold">Margin snapshot</h2>
       <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
         <div>
           <dt className="text-xs text-[var(--ob-text-muted)]">Revenue (lines)</dt>
@@ -709,7 +716,7 @@ export function AnalyticsStudio({
 
   const categoryListTile = categories.length ? (
     <Card>
-      <h2 className="mb-3 text-sm font-semibold">Sales by category</h2>
+      <h2 className="mb-3 font-display text-base font-semibold">Sales by category</h2>
       {visibleCategories.length ? (
         <RankBars data={visibleCategories} />
       ) : (
@@ -852,19 +859,7 @@ export function AnalyticsStudio({
   const empty = snapshot.orderCount === 0 && snapshot.netSales === 0;
 
   return (
-    <PageShell
-      title="Analytics"
-      headerActions={
-        <div className="hidden items-center gap-2 sm:flex">
-          <SegmentedControl
-            label="Trend days"
-            value={dayPart}
-            onChange={setDayPart}
-            options={[...DAY_PARTS]}
-          />
-        </div>
-      }
-    >
+    <PageShell title="Analytics">
       {rangeFrom && rangeTo ? (
         <RangeSelector
           basePath="/analytics"
@@ -876,33 +871,35 @@ export function AnalyticsStudio({
       {rangeNotice ? (
         <p className="mb-3 text-xs text-[var(--ob-text-muted)]">{rangeNotice}</p>
       ) : null}
-      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-sm text-[var(--ob-text-secondary)]">
-            Gross {money(snapshot.grossSales)} · Net {money(snapshot.netSales)}
-            {bestDay ? ` · Strongest day ${bestDay.date}` : ""}
-          </p>
-          {snapshot.partial ? (
-            <p className="mt-1 max-w-2xl text-xs text-[var(--ob-text-muted)]">
-              Category, product, and tender charts appear when line items and payments
-              are available. Trends and status use orders already in this workspace.
-            </p>
-          ) : (
-            <p className="mt-1 text-xs text-[var(--ob-text-muted)]">
-              Summary covers every order in the selected date range. The trend chart
-              additionally filters to the day parts chosen above.
-            </p>
-          )}
+      {snapshot.partial ? (
+        <p className="mb-3 max-w-2xl text-xs text-[var(--ob-text-muted)]">
+          Category, product, and tender charts appear when line items and payments
+          are available. Trends and status use orders already in this workspace.
+        </p>
+      ) : null}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <SegmentedControl
+            label="Trend days"
+            value={dayPart}
+            onChange={setDayPart}
+            options={[...DAY_PARTS]}
+          />
+          <button
+            type="button"
+            aria-expanded={customize}
+            onClick={() => setCustomize((open) => !open)}
+            className="ob-press inline-flex min-h-[2.75rem] items-center gap-2 rounded-full border border-[var(--ob-border)] bg-[var(--ob-surface)] px-3 py-1.5 text-xs font-medium"
+          >
+            <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden />
+            Customize view
+          </button>
         </div>
-        <button
-          type="button"
-          aria-expanded={customize}
-          onClick={() => setCustomize((open) => !open)}
-          className="ob-press inline-flex min-h-[2.75rem] items-center gap-2 rounded-full border border-[var(--ob-border)] bg-[var(--ob-surface)] px-3 py-1.5 text-xs font-medium"
-        >
-          <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden />
-          Customize view
-        </button>
+        <p className="flex flex-wrap items-center gap-2 text-xs text-[var(--ob-text-muted)]">
+          <span>Showing</span>
+          <Badge tone="demo">{rangeLabel}</Badge>
+          <Badge tone="neutral">{dayPartLabel}</Badge>
+        </p>
       </div>
 
       {notice ? (
@@ -911,20 +908,11 @@ export function AnalyticsStudio({
         </p>
       ) : null}
 
-      <div className="mb-4 sm:hidden">
-        <SegmentedControl
-          label="Trend days"
-          value={dayPart}
-          onChange={setDayPart}
-          options={[...DAY_PARTS]}
-        />
-      </div>
-
       <Tabs label="Analytics sections" value={tab} onChange={setTab} options={[...TABS]} />
 
       {customize ? (
         <Card className="mt-4">
-          <p className="text-sm font-semibold">What to show on Overview</p>
+          <p className="font-display text-base font-semibold">What to show on Overview</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {PANELS.map((panel) => {
               const on = panels.includes(panel.id);
@@ -1006,7 +994,7 @@ export function AnalyticsStudio({
                 items={miniCharts}
               />
               <div>
-                <h2 className="mb-3 text-sm font-semibold">Charts</h2>
+                <h2 className="mb-3 font-display text-base font-semibold">Charts</h2>
                 {bigCharts}
               </div>
             </div>
@@ -1088,7 +1076,7 @@ function MixCard({
 }) {
   return (
     <Card>
-      <h2 className="mb-2 text-sm font-semibold">{title}</h2>
+      <h2 className="mb-2 font-display text-base font-semibold">{title}</h2>
       {items.length === 0 ? (
         <p className="py-10 text-sm text-[var(--ob-text-muted)]">{emptyLabel}</p>
       ) : (

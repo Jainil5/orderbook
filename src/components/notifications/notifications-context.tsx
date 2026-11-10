@@ -31,6 +31,8 @@ interface NotificationsApi {
   toasts: ObNotification[];
   unreadCount: number;
   notify: (input: NotifyInput) => void;
+  /** Backfills the bell feed (e.g. demo data) without firing toasts. */
+  seed: (notifications: ObNotification[]) => void;
   markRead: (id: string) => void;
   markAllRead: () => void;
   dismiss: (id: string) => void;
@@ -81,6 +83,16 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     }, TOAST_MS);
   }, []);
 
+  const seed = useCallback((incoming: ObNotification[]) => {
+    setItems((state) => {
+      const fresh = incoming.filter((n) => !state.some((s) => s.id === n.id));
+      if (fresh.length === 0) return state;
+      return [...state, ...fresh]
+        .sort((a, b) => b.createdAt - a.createdAt)
+        .slice(0, ITEMS_LIMIT);
+    });
+  }, []);
+
   const markRead = useCallback((id: string) => {
     setItems((state) =>
       state.map((item) => (item.id === id ? { ...item, read: true } : item)),
@@ -107,12 +119,13 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       toasts,
       unreadCount: items.filter((item) => !item.read).length,
       notify,
+      seed,
       markRead,
       markAllRead,
       dismiss,
       clearAll,
     }),
-    [items, toasts, notify, markRead, markAllRead, dismiss, clearAll],
+    [items, toasts, notify, seed, markRead, markAllRead, dismiss, clearAll],
   );
 
   return (

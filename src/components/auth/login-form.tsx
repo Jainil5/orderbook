@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
+import { LogoMark } from "@/components/brand/logo-mark";
 import { Meteors } from "@/components/effects/meteors";
 
 export function LoginForm() {
@@ -27,10 +28,11 @@ export function LoginForm() {
       <Meteors count={10} seed={11} />
       <div className="relative z-[1] mx-auto flex min-h-[100dvh] max-w-md flex-col justify-center px-4 py-8 ob-safe-top ob-safe-bottom sm:py-12">
       <div className="ob-card p-6 sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--ob-text-muted)]">
+        <LogoMark size={52} spin />
+        <p className="mt-5 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--ob-text-muted)]">
           WebsiteIn
         </p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight">OrderBook</h1>
+        <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight">OrderBook</h1>
         <p className="mt-2 text-sm text-[var(--ob-text-secondary)]">
           Sign in with your business ID and password.
         </p>

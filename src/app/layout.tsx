@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { EnvConfigBanner } from "@/components/env-config-banner";
 import { CardGlow } from "@/components/effects/card-glow";
@@ -10,9 +10,17 @@ import {
   THEME_INIT_SCRIPT,
 } from "@/lib/theme";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -21,8 +29,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OrderBook — WebsiteIn",
-  description: "Multi-business order management and POS workspace",
+  title: "OrderBook — POS, billing & analytics for every business",
+  description:
+    "OrderBook is a multi-business order management and POS workspace: billing, orders, catalog, quotations, offers, and live analytics for breweries, furniture studios, and more.",
 };
 
 export const viewport = {
@@ -42,7 +51,7 @@ export default async function RootLayout({
     <html
       lang="en"
       data-theme={theme}
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${fraunces.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
