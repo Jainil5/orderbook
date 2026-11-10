@@ -135,4 +135,20 @@ describe("bill lifecycle", () => {
     expect(built.record.order.delivery_address).toBe("12 MG Road");
     expect(built.record.order.payment_reference).toBe("Zomato-1234");
   });
+
+  it("rejects an unavailable product like an inactive one", () => {
+    const built = buildOrderRecord({
+      ...base,
+      products: [{ ...product, unavailable: true }],
+      input: {
+        customerId: null,
+        lines: [{ productId: "p1", quantity: 1 }],
+        paymentMethod: "Cash",
+        paymentStatus: "pending",
+      },
+    });
+    expect(built.ok).toBe(false);
+    if (built.ok) return;
+    expect(built.message).toBe("A product on this bill is invalid or inactive.");
+  });
 });

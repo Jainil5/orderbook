@@ -50,7 +50,7 @@ function buildPricedLines(params: {
   const lines: PricedLine[] = [];
   for (const line of params.input.lines) {
     const product = productById.get(line.productId);
-    if (!product || !product.is_active) {
+    if (!product || !product.is_active || product.unavailable) {
       return {
         ok: false,
         message: "A product on this bill is invalid or inactive.",

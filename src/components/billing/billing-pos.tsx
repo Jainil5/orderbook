@@ -309,6 +309,10 @@ export function BillingPos({
   }
 
   function tryAddProduct(product: Product) {
+    if (product.unavailable) {
+      setFeedback("Not available right now.");
+      return;
+    }
     const mods = parseProductModifiers(product);
     if (mods.length) {
       setModifierPick({ product, ids: [] });

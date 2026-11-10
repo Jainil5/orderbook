@@ -53,6 +53,8 @@ export type Product = {
   low_stock_threshold?: number | null;
   wholesale_price?: number | null;
   modifiers_json?: ProductModifier[] | null;
+  /** Catalog flag: cashier cannot add it to a bill (Billing shows NA). */
+  unavailable?: boolean;
 };
 
 export type ProductModifier = {

@@ -209,6 +209,46 @@ export async function setDemoProductActive(
   return { ok: true };
 }
 
+export async function setDemoProductUnavailable(
+  productId: string,
+  unavailable: boolean,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const code = await activeDemoBrandCode();
+  const pack = getDemoBrandPack(code);
+  const bucket = await readDemoMutableBucket(code);
+  const inPack = pack.products.some((p) => p.id === productId);
+  const inBucket = bucket.products.some((p) => p.id === productId);
+  if (!inPack && !inBucket) return { ok: false, error: "Product not found." };
+
+  if (inPack) {
+    await updateDemoMutableBucket(code, (b) => ({
+      ...b,
+      productOverrides: {
+        ...b.productOverrides,
+        [productId]: { ...b.productOverrides[productId], unavailable },
+      },
+    }));
+  } else {
+    await updateDemoMutableBucket(code, (b) => ({
+      ...b,
+      products: b.products.map((p) =>
+        p.id === productId ? { ...p, unavailable } : p,
+      ),
+    }));
+  }
+  await appendDemoAudit(code, {
+    brand_id: pack.brand.id,
+    actor_email: null,
+    action: "product.updated",
+    entity_type: "product",
+    entity_id: productId,
+    detail: `unavailable:${unavailable}`,
+  });
+  revalidateAll();
+  revalidatePath("/products");
+  return { ok: true };
+}
+
 export async function submitDemoOrder(
   input: CreateOrderInput,
 ): Promise<CreateOrderResult> {

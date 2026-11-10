@@ -13,6 +13,7 @@ import { canManageProducts } from "@/lib/security/validate-product";
 import {
   saveProductAction,
   toggleProductActiveAction,
+  toggleProductUnavailableAction,
 } from "@/services/product-actions";
 import { Pencil, Plus } from "lucide-react";
 import { ProductPrice } from "@/components/products/product-price";
@@ -264,6 +265,36 @@ export function ProductsManager({
     if (result.ok) router.refresh();
   }
 
+  async function handleToggleUnavailable(product: Product) {
+    if (!canEdit) return;
+    const next = !product.unavailable;
+    setRowBusy(product.id);
+    setActionError(null);
+    setFormError(null);
+
+    if (mode === "demo") {
+      try {
+        const result = await toggleProductUnavailableAction(product.id, next);
+        if (result.ok) {
+          setProducts((prev) =>
+            prev.map((p) => (p.id === product.id ? { ...p, unavailable: next } : p)),
+          );
+        } else {
+          setActionError(result.error);
+        }
+      } catch {
+        setActionError("Could not save. Try again.");
+      } finally {
+        setRowBusy(null);
+      }
+      return;
+    }
+
+    const result = await toggleProductUnavailableAction(product.id, next);
+    setRowBusy(null);
+    if (result.ok) router.refresh();
+  }
+
   return (
     <div className="space-y-4">
       {loadError ? (
@@ -363,6 +394,9 @@ export function ProductsManager({
                       <Badge tone={p.is_active ? "success" : "neutral"}>
                         {p.is_active ? "Active" : "Inactive"}
                       </Badge>
+                      <Badge tone={p.unavailable ? "danger" : "success"}>
+                        {p.unavailable ? "NA" : "A"}
+                      </Badge>
                     </div>
                   </div>
                 </div>
@@ -384,6 +418,15 @@ export function ProductsManager({
                       onClick={() => handleToggleActive(p)}
                     >
                       {p.is_active ? "Off" : "On"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="ob-touch-target flex-1 py-2.5 text-xs"
+                      loading={rowBusy === p.id}
+                      onClick={() => handleToggleUnavailable(p)}
+                    >
+                      {p.unavailable ? "Available" : "Unavailable"}
                     </Button>
                   </div>
                 ) : null}
@@ -446,9 +489,14 @@ export function ProductsManager({
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <Badge tone={p.is_active ? "success" : "neutral"}>
-                      {p.is_active ? "Active" : "Inactive"}
-                    </Badge>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge tone={p.is_active ? "success" : "neutral"}>
+                        {p.is_active ? "Active" : "Inactive"}
+                      </Badge>
+                      <Badge tone={p.unavailable ? "danger" : "success"}>
+                        {p.unavailable ? "NA" : "A"}
+                      </Badge>
+                    </div>
                   </td>
                   {canEdit ? (
                     <td className="px-4 py-3">
@@ -470,6 +518,15 @@ export function ProductsManager({
                           onClick={() => handleToggleActive(p)}
                         >
                           {p.is_active ? "Deactivate" : "Activate"}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          className="px-3 py-1.5 text-xs"
+                          loading={rowBusy === p.id}
+                          onClick={() => handleToggleUnavailable(p)}
+                        >
+                          {p.unavailable ? "Mark available" : "Mark unavailable"}
                         </Button>
                       </div>
                     </td>
