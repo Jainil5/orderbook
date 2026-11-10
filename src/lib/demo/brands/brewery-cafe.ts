@@ -1,7 +1,7 @@
 import type { DemoBrandPack } from "@/lib/demo/brands/types";
 import { DEMO_CAFE_IMAGES } from "@/lib/demo/product-image-urls";
 import { localDayKey } from "@/lib/manager/time";
-import { buildOrderHistory } from "@/lib/demo/brands/history";
+import { buildOrderHistory, type HistoryConfig } from "@/lib/demo/brands/history";
 import type { StaffMember } from "@/types/manager";
 
 // Fixture shift dates are keyed by the server's local day so they line up with
@@ -446,7 +446,7 @@ const BREWERY_CAFE_DEMO_BASE: DemoBrandPack = {
 // Deterministic 6-month history (May–Oct complete, current month partial with a
 // daily-rate dip and a trailing-week rebound). Seeded and pure, so every process
 // start reproduces the same rows — the fixtures carry it at zero cookie cost.
-const BREWERY_CAFE_HISTORY = buildOrderHistory({
+export const BREWERY_CAFE_HISTORY_CFG: HistoryConfig = {
   brandId: BREWERY_CAFE_DEMO_BASE.brand.id,
   prefix: BREWERY_CAFE_DEMO_BASE.orderNumberPrefix,
   products: BREWERY_CAFE_DEMO_BASE.products,
@@ -463,7 +463,9 @@ const BREWERY_CAFE_HISTORY = buildOrderHistory({
     { year: 2026, month: 8, target: 50 },
     { year: 2026, month: 9, target: 56 },
   ],
-});
+};
+
+const BREWERY_CAFE_HISTORY = buildOrderHistory(BREWERY_CAFE_HISTORY_CFG);
 
 export const BREWERY_CAFE_DEMO: DemoBrandPack = {
   ...BREWERY_CAFE_DEMO_BASE,

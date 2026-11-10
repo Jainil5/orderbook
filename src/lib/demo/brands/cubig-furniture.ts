@@ -1,7 +1,7 @@
 import type { DemoBrandPack } from "@/lib/demo/brands/types";
 import { DEMO_FURNITURE_IMAGES } from "@/lib/demo/product-image-urls";
 import { localDayKey } from "@/lib/manager/time";
-import { buildOrderHistory } from "@/lib/demo/brands/history";
+import { buildOrderHistory, type HistoryConfig } from "@/lib/demo/brands/history";
 import type { StaffMember } from "@/types/manager";
 
 const BRAND_ID = "demo-cubig-furniture";
@@ -491,7 +491,7 @@ const CUBIG_FURNITURE_DEMO_BASE: DemoBrandPack = {
 
 // Same growth-and-dip shape as Brewery Cafe, scaled to showroom volume (~15
 // orders/month). Seeded independently so the two brands reproduce separately.
-const CUBIG_FURNITURE_HISTORY = buildOrderHistory({
+export const CUBIG_FURNITURE_HISTORY_CFG: HistoryConfig = {
   brandId: CUBIG_FURNITURE_DEMO_BASE.brand.id,
   prefix: CUBIG_FURNITURE_DEMO_BASE.orderNumberPrefix,
   products: CUBIG_FURNITURE_DEMO_BASE.products,
@@ -508,7 +508,9 @@ const CUBIG_FURNITURE_HISTORY = buildOrderHistory({
     { year: 2026, month: 8, target: 13 },
     { year: 2026, month: 9, target: 15 },
   ],
-});
+};
+
+const CUBIG_FURNITURE_HISTORY = buildOrderHistory(CUBIG_FURNITURE_HISTORY_CFG);
 
 export const CUBIG_FURNITURE_DEMO: DemoBrandPack = {
   ...CUBIG_FURNITURE_DEMO_BASE,
