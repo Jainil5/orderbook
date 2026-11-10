@@ -14,7 +14,7 @@ export function WorkspaceBrandWebsiteLink() {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-[var(--ob-border)] bg-white px-2.5 py-1.5 text-xs font-medium text-[var(--ob-text)] shadow-sm transition hover:border-[var(--ob-primary)] hover:text-[var(--ob-primary)] sm:px-3"
+      className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-[var(--ob-border)] bg-[var(--ob-surface)] px-2.5 py-1.5 text-xs font-medium text-[var(--ob-text)] shadow-sm transition hover:border-[var(--ob-primary)] hover:text-[var(--ob-primary)] sm:px-3"
       title="Brand website"
     >
       <span className="hidden sm:inline">Brand website</span>

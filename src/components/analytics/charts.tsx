@@ -18,18 +18,18 @@ import { formatMoney } from "@/lib/format";
 import type { Slice, TrendPoint } from "@/lib/analytics/snapshot";
 
 export const CHART_COLORS = [
-  "#1b3654",
-  "#0f766e",
-  "#c2410c",
-  "#6d28d9",
-  "#0369a1",
-  "#be123c",
-  "#a16207",
-  "#3f6212",
+  "var(--ob-series-1)",
+  "var(--ob-series-2)",
+  "var(--ob-series-3)",
+  "var(--ob-series-4)",
+  "var(--ob-series-5)",
+  "var(--ob-series-6)",
+  "var(--ob-series-7)",
+  "var(--ob-series-8)",
 ];
 
-const grid = "#e3e8ef";
-const tick = { fontSize: 12, fill: "#6b7789" };
+const grid = "var(--ob-border)";
+const tick = { fontSize: 12, fill: "var(--ob-text-muted)" };
 
 type Metric = "revenue" | "orders";
 type ChartKind = "area" | "bar" | "line";
@@ -56,7 +56,7 @@ function Tip({
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-[var(--ob-border)] bg-white px-3 py-2 text-xs shadow-md">
+    <div className="rounded-xl border border-[var(--ob-border)] bg-[var(--ob-surface)] px-3 py-2 text-xs text-[var(--ob-text)] shadow-md">
       <p className="mb-1 font-medium text-[var(--ob-text)]">{label}</p>
       {payload.map((entry) => (
         <p key={String(entry.dataKey)} style={{ color: entry.color }}>
@@ -123,8 +123,8 @@ export function TrendChart({
         <ComposedChart {...common}>
           <defs>
             <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#1b3654" stopOpacity={0.28} />
-              <stop offset="100%" stopColor="#1b3654" stopOpacity={0.02} />
+              <stop offset="0%" stopColor="var(--ob-series-1)" stopOpacity={0.28} />
+              <stop offset="100%" stopColor="var(--ob-series-1)" stopOpacity={0.02} />
             </linearGradient>
           </defs>
           {axes}
@@ -133,7 +133,7 @@ export function TrendChart({
               yAxisId="revenue"
               dataKey="revenue"
               name="Revenue"
-              fill="#1b3654"
+              fill="var(--ob-series-1)"
               radius={[6, 6, 0, 0]}
               maxBarSize={36}
             />
@@ -144,9 +144,9 @@ export function TrendChart({
               type="monotone"
               dataKey="revenue"
               name="Revenue"
-              stroke="#1b3654"
+              stroke="var(--ob-series-1)"
               strokeWidth={2.5}
-              dot={{ r: 3, fill: "#1b3654" }}
+              dot={{ r: 3, fill: "var(--ob-series-1)" }}
             />
           ) : null}
           {showRevenue && kind === "area" ? (
@@ -155,7 +155,7 @@ export function TrendChart({
               type="monotone"
               dataKey="revenue"
               name="Revenue"
-              stroke="#1b3654"
+              stroke="var(--ob-series-1)"
               strokeWidth={2.5}
               fill="url(#revenueFill)"
             />
@@ -165,7 +165,7 @@ export function TrendChart({
               yAxisId="orders"
               dataKey="orders"
               name="Orders"
-              fill="#0f766e"
+              fill="var(--ob-series-2)"
               radius={[6, 6, 0, 0]}
               maxBarSize={36}
             />
@@ -176,9 +176,9 @@ export function TrendChart({
               type="monotone"
               dataKey="orders"
               name="Orders"
-              stroke="#0f766e"
+              stroke="var(--ob-series-2)"
               strokeWidth={2.5}
-              dot={{ r: 3, fill: "#0f766e" }}
+              dot={{ r: 3, fill: "var(--ob-series-2)" }}
             />
           ) : null}
         </ComposedChart>

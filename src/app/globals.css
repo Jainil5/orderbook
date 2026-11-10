@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* dark: variants follow the data-theme attribute, not OS preference. */
+@custom-variant dark ([data-theme="dark"] &);
+
 :root {
   --ob-bg: #eef2f6;
   --ob-surface: #ffffff;
@@ -22,6 +25,19 @@
   --ob-sidebar-text: #f5f7fb;
   --ob-sidebar-muted: #9aa8bc;
   --ob-sidebar-line: rgb(255 255 255 / 0.08);
+  --ob-accent-2: #4f46e5;
+  --ob-glow: rgb(15 118 110 / 0.28);
+  --ob-gradient-primary: linear-gradient(120deg, #1b3654, #0f766e, #1b3654);
+  --ob-ambient-a: rgb(27 56 84 / 0.07);
+  --ob-ambient-b: rgb(15 118 110 / 0.06);
+  --ob-series-1: #1b3654;
+  --ob-series-2: #0f766e;
+  --ob-series-3: #c2410c;
+  --ob-series-4: #6d28d9;
+  --ob-series-5: #0369a1;
+  --ob-series-6: #be123c;
+  --ob-series-7: #a16207;
+  --ob-series-8: #3f6212;
   --ob-radius-sm: 0.375rem;
   --ob-radius-md: 0.625rem;
   --ob-radius-lg: 1rem;
@@ -35,6 +51,40 @@
   --ob-space-8: 2rem;
   --background: var(--ob-bg);
   --foreground: var(--ob-text);
+}
+
+[data-theme="dark"] {
+  --ob-bg: #0b111d;
+  --ob-surface: #121a29;
+  --ob-surface-muted: #1a2334;
+  --ob-border: #243049;
+  --ob-border-strong: #384766;
+  --ob-text: #e8edf6;
+  --ob-text-secondary: #c2cbdc;
+  --ob-text-muted: #8794ac;
+  --ob-primary: #2e5478;
+  --ob-primary-hover: #3a6690;
+  --ob-primary-foreground: #f2f6fc;
+  --ob-accent: #2dd4bf;
+  --ob-focus: #818cf8;
+  --ob-success: #34d399;
+  --ob-warning: #fbbf24;
+  --ob-danger: #f87171;
+  --ob-demo: #a78bfa;
+  --ob-sidebar: #0e1524;
+  --ob-accent-2: #6366f1;
+  --ob-glow: rgb(99 102 241 / 0.45);
+  --ob-gradient-primary: linear-gradient(120deg, #4f46e5, #0d9488, #4f46e5);
+  --ob-ambient-a: rgb(79 70 229 / 0.16);
+  --ob-ambient-b: rgb(45 212 191 / 0.1);
+  --ob-series-1: #60a5fa;
+  --ob-series-2: #2dd4bf;
+  --ob-series-3: #fb923c;
+  --ob-series-4: #a78bfa;
+  --ob-series-5: #38bdf8;
+  --ob-series-6: #f472b6;
+  --ob-series-7: #facc15;
+  --ob-series-8: #86efac;
 }
 
 @theme inline {
@@ -60,8 +110,8 @@ body {
 .ob-workspace {
   font-size: 1.0625rem;
   background:
-    radial-gradient(900px 420px at 100% -10%, rgb(27 54 84 / 0.07), transparent 55%),
-    radial-gradient(700px 360px at 0% 100%, rgb(15 118 110 / 0.06), transparent 50%),
+    radial-gradient(900px 420px at 100% -10%, var(--ob-ambient-a), transparent 55%),
+    radial-gradient(700px 360px at 0% 100%, var(--ob-ambient-b), transparent 50%),
     var(--ob-bg);
 }
 
@@ -123,7 +173,7 @@ body {
 }
 
 .ob-card table tbody tr:hover {
-  background: color-mix(in srgb, var(--ob-primary) 4%, white);
+  background: color-mix(in srgb, var(--ob-primary) 8%, var(--ob-surface));
 }
 
 .ob-input {
@@ -248,22 +298,8 @@ body {
   overflow: hidden;
 }
 
-.ob-nav-link::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 3px;
-  border-radius: 999px;
-  background: #fff;
-  transform: scaleY(0);
-  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.ob-nav-link[data-active="true"]::before,
-.ob-nav-link:hover::before {
-  transform: scaleY(1);
-}
-
+/* The active marker itself is the Motion layoutId pill in app-shell; this
+   rule only keeps the icon nudge. */
 .ob-nav-link svg {
   transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -286,7 +322,33 @@ body {
 }
 
 .ob-press:active:not(:disabled) {
-  transform: translateY(1px) scale(0.98);
+  transform: translateY(1px) scale(0.97);
+}
+
+/* Premium primary: themed gradient with a soft glow in dark. */
+.ob-btn-primary {
+  background: var(--ob-gradient-primary);
+  background-size: 200% 200%;
+  color: #fff;
+  transition:
+    transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    background-position 0.4s ease,
+    box-shadow 0.25s ease,
+    opacity 0.18s ease;
+}
+
+.ob-btn-primary:hover:not(:disabled) {
+  background-position: 100% 50%;
+}
+
+[data-theme="dark"] .ob-btn-primary:not(:disabled) {
+  box-shadow: 0 6px 22px -8px var(--ob-glow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ob-btn-primary {
+    transition: none;
+  }
 }
 
 .ob-tile img {
@@ -362,9 +424,45 @@ body {
 }
 
 .ob-mark {
-  background: linear-gradient(120deg, #1b3654, #0f766e, #1b3654);
+  background: var(--ob-gradient-primary);
   background-size: 200% 200%;
   animation: ob-sheen 8s ease infinite;
+}
+
+.ob-mark--ripple {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.ob-mark--ripple .ob-ripple-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1.5px solid var(--ob-accent);
+  animation: ob-ripple 3s ease-out infinite;
+  pointer-events: none;
+}
+
+.ob-mark--ripple .ob-ripple-ring:nth-child(2) {
+  animation-delay: 1s;
+}
+
+.ob-mark--ripple .ob-ripple-ring:nth-child(3) {
+  animation-delay: 2s;
+}
+
+@keyframes ob-ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
 }
 
 .ob-drawer {
@@ -387,9 +485,32 @@ body {
   width: 28rem;
   height: 28rem;
   border-radius: 999px;
-  background: radial-gradient(circle, rgb(15 118 110 / 0.16), transparent 68%);
+  background: radial-gradient(circle, var(--ob-glow), transparent 68%);
   animation: ob-sheen 14s ease infinite;
   z-index: 0;
+}
+
+/* Cursor-following radial highlight for KPI/analysis cards. The component
+   positions --ob-glow-x/--ob-glow-y; this layer never intercepts pointer
+   events and is aria-hidden at the usage site. */
+.ob-glow-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: radial-gradient(
+    260px circle at var(--ob-glow-x, 50%) var(--ob-glow-y, 50%),
+    var(--ob-glow),
+    transparent 65%
+  );
+}
+
+.ob-glow-host:hover .ob-glow-layer,
+.ob-glow-host:focus-within .ob-glow-layer {
+  opacity: 0.75;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -397,11 +518,16 @@ body {
   .ob-page-enter,
   .ob-stagger > *,
   .ob-mark,
+  .ob-mark--ripple .ob-ripple-ring,
   .ob-drawer,
   .ob-scrim,
   .ob-tile.ob-pop,
   .ob-ambient::before {
     animation: none !important;
+  }
+
+  .ob-glow-layer {
+    transition: none;
   }
 
   .ob-card:hover,
@@ -412,6 +538,48 @@ body {
   .ob-nav-link:hover svg,
   .ob-nav-link[data-active="true"] svg {
     transform: none;
+  }
+}
+
+.ob-meteor {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--ob-accent);
+  box-shadow: 0 0 6px var(--ob-glow);
+  animation: ob-meteor linear infinite;
+}
+
+.ob-meteor::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 1px;
+  width: var(--ob-meteor-length, 90px);
+  height: 1.5px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to left,
+    color-mix(in srgb, var(--ob-accent) 60%, transparent),
+    transparent
+  );
+}
+
+@keyframes ob-meteor {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(35deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(140px, 260px, 0) rotate(35deg);
+    opacity: 0;
   }
 }
 

@@ -2,6 +2,8 @@
 
 import { AppShell } from "@/components/shell/app-shell";
 import { useWorkspace } from "@/components/workspace/workspace-provider";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { NotificationStack } from "@/components/notifications/notification-stack";
 import {
   WorkspaceBrandWebsiteLink,
   WorkspaceSettingsFeaturesLink,
@@ -32,6 +34,8 @@ export function PageShell({
             <WorkspaceSettingsFeaturesLink />
           </span>
           {headerActions}
+          <NotificationStack />
+          <ThemeToggle className="ml-0.5" />
         </>
       }
     >

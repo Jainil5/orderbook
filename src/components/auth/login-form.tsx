@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
+import { Meteors } from "@/components/effects/meteors";
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -22,7 +23,9 @@ export function LoginForm() {
   }
 
   return (
-    <div className="mx-auto flex min-h-[100dvh] max-w-md flex-col justify-center px-4 py-8 ob-safe-top ob-safe-bottom sm:py-12">
+    <div className="ob-workspace relative min-h-[100dvh] overflow-hidden">
+      <Meteors count={10} seed={11} />
+      <div className="relative z-[1] mx-auto flex min-h-[100dvh] max-w-md flex-col justify-center px-4 py-8 ob-safe-top ob-safe-bottom sm:py-12">
       <div className="ob-card p-6 sm:p-8">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--ob-text-muted)]">
           WebsiteIn
@@ -105,6 +108,7 @@ export function LoginForm() {
       <p className="mt-6 text-center text-xs text-[var(--ob-text-muted)]">
         OrderBook by WebsiteIn — multi-business order management
       </p>
+      </div>
     </div>
   );
 }

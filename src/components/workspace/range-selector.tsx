@@ -85,7 +85,7 @@ export function RangeSelector({
               role="radio"
               aria-checked={selected}
               onClick={() => pickPreset(preset.id)}
-              className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition ${
+              className={`ob-press shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium min-h-[2.75rem] transition ${
                 selected
                   ? "bg-[var(--ob-primary)] text-white"
                   : "border border-[var(--ob-border)] text-[var(--ob-text-secondary)] hover:border-[var(--ob-primary)]"

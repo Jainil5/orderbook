@@ -361,7 +361,7 @@ export function AnalyticsStudio({
           type="button"
           aria-expanded={customize}
           onClick={() => setCustomize((open) => !open)}
-          className="inline-flex items-center gap-2 rounded-full border border-[var(--ob-border)] bg-white px-3 py-1.5 text-xs font-medium"
+          className="ob-press inline-flex min-h-[2.75rem] items-center gap-2 rounded-full border border-[var(--ob-border)] bg-[var(--ob-surface)] px-3 py-1.5 text-xs font-medium"
         >
           <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden />
           Customize view
@@ -453,6 +453,8 @@ export function AnalyticsStudio({
               <StatCard
                 label="Net sales"
                 value={money(snapshot.netSales)}
+                numericValue={snapshot.netSales}
+                format={{ kind: "currency", currency }}
                 hint={
                   delta === null
                     ? undefined
@@ -460,15 +462,24 @@ export function AnalyticsStudio({
                 }
                 tone={delta === null ? "neutral" : delta >= 0 ? "up" : "down"}
               />
-              <StatCard label="Orders" value={snapshot.orderCount.toString()} hint="In this sample" />
+              <StatCard
+                label="Orders"
+                value={snapshot.orderCount.toString()}
+                hint="In this sample"
+                numericValue={snapshot.orderCount}
+              />
               <StatCard
                 label="Avg. order"
                 value={money(snapshot.averageOrderValue)}
+                numericValue={snapshot.averageOrderValue}
+                format={{ kind: "currency", currency }}
                 hint={snapshot.itemsSold ? `${snapshot.itemsSold} items sold` : undefined}
               />
               <StatCard
                 label="Collected"
                 value={`${collectionRate.toFixed(0)}%`}
+                numericValue={collectionRate / 100}
+                format={{ kind: "percent" }}
                 hint={`${money(snapshot.paidAmount)} in · ${money(snapshot.pendingAmount)} open`}
                 tone={collectionRate >= 80 ? "up" : collectionRate >= 40 ? "neutral" : "down"}
               />
@@ -672,20 +683,28 @@ export function AnalyticsStudio({
                   label="Revenue (lines)"
                   value={money(marginSnapshot.revenue)}
                   hint="Excludes credit notes"
+                  numericValue={marginSnapshot.revenue}
+                  format={{ kind: "currency", currency }}
                 />
                 <StatCard
                   label="COGS"
                   value={money(marginSnapshot.cost)}
                   hint="From product cost price"
+                  numericValue={marginSnapshot.cost}
+                  format={{ kind: "currency", currency }}
                 />
                 <StatCard
                   label="Gross margin"
                   value={money(marginSnapshot.margin)}
                   tone={marginSnapshot.margin >= 0 ? "up" : "down"}
+                  numericValue={marginSnapshot.margin}
+                  format={{ kind: "currency", currency }}
                 />
                 <StatCard
                   label="Margin %"
                   value={`${marginSnapshot.marginPercent.toFixed(1)}%`}
+                  numericValue={marginSnapshot.marginPercent / 100}
+                  format={{ kind: "percent" }}
                 />
               </div>
               <Card>

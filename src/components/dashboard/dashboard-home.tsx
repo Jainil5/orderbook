@@ -107,12 +107,25 @@ export function DashboardHome({
           label="Net sales"
           value={money(snapshot.netSales)}
           hint={range.label}
+          numericValue={snapshot.netSales}
+          format={{ kind: "currency", currency: snapshot.currencyCode }}
         />
-        <StatCard label="Orders" value={snapshot.orderCount.toString()} />
-        <StatCard label="Avg. order value" value={money(snapshot.averageOrderValue)} />
+        <StatCard
+          label="Orders"
+          value={snapshot.orderCount.toString()}
+          numericValue={snapshot.orderCount}
+        />
+        <StatCard
+          label="Avg. order value"
+          value={money(snapshot.averageOrderValue)}
+          numericValue={snapshot.averageOrderValue}
+          format={{ kind: "currency", currency: snapshot.currencyCode }}
+        />
         <StatCard
           label="Collected"
           value={collected ? `${collectionRate.toFixed(0)}%` : "—"}
+          numericValue={collected ? collectionRate / 100 : undefined}
+          format={{ kind: "percent" }}
           hint={
             collected
               ? `${money(snapshot.paidAmount)} paid · ${money(snapshot.pendingAmount)} open`
