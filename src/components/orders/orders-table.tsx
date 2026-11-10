@@ -7,13 +7,7 @@ import {
   groupOrderItemsByOrderId,
   viewOrderDetailLabel,
 } from "@/lib/orders/order-list-helpers";
-
-function paymentBadgeTone(status: string) {
-  if (status === "paid") return "success" as const;
-  if (status === "pending") return "warning" as const;
-  if (status === "partial") return "demo" as const;
-  return "neutral" as const;
-}
+import { paymentBadgeTone } from "@/lib/orders/payment-badge";
 
 export function OrdersTable({
   orders,

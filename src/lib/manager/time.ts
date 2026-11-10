@@ -45,3 +45,8 @@ export function dueAtMs(dueAt: string): number {
   }
   return new Date(dueAt).getTime();
 }
+
+/** Whole minutes elapsed since a stored ISO timestamp, clamped at 0. */
+export function minutesSince(iso: string, now: Date): number {
+  return Math.max(0, Math.floor((now.getTime() - new Date(iso).getTime()) / 60000));
+}

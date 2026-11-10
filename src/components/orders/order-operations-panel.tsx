@@ -7,15 +7,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatMoney } from "@/lib/format";
 import {
+  completeOrderAction,
   createCreditNoteAction,
   recordPaymentAction,
   recordRefundAction,
   updateOrderStatusAction,
 } from "@/services/operations-actions";
 import { PrintReceiptButton } from "@/components/orders/print-receipt-button";
-import { canVoidOrCreditNote, isDraftOrder } from "@/lib/orders/order-rules";
+import {
+  canVoidOrCreditNote,
+  isDraftOrder,
+  isPendingOrder,
+} from "@/lib/orders/order-rules";
 
 const STATUS_ACTIONS: { status: OrderStatus; label: string }[] = [
+  { status: "pending", label: "Pending" },
   { status: "confirmed", label: "Confirm" },
   { status: "completed", label: "Complete" },
   { status: "cancelled", label: "Cancel" },
@@ -51,6 +57,20 @@ export function OrderOperationsPanel({
     setBusy(null);
     if (result.ok) router.refresh();
     else setMessage("message" in result ? result.message : "Could not update.");
+  }
+
+  async function onComplete() {
+    setBusy("complete");
+    setMessage(null);
+    try {
+      const result = await completeOrderAction(order.id);
+      if (result.ok) router.refresh();
+      else setMessage("message" in result ? result.message : "Could not update.");
+    } catch {
+      setMessage("Could not save. Try again.");
+    } finally {
+      setBusy(null);
+    }
   }
 
   async function onPay(e: React.FormEvent) {
@@ -133,6 +153,17 @@ export function OrderOperationsPanel({
         </div>
         <PrintReceiptButton orderId={order.id} />
       </div>
+
+      {isPendingOrder(order) ? (
+        <Button
+          type="button"
+          loading={busy === "complete"}
+          onClick={onComplete}
+          className="ob-touch-target w-full"
+        >
+          Order Completed
+        </Button>
+      ) : null}
 
       <div className="flex flex-wrap gap-2">
         {STATUS_ACTIONS.map(({ status, label }) => (
