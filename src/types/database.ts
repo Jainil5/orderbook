@@ -239,8 +239,6 @@ export type CreateOrderInput = {
   tableTag?: string;
   deliveryNotes?: string;
   depositPercent?: number | null;
-  /** Create a customer record from walk-in details at checkout. */
-  saveNewCustomer?: boolean;
   priceTier?: "retail" | "wholesale";
   orderType?: OrderType;
   serviceDate?: string;

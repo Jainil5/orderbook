@@ -19,6 +19,7 @@ import {
 } from "@/lib/demo/order-store";
 import { buildOrderRecord } from "@/lib/orders/build-order-record";
 import { allowedStatusTransitions } from "@/lib/orders/order-rules";
+import { matchOrCreateCustomerId } from "@/lib/demo/customer-identity";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
 import {
   DEMO_WORKSPACE_COOKIE,
@@ -219,25 +220,22 @@ export async function submitDemoOrder(
   let customers = await demoCustomers(code);
   let customerId = input.customerId;
 
-  if (
-    !customerId &&
-    input.saveNewCustomer &&
-    (input.walkInName?.trim() || input.customerPhone)
-  ) {
-    const newCustomer: Customer = {
-      id: `demo-cust-${Date.now()}`,
-      brand_id: pack.brand.id,
-      name: input.walkInName?.trim() || "Walk-in customer",
-      email: null,
-      phone: input.customerPhone ?? null,
-      notes: null,
-    };
-    await updateDemoMutableBucket(code, (b) => ({
-      ...b,
-      customers: [newCustomer, ...b.customers],
-    }));
-    customers = await demoCustomers(code);
-    customerId = newCustomer.id;
+  if (!customerId && input.customerPhone) {
+    const identity = matchOrCreateCustomerId(
+      customers,
+      input.customerPhone,
+      input.walkInName,
+      pack.brand.id,
+    );
+    if (identity.created) {
+      const created = identity.created;
+      await updateDemoMutableBucket(code, (b) => ({
+        ...b,
+        customers: [created, ...b.customers],
+      }));
+      customers = await demoCustomers(code);
+    }
+    customerId = identity.id;
   }
 
   const suffix = Math.floor(1000 + Math.random() * 9000);

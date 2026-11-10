@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
 import { normalizeCustomerPhone } from "@/lib/security/input";
+import { findCustomerByPhone } from "@/lib/demo/customer-identity";
+import { localDayKey } from "@/lib/manager/time";
 import { ProductPrice } from "@/components/products/product-price";
 import { ProductThumbnail } from "@/components/products/product-thumbnail";
 import { PosProductTileWithButton } from "@/components/billing/pos-product-tile";
@@ -103,7 +105,6 @@ export function BillingPos({
       lineDiscount: number;
       modifierIds?: string[];
     }[];
-    customerId: string | null;
     customerPhone: string | null;
     walkInName?: string;
     notes: string;
@@ -114,7 +115,11 @@ export function BillingPos({
     tableTag?: string;
     deliveryNotes?: string;
     depositPercent?: number | null;
-    saveNewCustomer?: boolean;
+    orderType?: "dine_in" | "takeaway" | "delivery" | "online";
+    serviceDate?: string;
+    guests?: number | null;
+    deliveryAddress?: string;
+    paymentReference?: string;
   }) => Promise<{
     ok: boolean;
     message: string;
@@ -126,18 +131,25 @@ export function BillingPos({
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [cart, setCart] = useState<CartLine[]>([]);
-  const [customerId, setCustomerId] = useState<string>("");
   const [customerName, setCustomerName] = useState("");
   const [customerMobile, setCustomerMobile] = useState("");
   const [notes, setNotes] = useState("");
-  const [offerCode, setOfferCode] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("UPI");
-  const [saveAsQuote, setSaveAsQuote] = useState(false);
+  const [orderType, setOrderType] = useState<
+    "dine_in" | "takeaway" | "delivery" | "online"
+  >("dine_in");
+  const [serviceDate, setServiceDate] = useState(() => localDayKey(new Date()));
+  const [guests, setGuests] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [paymentReference, setPaymentReference] = useState("");
+  const [offerPick, setOfferPick] = useState("");
+  const [offerCustom, setOfferCustom] = useState("");
+  const offerCode =
+    offerPick === "__custom" ? offerCustom.trim() : offerPick;
+  const [paymentMethod, setPaymentMethod] = useState("PENDING");
   const [orderDiscountType, setOrderDiscountType] = useState<
     "none" | "percent" | "fixed"
   >("none");
   const [orderDiscountValue, setOrderDiscountValue] = useState("");
-  const [saveNewCustomer, setSaveNewCustomer] = useState(false);
   const [tableTag, setTableTag] = useState("");
   const [deliveryNotes, setDeliveryNotes] = useState("");
   const [depositPercent, setDepositPercent] = useState("");
@@ -154,11 +166,14 @@ export function BillingPos({
   } | null>(null);
   const [peekProduct, setPeekProduct] = useState<Product | null>(null);
 
-  const selectedCustomer = useMemo(
-    () => customers.find((c) => c.id === customerId) ?? null,
-    [customers, customerId],
+  const priceTier = customerPriceTier(null);
+  const matchedCustomer = useMemo(
+    () =>
+      customerMobile.trim()
+        ? findCustomerByPhone(customers, customerMobile)
+        : null,
+    [customers, customerMobile],
   );
-  const priceTier = customerPriceTier(selectedCustomer);
 
   const pricedCart = useMemo(
     () =>
@@ -175,12 +190,7 @@ export function BillingPos({
 
   const dedicatedFlow =
     documentMode === "quotation" || documentMode === "bill";
-  const savingAsQuote =
-    documentMode === "quotation"
-      ? true
-      : documentMode === "bill"
-        ? false
-        : Boolean(saveAsQuote);
+  const savingAsQuote = documentMode === "quotation";
   const cartTitle =
     documentMode === "quotation"
       ? (copy.quotationCartTitle ?? "Quotation")
@@ -338,20 +348,31 @@ export function BillingPos({
     );
   }
 
-  async function handleSubmit(asQuote: boolean) {
+  async function handleSubmit() {
     if (!cart.length) {
       setFeedback("Add at least one item to the bill.");
       return;
     }
     const phone = normalizeCustomerPhone(customerMobile);
-    if (customerMobile.trim() && !phone) {
-      setFeedback("Enter a valid mobile number (8–15 digits).");
+    if (!phone) {
+      setFeedback("Enter the customer mobile number (8–15 digits).");
       return;
     }
     const trimmedWalkInName = customerName.trim();
     if (trimmedWalkInName.length > 120) {
       setFeedback("Customer name is too long.");
       return;
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(serviceDate)) {
+      setFeedback("Pick a valid date.");
+      return;
+    }
+    if (guests.trim()) {
+      const g = Number(guests);
+      if (!Number.isInteger(g) || g < 1 || g > 99) {
+        setFeedback("Guests must be a whole number between 1 and 99.");
+        return;
+      }
     }
     if (!parsedOrderDiscount.ok) {
       setFeedback(parsedOrderDiscount.message);
@@ -385,40 +406,57 @@ export function BillingPos({
       setFeedback("Deposit must be between 0 and 100.");
       return;
     }
+    const asQuote = savingAsQuote;
+    const resolvedPaymentMethod =
+      asQuote || paymentMethod === "PENDING" ? "" : paymentMethod;
     setSubmitting(true);
     setFeedback(null);
-    const result = await onSubmitOrder({
-      lines: cart.map((l) => ({
-        productId: l.product.id,
-        quantity: l.quantity,
-        lineDiscount: cartLineDiscountAmount(
-          l.product,
-          l.quantity,
-          priceTier,
-          l.modifierIds,
-        ),
-        modifierIds: l.modifierIds.length ? l.modifierIds : undefined,
-      })),
-      customerId: customerId || null,
-      customerPhone: phone,
-      walkInName: customerId ? undefined : trimmedWalkInName || undefined,
-      notes,
-      offerCode,
-      paymentMethod,
-      saveAsQuote: asQuote,
-      orderDiscount: parsedOrderDiscount.discount,
-      tableTag: tableTag.trim() || undefined,
-      deliveryNotes: deliveryNotes.trim() || undefined,
-      depositPercent: deposit,
-      saveNewCustomer: saveNewCustomer && !customerId,
-    });
+    let result: {
+      ok: boolean;
+      message: string;
+      orderNumber?: string;
+      savedAsQuote?: boolean;
+    };
+    try {
+      result = await onSubmitOrder({
+        lines: cart.map((l) => ({
+          productId: l.product.id,
+          quantity: l.quantity,
+          lineDiscount: cartLineDiscountAmount(
+            l.product,
+            l.quantity,
+            priceTier,
+            l.modifierIds,
+          ),
+          modifierIds: l.modifierIds.length ? l.modifierIds : undefined,
+        })),
+        customerPhone: phone,
+        walkInName: trimmedWalkInName || undefined,
+        notes,
+        offerCode,
+        paymentMethod: resolvedPaymentMethod,
+        saveAsQuote: asQuote,
+        orderDiscount: parsedOrderDiscount.discount,
+        tableTag: tableTag.trim() || undefined,
+        deliveryNotes: deliveryNotes.trim() || undefined,
+        depositPercent: deposit,
+        orderType,
+        serviceDate,
+        guests: guests.trim() ? Number(guests) : null,
+        deliveryAddress:
+          orderType === "delivery" ? deliveryAddress.trim() || undefined : undefined,
+        paymentReference: paymentReference.trim() || undefined,
+      });
+    } catch {
+      setSubmitting(false);
+      setFeedback("Could not save. Try again.");
+      return;
+    }
     setSubmitting(false);
     if (result.ok) {
       router.refresh();
       const isQuote = result.savedAsQuote ?? asQuote;
-      const resolvedCustomerName = customerId
-        ? (customers.find((c) => c.id === customerId)?.name ?? null)
-        : trimmedWalkInName || null;
+      const resolvedCustomerName = trimmedWalkInName || matchedCustomer?.name || null;
       if (result.orderNumber) {
         setLastSavedDocument(
           buildBillDocumentFromCheckout({
@@ -434,16 +472,27 @@ export function BillingPos({
             customerName: resolvedCustomerName,
             customerPhone: phone,
             notes,
-            paymentMethod,
+            paymentMethod: resolvedPaymentMethod || "Payment pending",
             cart,
             totals,
           }),
         );
       }
-      const isQuoteAfter = result.savedAsQuote ?? asQuote;
+      setCart([]);
+      setOfferPick("");
+      setOfferCustom("");
+      setServiceDate(localDayKey(new Date()));
+      setPaymentMethod("PENDING");
+      setPaymentReference("");
+      setCustomerMobile("");
+      setCustomerName("");
+      setNotes("");
+      setTableTag("");
+      setGuests("");
+      setDeliveryAddress("");
       if (result.orderNumber) {
         setFeedback(
-          isQuoteAfter
+          isQuote
             ? formatBillingSavedMessage(
                 copy.savedQuoteMessage,
                 result.orderNumber,
@@ -454,7 +503,7 @@ export function BillingPos({
               ),
         );
       } else {
-        setFeedback(isQuoteAfter ? "Quotation saved." : "Bill saved successfully.");
+        setFeedback(isQuote ? "Quotation saved." : "Bill saved successfully.");
       }
     } else {
       setFeedback(result.message);
@@ -574,33 +623,7 @@ export function BillingPos({
       <div className="mt-4 space-y-2 border-t border-[var(--ob-border)] pt-4 text-sm">
         <label className="block">
           <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-            Customer name <span className="font-normal">(optional)</span>
-          </span>
-          <Input
-            type="text"
-            autoComplete="name"
-            value={customerName}
-            disabled={Boolean(customerId)}
-            onChange={(e) => {
-              setCustomerName(e.target.value);
-              setLastSavedDocument(null);
-            }}
-            placeholder="Walk-in guest name"
-            className="mt-1"
-          />
-          {customerId ? (
-            <span className="mt-1 block text-xs text-[var(--ob-text-muted)]">
-              Name comes from the saved customer below.
-            </span>
-          ) : (
-            <span className="mt-1 block text-xs text-[var(--ob-text-muted)]">
-              Shown in ALL CAPS on the WhatsApp bill message when set.
-            </span>
-          )}
-        </label>
-        <label className="block">
-          <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-            Mobile number
+            Mobile number <span className="text-[var(--ob-danger)]">*</span>
           </span>
           <Input
             type="tel"
@@ -610,9 +633,6 @@ export function BillingPos({
             onChange={(e) => {
               setCustomerMobile(e.target.value);
               setLastSavedDocument(null);
-              if (e.target.value.trim() && customerId) {
-                setCustomerId("");
-              }
             }}
             placeholder="e.g. 9876543210"
             className="mt-1"
@@ -622,41 +642,118 @@ export function BillingPos({
             id="billing-mobile-hint"
             className="mt-1 block text-xs text-[var(--ob-text-muted)]"
           >
-            For walk-in orders — saved on the bill without picking a customer.
+            {matchedCustomer
+              ? `Existing customer: ${matchedCustomer.name}`
+              : "The customer is matched or created automatically."}
           </span>
         </label>
         <label className="block">
           <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-            Saved customer <span className="font-normal">(optional)</span>
+            Name <span className="font-normal">(optional)</span>
           </span>
-          <select
-            className="mt-1 w-full ob-input"
-            value={customerId}
+          <Input
+            type="text"
+            autoComplete="name"
+            value={customerName}
             onChange={(e) => {
-              const id = e.target.value;
-              setCustomerId(id);
+              setCustomerName(e.target.value);
               setLastSavedDocument(null);
-              const picked = customers.find((c) => c.id === id);
-              if (picked) {
-                setCustomerName(picked.name);
-                if (picked.phone) {
-                  setCustomerMobile(picked.phone);
-                }
-              } else {
-                setCustomerName("");
-              }
             }}
-          >
-            <option value="">None — use mobile above</option>
-            {customers.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-                {c.phone ? ` · ${c.phone}` : ""}
-              </option>
-            ))}
-          </select>
+            placeholder="Defaults to 'User'"
+            className="mt-1"
+          />
         </label>
-        {documentMode === "retail" ? (
+        <label className="block">
+          <span className="text-xs font-medium text-[var(--ob-text-muted)]">
+            Date
+          </span>
+          <Input
+            type="date"
+            value={serviceDate}
+            onChange={(e) => setServiceDate(e.target.value)}
+            className="mt-1"
+            aria-label="Service date"
+          />
+        </label>
+        <div>
+          <span className="text-xs font-medium text-[var(--ob-text-muted)]">
+            Order type
+          </span>
+          <div
+            role="radiogroup"
+            aria-label="Order type"
+            className="mt-1 flex flex-wrap gap-2"
+          >
+            {(
+              [
+                ["dine_in", "Dine-in"],
+                ["takeaway", "Take-away"],
+                ["delivery", "Delivery"],
+                ["online", "Online order"],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                role="radio"
+                aria-checked={orderType === value}
+                onClick={() => setOrderType(value)}
+                className={cn(
+                  "ob-touch-target rounded-full border px-3 py-1.5 text-sm transition",
+                  orderType === value
+                    ? "border-[var(--ob-primary)] bg-[var(--ob-primary)] text-white"
+                    : "border-[var(--ob-border)] bg-[var(--ob-surface)] hover:bg-[var(--ob-surface-muted)]",
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+        {orderType === "dine_in" ? (
+          <div className="flex flex-wrap gap-2">
+            <label className="block min-w-[8rem] flex-1">
+              <span className="text-xs font-medium text-[var(--ob-text-muted)]">
+                Table / tag
+              </span>
+              <Input
+                value={tableTag}
+                onChange={(e) => setTableTag(e.target.value)}
+                placeholder="e.g. T12"
+                className="mt-1"
+              />
+            </label>
+            <label className="block w-24">
+              <span className="text-xs font-medium text-[var(--ob-text-muted)]">
+                Guests
+              </span>
+              <Input
+                type="number"
+                min={1}
+                max={99}
+                value={guests}
+                onChange={(e) => setGuests(e.target.value)}
+                placeholder="e.g. 2"
+                className="mt-1"
+              />
+            </label>
+          </div>
+        ) : null}
+        {orderType === "delivery" ? (
+          <label className="block">
+            <span className="text-xs font-medium text-[var(--ob-text-muted)]">
+              Delivery address
+            </span>
+            <textarea
+              className="ob-input mt-1 w-full"
+              rows={2}
+              value={deliveryAddress}
+              onChange={(e) => setDeliveryAddress(e.target.value)}
+              placeholder="Flat, street, landmark…"
+            />
+          </label>
+        ) : null}
+        {orderType === "takeaway" || orderType === "online" ? (
           <label className="block">
             <span className="text-xs font-medium text-[var(--ob-text-muted)]">
               Table / tag
@@ -664,7 +761,7 @@ export function BillingPos({
             <Input
               value={tableTag}
               onChange={(e) => setTableTag(e.target.value)}
-              placeholder="e.g. T12"
+              placeholder="e.g. pickup token, order ref"
               className="mt-1"
             />
           </label>
@@ -695,33 +792,46 @@ export function BillingPos({
             />
           </label>
         ) : null}
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={saveNewCustomer}
-            onChange={(e) => setSaveNewCustomer(e.target.checked)}
-            disabled={Boolean(customerId)}
-          />
-          Save walk-in as new customer
-        </label>
         <label className="block">
           <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-            Offer code
+            Offer code <span className="font-normal">(optional)</span>
           </span>
-          <Input
-            value={offerCode}
-            onChange={(e) => setOfferCode(e.target.value)}
-            placeholder="Optional"
-            className="mt-1"
-          />
+          <select
+            className="mt-1 w-full ob-input"
+            value={offerPick}
+            onChange={(e) => setOfferPick(e.target.value)}
+            aria-label="Offer code"
+          >
+            <option value="">— None —</option>
+            {offers
+              .filter(
+                (o): o is Offer & { code: string } =>
+                  o.is_active !== false && Boolean(o.code),
+              )
+              .map((o) => (
+                <option key={o.id} value={o.code}>
+                  {o.code} · {o.name}
+                </option>
+              ))}
+            <option value="__custom">Enter your own code…</option>
+          </select>
+          {offerPick === "__custom" ? (
+            <Input
+              value={offerCustom}
+              onChange={(e) => setOfferCustom(e.target.value)}
+              placeholder="Type offer code"
+              className="mt-1"
+            />
+          ) : null}
         </label>
         <label className="block">
           <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-            Notes
+            Notes <span className="font-normal">(optional)</span>
           </span>
           <Input
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
+            placeholder="e.g. no ice"
             className="mt-1"
           />
         </label>
@@ -767,20 +877,39 @@ export function BillingPos({
           ) : null}
         </div>
         {!savingAsQuote ? (
-          <label className="block">
-            <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-              Payment method
-            </span>
-            <select
-              className="mt-1 w-full ob-input"
-              value={paymentMethod}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-            >
-              <option value="UPI">UPI</option>
-              <option value="Card">Card</option>
-              <option value="Cash">Cash</option>
-            </select>
-          </label>
+          <>
+            <label className="block">
+              <span className="text-xs font-medium text-[var(--ob-text-muted)]">
+                Payment
+              </span>
+              <select
+                className="mt-1 w-full ob-input"
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                aria-label="Payment method"
+              >
+                <option value="PENDING">Payment pending</option>
+                <option value="UPI">UPI</option>
+                <option value="Card">Card</option>
+                <option value="Cash">Cash</option>
+              </select>
+            </label>
+            {paymentMethod !== "PENDING" ? (
+              <label className="block">
+                <span className="text-xs font-medium text-[var(--ob-text-muted)]">
+                  Payment reference{" "}
+                  <span className="font-normal">(optional)</span>
+                </span>
+                <Input
+                  value={paymentReference}
+                  onChange={(e) => setPaymentReference(e.target.value)}
+                  placeholder="UPI txn / card ref / platform order no"
+                  maxLength={80}
+                  className="mt-1"
+                />
+              </label>
+            ) : null}
+          </>
         ) : null}
         <div className="flex justify-between pt-2">
           <span>List subtotal</span>
@@ -816,16 +945,6 @@ export function BillingPos({
           <span>{savingAsQuote ? "Quotation total" : "Total"}</span>
           <span>{formatMoney(totals.grandTotal, currencyCode)}</span>
         </div>
-        {documentMode === "retail" ? (
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={saveAsQuote}
-              onChange={(e) => setSaveAsQuote(e.target.checked)}
-            />
-            {copy.saveAsQuoteLabel}
-          </label>
-        ) : null}
         {feedback ? (
           <p
             className={cn(
@@ -841,7 +960,7 @@ export function BillingPos({
         ) : null}
         <Button
           className="ob-touch-target w-full"
-          onClick={() => handleSubmit(savingAsQuote)}
+          onClick={() => handleSubmit()}
           loading={submitting}
           disabled={!cart.length}
         >
