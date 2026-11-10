@@ -148,7 +148,7 @@ export function TasksManager({
           </div>
           {error ? <p role="alert" className="text-sm text-[var(--ob-danger)]">{error}</p> : null}
           <div className="flex gap-2">
-            <button type="submit" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-white disabled:opacity-50" disabled={!canEdit || pending}>
+            <button type="submit" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={!canEdit || pending}>
               {pending ? "Saving…" : editing ? "Save changes" : "Add task"}
             </button>
             {editing ? (
@@ -163,7 +163,7 @@ export function TasksManager({
             <button
               key={f.key}
               type="button"
-              className={`ob-touch-target rounded-full border px-3 text-sm ${filter === f.key ? "border-[var(--ob-primary)] bg-[var(--ob-primary)] text-white" : "border-[var(--ob-border)]"}`}
+              className={`ob-touch-target rounded-full border px-3 text-sm ${filter === f.key ? "border-[var(--ob-primary)] bg-[var(--ob-primary)] text-[var(--ob-primary-foreground)]" : "border-[var(--ob-border)]"}`}
               onClick={() => setFilter(f.key)}
             >
               {f.label}
@@ -196,10 +196,10 @@ export function TasksManager({
                   {canEdit ? (
                     <div className="flex flex-wrap gap-2">
                       {t.status === "open" ? (
-                        <button type="button" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-3 text-sm font-medium text-white disabled:opacity-50" disabled={pending} onClick={() => run(() => setTaskStatusAction(t.id, "in_progress"))}>Start</button>
+                        <button type="button" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-3 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={pending} onClick={() => run(() => setTaskStatusAction(t.id, "in_progress"))}>Start</button>
                       ) : null}
                       {t.status !== "done" ? (
-                        <button type="button" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-3 text-sm font-medium text-white disabled:opacity-50" disabled={pending} onClick={() => run(() => setTaskStatusAction(t.id, "done"))}>Done</button>
+                        <button type="button" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-3 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={pending} onClick={() => run(() => setTaskStatusAction(t.id, "done"))}>Done</button>
                       ) : (
                         <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" disabled={pending} onClick={() => run(() => setTaskStatusAction(t.id, "open"))}>Reopen</button>
                       )}

@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { Meteors } from "@/components/effects/meteors";
 import { CommandPalette } from "@/components/workspace/command-palette";
 import { LogoMark } from "@/components/brand/logo-mark";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -282,7 +283,10 @@ export function AppShell({
   return (
     <div className="ob-workspace ob-ambient flex min-h-screen">
       <CommandPalette />
-      <div className="hidden md:flex">{sidebar}</div>
+      <div aria-hidden className="ob-meteors-layer pointer-events-none fixed inset-0 z-0">
+        <Meteors count={10} seed={5} />
+      </div>
+      <div className="relative z-[1] hidden md:flex">{sidebar}</div>
       {mobileOpen ? (
         <div className="fixed inset-0 z-40 md:hidden" id="mobile-nav-drawer">
           <button

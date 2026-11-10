@@ -56,7 +56,7 @@ export function OrdersBoard({
             className={cn(
               "ob-touch-target rounded-full border px-4 py-1.5 text-sm font-medium transition",
               tab === value
-                ? "border-[var(--ob-primary)] bg-[var(--ob-primary)] text-white"
+                ? "border-[var(--ob-primary)] bg-[var(--ob-primary)] text-[var(--ob-primary-foreground)]"
                 : "border-[var(--ob-border)] bg-[var(--ob-surface)] hover:bg-[var(--ob-surface-muted)]",
             )}
           >

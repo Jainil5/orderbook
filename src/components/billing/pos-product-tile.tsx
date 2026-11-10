@@ -89,7 +89,7 @@ export function PosProductTileWithButton({
             size="wide"
           />
           {inCartQty > 0 ? (
-            <span className="absolute right-2 top-2 rounded-full bg-[var(--ob-primary)] px-2 py-0.5 text-xs font-semibold text-white shadow-sm">
+            <span className="absolute right-2 top-2 rounded-full bg-[var(--ob-primary)] px-2 py-0.5 text-xs font-semibold text-[var(--ob-primary-foreground)] shadow-sm">
               ×{inCartQty}
             </span>
           ) : null}

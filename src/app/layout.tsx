@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { EnvConfigBanner } from "@/components/env-config-banner";
+import { CardGlow } from "@/components/effects/card-glow";
 import {
   resolveInitialTheme,
   THEME_COOKIE,
@@ -49,6 +50,7 @@ export default async function RootLayout({
       </head>
       <body className="flex min-h-full flex-col">
         <EnvConfigBanner />
+        <CardGlow />
         {children}
       </body>
     </html>

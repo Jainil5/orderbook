@@ -1,3 +1,6 @@
+"use client";
+
+import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/cn";
 
 export function Tabs<T extends string>({
@@ -11,6 +14,7 @@ export function Tabs<T extends string>({
   options: { id: T; label: string }[];
   label: string;
 }) {
+  const reduceMotion = useReducedMotion();
   return (
     <div
       role="tablist"
@@ -27,13 +31,25 @@ export function Tabs<T extends string>({
             aria-selected={selected}
             onClick={() => onChange(option.id)}
             className={cn(
-              "-mb-px shrink-0 snap-start border-b-2 px-3 py-2.5 text-sm font-medium transition sm:px-4",
+              "ob-press relative -mb-px shrink-0 snap-start px-3 py-2.5 text-sm font-medium sm:min-h-[2.75rem] sm:px-4",
               selected
-                ? "border-[var(--ob-primary)] text-[var(--ob-primary)]"
-                : "border-transparent text-[var(--ob-text-muted)] hover:text-[var(--ob-text)]",
+                ? "text-[var(--ob-primary)]"
+                : "text-[var(--ob-text-muted)] hover:text-[var(--ob-text)]",
             )}
           >
             {option.label}
+            {selected ? (
+              <motion.span
+                layoutId={`ob-tab-active-${label}`}
+                transition={
+                  reduceMotion
+                    ? { duration: 0 }
+                    : { type: "spring", stiffness: 500, damping: 38 }
+                }
+                className="absolute inset-x-2 bottom-0 h-[3px] rounded-full bg-[var(--ob-primary)]"
+                aria-hidden
+              />
+            ) : null}
           </button>
         );
       })}

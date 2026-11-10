@@ -57,6 +57,8 @@ export function DashboardHome({
   }));
   const mixTotal = mix.reduce((total, item) => total + item.value, 0);
   const bestDay = [...snapshot.salesOverTime].sort((a, b) => b.revenue - a.revenue)[0];
+  const revenueSpark = snapshot.salesOverTime.map((point) => point.revenue);
+  const ordersSpark = snapshot.salesOverTime.map((point) => point.orders);
 
   return (
     <PageShell
@@ -77,7 +79,7 @@ export function DashboardHome({
           </Link>
           <Link
             href="/analytics"
-            className="rounded-full bg-[var(--ob-primary)] px-2.5 py-1.5 text-xs font-medium text-white sm:px-3"
+            className="rounded-full bg-[var(--ob-primary)] px-2.5 py-1.5 text-xs font-medium text-[var(--ob-primary-foreground)] sm:px-3"
           >
             Analytics
           </Link>
@@ -109,17 +111,22 @@ export function DashboardHome({
           hint={range.label}
           numericValue={snapshot.netSales}
           format={{ kind: "currency", currency: snapshot.currencyCode }}
+          spark={revenueSpark}
         />
         <StatCard
           label="Orders"
           value={snapshot.orderCount.toString()}
           numericValue={snapshot.orderCount}
+          spark={ordersSpark}
         />
         <StatCard
           label="Avg. order value"
           value={money(snapshot.averageOrderValue)}
           numericValue={snapshot.averageOrderValue}
           format={{ kind: "currency", currency: snapshot.currencyCode }}
+          spark={snapshot.salesOverTime.map((point) =>
+            point.orders ? Math.round(point.revenue / point.orders) : 0,
+          )}
         />
         <StatCard
           label="Collected"

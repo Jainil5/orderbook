@@ -108,7 +108,7 @@ export function SchedulesManager({
           </label>
           {error ? <p role="alert" className="text-sm text-[var(--ob-danger)]">{error}</p> : null}
           <div className="flex gap-2">
-            <button type="submit" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-white disabled:opacity-50" disabled={!canEdit || pending || staff.length === 0}>
+            <button type="submit" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={!canEdit || pending || staff.length === 0}>
               {pending ? "Saving…" : editing ? "Save changes" : "Add shift"}
             </button>
             {editing ? (

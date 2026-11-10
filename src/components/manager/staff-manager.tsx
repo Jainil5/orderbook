@@ -149,7 +149,7 @@ export function StaffManager({
           <div className="flex gap-2">
             <button
               type="submit"
-              className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-white disabled:opacity-50"
+              className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50"
               disabled={!canEdit || pending}
             >
               {pending ? "Saving…" : editing ? "Save changes" : "Add staff"}

@@ -1,11 +1,14 @@
 "use client";
 
+import { useId, useState } from "react";
 import {
   Area,
+  AreaChart,
   Bar,
   CartesianGrid,
   Cell,
   ComposedChart,
+  LabelList,
   Line,
   Pie,
   PieChart,
@@ -14,7 +17,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { formatMoney } from "@/lib/format";
+import { formatMoney, type OdometerFormat } from "@/lib/format";
+import { Odometer } from "@/components/ui/odometer";
 import type { Slice, TrendPoint } from "@/lib/analytics/snapshot";
 
 export const CHART_COLORS = [
@@ -59,11 +63,30 @@ function Tip({
     <div className="rounded-xl border border-[var(--ob-border)] bg-[var(--ob-surface)] px-3 py-2 text-xs text-[var(--ob-text)] shadow-md">
       <p className="mb-1 font-medium text-[var(--ob-text)]">{label}</p>
       {payload.map((entry) => (
-        <p key={String(entry.dataKey)} style={{ color: entry.color }}>
-          {entry.name}:{" "}
-          {entry.dataKey === "orders"
-            ? entry.value
-            : formatMoney(Number(entry.value ?? 0), currency)}
+        <p
+          key={String(entry.dataKey)}
+          className="flex items-baseline gap-1.5"
+          style={{ color: entry.color }}
+        >
+          <span>{entry.name}:</span>
+          {entry.dataKey === "orders" ? (
+            <Odometer
+              value={Number(entry.value ?? 0)}
+              format={{ kind: "number" }}
+              duration={0.35}
+            >
+              {String(entry.value)}
+            </Odometer>
+          ) : (
+            <Odometer
+              value={Number(entry.value ?? 0)}
+              format={{ kind: "currency", currency }}
+              decimals={0}
+              duration={0.35}
+            >
+              {formatMoney(Number(entry.value ?? 0), currency)}
+            </Odometer>
+          )}
         </p>
       ))}
     </div>
@@ -85,7 +108,7 @@ export function TrendChart({
   const showOrders = metrics.includes("orders");
   const common = {
     data,
-    margin: { top: 8, right: showOrders && showRevenue ? 8 : 0, left: 0, bottom: 0 },
+    margin: { top: 20, right: showOrders && showRevenue ? 8 : 0, left: 0, bottom: 0 },
   };
 
   const axes = (
@@ -113,7 +136,14 @@ export function TrendChart({
           allowDecimals={false}
         />
       ) : null}
-      <Tooltip content={<Tip currency={currency} />} />
+      <Tooltip
+        cursor={{
+          stroke: "var(--ob-primary)",
+          strokeWidth: 1,
+          strokeDasharray: "4 4",
+        }}
+        content={<Tip currency={currency} />}
+      />
     </>
   );
 
@@ -136,7 +166,15 @@ export function TrendChart({
               fill="var(--ob-series-1)"
               radius={[6, 6, 0, 0]}
               maxBarSize={36}
-            />
+              animationDuration={900}
+            >
+              <LabelList
+                dataKey="revenue"
+                position="top"
+                formatter={(value) => compactMoney(Number(value), currency)}
+                style={{ fontSize: 10, fill: "var(--ob-text-muted)" }}
+              />
+            </Bar>
           ) : null}
           {showRevenue && kind === "line" ? (
             <Line
@@ -147,6 +185,8 @@ export function TrendChart({
               stroke="var(--ob-series-1)"
               strokeWidth={2.5}
               dot={{ r: 3, fill: "var(--ob-series-1)" }}
+              animationDuration={900}
+              style={{ filter: "drop-shadow(0 0 6px var(--ob-series-1))" }}
             />
           ) : null}
           {showRevenue && kind === "area" ? (
@@ -158,6 +198,8 @@ export function TrendChart({
               stroke="var(--ob-series-1)"
               strokeWidth={2.5}
               fill="url(#revenueFill)"
+              animationDuration={900}
+              style={{ filter: "drop-shadow(0 0 6px var(--ob-series-1))" }}
             />
           ) : null}
           {showOrders && kind === "bar" ? (
@@ -168,6 +210,7 @@ export function TrendChart({
               fill="var(--ob-series-2)"
               radius={[6, 6, 0, 0]}
               maxBarSize={36}
+              animationDuration={900}
             />
           ) : null}
           {showOrders && kind !== "bar" ? (
@@ -179,6 +222,7 @@ export function TrendChart({
               stroke="var(--ob-series-2)"
               strokeWidth={2.5}
               dot={{ r: 3, fill: "var(--ob-series-2)" }}
+              animationDuration={900}
             />
           ) : null}
         </ComposedChart>
@@ -191,11 +235,16 @@ export function ShareDonut({
   data,
   centerLabel,
   centerValue,
+  centerNumeric,
+  centerFormat,
 }: {
   data: (Slice & { color: string })[];
   centerLabel: string;
   centerValue: string;
+  centerNumeric?: number;
+  centerFormat?: OdometerFormat;
 }) {
+  const [active, setActive] = useState<number | null>(null);
   return (
     <div className="relative h-64">
       <ResponsiveContainer width="100%" height="100%">
@@ -207,10 +256,22 @@ export function ShareDonut({
             innerRadius="62%"
             outerRadius="82%"
             paddingAngle={data.length > 1 ? 2 : 0}
+            cornerRadius={6}
             stroke="none"
+            animationDuration={900}
+            onMouseEnter={(_, index) => setActive(index)}
+            onMouseLeave={() => setActive(null)}
           >
-            {data.map((entry) => (
-              <Cell key={entry.name} fill={entry.color} />
+            {data.map((entry, index) => (
+              <Cell
+                key={entry.name}
+                fill={entry.color}
+                style={
+                  active === index
+                    ? { filter: `drop-shadow(0 0 8px ${entry.color})` }
+                    : undefined
+                }
+              />
             ))}
           </Pie>
           <Tooltip
@@ -225,10 +286,52 @@ export function ShareDonut({
           {centerLabel}
         </span>
         <span className="max-w-[7rem] text-center text-sm font-semibold">
-          {centerValue}
+          {centerNumeric !== undefined && centerFormat ? (
+            <Odometer value={centerNumeric} format={centerFormat} duration={0.9}>
+              {centerValue}
+            </Odometer>
+          ) : (
+            centerValue
+          )}
         </span>
       </div>
     </div>
   );
 }
 
+export function Sparkline({
+  data,
+  color = "var(--ob-series-1)",
+  height = 44,
+}: {
+  data: number[];
+  color?: string;
+  height?: number;
+}) {
+  const gradientId = `spark-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
+  const points = data.map((value, index) => ({ index, value }));
+  if (points.length < 2) return null;
+  return (
+    <div style={{ height }} aria-hidden>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={points} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
+          <defs>
+            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={color} stopOpacity={0.3} />
+              <stop offset="100%" stopColor={color} stopOpacity={0.02} />
+            </linearGradient>
+          </defs>
+          <Area
+            type="monotone"
+            dataKey="value"
+            stroke={color}
+            strokeWidth={2}
+            fill={`url(#${gradientId})`}
+            dot={false}
+            animationDuration={900}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}

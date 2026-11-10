@@ -111,7 +111,7 @@ export function VisitsManager({
           </label>
           {error ? <p role="alert" className="text-sm text-[var(--ob-danger)]">{error}</p> : null}
           <div className="flex gap-2">
-            <button type="submit" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-white disabled:opacity-50" disabled={!canEdit || pending || customers.length === 0 || staff.length === 0}>
+            <button type="submit" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={!canEdit || pending || customers.length === 0 || staff.length === 0}>
               {pending ? "Saving…" : editing ? "Save changes" : "Plan visit"}
             </button>
             {editing ? (
@@ -144,10 +144,10 @@ export function VisitsManager({
                     {canEdit ? (
                       <div className="flex flex-wrap gap-2">
                         {v.status === "planned" ? (
-                          <button type="button" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-3 text-sm font-medium text-white disabled:opacity-50" disabled={pending} onClick={() => run(() => checkInVisitAction(v.id), setActionError)}>Check in</button>
+                          <button type="button" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-3 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={pending} onClick={() => run(() => checkInVisitAction(v.id), setActionError)}>Check in</button>
                         ) : null}
                         {v.status === "checked_in" ? (
-                          <button type="button" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-3 text-sm font-medium text-white disabled:opacity-50" disabled={pending} onClick={() => { setCheckoutId(v.id); setReport(""); setCheckoutError(null); }}>Check out</button>
+                          <button type="button" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-3 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={pending} onClick={() => { setCheckoutId(v.id); setReport(""); setCheckoutError(null); }}>Check out</button>
                         ) : null}
                         {v.status === "planned" ? (
                           <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm disabled:opacity-50" disabled={pending} onClick={() => startEdit(v)}>Edit</button>
@@ -174,7 +174,7 @@ export function VisitsManager({
                       </label>
                       {checkoutError ? <p role="alert" className="text-sm text-[var(--ob-danger)]">{checkoutError}</p> : null}
                       <div className="flex gap-2">
-                        <button type="submit" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-white disabled:opacity-50" disabled={pending}>Complete visit</button>
+                        <button type="submit" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={pending}>Complete visit</button>
                         <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm disabled:opacity-50" disabled={pending} onClick={() => { setCheckoutId(null); setCheckoutError(null); }}>Cancel</button>
                       </div>
                     </form>

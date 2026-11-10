@@ -160,7 +160,7 @@ export function AppointmentsManager({
           </label>
           {error ? <p role="alert" className="text-sm text-[var(--ob-danger)]">{error}</p> : null}
           <div className="flex gap-2">
-            <button type="submit" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-white disabled:opacity-50" disabled={!canEdit || pending}>
+            <button type="submit" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={!canEdit || pending}>
               {pending ? "Saving…" : editing ? "Save changes" : "Schedule"}
             </button>
             {editing ? (
@@ -198,7 +198,7 @@ export function AppointmentsManager({
                     <div className="flex flex-wrap gap-2">
                       {a.status === "scheduled" ? (
                         <>
-                          <button type="button" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-3 text-sm font-medium text-white disabled:opacity-50" disabled={pending} onClick={() => run(() => setAppointmentStatusAction(a.id, "completed"))}>Complete</button>
+                          <button type="button" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-3 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={pending} onClick={() => run(() => setAppointmentStatusAction(a.id, "completed"))}>Complete</button>
                           <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" disabled={pending} onClick={() => run(() => setAppointmentStatusAction(a.id, "cancelled"))}>Cancel</button>
                         </>
                       ) : null}

@@ -136,7 +136,7 @@ export function ServicesManager({
               </label>
             </div>
             <div className="flex gap-2">
-              <button type="submit" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-white disabled:opacity-50" disabled={!canEdit || pending}>
+              <button type="submit" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={!canEdit || pending}>
                 {pending ? "Saving…" : editingService ? "Save changes" : "Add service"}
               </button>
               {editingService ? (
@@ -201,7 +201,7 @@ export function ServicesManager({
               <input className="ob-input mt-1 w-full" value={jobNotes} onChange={(e) => setJobNotes(e.target.value)} maxLength={300} disabled={!canEdit || pending} />
             </label>
             <div className="flex gap-2">
-              <button type="submit" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-white disabled:opacity-50" disabled={!canEdit || pending || services.length === 0 || customers.length === 0}>
+              <button type="submit" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={!canEdit || pending || services.length === 0 || customers.length === 0}>
                 {pending ? "Saving…" : editingJob ? "Save job" : "Request job"}
               </button>
               {editingJob ? (
@@ -264,7 +264,7 @@ export function ServicesManager({
                         {canEdit ? (
                           <div className="flex flex-wrap gap-2">
                             {nextJobStatus(j.status) ? (
-                              <button type="button" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-3 text-sm font-medium text-white disabled:opacity-50" disabled={pending} onClick={() => run(() => advanceServiceJobAction(j.id))}>
+                              <button type="button" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-3 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={pending} onClick={() => run(() => advanceServiceJobAction(j.id))}>
                                 Mark {SERVICE_JOB_STATUS_LABELS[nextJobStatus(j.status)!].toLowerCase()}
                               </button>
                             ) : null}

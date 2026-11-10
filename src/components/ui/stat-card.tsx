@@ -1,6 +1,6 @@
 import { cn } from "@/lib/cn";
 import { Odometer } from "@/components/ui/odometer";
-import { PointerGlow } from "@/components/effects/pointer-glow";
+import { Sparkline } from "@/components/analytics/charts";
 import type { OdometerFormat } from "@/lib/format";
 
 export function StatCard({
@@ -10,6 +10,7 @@ export function StatCard({
   tone = "neutral",
   numericValue,
   format = { kind: "number" },
+  spark,
 }: {
   label: string;
   value: string;
@@ -19,9 +20,11 @@ export function StatCard({
    *  text; `value` stays the final-formatted string for SSR/a11y parity. */
   numericValue?: number;
   format?: OdometerFormat;
+  /** Optional mini trend line drawn under the value. */
+  spark?: number[];
 }) {
   return (
-    <PointerGlow className="ob-card group relative overflow-hidden p-4">
+    <div className="ob-card group relative overflow-hidden p-4">
       <span
         className="absolute inset-y-0 left-0 w-1 bg-[var(--ob-primary)] transition-all duration-300 group-hover:w-1.5 group-hover:bg-[var(--ob-accent)]"
         aria-hidden
@@ -38,6 +41,11 @@ export function StatCard({
           </Odometer>
         )}
       </p>
+      {spark && spark.length > 1 ? (
+        <div className="mt-2">
+          <Sparkline data={spark} />
+        </div>
+      ) : null}
       {hint ? (
         <p
           className={cn(
@@ -50,6 +58,6 @@ export function StatCard({
           {hint}
         </p>
       ) : null}
-    </PointerGlow>
+    </div>
   );
 }

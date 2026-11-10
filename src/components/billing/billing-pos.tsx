@@ -519,7 +519,7 @@ export function BillingPos({
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-base font-semibold">{cartTitle}</h2>
         {itemCount > 0 ? (
-          <span className="rounded-full bg-[var(--ob-primary)] px-2.5 py-0.5 text-xs font-medium text-white">
+          <span className="rounded-full bg-[var(--ob-primary)] px-2.5 py-0.5 text-xs font-medium text-[var(--ob-primary-foreground)]">
             {itemCount} items
           </span>
         ) : null}
@@ -705,7 +705,7 @@ export function BillingPos({
                 className={cn(
                   "ob-touch-target rounded-full border px-3 py-1.5 text-sm transition",
                   orderType === value
-                    ? "border-[var(--ob-primary)] bg-[var(--ob-primary)] text-white"
+                    ? "border-[var(--ob-primary)] bg-[var(--ob-primary)] text-[var(--ob-primary-foreground)]"
                     : "border-[var(--ob-border)] bg-[var(--ob-surface)] hover:bg-[var(--ob-surface-muted)]",
                 )}
               >
@@ -1025,7 +1025,7 @@ export function BillingPos({
               className={cn(
                 "flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition",
                 category === cat
-                  ? "border-[var(--ob-primary)] bg-[var(--ob-primary)] text-white"
+                  ? "border-[var(--ob-primary)] bg-[var(--ob-primary)] text-[var(--ob-primary-foreground)]"
                   : "border-[var(--ob-border)] bg-[var(--ob-surface)] hover:bg-[var(--ob-surface-muted)]",
               )}
             >
@@ -1045,11 +1045,7 @@ export function BillingPos({
             {groupProductsByCategory(filtered).map((group) => {
               const tint = categoryTint(group.category);
               return (
-                <section
-                  key={group.category}
-                  className="rounded-[var(--ob-radius-lg)] p-3"
-                  style={{ backgroundColor: tint.background }}
-                >
+                <section key={group.category} className="rounded-[var(--ob-radius-lg)] p-3">
                   <div className="mb-2 flex items-baseline gap-2">
                     <h3
                       className="text-sm font-semibold"

@@ -87,7 +87,7 @@ export function RangeSelector({
               onClick={() => pickPreset(preset.id)}
               className={`ob-press shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium min-h-[2.75rem] transition ${
                 selected
-                  ? "bg-[var(--ob-primary)] text-white"
+                  ? "bg-[var(--ob-primary)] text-[var(--ob-primary-foreground)]"
                   : "border border-[var(--ob-border)] text-[var(--ob-text-secondary)] hover:border-[var(--ob-primary)]"
               }`}
             >

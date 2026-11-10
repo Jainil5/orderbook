@@ -4,40 +4,40 @@
 @custom-variant dark ([data-theme="dark"] &);
 
 :root {
-  --ob-bg: #eef2f6;
+  --ob-bg: #f7f8fb;
   --ob-surface: #ffffff;
-  --ob-surface-muted: #f3f6f9;
-  --ob-border: #e3e8ef;
-  --ob-border-strong: #cfd6e0;
-  --ob-text: #121826;
-  --ob-text-secondary: #3e4a5c;
-  --ob-text-muted: #6b7789;
-  --ob-primary: #1b3654;
-  --ob-primary-hover: #14283f;
+  --ob-surface-muted: #eef0f6;
+  --ob-border: #e2e6ef;
+  --ob-border-strong: #ccd3e3;
+  --ob-text: #1a2233;
+  --ob-text-secondary: #3d4761;
+  --ob-text-muted: #66718c;
+  --ob-primary: #4f46e5;
+  --ob-primary-hover: #4338ca;
   --ob-primary-foreground: #ffffff;
-  --ob-accent: #0f766e;
-  --ob-focus: #2563eb;
-  --ob-success: #047857;
+  --ob-accent: #0d9488;
+  --ob-focus: #4f46e5;
+  --ob-success: #059669;
   --ob-warning: #b45309;
-  --ob-danger: #b91c1c;
-  --ob-demo: #6d28d9;
-  --ob-sidebar: #121a27;
-  --ob-sidebar-text: #f5f7fb;
-  --ob-sidebar-muted: #9aa8bc;
+  --ob-danger: #dc2626;
+  --ob-demo: #7c3aed;
+  --ob-sidebar: #14182b;
+  --ob-sidebar-text: #eef0f9;
+  --ob-sidebar-muted: #9aa3c0;
   --ob-sidebar-line: rgb(255 255 255 / 0.08);
-  --ob-accent-2: #4f46e5;
-  --ob-glow: rgb(15 118 110 / 0.28);
-  --ob-gradient-primary: linear-gradient(120deg, #1b3654, #0f766e, #1b3654);
-  --ob-ambient-a: rgb(27 56 84 / 0.07);
-  --ob-ambient-b: rgb(15 118 110 / 0.06);
-  --ob-series-1: #1b3654;
-  --ob-series-2: #0f766e;
-  --ob-series-3: #c2410c;
-  --ob-series-4: #6d28d9;
-  --ob-series-5: #0369a1;
-  --ob-series-6: #be123c;
-  --ob-series-7: #a16207;
-  --ob-series-8: #3f6212;
+  --ob-accent-2: #6366f1;
+  --ob-glow: rgb(79 70 229 / 0.2);
+  --ob-gradient-primary: linear-gradient(120deg, #4f46e5, #0d9488, #4f46e5);
+  --ob-ambient-a: rgb(79 70 229 / 0.06);
+  --ob-ambient-b: rgb(13 148 136 / 0.05);
+  --ob-series-1: #4f46e5;
+  --ob-series-2: #0d9488;
+  --ob-series-3: #d97706;
+  --ob-series-4: #7c3aed;
+  --ob-series-5: #0891b2;
+  --ob-series-6: #e11d48;
+  --ob-series-7: #65a30d;
+  --ob-series-8: #ea580c;
   --ob-radius-sm: 0.375rem;
   --ob-radius-md: 0.625rem;
   --ob-radius-lg: 1rem;
@@ -54,37 +54,37 @@
 }
 
 [data-theme="dark"] {
-  --ob-bg: #0b111d;
-  --ob-surface: #121a29;
-  --ob-surface-muted: #1a2334;
-  --ob-border: #243049;
-  --ob-border-strong: #384766;
-  --ob-text: #e8edf6;
-  --ob-text-secondary: #c2cbdc;
-  --ob-text-muted: #8794ac;
-  --ob-primary: #2e5478;
-  --ob-primary-hover: #3a6690;
-  --ob-primary-foreground: #f2f6fc;
-  --ob-accent: #2dd4bf;
+  --ob-bg: #0e1220;
+  --ob-surface: #161c2c;
+  --ob-surface-muted: #1d2537;
+  --ob-border: #26304a;
+  --ob-border-strong: #39466b;
+  --ob-text: #e9edf8;
+  --ob-text-secondary: #c3cbe0;
+  --ob-text-muted: #8b96b3;
+  --ob-primary: #818cf8;
+  --ob-primary-hover: #a5b4fc;
+  --ob-primary-foreground: #0e1220;
+  --ob-accent: #5eead4;
   --ob-focus: #818cf8;
   --ob-success: #34d399;
   --ob-warning: #fbbf24;
   --ob-danger: #f87171;
   --ob-demo: #a78bfa;
-  --ob-sidebar: #0e1524;
+  --ob-sidebar: #101526;
   --ob-accent-2: #6366f1;
-  --ob-glow: rgb(99 102 241 / 0.45);
-  --ob-gradient-primary: linear-gradient(120deg, #4f46e5, #0d9488, #4f46e5);
-  --ob-ambient-a: rgb(79 70 229 / 0.16);
-  --ob-ambient-b: rgb(45 212 191 / 0.1);
-  --ob-series-1: #60a5fa;
-  --ob-series-2: #2dd4bf;
-  --ob-series-3: #fb923c;
-  --ob-series-4: #a78bfa;
-  --ob-series-5: #38bdf8;
-  --ob-series-6: #f472b6;
-  --ob-series-7: #facc15;
-  --ob-series-8: #86efac;
+  --ob-glow: rgb(129 140 248 / 0.4);
+  --ob-gradient-primary: linear-gradient(120deg, #6366f1, #0d9488, #6366f1);
+  --ob-ambient-a: rgb(99 102 241 / 0.14);
+  --ob-ambient-b: rgb(94 234 212 / 0.08);
+  --ob-series-1: #818cf8;
+  --ob-series-2: #5eead4;
+  --ob-series-3: #fbbf24;
+  --ob-series-4: #c4b5fd;
+  --ob-series-5: #67e8f9;
+  --ob-series-6: #f9a8d4;
+  --ob-series-7: #a3e635;
+  --ob-series-8: #fb923c;
 }
 
 @theme inline {
@@ -121,6 +121,7 @@ body {
 }
 
 .ob-card {
+  position: relative;
   background: var(--ob-surface);
   border: 1px solid var(--ob-border);
   border-radius: var(--ob-radius-lg);
@@ -490,13 +491,13 @@ body {
   z-index: 0;
 }
 
-/* Cursor-following radial highlight for KPI/analysis cards. The component
-   positions --ob-glow-x/--ob-glow-y; this layer never intercepts pointer
-   events and is aria-hidden at the usage site. */
-.ob-glow-layer {
+/* Cursor-following radial highlight on every card. The delegated CardGlow
+   listener positions --ob-glow-x/--ob-glow-y and toggles .ob-card-glow;
+   this layer never intercepts pointer events. */
+.ob-card::after {
+  content: "";
   position: absolute;
   inset: 0;
-  overflow: hidden;
   border-radius: inherit;
   pointer-events: none;
   opacity: 0;
@@ -508,8 +509,8 @@ body {
   );
 }
 
-.ob-glow-host:hover .ob-glow-layer,
-.ob-glow-host:focus-within .ob-glow-layer {
+.ob-card-glow::after,
+.ob-card:focus-within::after {
   opacity: 0.75;
 }
 
@@ -526,7 +527,7 @@ body {
     animation: none !important;
   }
 
-  .ob-glow-layer {
+  .ob-card::after {
     transition: none;
   }
 
@@ -589,5 +590,25 @@ body {
   }
   body {
     background: white;
+  }
+}
+
+/* Rank bars sweep in from the left when charts mount. */
+.ob-grow-bar {
+  animation: ob-grow-bar 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes ob-grow-bar {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ob-grow-bar {
+    animation: none;
   }
 }
