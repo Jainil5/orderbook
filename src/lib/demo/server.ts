@@ -239,7 +239,7 @@ export async function submitDemoOrder(
   }
 
   const suffix = Math.floor(1000 + Math.random() * 9000);
-  const isQuote = input.paymentStatus === "pending";
+  const isQuote = input.saveAsQuote === true;
   const prefix = isQuote
     ? `${pack.orderNumberPrefix}-Q`
     : pack.orderNumberPrefix;

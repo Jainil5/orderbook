@@ -68,6 +68,7 @@ export function BillingWorkspace({
           offerCode: payload.offerCode,
           paymentMethod: payload.paymentMethod,
           paymentStatus: payload.saveAsQuote ? ("pending" as const) : ("paid" as const),
+          saveAsQuote: payload.saveAsQuote,
           orderDiscount: payload.orderDiscount,
           tableTag: payload.tableTag,
           deliveryNotes: payload.deliveryNotes,

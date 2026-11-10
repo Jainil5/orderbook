@@ -18,6 +18,7 @@ import {
 import { customerPriceTier, listUnitPrice } from "@/lib/pricing/unit-price";
 import { parseProductModifiers } from "@/lib/products/modifiers";
 import { validateCreateOrderInput } from "@/lib/security/validate-order";
+import { localDayKey } from "@/lib/manager/time";
 
 export type BuiltOrderRecord = {
   order: Order;
@@ -148,7 +149,7 @@ export function buildOrderRecord(params: {
     offerDiscountAmount,
   });
 
-  const isQuote = params.input.paymentStatus === "pending";
+  const isQuote = params.input.saveAsQuote === true;
   let customerName: string | null = null;
   if (params.input.customerId) {
     customerName =
@@ -165,24 +166,22 @@ export function buildOrderRecord(params: {
       : null;
 
   const amountPaid =
-    params.input.paymentStatus === "paid"
-      ? totals.grandTotal
-      : depositPercent != null && depositPercent > 0
-        ? Math.round(((totals.grandTotal * depositPercent) / 100) * 100) / 100
-        : 0;
+    isQuote && depositPercent != null && depositPercent > 0
+      ? Math.round(((totals.grandTotal * depositPercent) / 100) * 100) / 100
+      : 0;
+
+  const serviceDate =
+    params.input.serviceDate && /^\d{4}-\d{2}-\d{2}$/.test(params.input.serviceDate)
+      ? params.input.serviceDate
+      : localDayKey(new Date());
 
   const createdAt = new Date().toISOString();
   const order: Order = {
     id: params.orderId,
     brand_id: params.brandId,
     order_number: params.orderNumber,
-    status: isQuote ? "draft" : "completed",
-    payment_status:
-      params.input.paymentStatus === "paid"
-        ? "paid"
-        : amountPaid > 0
-          ? "partial"
-          : params.input.paymentStatus,
+    status: isQuote ? "draft" : "pending",
+    payment_status: "pending",
     customer_id: params.input.customerId,
     customer_name_snapshot: customerName,
     subtotal: totals.taxableSubtotal,
@@ -194,6 +193,12 @@ export function buildOrderRecord(params: {
     created_at: createdAt,
     table_tag: params.input.tableTag?.trim() || null,
     delivery_notes: params.input.deliveryNotes?.trim() || null,
+    order_type: params.input.orderType ?? null,
+    service_date: serviceDate,
+    guests: params.input.guests ?? null,
+    delivery_address: params.input.deliveryAddress?.trim() || null,
+    payment_method: params.input.paymentMethod?.trim() || null,
+    payment_reference: params.input.paymentReference?.trim().slice(0, 80) || null,
     deposit_percent: depositPercent,
     amount_paid: amountPaid,
     offer_code_snapshot: appliedOffer?.code ?? null,

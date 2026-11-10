@@ -16,6 +16,7 @@ export function isValidBrandCode(code: string): boolean {
 const ALLOWED_ORDER_STATUS = new Set([
   "all",
   "draft",
+  "pending",
   "confirmed",
   "completed",
   "cancelled",

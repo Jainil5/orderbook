@@ -98,10 +98,13 @@ export type Customer = {
 
 export type OrderStatus =
   | "draft"
+  | "pending"
   | "confirmed"
   | "completed"
   | "cancelled"
   | "refunded";
+
+export type OrderType = "dine_in" | "takeaway" | "delivery" | "online";
 
 export type PaymentStatus =
   | "pending"
@@ -127,6 +130,14 @@ export type Order = {
   created_at: string;
   table_tag?: string | null;
   delivery_notes?: string | null;
+  order_type?: OrderType | null;
+  /** Local calendar day YYYY-MM-DD chosen at billing; defaults to today. */
+  service_date?: string | null;
+  guests?: number | null;
+  delivery_address?: string | null;
+  /** Method chosen at billing; null means payment still pending. */
+  payment_method?: string | null;
+  payment_reference?: string | null;
   deposit_percent?: number | null;
   amount_paid?: number | null;
   offer_code_snapshot?: string | null;
@@ -221,6 +232,8 @@ export type CreateOrderInput = {
   offerCode?: string;
   paymentMethod: string;
   paymentStatus: PaymentStatus;
+  /** Quotation document mode only — bills always save as pending orders. */
+  saveAsQuote?: boolean;
   /** Optional extra discount on the order subtotal (after line/product discounts). */
   orderDiscount?: OrderDiscountInput | null;
   tableTag?: string;
@@ -229,6 +242,11 @@ export type CreateOrderInput = {
   /** Create a customer record from walk-in details at checkout. */
   saveNewCustomer?: boolean;
   priceTier?: "retail" | "wholesale";
+  orderType?: OrderType;
+  serviceDate?: string;
+  guests?: number | null;
+  deliveryAddress?: string;
+  paymentReference?: string;
 };
 
 export type OfferUpsertInput = {
