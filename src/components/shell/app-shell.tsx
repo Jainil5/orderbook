@@ -252,14 +252,6 @@ export function AppShell({
             {!collapsed ? (mode === "demo" ? "Exit workspace" : "Log out") : null}
           </button>
         </form>
-        {mode === "demo" && !collapsed ? (
-          <Link
-            href="/login"
-            className="mt-1 flex items-center gap-2 rounded-[var(--ob-radius-md)] px-3 py-2 text-sm text-white hover:bg-white/5"
-          >
-            Sign in with business ID
-          </Link>
-        ) : null}
         <button
           type="button"
           className="mt-1 hidden w-full items-center gap-2 rounded-[var(--ob-radius-md)] px-3 py-2 text-sm text-[var(--ob-sidebar-muted)] hover:bg-white/5 hover:text-white md:flex"
