@@ -1,35 +1,25 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import {
+  completeDemoOrder,
+  createDemoCreditNote,
   recordDemoPayment,
+  recordDemoRefund,
+  recordDemoStockAdjustment,
   saveDemoCustomer,
   saveDemoOffer,
   updateDemoCustomer,
+  updateDemoOrderNotes,
   updateDemoOrderStatus,
 } from "@/lib/demo/server";
-import {
-  createCustomer,
-  createOffer,
-  recordPayment,
-  updateCustomer,
-  updateOrderStatus,
-} from "@/services/data";
-import {
-  createCreditNoteLive,
-  completeOrderLive,
-  listOpenQuotesAndReceivables,
-  recordRefundLive,
-  recordStockAdjustmentLive,
-  updateOrderNotesLive,
-} from "@/services/order-operations";
-import { listDemoOrders, toDemoBrandCode } from "@/lib/demo/data";
+import { listDemoCustomers, listDemoOrders, toDemoBrandCode } from "@/lib/demo/data";
 import { isOpenQuote, isOpenReceivable } from "@/lib/orders/order-rules";
 import { ORDER_TYPE_LABELS } from "@/lib/orders/order-labels";
 import { localDayKey } from "@/lib/manager/time";
 import type {
   CustomerUpsertInput,
   OfferUpsertInput,
+  Order,
   OrderStatus,
   RecordPaymentInput,
   RecordRefundInput,
@@ -37,25 +27,11 @@ import type {
 } from "@/types/database";
 import { loadWorkspaceSession } from "@/lib/workspace/session";
 import { rowsToCsv } from "@/lib/export/csv";
-import { listCustomers, listOrders } from "@/services/data";
-
-function revalidateOps() {
-  revalidatePath("/orders");
-  revalidatePath("/payments");
-  revalidatePath("/customers");
-  revalidatePath("/dashboard");
-  revalidatePath("/analytics");
-  revalidatePath("/products");
-  revalidatePath("/billing");
-}
 
 export async function saveCustomerAction(input: CustomerUpsertInput) {
   const ws = await loadWorkspaceSession();
   if (!ws) return { ok: false as const, message: "Not signed in." };
-  if (ws.mode === "demo") return saveDemoCustomer(input);
-  const result = await createCustomer(input);
-  if (result.ok) revalidatePath("/customers");
-  return result;
+  return saveDemoCustomer(input);
 }
 
 export async function updateCustomerAction(
@@ -64,15 +40,13 @@ export async function updateCustomerAction(
 ) {
   const ws = await loadWorkspaceSession();
   if (!ws) return { ok: false as const, message: "Not signed in." };
-  if (ws.mode === "demo") return updateDemoCustomer(customerId, input);
-  return updateCustomer(customerId, input);
+  return updateDemoCustomer(customerId, input);
 }
 
 export async function saveOfferAction(input: OfferUpsertInput) {
   const ws = await loadWorkspaceSession();
   if (!ws) return { ok: false as const, message: "Not signed in." };
-  if (ws.mode === "demo") return saveDemoOffer(input);
-  return createOffer(input);
+  return saveDemoOffer(input);
 }
 
 export async function updateOrderStatusAction(
@@ -81,21 +55,14 @@ export async function updateOrderStatusAction(
 ) {
   const ws = await loadWorkspaceSession();
   if (!ws) return { ok: false as const, message: "Not signed in." };
-  if (ws.mode === "demo") return updateDemoOrderStatus(orderId, status);
-  const result = await updateOrderStatus(orderId, status);
-  if (result.ok) revalidateOps();
-  return result;
+  return updateDemoOrderStatus(orderId, status);
 }
 
 export async function completeOrderAction(orderId: string) {
   const ws = await loadWorkspaceSession();
   if (!ws) return { ok: false as const, message: "Not signed in." };
   try {
-    if (ws.mode === "demo") {
-      const { completeDemoOrder } = await import("@/lib/demo/server");
-      return await completeDemoOrder(orderId);
-    }
-    return await completeOrderLive(orderId);
+    return await completeDemoOrder(orderId);
   } catch {
     return { ok: false as const, message: "Could not save. Try again." };
   }
@@ -104,66 +71,40 @@ export async function completeOrderAction(orderId: string) {
 export async function recordPaymentAction(input: RecordPaymentInput) {
   const ws = await loadWorkspaceSession();
   if (!ws) return { ok: false as const, message: "Not signed in." };
-  if (ws.mode === "demo") return recordDemoPayment(input);
-  const result = await recordPayment(input);
-  if (result.ok) revalidateOps();
-  return result;
+  return recordDemoPayment(input);
 }
 
 export async function recordRefundAction(input: RecordRefundInput) {
   const ws = await loadWorkspaceSession();
   if (!ws) return { ok: false as const, message: "Not signed in." };
-  if (ws.mode === "demo") {
-    const { recordDemoRefund } = await import("@/lib/demo/server");
-    return recordDemoRefund(input);
-  }
-  const result = await recordRefundLive(input);
-  if (result.ok) revalidateOps();
-  return result;
+  return recordDemoRefund(input);
 }
 
 export async function createCreditNoteAction(orderId: string) {
   const ws = await loadWorkspaceSession();
   if (!ws) return { ok: false as const, message: "Not signed in." };
-  if (ws.mode === "demo") {
-    const { createDemoCreditNote } = await import("@/lib/demo/server");
-    return createDemoCreditNote(orderId);
-  }
-  const result = await createCreditNoteLive(orderId);
-  if (result.ok) revalidateOps();
-  return result;
+  return createDemoCreditNote(orderId);
 }
 
 export async function updateOrderNotesAction(orderId: string, notes: string) {
   const ws = await loadWorkspaceSession();
   if (!ws) return { ok: false as const, message: "Not signed in." };
-  if (ws.mode === "demo") {
-    const { updateDemoOrderNotes } = await import("@/lib/demo/server");
-    return updateDemoOrderNotes(orderId, notes);
-  }
-  return updateOrderNotesLive(orderId, notes);
+  return updateDemoOrderNotes(orderId, notes);
 }
 
 export async function recordStockAdjustmentAction(input: StockAdjustmentInput) {
   const ws = await loadWorkspaceSession();
   if (!ws) return { ok: false as const, message: "Not signed in." };
-  if (ws.mode === "demo") {
-    const { recordDemoStockAdjustment } = await import("@/lib/demo/server");
-    return recordDemoStockAdjustment(input);
-  }
-  return recordStockAdjustmentLive(input);
+  return recordDemoStockAdjustment(input);
 }
 
 export async function loadOpenQuotesAction() {
   const ws = await loadWorkspaceSession();
-  if (!ws) return { data: [] as import("@/types/database").Order[] };
-  if (ws.mode === "demo") {
-    const orders = await listDemoOrders(undefined, toDemoBrandCode(ws.brand.code));
-    return {
-      data: orders.filter((o) => isOpenQuote(o) || isOpenReceivable(o)).slice(0, 20),
-    };
-  }
-  return listOpenQuotesAndReceivables();
+  if (!ws) return { data: [] as Order[] };
+  const orders = await listDemoOrders(undefined, toDemoBrandCode(ws.brand.code));
+  return {
+    data: orders.filter((o) => isOpenQuote(o) || isOpenReceivable(o)).slice(0, 20),
+  };
 }
 
 export async function exportOrdersCsvAction() {
@@ -180,7 +121,7 @@ export async function exportOrdersCsvAction() {
     "Date",
     "Created",
   ];
-  const orderRow = (o: import("@/types/database").Order) => [
+  const orderRow = (o: Order) => [
     o.order_number,
     o.customer_name_snapshot,
     o.grand_total,
@@ -191,38 +132,18 @@ export async function exportOrdersCsvAction() {
     o.service_date ?? localDayKey(new Date(o.created_at)),
     o.created_at,
   ];
-  if (ws.mode === "demo") {
-    const orders = await listDemoOrders(undefined, toDemoBrandCode(ws.brand.code));
-    const csv = rowsToCsv(header, orders.map(orderRow));
-    return { ok: true as const, csv, filename: "orders.csv" };
-  }
-  const { data } = await listOrders({ page: 1, pageSize: 500 });
-  const csv = rowsToCsv(header, data.map(orderRow));
+  const orders = await listDemoOrders(undefined, toDemoBrandCode(ws.brand.code));
+  const csv = rowsToCsv(header, orders.map(orderRow));
   return { ok: true as const, csv, filename: "orders.csv" };
 }
 
 export async function exportCustomersCsvAction() {
   const ws = await loadWorkspaceSession();
   if (!ws) return { ok: false as const, message: "Not signed in." };
-  if (ws.mode === "demo") {
-    const { listDemoCustomers } = await import("@/lib/demo/data");
-    const customers = await listDemoCustomers(undefined, toDemoBrandCode(ws.brand.code));
-    const csv = rowsToCsv(
-      ["Name", "Phone", "Email", "Tier", "Notes"],
-      customers.map((c) => [
-        c.name,
-        c.phone,
-        c.email,
-        c.price_tier ?? "retail",
-        c.notes ?? "",
-      ]),
-    );
-    return { ok: true as const, csv, filename: "customers.csv" };
-  }
-  const { data } = await listCustomers();
+  const customers = await listDemoCustomers(undefined, toDemoBrandCode(ws.brand.code));
   const csv = rowsToCsv(
     ["Name", "Phone", "Email", "Tier", "Notes"],
-    data.map((c) => [
+    customers.map((c) => [
       c.name,
       c.phone,
       c.email,

@@ -41,8 +41,6 @@ export function ReceiptSettings({
     setBusy(false);
     if (result.ok) {
       setMessage("Saved.");
-    } else {
-      setMessage("message" in result ? result.message : "Could not save.");
     }
   }
 

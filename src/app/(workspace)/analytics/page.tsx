@@ -1,10 +1,6 @@
 import { Suspense } from "react";
 import { AnalyticsStudio } from "@/components/analytics/analytics-studio";
-import {
-  createdAtRangeQuery,
-  orderInCalendarRange,
-  resolveRange,
-} from "@/lib/analytics/date-range";
+import { orderInCalendarRange, resolveRange } from "@/lib/analytics/date-range";
 import { computeMarginSnapshot } from "@/lib/analytics/margin";
 import { snapshotFromOrderRecords } from "@/lib/analytics/snapshot";
 import { revenueOrders } from "@/lib/orders/order-rules";
@@ -15,13 +11,6 @@ import {
   listDemoProductsMerged,
   toDemoBrandCode,
 } from "@/lib/demo/data";
-import {
-  listOrderItemsForOrders,
-  listOrders,
-  listPayments,
-  listProducts,
-} from "@/services/data";
-import { fetchAnalyticsSnapshotLive } from "@/services/quotes";
 import { loadWorkspaceSession } from "@/lib/workspace/session";
 import { redirect } from "next/navigation";
 
@@ -61,98 +50,31 @@ export default async function AnalyticsPage({
   const range = resolveRange(params);
   const { from, to } = range;
 
-  if (ws.mode === "demo") {
-    const code = toDemoBrandCode(ws.brand.code);
-    const allOrders = await listDemoOrders(undefined, code);
-    const orders = allOrders.filter((o) =>
-      orderInCalendarRange(o.created_at, from, to),
-    );
-    const payments = (await listDemoPayments(code)).filter((p) => {
-      const order = allOrders.find((o) => o.id === p.order_id);
-      return order
-        ? orderInCalendarRange(order.created_at, from, to)
-        : true;
-    });
-    const products = await listDemoProductsMerged({}, code);
-    const orderIds = orders.map((o) => o.id);
-    const itemGroups = await Promise.all(
-      orderIds.map((id) => getDemoOrderItems(id, code)),
-    );
-    const orderItems = itemGroups.flat();
-    // Only completed bills earn — trend, mix, margin and collection all read
-    // from this revenue set while the receivables list stays all-status.
-    const revenue = revenueOrders(orders);
-    const marginSnapshot = computeMarginSnapshot({
-      orders: revenue,
-      orderItems,
-      products,
-    });
-
-    return (
-      <Suspense fallback={null}>
-        <AnalyticsStudio
-          initialTab={initialTab}
-          rangeFrom={from}
-          rangeTo={to}
-          rangePreset={range.preset}
-          snapshot={snapshotFromOrderRecords({
-            orders: revenue,
-            items: orderItems,
-            products,
-            payments,
-            currencyCode: ws.settings.currency_code,
-          })}
-          payments={payments}
-          marginSnapshot={marginSnapshot}
-        />
-      </Suspense>
-    );
-  }
-
-  const { dateFrom, dateTo } = createdAtRangeQuery(from, to);
-  const [ordersRes, paymentsRes, productsRes, rpcKpis] = await Promise.all([
-    listOrders({ page: 1, pageSize: 500, dateFrom, dateTo }),
-    listPayments(),
-    listProducts({ activeOnly: false }),
-    fetchAnalyticsSnapshotLive(dateFrom, dateTo),
-  ]);
-
-  const orderIds = ordersRes.data.map((o) => o.id);
-  const itemsRes = await listOrderItemsForOrders(orderIds);
-  const inRangeOrderIds = new Set(orderIds);
-  const filteredPayments = paymentsRes.data.filter((payment) =>
-    inRangeOrderIds.has(payment.order_id),
+  const code = toDemoBrandCode(ws.brand.code);
+  const allOrders = await listDemoOrders(undefined, code);
+  const orders = allOrders.filter((o) =>
+    orderInCalendarRange(o.created_at, from, to),
   );
-  const liveRevenue = revenueOrders(ordersRes.data);
+  const payments = (await listDemoPayments(code)).filter((p) => {
+    const order = allOrders.find((o) => o.id === p.order_id);
+    return order
+      ? orderInCalendarRange(order.created_at, from, to)
+      : true;
+  });
+  const products = await listDemoProductsMerged({}, code);
+  const orderIds = orders.map((o) => o.id);
+  const itemGroups = await Promise.all(
+    orderIds.map((id) => getDemoOrderItems(id, code)),
+  );
+  const orderItems = itemGroups.flat();
+  // Only completed bills earn — trend, mix, margin and collection all read
+  // from this revenue set while the receivables list stays all-status.
+  const revenue = revenueOrders(orders);
   const marginSnapshot = computeMarginSnapshot({
-    orders: liveRevenue,
-    orderItems: itemsRes.data,
-    products: productsRes.data,
+    orders: revenue,
+    orderItems,
+    products,
   });
-
-  let snapshot = snapshotFromOrderRecords({
-    orders: liveRevenue,
-    items: itemsRes.data,
-    products: productsRes.data,
-    payments: filteredPayments,
-    currencyCode: ws.settings.currency_code,
-  });
-  let rangeNotice: string | undefined;
-  if (rpcKpis.ok) {
-    snapshot = {
-      ...snapshot,
-      netSales: rpcKpis.netSales,
-      orderCount: rpcKpis.orderCount,
-      discountTotal: rpcKpis.discountTotal,
-      paidAmount: rpcKpis.paidAmount,
-      pendingAmount: rpcKpis.pendingAmount,
-      grossSales: rpcKpis.netSales + rpcKpis.discountTotal,
-      averageOrderValue:
-        rpcKpis.orderCount > 0 ? rpcKpis.netSales / rpcKpis.orderCount : 0,
-    };
-  } else if (process.env.NODE_ENV === "development") {
-    rangeNotice = rpcKpis.message;
-  }
 
   return (
     <Suspense fallback={null}>
@@ -161,11 +83,14 @@ export default async function AnalyticsPage({
         rangeFrom={from}
         rangeTo={to}
         rangePreset={range.preset}
-        snapshot={snapshot}
-        notice={ordersRes.error}
-        rangeNotice={rangeNotice}
-        payments={filteredPayments}
-        paymentsNotice={paymentsRes.error}
+        snapshot={snapshotFromOrderRecords({
+          orders: revenue,
+          items: orderItems,
+          products,
+          payments,
+          currencyCode: ws.settings.currency_code,
+        })}
+        payments={payments}
         marginSnapshot={marginSnapshot}
       />
     </Suspense>

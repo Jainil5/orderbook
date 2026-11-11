@@ -12,7 +12,6 @@ import { updateDemoMutableBucket } from "@/lib/demo/mutable-store";
 import { appendDemoAudit } from "@/lib/demo/mutable-store";
 import { DEMO_BRAND_CODES, type DemoBrandCode } from "@/lib/workspace/constants";
 import type { OrderStatus } from "@/types/database";
-import { acceptQuoteByTokenLive } from "@/services/quotes";
 import {
   consumeRateLimit,
   rateLimitKeyFromHeaders,
@@ -41,10 +40,6 @@ export async function acceptPublicQuoteAction(token: string) {
   }
 
   const normalized = normalizePublicQuoteToken(token) ?? token.trim();
-  const live = await acceptQuoteByTokenLive(normalized);
-  if (live.ok) {
-    return { ok: true as const, orderNumber: live.orderNumber };
-  }
 
   const match = await findDemoOrderByPublicToken(normalized);
   if (match) {
@@ -78,6 +73,6 @@ export async function acceptPublicQuoteAction(token: string) {
 
   return {
     ok: false as const,
-    message: live.message ?? "Quote not found or already processed.",
+    message: "Quote not found or already processed.",
   };
 }

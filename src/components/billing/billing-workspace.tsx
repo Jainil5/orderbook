@@ -2,7 +2,6 @@
 
 import type { BrandRole, Customer, Offer, Product } from "@/types/database";
 import { BillingPos, type BillBrandSettings } from "@/components/billing/billing-pos";
-import { submitOrderAction } from "@/services/actions";
 import { submitDemoOrder } from "@/lib/demo/server";
 import type { BillingDocumentMode, BillingPosCopy } from "@/lib/workspace/constants";
 import {
@@ -10,7 +9,6 @@ import {
 } from "@/lib/workspace/constants";
 
 export function BillingWorkspace({
-  mode,
   documentMode = "retail",
   products,
   customers,
@@ -26,7 +24,6 @@ export function BillingWorkspace({
   userRole = "owner",
   blockOversell = false,
 }: {
-  mode: "live" | "demo";
   documentMode?: BillingDocumentMode;
   products: Product[];
   customers: Customer[];
@@ -79,20 +76,7 @@ export function BillingWorkspace({
           deliveryAddress: payload.deliveryAddress,
           paymentReference: payload.paymentReference,
         };
-        if (mode === "demo") {
-          const result = await submitDemoOrder(input);
-          if (result.ok) {
-            return {
-              ok: true,
-              message: "Order saved",
-              orderNumber: result.orderNumber,
-              savedAsQuote: payload.saveAsQuote,
-            };
-          }
-          return { ok: false, message: result.message };
-        }
-
-        const result = await submitOrderAction(input);
+        const result = await submitDemoOrder(input);
         if (result.ok) {
           return {
             ok: true,

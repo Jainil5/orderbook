@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { PageShell } from "@/components/workspace/page-shell";
 import { listDemoOrders, toDemoBrandCode } from "@/lib/demo/data";
-import { listOrders } from "@/services/data";
 import { loadWorkspaceSession } from "@/lib/workspace/session";
 import { formatDate, formatMoney } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
@@ -12,19 +11,11 @@ export default async function KitchenPage() {
   const ws = await loadWorkspaceSession();
   if (!ws) redirect("/login");
 
-  const orders =
-    ws.mode === "demo"
-      ? (await listDemoOrders(undefined, toDemoBrandCode(ws.brand.code))).filter(
-          (o) =>
-            isPendingOrder(o) || o.status === "confirmed" || o.status === "draft",
-        )
-      : (
-          await listOrders({
-            page: 1,
-            pageSize: 50,
-            status: "confirmed",
-          })
-        ).data;
+  const orders = (
+    await listDemoOrders(undefined, toDemoBrandCode(ws.brand.code))
+  ).filter(
+    (o) => isPendingOrder(o) || o.status === "confirmed" || o.status === "draft",
+  );
 
   return (
     <PageShell

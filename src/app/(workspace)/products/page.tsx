@@ -1,7 +1,6 @@
 import { PageShell } from "@/components/workspace/page-shell";
 import { ProductsWorkspace } from "@/components/products/products-workspace";
 import { listDemoOffers, listDemoProductsMerged, toDemoBrandCode } from "@/lib/demo/data";
-import { listOffers, listProducts } from "@/services/data";
 import { loadWorkspaceSession } from "@/lib/workspace/session";
 import { redirect } from "next/navigation";
 
@@ -16,42 +15,20 @@ export default async function ProductsPage({
   const { tab } = await searchParams;
   const initialTab = tab === "offers" ? "offers" : "products";
 
-  if (ws.mode === "demo") {
-    const demoCode = toDemoBrandCode(ws.brand.code);
-    const [offers, products] = await Promise.all([
-      listDemoOffers(demoCode),
-      listDemoProductsMerged({ activeOnly: false }, demoCode),
-    ]);
-    return (
-      <PageShell title="Products">
-        <ProductsWorkspace
-          mode="demo"
-          initialTab={initialTab}
-          products={products}
-          offers={offers}
-          currencyCode={ws.settings.currency_code}
-          userRole="owner"
-        />
-      </PageShell>
-    );
-  }
-
-  const [productsRes, offersRes] = await Promise.all([
-    listProducts({ activeOnly: false }),
-    listOffers(),
+  const demoCode = toDemoBrandCode(ws.brand.code);
+  const [offers, products] = await Promise.all([
+    listDemoOffers(demoCode),
+    listDemoProductsMerged({ activeOnly: false }, demoCode),
   ]);
-
   return (
     <PageShell title="Products">
       <ProductsWorkspace
-        mode="live"
+        mode="demo"
         initialTab={initialTab}
-        products={productsRes.data}
-        offers={offersRes.data}
+        products={products}
+        offers={offers}
         currencyCode={ws.settings.currency_code}
-        userRole={ws.member.role}
-        productsError={productsRes.error}
-        offersError={offersRes.error}
+        userRole="owner"
       />
     </PageShell>
   );

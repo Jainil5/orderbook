@@ -21,7 +21,6 @@ const jar = vi.hoisted(() => {
 
 vi.mock("next/headers", () => ({ cookies: async () => jar }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
-vi.mock("@/lib/auth/actions", () => ({ loadLiveWorkspace: async () => null }));
 
 import { readDemoMutableBucket } from "@/lib/demo/mutable-store";
 import {

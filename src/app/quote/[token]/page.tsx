@@ -1,5 +1,4 @@
 import { findDemoOrderByPublicToken } from "@/lib/demo/public-quote";
-import { getOrderByPublicToken } from "@/services/data";
 import { acceptPublicQuoteAction } from "@/services/quote-actions";
 import { formatMoney } from "@/lib/format";
 import { Button } from "@/components/ui/button";
@@ -11,9 +10,8 @@ export default async function PublicQuotePage({
 }) {
   const { token } = await params;
   const demoMatch = await findDemoOrderByPublicToken(token);
-  const liveMatch = demoMatch ? null : await getOrderByPublicToken(token);
-  const order = demoMatch?.order ?? liveMatch?.order;
-  const brandName = demoMatch?.brandName ?? liveMatch?.brandName ?? "Business";
+  const order = demoMatch?.order;
+  const brandName = demoMatch?.brandName ?? "Business";
 
   if (!order) {
     return (

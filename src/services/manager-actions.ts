@@ -5,15 +5,8 @@ import { getDemoBrandPack } from "@/lib/demo/brands";
 import { appendDemoAudit, updateDemoMutableBucket } from "@/lib/demo/mutable-store";
 import { listDemoStaff } from "@/lib/demo/staff-data";
 import { validateStaffInput, type StaffInput } from "@/lib/manager/staff";
-import { loadLiveWorkspace } from "@/lib/auth/actions";
-import { canEditBrandSettings } from "@/lib/security/authorization";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
 import type { StaffAvailability, StaffMember } from "@/types/manager";
-
-const LIVE_UNAVAILABLE = {
-  ok: false as const,
-  message: "Staff management is not connected to live workspaces yet.",
-};
 
 async function resolveDemoBrandCode() {
   const { cookies } = await import("next/headers");
@@ -44,13 +37,6 @@ async function hasStaffRecord(code: DemoBrandCode, id: string) {
 const STAFF_NOT_FOUND = { ok: false as const, message: "Staff member not found." };
 
 export async function createStaffAction(input: StaffInput) {
-  const live = await loadLiveWorkspace();
-  if (live) {
-    if (!canEditBrandSettings(live.member.role)) {
-      return { ok: false as const, message: "Not allowed." };
-    }
-    return LIVE_UNAVAILABLE;
-  }
   const parsed = validateStaffInput(input);
   if (!parsed.ok) return parsed;
   const code = await resolveDemoBrandCode();
@@ -80,13 +66,6 @@ export async function createStaffAction(input: StaffInput) {
 }
 
 export async function updateStaffAction(id: string, input: StaffInput) {
-  const live = await loadLiveWorkspace();
-  if (live) {
-    if (!canEditBrandSettings(live.member.role)) {
-      return { ok: false as const, message: "Not allowed." };
-    }
-    return LIVE_UNAVAILABLE;
-  }
   const parsed = validateStaffInput(input);
   if (!parsed.ok) return parsed;
   const code = await resolveDemoBrandCode();
@@ -109,13 +88,6 @@ export async function setStaffAvailabilityAction(
   if (!["available", "busy", "off"].includes(availability)) {
     return { ok: false as const, message: "Invalid availability." };
   }
-  const live = await loadLiveWorkspace();
-  if (live) {
-    if (!canEditBrandSettings(live.member.role)) {
-      return { ok: false as const, message: "Not allowed." };
-    }
-    return LIVE_UNAVAILABLE;
-  }
   const code = await resolveDemoBrandCode();
   if (!(await hasStaffRecord(code, id))) return STAFF_NOT_FOUND;
   await updateDemoMutableBucket(code, (bucket) => ({
@@ -132,13 +104,6 @@ export async function setStaffAvailabilityAction(
 export async function setStaffStatusAction(id: string, status: "active" | "inactive") {
   if (status !== "active" && status !== "inactive") {
     return { ok: false as const, message: "Invalid status." };
-  }
-  const live = await loadLiveWorkspace();
-  if (live) {
-    if (!canEditBrandSettings(live.member.role)) {
-      return { ok: false as const, message: "Not allowed." };
-    }
-    return LIVE_UNAVAILABLE;
   }
   const code = await resolveDemoBrandCode();
   if (!(await hasStaffRecord(code, id))) return STAFF_NOT_FOUND;

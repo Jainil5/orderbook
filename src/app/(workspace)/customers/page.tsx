@@ -6,7 +6,6 @@ import { CustomerEditor } from "@/components/customers/customer-editor";
 import { CsvExportButton } from "@/components/export/csv-export-button";
 import { exportCustomersCsvAction } from "@/services/operations-actions";
 import { listDemoCustomers, toDemoBrandCode } from "@/lib/demo/data";
-import { listCustomers } from "@/services/data";
 import { loadWorkspaceSession } from "@/lib/workspace/session";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Card } from "@/components/ui/card";
@@ -23,16 +22,10 @@ export default async function CustomersPage({
   const { q } = await searchParams;
   const query = q?.trim() ?? "";
 
-  let customers;
-  let error: string | undefined;
-
-  if (ws.mode === "demo") {
-    customers = await listDemoCustomers(query || undefined, toDemoBrandCode(ws.brand.code));
-  } else {
-    const result = await listCustomers(query || undefined);
-    customers = result.data;
-    error = result.error;
-  }
+  const customers = await listDemoCustomers(
+    query || undefined,
+    toDemoBrandCode(ws.brand.code),
+  );
 
   return (
     <PageShell
@@ -61,9 +54,6 @@ export default async function CustomersPage({
           </Suspense>
         </div>
       </div>
-      {error ? (
-        <p role="alert" className="mb-4 text-sm text-[var(--ob-danger)]">{error}</p>
-      ) : null}
       {customers.length === 0 ? (
         <EmptyState
           title={query ? "No matching customers" : "No customers"}

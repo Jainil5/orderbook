@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { loadLiveWorkspace } from "@/lib/auth/actions";
 import { getDemoBrandPack } from "@/lib/demo/brands";
 import { mergeDemoCustomers } from "@/lib/demo/merge-entities";
 import {
@@ -35,27 +34,14 @@ import {
   visitTransitionError,
   type VisitInput,
 } from "@/lib/manager/visits";
-import { canEditBrandSettings } from "@/lib/security/authorization";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
 import type { Appointment, FieldVisit, Service, ServiceJob, Shift, Task, TaskStatus } from "@/types/operations";
-
-const LIVE_UNAVAILABLE = {
-  ok: false as const,
-  message: "Operations are not connected to live workspaces yet.",
-};
 
 type OpsGuard =
   | { ok: true; code: DemoBrandCode; brandId: string }
   | { ok: false; message: string };
 
 async function guardOps(): Promise<OpsGuard> {
-  const live = await loadLiveWorkspace();
-  if (live) {
-    if (!canEditBrandSettings(live.member.role)) {
-      return { ok: false, message: "Not allowed." };
-    }
-    return LIVE_UNAVAILABLE;
-  }
   const { cookies } = await import("next/headers");
   const { DEMO_WORKSPACE_COOKIE, parseDemoBrandCodeFromCookie } = await import(
     "@/lib/workspace/constants"

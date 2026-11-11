@@ -1,12 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import {
-  createProduct,
-  setProductActive,
-  setProductUnavailable,
-  updateProduct,
-} from "@/services/data";
 import {
   saveDemoProduct,
   setDemoProductActive,
@@ -20,18 +13,8 @@ export async function saveProductAction(
   input: ProductUpsertInput,
 ) {
   const ws = await loadWorkspaceSession();
-  if (ws?.mode === "demo") return saveDemoProduct(productId, input);
-
-  const result = productId
-    ? await updateProduct(productId, input)
-    : await createProduct(input);
-
-  if (result.ok) {
-    revalidatePath("/products");
-    revalidatePath("/billing");
-  }
-
-  return result;
+  if (!ws) return { ok: false as const, error: "Not signed in." };
+  return saveDemoProduct(productId, input);
 }
 
 export async function toggleProductActiveAction(
@@ -39,14 +22,8 @@ export async function toggleProductActiveAction(
   isActive: boolean,
 ) {
   const ws = await loadWorkspaceSession();
-  if (ws?.mode === "demo") return setDemoProductActive(productId, isActive);
-
-  const result = await setProductActive(productId, isActive);
-  if (result.ok) {
-    revalidatePath("/products");
-    revalidatePath("/billing");
-  }
-  return result;
+  if (!ws) return { ok: false as const, error: "Not signed in." };
+  return setDemoProductActive(productId, isActive);
 }
 
 export async function toggleProductUnavailableAction(
@@ -54,12 +31,6 @@ export async function toggleProductUnavailableAction(
   unavailable: boolean,
 ) {
   const ws = await loadWorkspaceSession();
-  if (ws?.mode === "demo") return setDemoProductUnavailable(productId, unavailable);
-
-  const result = await setProductUnavailable(productId, unavailable);
-  if (result.ok) {
-    revalidatePath("/products");
-    revalidatePath("/billing");
-  }
-  return result;
+  if (!ws) return { ok: false as const, error: "Not signed in." };
+  return setDemoProductUnavailable(productId, unavailable);
 }
