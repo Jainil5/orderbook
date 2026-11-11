@@ -65,8 +65,9 @@ JSON columns (`modifiers_json`) and string-array columns (`staff_ids`) hold JSON
 - `parse-csv.ts`: zero-dependency RFC-4180 parser (quoted fields, escaped quotes,
   embedded commas/newlines, CRLF). Unit-tested.
 - `mappers.ts`: per-entity row → typed entity (number/boolean/null coercion, JSON columns).
-- `load-pack.ts`: raw CSV imports → mapped rows → date rebase → computed analytics →
-  `DemoBrandPack` (identical shape to today). Module-level cache per brand.
+- `load-pack.ts`: raw CSV imports → mapped rows → date rebase →
+  `DemoBrandPack` (identical shape to today, minus the dead analytics field).
+  Module-level cache per brand.
 - CSV contents are **bundled as raw imports** (turbopack rule or the fork's documented
   equivalent — check `node_modules/next/dist/docs/` during implementation; fallback is
   `fs.readFileSync` + `outputFileTracingIncludes`). No runtime disk reads on serverless.
@@ -83,11 +84,10 @@ Newest order lands today; today-pending bills stay today. Deterministic per day.
 
 ### Analytics
 
-Computed from loaded orders/items/payments by a pure function producing the existing
-`DemoAnalytics` shape (grossSales, netSales, orderCount, averageOrderValue, itemsSold,
-discountTotal, paidAmount, pendingAmount, salesByCategory, salesOverTime, topProducts,
-paymentMethods). Replaces the hand-maintained static objects. Reuse existing analytics
-selectors where they fit.
+Dashboard and Analytics pages already compute figures from order records via
+`snapshotFromOrderRecords` — no change needed there. The hand-maintained static
+`pack.analytics` object has no consumers (verified by grep): delete it, the
+`DemoAnalytics` type, `snapshotFromDemo`, `getDemoAnalytics`, and `fixtures.ts`.
 
 ## 2. Supabase removal + demo-picker login
 
@@ -152,8 +152,7 @@ Kept/changed:
 
 New unit tests: parser (quotes/commas/newlines/CRLF), mappers (null/bool/number/JSON),
 date rebase (today-bills stay today, ordering preserved), pack integrity (referential
-integrity orders↔items↔payments, unique SKUs, every image_url file exists), analytics
-computation.
+integrity orders↔items↔payments, unique SKUs, every image_url file exists).
 
 Existing suite (~200 tests): history/seed-SQL tests deleted with their code; fixture
 tests repointed at CSV packs; all others stay green.
