@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { buildDemoNotifications } from "@/lib/notifications/demo-feed-data";
 import { useNotifications } from "./notifications-context";
 
-// Seeds the bell with repo-only demo data (no Supabase). Mount only in demo
+// Seeds the bell with repo-only demo data. Mount only in demo
 // workspaces; ids are stable so re-mounts and StrictMode double-runs collapse.
 export function DemoFeedSeed() {
   const { seed } = useNotifications();

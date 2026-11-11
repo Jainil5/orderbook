@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Fraunces, Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { EnvConfigBanner } from "@/components/env-config-banner";
 import { CardGlow } from "@/components/effects/card-glow";
 import {
   resolveInitialTheme,
@@ -58,7 +57,6 @@ export default async function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="flex min-h-full flex-col">
-        <EnvConfigBanner />
         <CardGlow />
         {children}
       </body>

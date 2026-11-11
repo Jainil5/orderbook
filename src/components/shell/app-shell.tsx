@@ -7,7 +7,7 @@ import { buildWorkspaceNavItems } from "@/lib/workspace/nav";
 import type { WorkspaceMode } from "@/lib/workspace/types";
 import type { WorkspaceProfile } from "@/lib/workspace/constants";
 import { useWorkspace } from "@/components/workspace/workspace-provider";
-import { logoutAction } from "@/lib/auth/actions";
+import { logoutAction } from "@/lib/auth/demo";
 import {
   LayoutDashboard,
   Receipt,

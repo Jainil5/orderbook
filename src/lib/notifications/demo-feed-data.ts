@@ -11,7 +11,7 @@ type DemoRow = {
 };
 
 // Repo-only demo feed: the notification bell gets rich content in demo
-// workspaces without any Supabase table. Delete this file (and its mount)
+// workspaces without any backend table. Delete this file (and its mount)
 // to remove the seed.
 const DEMO_ROWS: DemoRow[] = [
   {

@@ -1,5 +1,4 @@
 import { cookies } from "next/headers";
-import { loadLiveWorkspace } from "@/lib/auth/actions";
 import { demoWorkspaceMeta } from "@/lib/demo/server";
 import {
   DEMO_WORKSPACE_COOKIE,
@@ -14,7 +13,7 @@ import {
   readReceiptSettingsPref,
 } from "@/lib/workspace/prefs";
 import type { ManagerModuleKey } from "@/lib/workspace/manager-modules";
-import type { Brand, BrandMember, BrandRole, BrandSettings } from "@/types/database";
+import type { Brand, BrandSettings } from "@/types/database";
 
 async function mergeBrandSettings(
   settings: BrandSettings,
@@ -42,26 +41,14 @@ async function mergeBrandSettings(
   return next;
 }
 
-export type WorkspaceSession =
-  | {
-      mode: "live";
-      brand: Brand;
-      settings: BrandSettings;
-      userEmail: string | null | undefined;
-      member: BrandMember;
-      role: BrandRole;
-      profile: WorkspaceProfile;
-      hiddenManagerModules: ManagerModuleKey[];
-    }
-  | {
-      mode: "demo";
-      brand: Brand;
-      settings: BrandSettings;
-      userEmail: null;
-      role: "owner";
-      profile: WorkspaceProfile;
-      hiddenManagerModules: ManagerModuleKey[];
-    };
+export type WorkspaceSession = {
+  mode: "demo";
+  brand: Brand;
+  settings: BrandSettings;
+  role: "owner";
+  profile: WorkspaceProfile;
+  hiddenManagerModules: ManagerModuleKey[];
+};
 
 export async function isDemoWorkspaceCookieSet(): Promise<boolean> {
   const cookieStore = await cookies();
@@ -71,23 +58,6 @@ export async function isDemoWorkspaceCookieSet(): Promise<boolean> {
 }
 
 export async function loadWorkspaceSession(): Promise<WorkspaceSession | null> {
-  const live = await loadLiveWorkspace();
-  if (live) {
-    const settings = await mergeBrandSettings(live.settings, live.brand.code);
-    const hiddenManagerModules =
-      (await readManagerModulesPref(live.brand.code)) ?? [];
-    return {
-      mode: "live",
-      brand: live.brand,
-      settings,
-      userEmail: live.userEmail,
-      member: live.member,
-      role: live.member.role,
-      profile: getWorkspaceProfile(live.brand.code),
-      hiddenManagerModules,
-    };
-  }
-
   if (await isDemoWorkspaceCookieSet()) {
     const meta = await demoWorkspaceMeta();
     const settings = await mergeBrandSettings(meta.settings, meta.brand.code);
@@ -97,7 +67,6 @@ export async function loadWorkspaceSession(): Promise<WorkspaceSession | null> {
       mode: "demo",
       brand: meta.brand,
       settings,
-      userEmail: null,
       role: "owner",
       profile: getWorkspaceProfile(meta.brand.code),
       hiddenManagerModules,

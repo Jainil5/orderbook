@@ -11,7 +11,6 @@ import { ReceiptSettingsCard } from "@/components/settings/receipt-settings";
 import { useWorkspace } from "@/components/workspace/workspace-provider";
 import { canEditWorkspaceFeatures } from "@/lib/workspace/settings-access";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs } from "@/components/ui/tabs";
 
@@ -107,18 +106,9 @@ export default function SettingsPage() {
             </Card>
             <Card>
               <h2 className="font-semibold">Your account</h2>
-              {ws.mode === "live" && ws.userEmail ? (
-                <p className="mt-2 text-sm">{ws.userEmail}</p>
-              ) : (
-                <p className="mt-2 text-sm text-[var(--ob-text-muted)]">
-                  Guest workspace — sign in to manage your account.
-                </p>
-              )}
-              {ws.mode === "live" ? (
-                <Badge className="mt-3" tone="neutral">
-                  Role: {ws.member.role}
-                </Badge>
-              ) : null}
+              <p className="mt-2 text-sm text-[var(--ob-text-muted)]">
+                Demo workspace — your edits stay on this device.
+              </p>
             </Card>
           </div>
         ) : null}
@@ -175,20 +165,12 @@ export default function SettingsPage() {
           <Card className="max-w-2xl">
             <h2 className="font-semibold">Team</h2>
             <p className="mt-2 text-sm text-[var(--ob-text-muted)]">
-              Invite owners, managers, and staff via Supabase{" "}
-              <code className="text-xs">brand_members</code>. Role-based
-              discount limits apply in Billing (staff 10%, manager 30%).
+              Role-based discount limits apply in Billing (staff 10%, manager
+              30%).
             </p>
-            {ws.mode === "live" ? (
-              <p className="mt-3 text-sm">
-                Signed in as {ws.userEmail} · role{" "}
-                <Badge tone="neutral">{ws.member.role}</Badge>
-              </p>
-            ) : (
-              <p className="mt-3 text-sm text-[var(--ob-text-muted)]">
-                Demo workspace runs as owner.
-              </p>
-            )}
+            <p className="mt-3 text-sm text-[var(--ob-text-muted)]">
+              Demo workspace runs as owner.
+            </p>
           </Card>
         ) : null}
       </div>

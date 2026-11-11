@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { PageShell } from "@/components/workspace/page-shell";
 import { ManagerSubnav } from "@/components/manager/manager-subnav";
 import { Card } from "@/components/ui/card";
-import { EmptyState } from "@/components/ui/empty-state";
 import { listDemoStaff } from "@/lib/demo/staff-data";
 import { listDemoOrders, toDemoBrandCode } from "@/lib/demo/data";
 import { staffAvailabilitySummary } from "@/lib/manager/staff";
@@ -27,17 +26,6 @@ export default async function ManagerPage() {
 
   const modules = visibleManagerModules(ws.hiddenManagerModules);
 
-  if (ws.mode !== "demo") {
-    return (
-      <PageShell title="Management Overview">
-        <ManagerSubnav activeHref="/manager" />
-        <EmptyState
-          title="Manager is not connected to live workspaces yet"
-          description="Operational data needs the staff and operations tables in the live database. Demo workspaces show the Manager experience today."
-        />
-      </PageShell>
-    );
-  }
 
   const brandCode = toDemoBrandCode(ws.brand.code);
   const staff = await listDemoStaff(brandCode);

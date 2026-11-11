@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { PageShell } from "@/components/workspace/page-shell";
 import { ManagerSubnav } from "@/components/manager/manager-subnav";
 import { AppointmentsManager } from "@/components/manager/appointments-manager";
-import { EmptyState } from "@/components/ui/empty-state";
 import { getDemoBrandPack } from "@/lib/demo/brands";
 import { toDemoBrandCode } from "@/lib/demo/data";
 import { mergeDemoCustomers } from "@/lib/demo/merge-entities";
@@ -16,17 +15,6 @@ export default async function AppointmentsPage() {
   if (!ws) redirect("/login");
   if (ws.hiddenManagerModules.includes("appointments")) redirect("/manager");
 
-  if (ws.mode !== "demo") {
-    return (
-      <PageShell title="Meetings & Appointments">
-        <ManagerSubnav activeHref="/manager/appointments" />
-        <EmptyState
-          title="Appointments is not connected to live workspaces yet"
-          description="Meetings and appointments need the operations tables in the live database. Demo workspaces have full scheduling today."
-        />
-      </PageShell>
-    );
-  }
 
   const code = toDemoBrandCode(ws.brand.code);
   const ops = await loadDemoOperations(code);

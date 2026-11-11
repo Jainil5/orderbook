@@ -105,13 +105,3 @@ export function normalizeBrandWebsiteUrl(raw: string): string | null {
     return null;
   }
 }
-
-export function isTrustedSupabaseUrl(url: string): boolean {
-  try {
-    const parsed = new URL(url);
-    if (parsed.protocol !== "https:") return false;
-    return parsed.hostname.endsWith(".supabase.co");
-  } catch {
-    return false;
-  }
-}

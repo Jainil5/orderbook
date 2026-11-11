@@ -1,4 +1,4 @@
-/** Logical types aligned with docs/DATABASE_CONTRACT.md — adjust when Supabase types are generated. */
+/** Core entity types for the CSV-backed demo dataset (data/demo/<brand>/*.csv). */
 
 export type BrandRole = "owner" | "admin" | "manager" | "staff";
 
@@ -48,7 +48,7 @@ export type Product = {
   default_discount_percent?: number | null;
   /** HTTPS URL to a product photo shown in POS and product list. */
   image_url?: string | null;
-  /** Optional inventory (app-level; provision column in Supabase when ready). */
+  /** Optional inventory (app-level). */
   stock_qty?: number | null;
   low_stock_threshold?: number | null;
   wholesale_price?: number | null;

@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { PageShell } from "@/components/workspace/page-shell";
 import { ManagerSubnav } from "@/components/manager/manager-subnav";
 import { ServicesManager } from "@/components/manager/services-manager";
-import { EmptyState } from "@/components/ui/empty-state";
 import { getDemoBrandPack } from "@/lib/demo/brands";
 import { toDemoBrandCode } from "@/lib/demo/data";
 import { mergeDemoCustomers } from "@/lib/demo/merge-entities";
@@ -16,17 +15,6 @@ export default async function ServicesPage() {
   if (!ws) redirect("/login");
   if (ws.hiddenManagerModules.includes("services")) redirect("/manager");
 
-  if (ws.mode !== "demo") {
-    return (
-      <PageShell title="Services">
-        <ManagerSubnav activeHref="/manager/services" />
-        <EmptyState
-          title="Services is not connected to live workspaces yet"
-          description="Service catalogues and jobs need the operations tables in the live database. Demo workspaces have full service management today."
-        />
-      </PageShell>
-    );
-  }
 
   const code = toDemoBrandCode(ws.brand.code);
   const ops = await loadDemoOperations(code);

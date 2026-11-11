@@ -29,13 +29,6 @@ export function WorkspaceSettingsFeaturesLink() {
   const url = ws.settings.brand_website_url?.trim();
   if (url) return null;
 
-  const canEdit =
-    ws.mode === "demo" ||
-    ws.member.role === "owner" ||
-    ws.member.role === "admin" ||
-    ws.member.role === "manager";
-
-  if (!canEdit) return null;
 
   return (
     <Link

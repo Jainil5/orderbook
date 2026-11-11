@@ -24,7 +24,7 @@ export function PageShell({
       mode={ws.mode}
       brandName={ws.brand.name}
       brandCode={ws.brand.code}
-      userEmail={ws.userEmail}
+      userEmail={null}
       profile={ws.profile}
       pageTitle={title}
       headerActions={

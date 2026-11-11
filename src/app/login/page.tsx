@@ -1,5 +1,5 @@
-import { LoginForm } from "@/components/auth/login-form";
+import { DemoPicker } from "@/components/auth/demo-picker";
 
 export default function LoginPage() {
-  return <LoginForm />;
+  return <DemoPicker />;
 }
