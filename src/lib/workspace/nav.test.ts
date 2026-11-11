@@ -46,6 +46,14 @@ describe("buildWorkspaceNavItems", () => {
     ]);
   });
 
+  it("adds the leads board for project businesses", () => {
+    const manager = buildWorkspaceNavItems(true, getWorkspaceProfile("BR-2")).find(
+      (i) => i.href === "/manager",
+    );
+    expect(manager?.children?.map((c) => c.href)).toContain("/manager/leads");
+    expect(manager?.children).toHaveLength(7);
+  });
+
   it("drops hidden modules from Manager children", () => {
     const manager = buildWorkspaceNavItems(false, profile, ["visits"]).find(
       (i) => i.href === "/manager",

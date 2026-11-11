@@ -7,9 +7,10 @@ import {
 } from "@/lib/workspace/manager-modules";
 
 describe("manager modules", () => {
-  it("registers the six Phase 1 sub-modules in nav order", () => {
+  it("registers the sub-modules in nav order", () => {
     expect(MANAGER_MODULES.map((m) => m.key)).toEqual([
       "staff",
+      "leads",
       "services",
       "appointments",
       "visits",
@@ -29,8 +30,22 @@ describe("manager modules", () => {
     ]);
   });
 
+  it("shows the pipeline only to project businesses", () => {
+    expect(
+      visibleManagerModules([], "project").map((m) => m.key),
+    ).toContain("leads");
+    expect(visibleManagerModules([], "counter").map((m) => m.key)).not.toContain(
+      "leads",
+    );
+    expect(
+      visibleManagerModules(["leads"], "project").map((m) => m.key),
+    ).not.toContain("leads");
+  });
+
   it("ignores unknown keys in the hidden list", () => {
-    expect(visibleManagerModules(["bogus"])).toHaveLength(MANAGER_MODULES.length);
+    expect(visibleManagerModules(["bogus"])).toHaveLength(
+      MANAGER_MODULES.filter((m) => !m.projectOnly).length,
+    );
   });
 
   it("validates module keys", () => {

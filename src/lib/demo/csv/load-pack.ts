@@ -18,6 +18,7 @@ import {
   mapFieldVisit,
   mapShift,
   mapTask,
+  mapLead,
 } from "./mappers";
 
 import b1Brand from "../../../../data/demo/BR-1/brand.csv";
@@ -35,6 +36,7 @@ import b1Appointments from "../../../../data/demo/BR-1/appointments.csv";
 import b1Visits from "../../../../data/demo/BR-1/field_visits.csv";
 import b1Shifts from "../../../../data/demo/BR-1/shifts.csv";
 import b1Tasks from "../../../../data/demo/BR-1/tasks.csv";
+import b1Leads from "../../../../data/demo/BR-1/leads.csv";
 
 import b2Brand from "../../../../data/demo/BR-2/brand.csv";
 import b2Settings from "../../../../data/demo/BR-2/brand_settings.csv";
@@ -51,6 +53,7 @@ import b2Appointments from "../../../../data/demo/BR-2/appointments.csv";
 import b2Visits from "../../../../data/demo/BR-2/field_visits.csv";
 import b2Shifts from "../../../../data/demo/BR-2/shifts.csv";
 import b2Tasks from "../../../../data/demo/BR-2/tasks.csv";
+import b2Leads from "../../../../data/demo/BR-2/leads.csv";
 
 type BrandCsvFiles = {
   brand: string;
@@ -68,6 +71,7 @@ type BrandCsvFiles = {
   visits: string;
   shifts: string;
   tasks: string;
+  leads: string;
 };
 
 const FILES: Record<DemoBrandCode, BrandCsvFiles> = {
@@ -75,13 +79,13 @@ const FILES: Record<DemoBrandCode, BrandCsvFiles> = {
     brand: b1Brand, settings: b1Settings, products: b1Products, customers: b1Customers,
     orders: b1Orders, items: b1Items, payments: b1Payments, offers: b1Offers,
     staff: b1Staff, services: b1Services, jobs: b1Jobs, appointments: b1Appointments,
-    visits: b1Visits, shifts: b1Shifts, tasks: b1Tasks,
+    visits: b1Visits, shifts: b1Shifts, tasks: b1Tasks, leads: b1Leads,
   },
   "BR-2": {
     brand: b2Brand, settings: b2Settings, products: b2Products, customers: b2Customers,
     orders: b2Orders, items: b2Items, payments: b2Payments, offers: b2Offers,
     staff: b2Staff, services: b2Services, jobs: b2Jobs, appointments: b2Appointments,
-    visits: b2Visits, shifts: b2Shifts, tasks: b2Tasks,
+    visits: b2Visits, shifts: b2Shifts, tasks: b2Tasks, leads: b2Leads,
   },
 };
 
@@ -111,6 +115,7 @@ export function loadDemoBrandPack(code: DemoBrandCode): DemoBrandPack {
     visits: rows(f.visits, "field_visits.csv").map((r) => mapFieldVisit(r, src("field_visits.csv"))),
     shifts: rows(f.shifts, "shifts.csv").map((r) => mapShift(r, src("shifts.csv"))),
     tasks: rows(f.tasks, "tasks.csv").map((r) => mapTask(r, src("tasks.csv"))),
+    leads: rows(f.leads, "leads.csv").map((r) => mapLead(r, src("leads.csv"))),
   };
   const rebased = rebasePackDates(pack);
   cache.set(code, rebased);

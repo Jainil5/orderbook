@@ -13,6 +13,7 @@ export type DatedPack = Pick<
   | "visits"
   | "tasks"
   | "shifts"
+  | "leads"
 >;
 
 function startOfDayMs(d: Date): number {
@@ -81,5 +82,10 @@ export function rebasePackDates<T extends DatedPack>(pack: T, now: Date = new Da
     })),
     tasks: pack.tasks.map((t) => ({ ...t, dueAt: shiftNullableIso(t.dueAt, days) })),
     shifts: pack.shifts.map((s) => ({ ...s, date: shiftDayKey(s.date, days) })),
+    leads: pack.leads.map((l) => ({
+      ...l,
+      created_at: shiftIso(l.created_at, days),
+      next_action_at: shiftNullableIso(l.next_action_at, days),
+    })),
   };
 }

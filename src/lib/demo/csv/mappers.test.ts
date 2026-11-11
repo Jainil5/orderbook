@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mapProduct, mapOrder, mapOrderItem, mapPayment, mapStaff, mapShift, mapServiceJob, mapBrand } from "./mappers";
+import { mapProduct, mapOrder, mapOrderItem, mapPayment, mapStaff, mapShift, mapServiceJob, mapBrand, mapLead } from "./mappers";
 
 const src = "test.csv";
 
@@ -44,5 +44,29 @@ describe("mappers", () => {
     expect(mapStaff({ id: "s1", brand_id: "b", name: "Asha", role: "manager", phone: "", email: "", status: "active", availability: "available", created_at: "2026-10-01T09:00:00.000Z" }, src).phone).toBeNull();
     expect(mapShift({ id: "sh1", brand_id: "b", staffId: "s1", date: "2026-11-11", start: "08:00", end: "16:00", note: "Bar" }, src).date).toBe("2026-11-11");
     expect(mapServiceJob({ id: "j1", brand_id: "b", serviceId: "svc1", customerId: "c1", staff_ids: '["s1","s2"]', status: "scheduled", scheduledAt: "", notes: "" }, src).staffIds).toEqual(["s1", "s2"]);
+  });
+  it("mapLead coerces the pipeline row", () => {
+    const row = {
+      id: "cf-lead-1", brand_id: "b", contact_name: "Asha Sheth", phone: "+91 98250 11111",
+      email: "", source: "Referral", requirement: "L-shaped desk for a 12-seat floor",
+      site_address: "", stage: "site_visit", estimated_value: "285000",
+      owner_staff_id: "s1", next_action_at: "", quotation_number: "",
+      created_at: "2026-11-05T09:00:00.000Z",
+    };
+    const lead = mapLead(row, src);
+    expect(lead.estimated_value).toBe(285000);
+    expect(lead.email).toBeNull();
+    expect(lead.site_address).toBeNull();
+    expect(lead.next_action_at).toBeNull();
+    expect(lead.quotation_number).toBeNull();
+    expect(lead.stage).toBe("site_visit");
+  });
+  it("mapLead refuses a stage the board cannot render", () => {
+    expect(() =>
+      mapLead(
+        { id: "l", brand_id: "b", contact_name: "A", stage: "shipped", estimated_value: "0", created_at: "2026-11-05T09:00:00.000Z" },
+        src,
+      ),
+    ).toThrow(/stage/);
   });
 });

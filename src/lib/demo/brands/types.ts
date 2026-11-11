@@ -12,6 +12,7 @@ import type { StaffMember } from "@/types/manager";
 import type {
   Appointment,
   FieldVisit,
+  Lead,
   Service,
   ServiceJob,
   Shift,
@@ -34,6 +35,8 @@ export type DemoBrandPack = {
   visits: FieldVisit[];
   shifts: Shift[];
   tasks: Task[];
+  /** Sales pipeline for project businesses; empty for counter-service brands. */
+  leads: Lead[];
   /** Prefix for demo order numbers, e.g. BC or CF */
   orderNumberPrefix: string;
 };

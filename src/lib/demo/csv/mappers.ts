@@ -13,11 +13,14 @@ import type { StaffMember } from "@/types/manager";
 import type {
   Appointment,
   FieldVisit,
+  Lead,
+  LeadStage,
   Service,
   ServiceJob,
   Shift,
   Task,
 } from "@/types/operations";
+import { LEAD_STAGES } from "@/types/operations";
 import { bool, json, num, reqNum, reqStr, str, type CsvRow } from "./parse-csv";
 
 export function mapBrand(
@@ -258,5 +261,28 @@ export function mapTask(r: CsvRow, source: string): Task {
     priority: reqStr(r.priority, "priority", source) as Task["priority"],
     dueAt: str(r.dueAt),
     status: reqStr(r.status, "status", source) as Task["status"],
+  };
+}
+
+export function mapLead(r: CsvRow, source: string): Lead {
+  const stage = reqStr(r.stage, "stage", source);
+  if (!(LEAD_STAGES as readonly string[]).includes(stage)) {
+    throw new Error(`Invalid lead stage "${stage}" in ${source}`);
+  }
+  return {
+    id: reqStr(r.id, "id", source),
+    brand_id: reqStr(r.brand_id, "brand_id", source),
+    contact_name: reqStr(r.contact_name, "contact_name", source),
+    phone: str(r.phone),
+    email: str(r.email),
+    source: str(r.source),
+    requirement: r.requirement ?? "",
+    site_address: str(r.site_address),
+    stage: stage as LeadStage,
+    estimated_value: num(r.estimated_value, "estimated_value", source) ?? 0,
+    owner_staff_id: str(r.owner_staff_id),
+    next_action_at: str(r.next_action_at),
+    quotation_number: str(r.quotation_number),
+    created_at: reqStr(r.created_at, "created_at", source),
   };
 }

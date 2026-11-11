@@ -2,7 +2,7 @@ import { getDemoBrandPack } from "@/lib/demo/brands";
 import { readDemoMutableBucket, type DemoMutableBucket } from "@/lib/demo/mutable-store";
 import { mergeOpsEntities } from "@/lib/manager/ops-shared";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
-import type { Appointment, FieldVisit, Service, ServiceJob, Shift, Task } from "@/types/operations";
+import type { Appointment, FieldVisit, Lead, Service, ServiceJob, Shift, Task } from "@/types/operations";
 
 export type DemoOperations = {
   services: Service[];
@@ -11,6 +11,7 @@ export type DemoOperations = {
   tasks: Task[];
   shifts: Shift[];
   visits: FieldVisit[];
+  leads: Lead[];
 };
 
 export function mergeOperations(pack: ReturnType<typeof getDemoBrandPack>, bucket: DemoMutableBucket): DemoOperations {
@@ -21,6 +22,7 @@ export function mergeOperations(pack: ReturnType<typeof getDemoBrandPack>, bucke
     tasks: mergeOpsEntities(pack.tasks, bucket.tasks ?? [], bucket.taskOverrides ?? {}),
     shifts: mergeOpsEntities(pack.shifts, bucket.shifts ?? [], bucket.shiftOverrides ?? {}),
     visits: mergeOpsEntities(pack.visits, bucket.visits ?? [], bucket.visitOverrides ?? {}),
+    leads: mergeOpsEntities(pack.leads ?? [], bucket.leads ?? [], bucket.leadOverrides ?? {}),
   };
 }
 
@@ -46,4 +48,7 @@ export async function listDemoShifts(brandCode?: DemoBrandCode): Promise<Shift[]
 }
 export async function listDemoVisits(brandCode?: DemoBrandCode): Promise<FieldVisit[]> {
   return (await loadDemoOperations(brandCode)).visits;
+}
+export async function listDemoLeads(brandCode?: DemoBrandCode): Promise<Lead[]> {
+  return (await loadDemoOperations(brandCode)).leads;
 }

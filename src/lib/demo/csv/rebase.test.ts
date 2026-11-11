@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Order, Payment, Offer } from "@/types/database";
 import type { StaffMember } from "@/types/manager";
-import type { Appointment, FieldVisit, ServiceJob, Shift, Task } from "@/types/operations";
+import type { Appointment, FieldVisit, Lead, ServiceJob, Shift, Task } from "@/types/operations";
 import { computeOffsetDays, rebasePackDates, shiftDayKey, shiftIso, type DatedPack } from "./rebase";
 
 const NOW = new Date(2026, 10, 11, 15, 0, 0);
@@ -41,6 +41,13 @@ function task(over: Partial<Task> & Pick<Task, "id">): Task {
 function shift(over: Partial<Shift> & Pick<Shift, "id" | "date">): Shift {
   return { brand_id: "b", staffId: "s", start: "08:00", end: "16:00", note: "", ...over };
 }
+function lead(over: Partial<Lead> & Pick<Lead, "id" | "created_at">): Lead {
+  return {
+    brand_id: "b", contact_name: "L", phone: null, email: null, source: null,
+    requirement: "", site_address: null, stage: "new", estimated_value: 0,
+    owner_staff_id: null, next_action_at: null, quotation_number: null, ...over,
+  };
+}
 
 describe("shift helpers", () => {
   it("shiftIso adds whole days preserving time", () => {
@@ -71,6 +78,13 @@ describe("rebasePackDates", () => {
     visits: [visit({ id: "v1" })],
     tasks: [task({ id: "t1", dueAt: new Date(2026, 10, 12, 10, 0).toISOString() })],
     shifts: [shift({ id: "sh1", date: "2026-11-11" })],
+    leads: [
+      lead({
+        id: "l1",
+        created_at: new Date(2026, 10, 1, 9, 0).toISOString(),
+        next_action_at: new Date(2026, 10, 2, 11, 0).toISOString(),
+      }),
+    ],
   };
 
   it("offset 0 returns equal data", () => {
@@ -96,6 +110,18 @@ describe("rebasePackDates", () => {
     expect(out.staff[0].created_at).toBe("2026-10-11T09:00:00.000Z");
     expect(out.visits[0].checkInAt).toBeNull();
     expect(out.offers[0].starts_at).toBeNull();
+    expect(out.leads[0].created_at).toBe(new Date(2026, 10, 11, 9, 0).toISOString());
+    expect(out.leads[0].next_action_at).toBe(new Date(2026, 10, 12, 11, 0).toISOString());
+  });
+
+  it("keeps a lead with no follow-up date free of one", () => {
+    const stale: DatedPack = {
+      ...base,
+      orders: [base.orders[0]],
+      leads: [lead({ id: "l2", created_at: new Date(2026, 10, 1, 9, 0).toISOString() })],
+    };
+    const out = rebasePackDates(stale, NOW);
+    expect(out.leads[0].next_action_at).toBeNull();
   });
 
   it("shifts appointments, jobs, tasks and payments when stale", () => {

@@ -12,7 +12,7 @@ import type {
   StockAdjustment,
 } from "@/types/database";
 import type { StaffMember } from "@/types/manager";
-import type { Appointment, FieldVisit, Service, ServiceJob, Shift, Task } from "@/types/operations";
+import type { Appointment, FieldVisit, Lead, Service, ServiceJob, Shift, Task } from "@/types/operations";
 
 export const DEMO_MUTABLE_COOKIE = "ob_demo_mutable_v1";
 
@@ -41,6 +41,8 @@ export type DemoMutableBucket = {
   shiftOverrides: Record<string, Partial<Shift> & { deleted?: boolean }>;
   visits: FieldVisit[];
   visitOverrides: Record<string, Partial<FieldVisit> & { deleted?: boolean }>;
+  leads: Lead[];
+  leadOverrides: Record<string, Partial<Lead> & { deleted?: boolean }>;
 };
 
 type DemoMutableStore = Partial<Record<DemoBrandCode, DemoMutableBucket>>;
@@ -70,6 +72,8 @@ function emptyBucket(): DemoMutableBucket {
     shiftOverrides: {},
     visits: [],
     visitOverrides: {},
+    leads: [],
+    leadOverrides: {},
   };
 }
 
