@@ -1,4 +1,3 @@
-import type { DemoAnalytics } from "@/lib/demo/brands/types";
 import type { Order, OrderItem, Payment, Product } from "@/types/database";
 
 export type Slice = { name: string; value: number };
@@ -40,49 +39,12 @@ function tally(orders: Order[], key: "status" | "payment_status"): Slice[] {
   );
 }
 
-export function snapshotFromDemo(
-  analytics: DemoAnalytics,
-  orders: Order[],
-  currencyCode: string,
-): AnalyticsSnapshot {
-  return {
-    currencyCode,
-    grossSales: analytics.grossSales,
-    netSales: analytics.netSales,
-    orderCount: analytics.orderCount,
-    averageOrderValue: analytics.averageOrderValue,
-    itemsSold: analytics.itemsSold,
-    discountTotal: analytics.discountTotal,
-    paidAmount: analytics.paidAmount,
-    pendingAmount: analytics.pendingAmount,
-    salesByCategory: analytics.salesByCategory.map((row) => ({
-      name: row.category,
-      value: row.total,
-    })),
-    salesOverTime: analytics.salesOverTime.map((row) => ({
-      date: row.date,
-      revenue: row.total,
-      orders: row.orders,
-    })),
-    topProducts: analytics.topProducts,
-    paymentMethods: analytics.paymentMethods.map((row) => ({
-      name: row.method,
-      value: row.total,
-    })),
-    orderStatuses: tally(orders, "status"),
-    paymentStatuses: tally(orders, "payment_status"),
-    partial: false,
-  };
-}
-
 /**
  * Builds a snapshot from order headers, enriched with line-item and payment
  * slices when the caller supplies them.
  *
- * Range filtering needs this: the precomputed `DemoAnalytics` aggregates are
- * all-time, so a date-filtered dashboard cannot use them. Deriving category
- * mix, top products and tender mix from the underlying rows keeps those
- * charts populated for any range, in both demo and live modes.
+ * Range filtering needs this: deriving category mix, top products and tender
+ * mix from the underlying rows keeps those charts populated for any date range.
  */
 export function snapshotFromOrderRecords(params: {
   orders: Order[];

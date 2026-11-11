@@ -12,6 +12,9 @@ const nextConfig: NextConfig = {
         loaders: ["@tailwindcss/turbopack"],
         as: "*.css",
       },
+      "*.csv": {
+        type: "raw",
+      },
     },
   },
   experimental: {

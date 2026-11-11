@@ -18,21 +18,6 @@ import type {
   Task,
 } from "@/types/operations";
 
-export type DemoAnalytics = {
-  grossSales: number;
-  netSales: number;
-  orderCount: number;
-  averageOrderValue: number;
-  itemsSold: number;
-  discountTotal: number;
-  paidAmount: number;
-  pendingAmount: number;
-  salesByCategory: { category: string; total: number }[];
-  salesOverTime: { date: string; total: number; orders: number }[];
-  topProducts: { name: string; qty: number }[];
-  paymentMethods: { method: string; total: number }[];
-};
-
 export type DemoBrandPack = {
   brand: Brand;
   settings: BrandSettings;
@@ -49,7 +34,6 @@ export type DemoBrandPack = {
   visits: FieldVisit[];
   shifts: Shift[];
   tasks: Task[];
-  analytics: DemoAnalytics;
   /** Prefix for demo order numbers, e.g. BC or CF */
   orderNumberPrefix: string;
 };

@@ -237,10 +237,6 @@ export async function listDemoAuditLog(brandCode?: DemoBrandCode) {
   return listDemoAudit(bucket);
 }
 
-export function getDemoAnalytics(brandCode?: DemoBrandCode) {
-  return packFor(brandCode ?? "BR-1").analytics;
-}
-
 export async function listDemoStockAdjustments(
   brandCode?: DemoBrandCode,
 ): Promise<StockAdjustment[]> {
