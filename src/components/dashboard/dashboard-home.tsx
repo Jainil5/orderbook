@@ -5,7 +5,7 @@ import Link from "next/link";
 import { PageShell } from "@/components/workspace/page-shell";
 import { Card } from "@/components/ui/card";
 import { StatCard } from "@/components/ui/stat-card";
-import { CHART_COLORS } from "@/components/analytics/charts";
+import { CHART_COLORS } from "@/components/analytics/chart-colors";
 import { formatMoney } from "@/lib/format";
 import type { AnalyticsSnapshot } from "@/lib/analytics/snapshot";
 import type { ResolvedRange } from "@/lib/analytics/date-range";

@@ -5,6 +5,8 @@ import { Coffee, Armchair, ArrowRight } from "lucide-react";
 import { enterDemoWorkspace } from "@/lib/auth/demo";
 import { LogoMark } from "@/components/brand/logo-mark";
 import { Meteors } from "@/components/effects/meteors";
+import { DemoShowcase } from "@/components/auth/demo-showcase";
+import type { DemoShowcaseStats } from "@/lib/demo/showcase-stats";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
 
 const BRANDS: {
@@ -27,7 +29,7 @@ const BRANDS: {
   },
 ];
 
-export function DemoPicker() {
+export function DemoPicker({ showcase }: { showcase: DemoShowcaseStats }) {
   const [pending, setPending] = useState<DemoBrandCode | null>(null);
 
   async function enter(code: DemoBrandCode) {
@@ -38,27 +40,35 @@ export function DemoPicker() {
   return (
     <div className="ob-workspace relative min-h-[100dvh] overflow-hidden">
       <Meteors count={10} seed={11} />
-      <div className="relative z-[1] mx-auto flex min-h-[100dvh] max-w-md flex-col justify-center px-4 py-8 ob-safe-top ob-safe-bottom sm:py-12">
-        <div className="ob-card p-6 sm:p-8">
+      <div className="relative z-[1] mx-auto flex min-h-[100dvh] w-full max-w-3xl flex-col justify-center gap-7 px-4 py-10 ob-safe-top ob-safe-bottom sm:py-14">
+        <header className="text-center">
           <LogoMark size={52} spin />
           <p className="mt-5 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--ob-text-muted)]">
             WebsiteIn
           </p>
-          <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight">
+          <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
             OrderBook
           </h1>
-          <p className="mt-2 text-sm text-[var(--ob-text-secondary)]">
-            Pick a demo business to explore the full workspace — no sign-up
-            needed.
+          <p className="mx-auto mt-2 max-w-md text-sm text-[var(--ob-text-secondary)]">
+            Two live businesses running on one workspace — billing, kitchen,
+            deliveries and analytics. No sign-up needed.
           </p>
-          <div className="mt-8 space-y-3">
+        </header>
+
+        <DemoShowcase stats={showcase} />
+
+        <div className="ob-card p-5 sm:p-6">
+          <h2 className="font-display text-base font-semibold">
+            Choose a demo business
+          </h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {BRANDS.map(({ code, name, tagline, Icon }) => (
               <button
                 key={code}
                 type="button"
                 onClick={() => enter(code)}
                 disabled={pending !== null}
-                className="ob-card flex w-full items-center gap-4 p-4 text-left transition hover:border-[var(--ob-primary)] disabled:opacity-60"
+                className="ob-card flex w-full min-h-[44px] items-center gap-4 p-4 text-left transition hover:border-[var(--ob-primary)] disabled:opacity-60"
               >
                 <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[var(--ob-surface-muted)] text-[var(--ob-primary)]">
                   <Icon className="size-5" aria-hidden />
@@ -78,7 +88,7 @@ export function DemoPicker() {
               </button>
             ))}
           </div>
-          <p className="mt-6 text-xs text-[var(--ob-text-muted)]">
+          <p className="mt-5 text-xs text-[var(--ob-text-muted)]">
             Demo data resets per browser. Your edits stay on this device.
           </p>
         </div>

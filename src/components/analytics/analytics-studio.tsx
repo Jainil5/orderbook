@@ -12,7 +12,7 @@ import { SegmentedControl } from "@/components/ui/segmented-control";
 import { StatCard } from "@/components/ui/stat-card";
 import { Tabs } from "@/components/ui/tabs";
 import { LoopRow } from "@/components/effects/loop-row";
-import { CHART_COLORS } from "@/components/analytics/charts";
+import { CHART_COLORS } from "@/components/analytics/chart-colors";
 import { formatMoney } from "@/lib/format";
 import type { AnalyticsSnapshot, Slice, TrendPoint } from "@/lib/analytics/snapshot";
 import type { MarginSnapshot } from "@/lib/analytics/margin";
