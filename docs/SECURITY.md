@@ -1,51 +1,44 @@
-# Security model (OrderBook)
+# Security model (OrderBook demo)
 
-Defense in depth — **Supabase RLS is the authority**; the app adds transport and input guardrails.
+OrderBook ships as a self-contained product demo: no backend, no accounts, no
+secrets, no environment variables. The dataset is read-only CSV in the repo;
+visitor edits live in their own browser cookies. Guardrails below keep the
+public surface tidy.
 
-## Secrets
+## Access model
 
-- Only `NEXT_PUBLIC_*` Supabase URL + **publishable** key in the browser.
-- `BRAND_AUTH_EMAIL_MAP` and any future DB credentials stay **server-only** (`.env.local`, Railway).
-- `.env.local` is gitignored; never commit passwords or `service_role` keys.
-
-## Authentication
-
-- Login maps **brand code → auth email on the server** only (`BRAND_AUTH_EMAIL_MAP` or future RPC).
-- Active brand comes from `brand_members`, never from client-supplied `brand_id`.
-- Brute-force mitigation: per-IP rate limit on sign-in server action.
-- Generic error copy on failed password (no account enumeration).
-
-## Authorization
-
-- Middleware refreshes Supabase session and blocks private routes without a user.
-- Demo routes use fixture data only — no live session or service role.
-- Live data services call `loadLiveWorkspace()` and filter by membership-derived `brand_id`.
-
-## Input & queries
-
-- Search terms escaped before `ilike` filters (PostgREST injection hardening).
-- Order/list filters restricted to allowlists; pagination capped.
-- Order creation goes through `create_order` RPC when enabled (server-validated totals).
+- `/login` is a demo picker — choosing a business sets an **httpOnly,
+  SameSite=Lax** cookie (`ob_demo_workspace`, 7-day expiry).
+- Middleware redirects workspace and print routes to `/login` without that
+  cookie; `/demo/*` entry links set it and redirect into the app.
+- There is no authentication to bypass: every visitor is a demo "owner" of
+  their own browser-scoped sandbox. No cross-visitor data exists.
 
 ## HTTP hardening
 
-- Security headers on all responses (frame deny, nosniff, referrer policy, etc.).
-- `poweredByHeader` disabled.
-- Server Actions body size limited.
+- Security headers on all responses: CSP (`default-src 'self'`, no external
+  connect targets), frame deny, nosniff, strict referrer policy.
+- Probe paths (`/.env`, `/wp-admin`, `/.git`, …) return 404 at the edge.
+- `poweredByHeader` disabled; Server Actions body size limited to 1 MB.
 
-## Local development
+## Input handling
 
-1. `npm run setup:env` → creates `.env.local` from `.env.example`
-2. Fill publishable key + optional `BRAND_AUTH_EMAIL_MAP`
-3. `npm run dev` (runs env check first)
+- Public quote tokens normalized and length-checked before lookup
+  (`src/lib/security/public-token.ts`).
+- Brand website URLs validated as https-only; internal redirect paths
+  sanitized (`safeInternalPath`) — no open redirects.
+- Order/status filters restricted to allowlists; CSV export built from typed
+  rows with proper cell escaping.
 
-Replace in-memory rate limits with Redis/edge limits for multi-instance production if needed.
+## Rate limiting
 
-## Security audit & reports
+- Per-IP in-memory rate limit on the public quote-accept action
+  (`src/lib/security/rate-limit.ts`). For multi-instance production, swap in
+  a shared store (Redis/edge) — not needed for a demo deployment.
 
-- [Security Audit Report](./SECURITY_AUDIT.md) — Comprehensive vulnerability analysis & methodology
-- [Security Checklist](./SECURITY_CHECKLIST.md) — Verification checklist before production rollout
-- [Security Fixes](./SECURITY_FIXES.md) — Remediation details and code changes
-- [Remaining Security Risks](./SECURITY_REMAINING_RISKS.md) — Open risks and external infrastructure dependencies
-- [Recommended Supabase RLS](./SUPABASE_RLS_RECOMMENDED.sql) & [Apply Script](./SUPABASE_RLS_APPLY.sql) — Tenant isolation policies
-- [Supabase Extensions & RPCs](./SUPABASE_EXTENSIONS.sql) — Required database functions
+## Data
+
+- CSVs are bundled into the server build as raw imports; nothing is read from
+  or written to disk at runtime, so serverless hosts (Vercel) work unchanged.
+- Demo edits persist in chunked httpOnly cookies per browser; clearing site
+  data resets the sandbox to the repo dataset.

@@ -1,84 +1,71 @@
 # OrderBook
 
-Multi-business order management and POS workspace for **WebsiteIn**. One app, one data model, every record scoped by `brand_id`.
+POS, billing, and analytics workspace by **WebsiteIn** — shipped as a fully
+self-contained product demo. Two sample businesses (a café and a furniture
+studio) run on repo-stored CSV data. No database, no accounts, no environment
+variables.
 
 ## Stack
 
-- Next.js App Router, React, TypeScript (strict)
-- Supabase Auth + PostgreSQL (browser client under RLS)
-- Tailwind CSS + shared `--ob-*` design tokens
+- Next.js App Router (custom 16.x fork), React 19, TypeScript (strict)
+- Tailwind CSS v4 + shared `--ob-*` design tokens, dual light/dark theme
+- Recharts + Motion for charts and UI motion
+- Vitest for unit tests
 
-## Local development (`.env.local`)
-
-Local secrets live in **`.env.local`** — gitignored. Never commit this file.
+## Quick start
 
 ```bash
 npm install
-npm run setup:env          # creates .env.local from .env.example (once)
+npm run dev
 ```
 
-Edit `.env.local`:
+Open http://localhost:3000, pick a demo business on the login screen, and
+explore. That's the whole setup — there is nothing to configure.
 
-```bash
-NEXT_PUBLIC_SUPABASE_URL=https://vdrnkhtltpwrkfjnlasf.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...   # from Supabase dashboard
+| Script | Purpose |
+|--------|---------|
+| `npm run dev` | Dev server |
+| `npm run build` | Production build |
+| `npm start` | Serve the production build |
+| `npm run lint` | ESLint |
+| `npm test` | Vitest suite |
 
-# Server-only — login until DB RPC exists (use your Auth user emails, not passwords)
-BRAND_AUTH_EMAIL_MAP={"BR-1":"cafe-owner@example.com","BR-2":"furniture-owner@example.com"}
-```
+## Demo data
 
-Run the app (`predev` checks that `.env.local` exists):
+The dataset lives in **`data/demo/<brand>/*.csv`** — one file per table
+(products, customers, orders, order_items, payments, offers, staff, services,
+service_jobs, appointments, field_visits, shifts, tasks, brand, brand_settings):
 
-```bash
-npm run dev                  # http://localhost:3000
-npm run check:env            # manual env validation
-```
+- `BR-1` — Brewery Cafe (24 products, ~270 orders incl. 6 months of history)
+- `BR-2` — Cubig Furniture (8 products, quotations enabled)
 
-**Demo without login:** `/demo/dashboard` (Brewery Cafe) or `/demo/dashboard?brand=BR-2` (Cubig Furniture), or use the buttons on `/login`.
+Edit or add rows in any spreadsheet app and restart the dev server. Columns
+mirror the TypeScript entity types in `src/types/`. Empty cell = null,
+`true`/`false` for booleans, JSON text for `modifiers_json` and `staff_ids`.
 
-**Railway:** set the same variables in the project environment (not in Git).
+Historical dates are **rebased at load** so the newest order always lands
+today — the demo stays fresh without touching the files.
 
-See `docs/SECURITY.md` for hardening details.
+Product photos live in **`public/demo/products/<brand>/<SKU>.jpg`**, named by
+product SKU. The `image_url` column in `products.csv` points at them.
 
-## Routes
+Edits made inside the demo (new orders, product changes, settings) persist
+**per browser** via cookies — each visitor gets their own sandbox, and the
+CSVs are never written at runtime.
 
-| Route | Description |
-|-------|-------------|
-| `/login` | Business ID + password sign-in, demo entry |
-| `/demo/*` | Read-only demo workspace (default **BR-1**; use `?brand=BR-2` for Cubig) |
-| `/dashboard` … `/settings` | Authenticated workspace (requires Supabase session + `brand_members`) |
+## Deploy
 
-## Environment reference
+**Vercel (recommended):** import the repo, deploy. Zero config, zero env vars.
 
-| Variable | Where | Purpose |
-|----------|--------|---------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Browser + server | Supabase project URL (`*.supabase.co` only) |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Browser + server | Publishable key (RLS-enforced) |
-| `BRAND_AUTH_EMAIL_MAP` | **Server only** | JSON map of brand code → Auth email |
+**Railway:** the included `Dockerfile` builds and serves the app (`next start`,
+honors `PORT`). Create a service from the repo and deploy.
 
-Never commit secrets or use `service_role` in the browser.
-
-See `docs/DATABASE_CONTRACT.md` for tables, RLS, and RPC expectations.
+**Netlify:** not verified — this repo uses a custom Next.js fork and the
+Netlify Next.js runtime may lag behind it.
 
 ## Documentation
 
-- [`docs/SECURITY.md`](docs/SECURITY.md) — Security architecture, hardening, and audit reports
-- [`docs/DATABASE_CONTRACT.md`](docs/DATABASE_CONTRACT.md) — Supabase schema, RLS, and RPC expectations
-- [`docs/DESIGN.md`](docs/DESIGN.md) — Visual direction and design tokens
-
-## Commands
-
-```bash
-npm run lint                 # ESLint check
-npm test                     # Vitest test suite
-npm run build                # Production Next.js build
-npm start                    # Start production server
-```
-
-## Demo vs live
-
-- **Explore demo** on `/login` opens the full workspace for **Brewery Cafe (BR-1)** or **Cubig Furniture (BR-2)** with brand-specific sample data via a secure httpOnly cookie.
-- **Sign in** uses Supabase Auth + `brand_members` and clears the demo cookie.
-- Billing is fully interactive in demo (cart + local bill confirmation); live orders use Supabase when configured.
+- [`docs/SECURITY.md`](docs/SECURITY.md) — security guardrails for the demo app
+- [`docs/DESIGN.md`](docs/DESIGN.md) — visual direction and design tokens
 
 Built by WebsiteIn.
