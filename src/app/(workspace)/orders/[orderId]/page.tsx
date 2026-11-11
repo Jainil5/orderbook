@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PageShell } from "@/components/workspace/page-shell";
 import { getDemoOrder, getDemoOrderItems, getDemoCustomer, listDemoProductsMerged, toDemoBrandCode } from "@/lib/demo/data";
-import { buildBillDocumentFromOrder, productImageLookupFromProducts } from "@/lib/documents/build-bill-document";
+import { buildBillDocumentFromOrder } from "@/lib/documents/build-bill-document";
 import { OrderDetailDocuments } from "@/components/orders/order-detail-documents";
 import { OrderLineItemsList } from "@/components/orders/order-line-items-list";
 import { OrderCustomerDetails } from "@/components/orders/order-customer-details";
@@ -41,11 +41,10 @@ export default async function OrderDetailPage({
   if (!order) notFound();
   const items = await getDemoOrderItems(order.id, demoCode);
   const products = await listDemoProductsMerged({}, demoCode);
-  const productImageByProductId = productImageLookupFromProducts(products);
   const document = buildBillDocumentFromOrder({
     order,
     items,
-    productImageByProductId,
+    products,
     ...docMeta,
   });
 
@@ -67,6 +66,7 @@ export default async function OrderDetailPage({
           order={order}
           customer={linkedCustomer ?? null}
           customerPhone={linkedCustomer?.phone ?? document.customerPhone}
+          captureMode={ws.profile.capture}
         />
         <Card>
           <h2 className="font-semibold">Totals</h2>
@@ -91,12 +91,39 @@ export default async function OrderDetailPage({
                 {formatMoney(order.tax_total, ws.settings.currency_code)}
               </span>
             </div>
+            {(order.fees_total ?? 0) > 0 ? (
+              <div className="flex justify-between text-[var(--ob-text-muted)]">
+                <span>Delivery & installation</span>
+                <span>
+                  {formatMoney(order.fees_total ?? 0, ws.settings.currency_code)}
+                </span>
+              </div>
+            ) : null}
             <div className="flex justify-between border-t border-[var(--ob-border)] pt-2 text-base font-semibold">
               <span>Grand total</span>
               <span>
                 {formatMoney(order.grand_total, ws.settings.currency_code)}
               </span>
             </div>
+            {(order.amount_paid ?? 0) > 0 ? (
+              <>
+                <div className="flex justify-between text-[var(--ob-success)]">
+                  <span>Received</span>
+                  <span>
+                    −{formatMoney(order.amount_paid ?? 0, ws.settings.currency_code)}
+                  </span>
+                </div>
+                <div className="flex justify-between font-medium">
+                  <span>Balance</span>
+                  <span>
+                    {formatMoney(
+                      Math.max(0, order.grand_total - (order.amount_paid ?? 0)),
+                      ws.settings.currency_code,
+                    )}
+                  </span>
+                </div>
+              </>
+            ) : null}
             <p className="text-xs text-[var(--ob-text-muted)]">
               Status: {order.status} · {order.payment_status}
             </p>

@@ -48,6 +48,8 @@ export type CartTotals = {
   discountTotal: number;
   taxableSubtotal: number;
   taxTotal: number;
+  /** Untaxed delivery / installation charges added after tax. */
+  feesTotal: number;
   grandTotal: number;
 };
 
@@ -56,6 +58,7 @@ export function computeCartTotals(params: {
   taxRatePercent: number;
   orderDiscount: OrderDiscountInput | null;
   offerDiscountAmount?: number;
+  feesAmount?: number;
 }): CartTotals {
   const taxRate = clampPercent(params.taxRatePercent);
 
@@ -107,7 +110,10 @@ export function computeCartTotals(params: {
     ),
   );
   const taxTotal = roundMoney((taxableSubtotal * taxRate) / 100);
-  const grandTotal = roundMoney(taxableSubtotal + taxTotal);
+  const feesTotal = roundMoney(
+    Math.max(0, Number.isFinite(params.feesAmount ?? 0) ? (params.feesAmount ?? 0) : 0),
+  );
+  const grandTotal = roundMoney(taxableSubtotal + taxTotal + feesTotal);
 
   return {
     listSubtotal,
@@ -118,6 +124,7 @@ export function computeCartTotals(params: {
     discountTotal,
     taxableSubtotal,
     taxTotal,
+    feesTotal,
     grandTotal,
   };
 }

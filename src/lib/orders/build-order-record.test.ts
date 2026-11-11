@@ -136,6 +136,40 @@ describe("bill lifecycle", () => {
     expect(built.record.order.payment_reference).toBe("Zomato-1234");
   });
 
+  it("adds untaxed delivery & installation charges to a project bill", () => {
+    const built = buildOrderRecord({
+      ...base,
+      input: {
+        customerId: null,
+        lines: [{ productId: "p1", quantity: 2 }],
+        paymentMethod: "UPI",
+        paymentStatus: "pending",
+        feesTotal: 2500,
+        deliveryAddress: "Third floor, Adajan, Surat",
+      },
+    });
+    expect(built.ok).toBe(true);
+    if (!built.ok) return;
+    expect(built.record.order.subtotal).toBe(440);
+    expect(built.record.order.tax_total).toBe(22);
+    expect(built.record.order.fees_total).toBe(2500);
+    expect(built.record.order.grand_total).toBe(2962);
+  });
+
+  it("rejects a negative charges amount", () => {
+    const built = buildOrderRecord({
+      ...base,
+      input: {
+        customerId: null,
+        lines: [{ productId: "p1", quantity: 1 }],
+        paymentMethod: "Cash",
+        paymentStatus: "pending",
+        feesTotal: -100,
+      },
+    });
+    expect(built.ok).toBe(false);
+  });
+
   it("rejects an unavailable product like an inactive one", () => {
     const built = buildOrderRecord({
       ...base,

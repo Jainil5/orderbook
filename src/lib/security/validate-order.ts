@@ -69,6 +69,13 @@ export function validateCreateOrderInput(
     }
   }
 
+  const fees = input.feesTotal;
+  if (fees != null) {
+    if (!Number.isFinite(fees) || fees < 0 || fees > MAX_ORDER_DISCOUNT) {
+      return { ok: false, message: "Invalid delivery or installation charges." };
+    }
+  }
+
   for (const line of input.lines) {
     if (line.lineDiscount != null) {
       if (

@@ -3,76 +3,76 @@ fo1,demo-cubig-furniture,CF-Q-1046,draft,pending,fc2,Priya Homes Interiors,11670
 fo2,demo-cubig-furniture,CF-Q-1045,confirmed,pending,fc4,Arjun & Meera Shah,77220,6480,13899.6,0,91119.6,Quote sent — bedroom package,2026-11-10T02:21:25.080Z,,,,,,,,,,,,,,
 fo3,demo-cubig-furniture,CF-1044,completed,paid,fc3,Northstar Coworking,268200,0,48276,500,316976,Bill · 12 chairs + 6 desks · installation included,2026-11-08T08:21:25.080Z,,,,,,,,,,,,,,
 fo4,demo-cubig-furniture,CF-1043,completed,partial,fc2,Priya Homes Interiors,68900,0,12402,0,81302,Advance received — balance on delivery,2026-11-06T08:21:25.080Z,,,,,,,,,,,,,,
-hist-CF-1,demo-cubig-furniture,CF-H1,completed,paid,h-cust-21,Tanvi Pillai,258300,0,46494,0,304794,,2026-05-29T07:20:00.000Z,,,dine_in,2026-05-29,4,,UPI,,,304794,,,,sale
-hist-CF-2,demo-cubig-furniture,CF-H2,completed,paid,,Walk-in Guest,63885,8915,11499.3,0,75384.3,,2026-05-12T04:32:00.000Z,,,delivery,2026-05-12,,"89 Indiranagar, 100 Ft Road",UPI,,,75384.3,,,,sale
-hist-CF-3,demo-cubig-furniture,CF-H3,completed,paid,h-cust-15,Sameer Kulkarni,112870,930,20316.6,0,133186.6,,2026-05-23T08:34:00.000Z,,,takeaway,2026-05-23,,,UPI,,,133186.6,,,,sale
-hist-CF-4,demo-cubig-furniture,CF-H4,completed,paid,,Walk-in Guest,15810,2790,2845.8,0,18655.8,,2026-05-10T12:45:00.000Z,,,dine_in,2026-05-10,4,,UPI,,,18655.8,,,,sale
-hist-CF-5,demo-cubig-furniture,CF-H5,completed,paid,h-cust-17,Tara Mehta,105300,0,18954,0,124254,,2026-05-29T12:52:00.000Z,,,dine_in,2026-05-29,4,,Cash,,,124254,,,,sale
-hist-CF-6,demo-cubig-furniture,CF-H6,completed,paid,h-cust-25,Nisha Patel,134100,0,24138,0,158238,,2026-05-16T11:18:00.000Z,,,dine_in,2026-05-16,2,,Cash,,,158238,,,,sale
-hist-CF-7,demo-cubig-furniture,CF-H7,completed,paid,h-cust-5,Siddharth Malhotra,109800,0,19764,0,129564,,2026-05-23T11:10:00.000Z,,,delivery,2026-05-23,,"7 Salt Lake, Sector V",Cash,,,129564,,,,sale
-hist-CF-8,demo-cubig-furniture,CF-H8,completed,paid,h-cust-19,Rahul Pillai,232300,0,41814,0,274114,,2026-05-22T04:49:00.000Z,,,dine_in,2026-05-22,4,,Card,,,274114,,,,sale
-hist-CF-9,demo-cubig-furniture,CF-H9,completed,paid,h-cust-18,Sameer Sethi,364800,15000,65664,0,430464,,2026-06-26T11:39:00.000Z,,,takeaway,2026-06-26,,,Card,,,430464,SHOW10,,,sale
-hist-CF-10,demo-cubig-furniture,CF-H10,completed,paid,h-cust-17,Tara Mehta,25800,0,4644,0,30444,,2026-06-14T15:07:00.000Z,,,dine_in,2026-06-14,4,,UPI,,,30444,,,,sale
-hist-CF-11,demo-cubig-furniture,CF-H11,completed,paid,h-cust-15,Sameer Kulkarni,164310,2790,29575.8,0,193885.8,,2026-06-06T03:45:00.000Z,,,takeaway,2026-06-06,,,UPI,,,193885.8,,,,sale
-hist-CF-12,demo-cubig-furniture,CF-H12,completed,paid,,Walk-in Guest,160500,0,28890,0,189390,,2026-06-05T08:46:00.000Z,,,delivery,2026-06-05,,"17 Koramangala, 5th Block",UPI,,,189390,,,,sale
-hist-CF-13,demo-cubig-furniture,CF-H13,completed,paid,h-cust-24,Rohan Kulkarni,164700,0,29646,0,194346,,2026-06-26T13:46:00.000Z,,,dine_in,2026-06-26,1,,UPI,,,194346,,,,sale
-hist-CF-14,demo-cubig-furniture,CF-H14,completed,paid,h-cust-11,Tanvi Rao,186140,1860,33505.2,0,219645.2,,2026-06-13T12:37:00.000Z,,,dine_in,2026-06-13,2,,UPI,,,219645.2,,,,sale
-hist-CF-15,demo-cubig-furniture,CF-H15,completed,paid,h-cust-11,Tanvi Rao,19800,0,3564,0,23364,,2026-06-22T08:20:00.000Z,,,takeaway,2026-06-22,,,Cash,,,23364,,,,sale
-hist-CF-16,demo-cubig-furniture,CF-H16,completed,paid,h-cust-7,Tanvi Bose,107400,0,19332,0,126732,,2026-06-06T06:44:00.000Z,,,takeaway,2026-06-06,,,Cash,,,126732,,,,sale
-hist-CF-17,demo-cubig-furniture,CF-H17,completed,paid,h-cust-2,Diya Verma,212100,0,38178,0,250278,,2026-06-14T11:01:00.000Z,,,dine_in,2026-06-14,2,,Cash,,,250278,,,,sale
-hist-CF-18,demo-cubig-furniture,CF-H18,completed,paid,h-cust-2,Diya Verma,26730,2970,4811.4,0,31541.4,,2026-07-24T03:14:00.000Z,,,dine_in,2026-07-24,4,,Card,,,31541.4,SHOW10,,,sale
-hist-CF-19,demo-cubig-furniture,CF-H19,completed,paid,h-cust-7,Tanvi Bose,439050,12250,79029,0,518079,,2026-07-24T10:00:00.000Z,,,dine_in,2026-07-24,2,,Card,,,518079,,,,sale
-hist-CF-20,demo-cubig-furniture,CF-H20,cancelled,refunded,,Walk-in Guest,90210,2790,16237.8,0,106447.8,,2026-07-07T13:07:00.000Z,,,delivery,2026-07-07,,"65 Indiranagar, 100 Ft Road",,,,0,,,,sale
-hist-CF-21,demo-cubig-furniture,CF-H21,completed,paid,h-cust-14,Arjun Kulkarni,233250,12250,41985,0,275235,,2026-07-14T06:52:00.000Z,,,takeaway,2026-07-14,,,UPI,,,275235,,,,sale
-hist-CF-22,demo-cubig-furniture,CF-H22,completed,paid,h-cust-21,Tanvi Pillai,49650,12250,8937,0,58587,,2026-07-10T03:57:00.000Z,,,delivery,2026-07-10,,"42 Bandra West, Linking Road",UPI,,,58587,,,,sale
-hist-CF-23,demo-cubig-furniture,CF-H23,completed,paid,h-cust-1,Siddharth Verma,285570,930,51402.6,0,336972.6,,2026-07-25T07:32:00.000Z,,,dine_in,2026-07-25,4,,UPI,,,336972.6,,,,sale
-hist-CF-24,demo-cubig-furniture,CF-H24,completed,paid,h-cust-15,Sameer Kulkarni,195600,0,35208,0,230808,,2026-07-13T14:51:00.000Z,,,dine_in,2026-07-13,1,,UPI,,,230808,,,,sale
-hist-CF-25,demo-cubig-furniture,CF-H25,completed,paid,h-cust-23,Tara Sharma,214840,1860,38671.2,0,253511.2,,2026-07-22T15:04:00.000Z,,,dine_in,2026-07-22,1,,Cash,,,253511.2,,,,sale
-hist-CF-26,demo-cubig-furniture,CF-H26,completed,paid,,Walk-in Guest,222510,2790,40051.8,0,262561.8,,2026-07-28T10:04:00.000Z,,,online,2026-07-28,,,Cash,Zomato-2698,,262561.8,,,,sale
-hist-CF-27,demo-cubig-furniture,CF-H27,completed,paid,h-cust-15,Sameer Kulkarni,40149,7251,7226.82,0,47375.82,,2026-07-31T11:03:00.000Z,,,dine_in,2026-07-31,4,,Cash,,,47375.82,SHOW10,,,sale
-hist-CF-28,demo-cubig-furniture,CF-H28,completed,paid,h-cust-12,Gaurav Sharma,70710,2790,12727.8,0,83437.8,,2026-07-20T09:32:00.000Z,,,dine_in,2026-07-20,1,,Card,,,83437.8,,,,sale
-hist-CF-29,demo-cubig-furniture,CF-H29,completed,paid,,Walk-in Guest,164700,0,29646,0,194346,,2026-08-15T14:29:00.000Z,,,dine_in,2026-08-15,2,,Card,,,194346,,,,sale
-hist-CF-30,demo-cubig-furniture,CF-H30,completed,paid,h-cust-20,Harsh Bhatt,184350,12250,33183,0,217533,,2026-08-15T07:03:00.000Z,,,dine_in,2026-08-15,3,,UPI,,,217533,,,,sale
-hist-CF-31,demo-cubig-furniture,CF-H31,completed,paid,h-cust-13,Reema Bhatt,31070,930,5592.6,0,36662.6,,2026-08-12T11:02:00.000Z,,,takeaway,2026-08-12,,,UPI,,,36662.6,,,,sale
-hist-CF-32,demo-cubig-furniture,CF-H32,completed,paid,h-cust-17,Tara Mehta,104310,2790,18775.8,0,123085.8,,2026-08-28T02:35:00.000Z,,,dine_in,2026-08-28,2,,UPI,,,123085.8,,,,sale
-hist-CF-33,demo-cubig-furniture,CF-H33,completed,paid,h-cust-24,Rohan Kulkarni,120340,1860,21661.2,0,142001.2,,2026-08-18T05:30:00.000Z,,,dine_in,2026-08-18,3,,UPI,,,142001.2,,,,sale
-hist-CF-34,demo-cubig-furniture,CF-H34,completed,paid,,Walk-in Guest,268500,0,48330,0,316830,,2026-08-20T02:53:00.000Z,,,dine_in,2026-08-20,1,,UPI,,,316830,,,,sale
-hist-CF-35,demo-cubig-furniture,CF-H35,completed,paid,h-cust-25,Nisha Patel,163410,2790,29413.8,0,192823.8,,2026-08-02T03:26:00.000Z,,,takeaway,2026-08-02,,,Cash,,,192823.8,,,,sale
-hist-CF-36,demo-cubig-furniture,CF-H36,completed,paid,,Walk-in Guest,192600,15000,34668,0,227268,,2026-08-28T07:20:00.000Z,,,dine_in,2026-08-28,1,,Cash,,,227268,SHOW10,,,sale
-hist-CF-37,demo-cubig-furniture,CF-H37,completed,paid,,Walk-in Guest,15810,2790,2845.8,0,18655.8,,2026-08-26T13:16:00.000Z,,,takeaway,2026-08-26,,,Cash,,,18655.8,,,,sale
-hist-CF-38,demo-cubig-furniture,CF-H38,completed,paid,h-cust-3,Priya Bose,56700,0,10206,0,66906,,2026-08-15T11:44:00.000Z,,,takeaway,2026-08-15,,,Card,,,66906,,,,sale
-hist-CF-39,demo-cubig-furniture,CF-H39,completed,paid,h-cust-21,Tanvi Pillai,442300,0,79614,0,521914,,2026-08-14T09:09:00.000Z,,,takeaway,2026-08-14,,,Card,,,521914,,,,sale
-hist-CF-40,demo-cubig-furniture,CF-H40,cancelled,refunded,h-cust-14,Arjun Kulkarni,66450,12250,11961,0,78411,,2026-08-07T10:09:00.000Z,,,takeaway,2026-08-07,,,,,,0,,,,sale
-hist-CF-41,demo-cubig-furniture,CF-H41,completed,paid,h-cust-21,Tanvi Pillai,79440,1860,14299.2,0,93739.2,,2026-09-28T13:27:00.000Z,,,dine_in,2026-09-28,1,,UPI,,,93739.2,,,,sale
-hist-CF-42,demo-cubig-furniture,CF-H42,completed,paid,h-cust-1,Siddharth Verma,128870,930,23196.6,0,152066.6,,2026-09-21T12:50:00.000Z,,,takeaway,2026-09-21,,,UPI,,,152066.6,,,,sale
-hist-CF-43,demo-cubig-furniture,CF-H43,completed,paid,h-cust-20,Harsh Bhatt,156300,0,28134,0,184434,,2026-09-24T06:18:00.000Z,,,dine_in,2026-09-24,3,,UPI,,,184434,,,,sale
-hist-CF-44,demo-cubig-furniture,CF-H44,completed,paid,,Walk-in Guest,89835,21165,16170.3,0,106005.3,,2026-09-04T08:21:00.000Z,,,takeaway,2026-09-04,,,UPI,,,106005.3,,,,sale
-hist-CF-45,demo-cubig-furniture,CF-H45,completed,paid,h-cust-16,Manav Sharma,49059,8241,8830.62,0,57889.62,,2026-09-24T13:42:00.000Z,,,takeaway,2026-09-24,,,Cash,,,57889.62,SHOW10,,,sale
-hist-CF-46,demo-cubig-furniture,CF-H46,completed,paid,,Walk-in Guest,79650,12250,14337,0,93987,,2026-09-17T05:01:00.000Z,,,dine_in,2026-09-17,2,,Cash,,,93987,,,,sale
-hist-CF-47,demo-cubig-furniture,CF-H47,completed,paid,h-cust-20,Harsh Bhatt,25800,0,4644,0,30444,,2026-09-28T11:09:00.000Z,,,dine_in,2026-09-28,3,,Cash,,,30444,,,,sale
-hist-CF-48,demo-cubig-furniture,CF-H48,completed,paid,h-cust-13,Reema Bhatt,9900,0,1782,0,11682,,2026-09-06T14:52:00.000Z,,,dine_in,2026-09-06,3,,Card,,,11682,,,,sale
-hist-CF-49,demo-cubig-furniture,CF-H49,completed,paid,,Walk-in Guest,222300,0,40014,0,262314,,2026-09-03T03:11:00.000Z,,,dine_in,2026-09-03,3,,Card,,,262314,,,,sale
-hist-CF-50,demo-cubig-furniture,CF-H50,completed,paid,h-cust-8,Karan Chopra,135875,6125,24457.5,0,160332.5,,2026-09-28T03:08:00.000Z,,,dine_in,2026-09-28,1,,UPI,,,160332.5,,,,sale
-hist-CF-51,demo-cubig-furniture,CF-H51,completed,paid,h-cust-3,Priya Bose,277200,0,49896,0,327096,,2026-09-23T13:41:00.000Z,,,dine_in,2026-09-23,3,,UPI,,,327096,,,,sale
-hist-CF-52,demo-cubig-furniture,CF-H52,completed,paid,,Walk-in Guest,38700,0,6966,0,45666,,2026-09-01T10:47:00.000Z,,,takeaway,2026-09-01,,,UPI,,,45666,,,,sale
-hist-CF-53,demo-cubig-furniture,CF-H53,completed,paid,h-cust-13,Reema Bhatt,295400,0,53172,0,348572,,2026-09-15T04:24:00.000Z,,,dine_in,2026-09-15,1,,UPI,,,348572,,,,sale
-hist-CF-54,demo-cubig-furniture,CF-H54,completed,paid,,Walk-in Guest,33075,15925,5953.5,0,39028.5,,2026-10-25T12:26:00.000Z,,,online,2026-10-25,,,UPI,Zomato-9279,,39028.5,SHOW10,,,sale
-hist-CF-55,demo-cubig-furniture,CF-H55,completed,paid,,Walk-in Guest,137800,0,24804,0,162604,,2026-10-31T14:24:00.000Z,,,takeaway,2026-10-31,,,Cash,,,162604,,,,sale
-hist-CF-56,demo-cubig-furniture,CF-H56,completed,paid,h-cust-9,Vihaan Pillai,185780,3720,33440.4,0,219220.4,,2026-10-28T05:04:00.000Z,,,dine_in,2026-10-28,2,,Cash,,,219220.4,,,,sale
-hist-CF-57,demo-cubig-furniture,CF-H57,completed,paid,h-cust-20,Harsh Bhatt,78600,0,14148,0,92748,,2026-10-20T06:19:00.000Z,,,dine_in,2026-10-20,4,,Cash,,,92748,,,,sale
-hist-CF-58,demo-cubig-furniture,CF-H58,completed,paid,,Walk-in Guest,9900,0,1782,0,11682,,2026-10-10T15:28:00.000Z,,,dine_in,2026-10-10,2,,Card,,,11682,,,,sale
-hist-CF-59,demo-cubig-furniture,CF-H59,completed,paid,,Walk-in Guest,15810,2790,2845.8,0,18655.8,,2026-10-23T04:53:00.000Z,,,dine_in,2026-10-23,1,,Card,,,18655.8,,,,sale
-hist-CF-60,demo-cubig-furniture,CF-H60,cancelled,refunded,h-cust-7,Tanvi Bose,10540,1860,1897.2,0,12437.2,,2026-10-10T14:35:00.000Z,,,delivery,2026-10-10,,"58 Andheri East, Sahar Road",,,,0,,,,sale
-hist-CF-61,demo-cubig-furniture,CF-H61,completed,paid,,Walk-in Guest,95400,0,17172,0,112572,,2026-10-09T03:10:00.000Z,,,dine_in,2026-10-09,3,,UPI,,,112572,,,,sale
-hist-CF-62,demo-cubig-furniture,CF-H62,completed,paid,,Walk-in Guest,99000,0,17820,0,116820,,2026-10-06T05:44:00.000Z,,,dine_in,2026-10-06,1,,UPI,,,116820,,,,sale
-hist-CF-63,demo-cubig-furniture,CF-H63,completed,paid,h-cust-1,Siddharth Verma,34830,3870,6269.4,0,41099.4,,2026-10-22T12:20:00.000Z,,,dine_in,2026-10-22,4,,UPI,,,41099.4,SHOW10,,,sale
-hist-CF-64,demo-cubig-furniture,CF-H64,completed,paid,h-cust-2,Diya Verma,125600,0,22608,0,148208,,2026-10-02T09:19:00.000Z,,,delivery,2026-10-02,,"15 Koramangala, 5th Block",UPI,,,148208,,,,sale
-hist-CF-65,demo-cubig-furniture,CF-H65,completed,paid,h-cust-21,Tanvi Pillai,157600,0,28368,0,185968,,2026-10-19T04:32:00.000Z,,,dine_in,2026-10-19,1,,Cash,,,185968,,,,sale
-hist-CF-66,demo-cubig-furniture,CF-H66,completed,paid,h-cust-23,Tara Sharma,61800,0,11124,0,72924,,2026-10-19T09:48:00.000Z,,,dine_in,2026-10-19,3,,Cash,,,72924,,,,sale
-hist-CF-67,demo-cubig-furniture,CF-H67,completed,paid,h-cust-6,Diya Mehta,206700,0,37206,0,243906,,2026-10-19T13:39:00.000Z,,,dine_in,2026-10-19,3,,Cash,,,243906,,,,sale
-hist-CF-68,demo-cubig-furniture,CF-H68,completed,paid,h-cust-25,Nisha Patel,32700,0,5886,0,38586,,2026-10-07T06:01:00.000Z,,,dine_in,2026-10-07,2,,Card,,,38586,,,,sale
-hist-CF-69,demo-cubig-furniture,CF-H69,completed,pending,h-cust-21,Tanvi Pillai,68900,0,12402,0,81302,,2026-11-03T07:22:00.000Z,,,takeaway,2026-11-03,,,,,,0,,,,sale
-hist-CF-70,demo-cubig-furniture,CF-H70,completed,pending,,Walk-in Guest,220350,12250,39663,0,260013,,2026-11-09T10:27:00.000Z,,,delivery,2026-11-09,,"6 Bandra West, Linking Road",,,,0,,,,sale
-hist-CF-71,demo-cubig-furniture,CF-H71,completed,pending,h-cust-18,Sameer Sethi,137800,0,24804,0,162604,,2026-11-07T15:01:00.000Z,,,delivery,2026-11-07,,"26 Indiranagar, 100 Ft Road",,,,0,,,,sale
-hist-CF-72,demo-cubig-furniture,CF-H72,completed,paid,h-cust-16,Manav Sharma,49612.5,23887.5,8930.25,0,58542.75,,2026-11-11T08:21:24.080Z,,,online,2026-11-11,,,UPI,Zomato-3909,,58542.75,SHOW10,,,sale
-hist-CF-73,demo-cubig-furniture,CF-H73,pending,pending,,Walk-in Guest,109800,0,19764,0,129564,,2026-11-11T07:41:25.080Z,,,dine_in,2026-11-11,3,,,,,0,,,,sale
+hist-CF-1,demo-cubig-furniture,CF-H1,completed,paid,h-cust-21,Tanvi Pillai,258300,0,46494,0,304794,,2026-05-29T07:20:00.000Z,,,,2026-05-29,,,UPI,,,304794,,,,sale
+hist-CF-2,demo-cubig-furniture,CF-H2,completed,paid,,Walk-in / Showroom,63885,8915,11499.3,0,75384.3,,2026-05-12T04:32:00.000Z,,,,2026-05-12,,"89 Indiranagar, 100 Ft Road",UPI,,,75384.3,,,,sale
+hist-CF-3,demo-cubig-furniture,CF-H3,completed,paid,h-cust-15,Sameer Kulkarni,112870,930,20316.6,0,133186.6,,2026-05-23T08:34:00.000Z,,,,2026-05-23,,,UPI,,,133186.6,,,,sale
+hist-CF-4,demo-cubig-furniture,CF-H4,completed,paid,,Walk-in / Showroom,15810,2790,2845.8,0,18655.8,,2026-05-10T12:45:00.000Z,,,,2026-05-10,,,UPI,,,18655.8,,,,sale
+hist-CF-5,demo-cubig-furniture,CF-H5,completed,paid,h-cust-17,Tara Mehta,105300,0,18954,0,124254,,2026-05-29T12:52:00.000Z,,,,2026-05-29,,,Cash,,,124254,,,,sale
+hist-CF-6,demo-cubig-furniture,CF-H6,completed,paid,h-cust-25,Nisha Patel,134100,0,24138,0,158238,,2026-05-16T11:18:00.000Z,,,,2026-05-16,,,Cash,,,158238,,,,sale
+hist-CF-7,demo-cubig-furniture,CF-H7,completed,paid,h-cust-5,Siddharth Malhotra,109800,0,19764,0,129564,,2026-05-23T11:10:00.000Z,,,,2026-05-23,,"7 Salt Lake, Sector V",Cash,,,129564,,,,sale
+hist-CF-8,demo-cubig-furniture,CF-H8,completed,paid,h-cust-19,Rahul Pillai,232300,0,41814,0,274114,,2026-05-22T04:49:00.000Z,,,,2026-05-22,,,Card,,,274114,,,,sale
+hist-CF-9,demo-cubig-furniture,CF-H9,completed,paid,h-cust-18,Sameer Sethi,364800,15000,65664,0,430464,,2026-06-26T11:39:00.000Z,,,,2026-06-26,,,Card,,,430464,SHOW10,,,sale
+hist-CF-10,demo-cubig-furniture,CF-H10,completed,paid,h-cust-17,Tara Mehta,25800,0,4644,0,30444,,2026-06-14T15:07:00.000Z,,,,2026-06-14,,,UPI,,,30444,,,,sale
+hist-CF-11,demo-cubig-furniture,CF-H11,completed,paid,h-cust-15,Sameer Kulkarni,164310,2790,29575.8,0,193885.8,,2026-06-06T03:45:00.000Z,,,,2026-06-06,,,UPI,,,193885.8,,,,sale
+hist-CF-12,demo-cubig-furniture,CF-H12,completed,paid,,Walk-in / Showroom,160500,0,28890,0,189390,,2026-06-05T08:46:00.000Z,,,,2026-06-05,,"17 Koramangala, 5th Block",UPI,,,189390,,,,sale
+hist-CF-13,demo-cubig-furniture,CF-H13,completed,paid,h-cust-24,Rohan Kulkarni,164700,0,29646,0,194346,,2026-06-26T13:46:00.000Z,,,,2026-06-26,,,UPI,,,194346,,,,sale
+hist-CF-14,demo-cubig-furniture,CF-H14,completed,paid,h-cust-11,Tanvi Rao,186140,1860,33505.2,0,219645.2,,2026-06-13T12:37:00.000Z,,,,2026-06-13,,,UPI,,,219645.2,,,,sale
+hist-CF-15,demo-cubig-furniture,CF-H15,completed,paid,h-cust-11,Tanvi Rao,19800,0,3564,0,23364,,2026-06-22T08:20:00.000Z,,,,2026-06-22,,,Cash,,,23364,,,,sale
+hist-CF-16,demo-cubig-furniture,CF-H16,completed,paid,h-cust-7,Tanvi Bose,107400,0,19332,0,126732,,2026-06-06T06:44:00.000Z,,,,2026-06-06,,,Cash,,,126732,,,,sale
+hist-CF-17,demo-cubig-furniture,CF-H17,completed,paid,h-cust-2,Diya Verma,212100,0,38178,0,250278,,2026-06-14T11:01:00.000Z,,,,2026-06-14,,,Cash,,,250278,,,,sale
+hist-CF-18,demo-cubig-furniture,CF-H18,completed,paid,h-cust-2,Diya Verma,26730,2970,4811.4,0,31541.4,,2026-07-24T03:14:00.000Z,,,,2026-07-24,,,Card,,,31541.4,SHOW10,,,sale
+hist-CF-19,demo-cubig-furniture,CF-H19,completed,paid,h-cust-7,Tanvi Bose,439050,12250,79029,0,518079,,2026-07-24T10:00:00.000Z,,,,2026-07-24,,,Card,,,518079,,,,sale
+hist-CF-20,demo-cubig-furniture,CF-H20,cancelled,refunded,,Walk-in / Showroom,90210,2790,16237.8,0,106447.8,,2026-07-07T13:07:00.000Z,,,,2026-07-07,,"65 Indiranagar, 100 Ft Road",,,,0,,,,sale
+hist-CF-21,demo-cubig-furniture,CF-H21,completed,paid,h-cust-14,Arjun Kulkarni,233250,12250,41985,0,275235,,2026-07-14T06:52:00.000Z,,,,2026-07-14,,,UPI,,,275235,,,,sale
+hist-CF-22,demo-cubig-furniture,CF-H22,completed,paid,h-cust-21,Tanvi Pillai,49650,12250,8937,0,58587,,2026-07-10T03:57:00.000Z,,,,2026-07-10,,"42 Bandra West, Linking Road",UPI,,,58587,,,,sale
+hist-CF-23,demo-cubig-furniture,CF-H23,completed,paid,h-cust-1,Siddharth Verma,285570,930,51402.6,0,336972.6,,2026-07-25T07:32:00.000Z,,,,2026-07-25,,,UPI,,,336972.6,,,,sale
+hist-CF-24,demo-cubig-furniture,CF-H24,completed,paid,h-cust-15,Sameer Kulkarni,195600,0,35208,0,230808,,2026-07-13T14:51:00.000Z,,,,2026-07-13,,,UPI,,,230808,,,,sale
+hist-CF-25,demo-cubig-furniture,CF-H25,completed,paid,h-cust-23,Tara Sharma,214840,1860,38671.2,0,253511.2,,2026-07-22T15:04:00.000Z,,,,2026-07-22,,,Cash,,,253511.2,,,,sale
+hist-CF-26,demo-cubig-furniture,CF-H26,completed,paid,,Walk-in / Showroom,222510,2790,40051.8,0,262561.8,,2026-07-28T10:04:00.000Z,,,,2026-07-28,,,Cash,Zomato-2698,,262561.8,,,,sale
+hist-CF-27,demo-cubig-furniture,CF-H27,completed,paid,h-cust-15,Sameer Kulkarni,40149,7251,7226.82,0,47375.82,,2026-07-31T11:03:00.000Z,,,,2026-07-31,,,Cash,,,47375.82,SHOW10,,,sale
+hist-CF-28,demo-cubig-furniture,CF-H28,completed,paid,h-cust-12,Gaurav Sharma,70710,2790,12727.8,0,83437.8,,2026-07-20T09:32:00.000Z,,,,2026-07-20,,,Card,,,83437.8,,,,sale
+hist-CF-29,demo-cubig-furniture,CF-H29,completed,paid,,Walk-in / Showroom,164700,0,29646,0,194346,,2026-08-15T14:29:00.000Z,,,,2026-08-15,,,Card,,,194346,,,,sale
+hist-CF-30,demo-cubig-furniture,CF-H30,completed,paid,h-cust-20,Harsh Bhatt,184350,12250,33183,0,217533,,2026-08-15T07:03:00.000Z,,,,2026-08-15,,,UPI,,,217533,,,,sale
+hist-CF-31,demo-cubig-furniture,CF-H31,completed,paid,h-cust-13,Reema Bhatt,31070,930,5592.6,0,36662.6,,2026-08-12T11:02:00.000Z,,,,2026-08-12,,,UPI,,,36662.6,,,,sale
+hist-CF-32,demo-cubig-furniture,CF-H32,completed,paid,h-cust-17,Tara Mehta,104310,2790,18775.8,0,123085.8,,2026-08-28T02:35:00.000Z,,,,2026-08-28,,,UPI,,,123085.8,,,,sale
+hist-CF-33,demo-cubig-furniture,CF-H33,completed,paid,h-cust-24,Rohan Kulkarni,120340,1860,21661.2,0,142001.2,,2026-08-18T05:30:00.000Z,,,,2026-08-18,,,UPI,,,142001.2,,,,sale
+hist-CF-34,demo-cubig-furniture,CF-H34,completed,paid,,Walk-in / Showroom,268500,0,48330,0,316830,,2026-08-20T02:53:00.000Z,,,,2026-08-20,,,UPI,,,316830,,,,sale
+hist-CF-35,demo-cubig-furniture,CF-H35,completed,paid,h-cust-25,Nisha Patel,163410,2790,29413.8,0,192823.8,,2026-08-02T03:26:00.000Z,,,,2026-08-02,,,Cash,,,192823.8,,,,sale
+hist-CF-36,demo-cubig-furniture,CF-H36,completed,paid,,Walk-in / Showroom,192600,15000,34668,0,227268,,2026-08-28T07:20:00.000Z,,,,2026-08-28,,,Cash,,,227268,SHOW10,,,sale
+hist-CF-37,demo-cubig-furniture,CF-H37,completed,paid,,Walk-in / Showroom,15810,2790,2845.8,0,18655.8,,2026-08-26T13:16:00.000Z,,,,2026-08-26,,,Cash,,,18655.8,,,,sale
+hist-CF-38,demo-cubig-furniture,CF-H38,completed,paid,h-cust-3,Priya Bose,56700,0,10206,0,66906,,2026-08-15T11:44:00.000Z,,,,2026-08-15,,,Card,,,66906,,,,sale
+hist-CF-39,demo-cubig-furniture,CF-H39,completed,paid,h-cust-21,Tanvi Pillai,442300,0,79614,0,521914,,2026-08-14T09:09:00.000Z,,,,2026-08-14,,,Card,,,521914,,,,sale
+hist-CF-40,demo-cubig-furniture,CF-H40,cancelled,refunded,h-cust-14,Arjun Kulkarni,66450,12250,11961,0,78411,,2026-08-07T10:09:00.000Z,,,,2026-08-07,,,,,,0,,,,sale
+hist-CF-41,demo-cubig-furniture,CF-H41,completed,paid,h-cust-21,Tanvi Pillai,79440,1860,14299.2,0,93739.2,,2026-09-28T13:27:00.000Z,,,,2026-09-28,,,UPI,,,93739.2,,,,sale
+hist-CF-42,demo-cubig-furniture,CF-H42,completed,paid,h-cust-1,Siddharth Verma,128870,930,23196.6,0,152066.6,,2026-09-21T12:50:00.000Z,,,,2026-09-21,,,UPI,,,152066.6,,,,sale
+hist-CF-43,demo-cubig-furniture,CF-H43,completed,paid,h-cust-20,Harsh Bhatt,156300,0,28134,0,184434,,2026-09-24T06:18:00.000Z,,,,2026-09-24,,,UPI,,,184434,,,,sale
+hist-CF-44,demo-cubig-furniture,CF-H44,completed,paid,,Walk-in / Showroom,89835,21165,16170.3,0,106005.3,,2026-09-04T08:21:00.000Z,,,,2026-09-04,,,UPI,,,106005.3,,,,sale
+hist-CF-45,demo-cubig-furniture,CF-H45,completed,paid,h-cust-16,Manav Sharma,49059,8241,8830.62,0,57889.62,,2026-09-24T13:42:00.000Z,,,,2026-09-24,,,Cash,,,57889.62,SHOW10,,,sale
+hist-CF-46,demo-cubig-furniture,CF-H46,completed,paid,,Walk-in / Showroom,79650,12250,14337,0,93987,,2026-09-17T05:01:00.000Z,,,,2026-09-17,,,Cash,,,93987,,,,sale
+hist-CF-47,demo-cubig-furniture,CF-H47,completed,paid,h-cust-20,Harsh Bhatt,25800,0,4644,0,30444,,2026-09-28T11:09:00.000Z,,,,2026-09-28,,,Cash,,,30444,,,,sale
+hist-CF-48,demo-cubig-furniture,CF-H48,completed,paid,h-cust-13,Reema Bhatt,9900,0,1782,0,11682,,2026-09-06T14:52:00.000Z,,,,2026-09-06,,,Card,,,11682,,,,sale
+hist-CF-49,demo-cubig-furniture,CF-H49,completed,paid,,Walk-in / Showroom,222300,0,40014,0,262314,,2026-09-03T03:11:00.000Z,,,,2026-09-03,,,Card,,,262314,,,,sale
+hist-CF-50,demo-cubig-furniture,CF-H50,completed,paid,h-cust-8,Karan Chopra,135875,6125,24457.5,0,160332.5,,2026-09-28T03:08:00.000Z,,,,2026-09-28,,,UPI,,,160332.5,,,,sale
+hist-CF-51,demo-cubig-furniture,CF-H51,completed,paid,h-cust-3,Priya Bose,277200,0,49896,0,327096,,2026-09-23T13:41:00.000Z,,,,2026-09-23,,,UPI,,,327096,,,,sale
+hist-CF-52,demo-cubig-furniture,CF-H52,completed,paid,,Walk-in / Showroom,38700,0,6966,0,45666,,2026-09-01T10:47:00.000Z,,,,2026-09-01,,,UPI,,,45666,,,,sale
+hist-CF-53,demo-cubig-furniture,CF-H53,completed,paid,h-cust-13,Reema Bhatt,295400,0,53172,0,348572,,2026-09-15T04:24:00.000Z,,,,2026-09-15,,,UPI,,,348572,,,,sale
+hist-CF-54,demo-cubig-furniture,CF-H54,completed,paid,,Walk-in / Showroom,33075,15925,5953.5,0,39028.5,,2026-10-25T12:26:00.000Z,,,,2026-10-25,,,UPI,Zomato-9279,,39028.5,SHOW10,,,sale
+hist-CF-55,demo-cubig-furniture,CF-H55,completed,paid,,Walk-in / Showroom,137800,0,24804,0,162604,,2026-10-31T14:24:00.000Z,,,,2026-10-31,,,Cash,,,162604,,,,sale
+hist-CF-56,demo-cubig-furniture,CF-H56,completed,paid,h-cust-9,Vihaan Pillai,185780,3720,33440.4,0,219220.4,,2026-10-28T05:04:00.000Z,,,,2026-10-28,,,Cash,,,219220.4,,,,sale
+hist-CF-57,demo-cubig-furniture,CF-H57,completed,paid,h-cust-20,Harsh Bhatt,78600,0,14148,0,92748,,2026-10-20T06:19:00.000Z,,,,2026-10-20,,,Cash,,,92748,,,,sale
+hist-CF-58,demo-cubig-furniture,CF-H58,completed,paid,,Walk-in / Showroom,9900,0,1782,0,11682,,2026-10-10T15:28:00.000Z,,,,2026-10-10,,,Card,,,11682,,,,sale
+hist-CF-59,demo-cubig-furniture,CF-H59,completed,paid,,Walk-in / Showroom,15810,2790,2845.8,0,18655.8,,2026-10-23T04:53:00.000Z,,,,2026-10-23,,,Card,,,18655.8,,,,sale
+hist-CF-60,demo-cubig-furniture,CF-H60,cancelled,refunded,h-cust-7,Tanvi Bose,10540,1860,1897.2,0,12437.2,,2026-10-10T14:35:00.000Z,,,,2026-10-10,,"58 Andheri East, Sahar Road",,,,0,,,,sale
+hist-CF-61,demo-cubig-furniture,CF-H61,completed,paid,,Walk-in / Showroom,95400,0,17172,0,112572,,2026-10-09T03:10:00.000Z,,,,2026-10-09,,,UPI,,,112572,,,,sale
+hist-CF-62,demo-cubig-furniture,CF-H62,completed,paid,,Walk-in / Showroom,99000,0,17820,0,116820,,2026-10-06T05:44:00.000Z,,,,2026-10-06,,,UPI,,,116820,,,,sale
+hist-CF-63,demo-cubig-furniture,CF-H63,completed,paid,h-cust-1,Siddharth Verma,34830,3870,6269.4,0,41099.4,,2026-10-22T12:20:00.000Z,,,,2026-10-22,,,UPI,,,41099.4,SHOW10,,,sale
+hist-CF-64,demo-cubig-furniture,CF-H64,completed,paid,h-cust-2,Diya Verma,125600,0,22608,0,148208,,2026-10-02T09:19:00.000Z,,,,2026-10-02,,"15 Koramangala, 5th Block",UPI,,,148208,,,,sale
+hist-CF-65,demo-cubig-furniture,CF-H65,completed,paid,h-cust-21,Tanvi Pillai,157600,0,28368,0,185968,,2026-10-19T04:32:00.000Z,,,,2026-10-19,,,Cash,,,185968,,,,sale
+hist-CF-66,demo-cubig-furniture,CF-H66,completed,paid,h-cust-23,Tara Sharma,61800,0,11124,0,72924,,2026-10-19T09:48:00.000Z,,,,2026-10-19,,,Cash,,,72924,,,,sale
+hist-CF-67,demo-cubig-furniture,CF-H67,completed,paid,h-cust-6,Diya Mehta,206700,0,37206,0,243906,,2026-10-19T13:39:00.000Z,,,,2026-10-19,,,Cash,,,243906,,,,sale
+hist-CF-68,demo-cubig-furniture,CF-H68,completed,paid,h-cust-25,Nisha Patel,32700,0,5886,0,38586,,2026-10-07T06:01:00.000Z,,,,2026-10-07,,,Card,,,38586,,,,sale
+hist-CF-69,demo-cubig-furniture,CF-H69,completed,pending,h-cust-21,Tanvi Pillai,68900,0,12402,0,81302,,2026-11-03T07:22:00.000Z,,,,2026-11-03,,,,,,0,,,,sale
+hist-CF-70,demo-cubig-furniture,CF-H70,completed,pending,,Walk-in / Showroom,220350,12250,39663,0,260013,,2026-11-09T10:27:00.000Z,,,,2026-11-09,,"6 Bandra West, Linking Road",,,,0,,,,sale
+hist-CF-71,demo-cubig-furniture,CF-H71,completed,pending,h-cust-18,Sameer Sethi,137800,0,24804,0,162604,,2026-11-07T15:01:00.000Z,,,,2026-11-07,,"26 Indiranagar, 100 Ft Road",,,,0,,,,sale
+hist-CF-72,demo-cubig-furniture,CF-H72,completed,paid,h-cust-16,Manav Sharma,49612.5,23887.5,8930.25,0,58542.75,,2026-11-11T08:21:24.080Z,,,,2026-11-11,,,UPI,Zomato-3909,,58542.75,SHOW10,,,sale
+hist-CF-73,demo-cubig-furniture,CF-H73,pending,pending,,Walk-in / Showroom,109800,0,19764,0,129564,,2026-11-11T07:41:25.080Z,,,,2026-11-11,,,,,,0,,,,sale

@@ -241,6 +241,8 @@ export type CreateOrderInput = {
   tableTag?: string;
   deliveryNotes?: string;
   depositPercent?: number | null;
+  /** Untaxed delivery / installation charges added to a project bill. */
+  feesTotal?: number | null;
   priceTier?: "retail" | "wholesale";
   orderType?: OrderType;
   serviceDate?: string;

@@ -23,22 +23,26 @@ function attachIssuer(
   return { ...doc, brandCode, issuer };
 }
 
-export function productImageLookupFromProducts(
-  products: Pick<Product, "id" | "image_url">[],
-): Map<string, string | null> {
-  return new Map(products.map((p) => [p.id, p.image_url ?? null]));
+type CatalogLine = Pick<
+  Product,
+  "id" | "unit" | "sku" | "description" | "image_url"
+>;
+
+function catalogFor(
+  productId: string | null,
+  products?: CatalogLine[],
+): CatalogLine | undefined {
+  if (!productId || !products) return undefined;
+  return products.find((p) => p.id === productId);
 }
 
 function resolveOrderLineImageUrl(
   item: OrderItem,
-  productImageByProductId?: Map<string, string | null>,
+  catalog?: CatalogLine,
 ): string | null {
   const snapshot = item.product_image_url_snapshot?.trim();
   if (snapshot) return snapshot;
-  if (item.product_id && productImageByProductId?.has(item.product_id)) {
-    return productImageByProductId.get(item.product_id) ?? null;
-  }
-  return null;
+  return catalog?.image_url ?? null;
 }
 
 export function billDocumentFilename(doc: BillDocument): string {
@@ -77,6 +81,9 @@ export function buildBillDocumentFromCheckout(params: {
   paymentMethod: string | null;
   cart: CartLine[];
   totals: CartTotals;
+  serviceDate?: string | null;
+  siteAddress?: string | null;
+  depositPercent?: number | null;
 }): BillDocument {
   const kind = inferDocumentKind(params.orderNumber, params.isQuote);
   const doc: BillDocument = {
@@ -89,9 +96,11 @@ export function buildBillDocumentFromCheckout(params: {
     taxRatePercent: params.taxRatePercent,
     customerName: params.customerName,
     customerPhone: params.customerPhone,
+    customerAddress: params.siteAddress?.trim() || null,
     notes: params.notes?.trim() || null,
     paymentMethod: kind === "quotation" ? null : params.paymentMethod,
     createdAt: new Date().toISOString(),
+    serviceDate: params.serviceDate ?? null,
     lines: params.cart.map((line) => ({
       name: line.product.name,
       quantity: line.quantity,
@@ -100,13 +109,18 @@ export function buildBillDocumentFromCheckout(params: {
       lineDiscount: productLineDiscountAmount(line.product, line.quantity),
       lineTotal: lineNetTotal(line.product, line.quantity),
       imageUrl: params.isQuote ? (line.product.image_url ?? null) : null,
+      sku: line.product.sku ?? null,
+      description: line.product.description ?? null,
     })),
     listSubtotal: params.totals.listSubtotal,
     productDiscountTotal: params.totals.productDiscountTotal,
     orderDiscountAmount: params.totals.orderDiscountAmount,
+    offerDiscountAmount: params.totals.offerDiscountAmount,
     taxableSubtotal: params.totals.taxableSubtotal,
     taxTotal: params.totals.taxTotal,
+    feesTotal: params.totals.feesTotal,
     grandTotal: params.totals.grandTotal,
+    depositPercent: params.depositPercent ?? null,
   };
   return attachIssuer(doc, params.brandCode, params.brandSettings);
 }
@@ -125,7 +139,9 @@ export function buildBillDocumentFromOrder(params: {
   currencyCode: string;
   taxRatePercent: number;
   customerPhone?: string | null;
-  productImageByProductId?: Map<string, string | null>;
+  products?: CatalogLine[];
+  /** Quote number this bill was raised from, for the reference line. */
+  referenceNumber?: string | null;
 }): BillDocument {
   const { order, items } = params;
   const kind =
@@ -155,21 +171,28 @@ export function buildBillDocumentFromOrder(params: {
     taxRatePercent: params.taxRatePercent,
     customerName: order.customer_name_snapshot,
     customerPhone: params.customerPhone ?? null,
+    customerAddress: order.delivery_address?.trim() || null,
     notes: order.notes,
-    paymentMethod: null,
+    paymentMethod: kind === "quotation" ? null : order.payment_method ?? null,
     createdAt: order.created_at,
-    lines: items.map((item) => ({
-      name: item.product_name_snapshot,
-      quantity: item.quantity,
-      unit: null,
-      listUnitPrice: item.unit_price,
-      lineDiscount: item.line_discount,
-      lineTotal: item.line_total,
-      imageUrl:
-        kind === "quotation"
-          ? resolveOrderLineImageUrl(item, params.productImageByProductId)
-          : null,
-    })),
+    serviceDate: order.service_date ?? null,
+    lines: items.map((item) => {
+      const catalog = catalogFor(item.product_id, params.products);
+      return {
+        name: item.product_name_snapshot,
+        quantity: item.quantity,
+        unit: catalog?.unit ?? null,
+        listUnitPrice: item.unit_price,
+        lineDiscount: item.line_discount,
+        lineTotal: item.line_total,
+        imageUrl:
+          kind === "quotation"
+            ? resolveOrderLineImageUrl(item, catalog)
+            : null,
+        sku: catalog?.sku ?? null,
+        description: catalog?.description ?? null,
+      };
+    }),
     listSubtotal,
     productDiscountTotal,
     orderDiscountAmount: Math.max(
@@ -178,7 +201,11 @@ export function buildBillDocumentFromOrder(params: {
     ),
     taxableSubtotal: order.subtotal,
     taxTotal: order.tax_total,
+    feesTotal: order.fees_total ?? 0,
     grandTotal: order.grand_total,
+    amountPaid: order.amount_paid ?? 0,
+    depositPercent: order.deposit_percent ?? null,
+    referenceNumber: params.referenceNumber ?? null,
     },
     params.brandCode,
     params.brandSettings,

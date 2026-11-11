@@ -147,6 +147,7 @@ export function buildOrderRecord(params: {
     taxRatePercent: params.taxRatePercent,
     orderDiscount: params.input.orderDiscount ?? null,
     offerDiscountAmount,
+    feesAmount: params.input.feesTotal ?? 0,
   });
 
   const isQuote = params.input.saveAsQuote === true;
@@ -187,7 +188,7 @@ export function buildOrderRecord(params: {
     subtotal: totals.taxableSubtotal,
     discount_total: totals.discountTotal,
     tax_total: totals.taxTotal,
-    fees_total: 0,
+    fees_total: totals.feesTotal,
     grand_total: totals.grandTotal,
     notes: params.input.notes?.trim() || null,
     created_at: createdAt,

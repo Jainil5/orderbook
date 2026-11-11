@@ -57,7 +57,23 @@ export function formatBillPlainText(
   lines.push(
     `Tax (${doc.taxRatePercent}%): ${formatMoney(doc.taxTotal, doc.currencyCode)}`,
   );
+  if ((doc.feesTotal ?? 0) > 0) {
+    lines.push(
+      `Delivery & installation: ${formatMoney(doc.feesTotal ?? 0, doc.currencyCode)}`,
+    );
+  }
   lines.push(`Total: ${formatMoney(doc.grandTotal, doc.currencyCode)}`);
+
+  const paid = doc.amountPaid ?? 0;
+  if (paid > 0) {
+    lines.push(`Paid: ${formatMoney(paid, doc.currencyCode)}`);
+    lines.push(
+      `Balance: ${formatMoney(
+        Math.max(0, doc.grandTotal - paid),
+        doc.currencyCode,
+      )}`,
+    );
+  }
 
   if (doc.paymentMethod) {
     lines.push(`Payment: ${doc.paymentMethod}`);

@@ -58,6 +58,16 @@ export type BillingPosCopy = {
   billCartTitle?: string;
   quotationModeHint?: string;
   billModeHint?: string;
+  /** Project capture fields — counter brands leave these unset. */
+  projectFields?: {
+    dateLabel: string;
+    siteLabel: string;
+    sitePlaceholder: string;
+    leadLabel: string;
+    chargesLabel: string;
+    chargesPlaceholder: string;
+    depositLabel: string;
+  };
   emptyCartHint: string;
   addButton: string;
   addAnotherButton: string;
@@ -71,20 +81,11 @@ export type BillingPosCopy = {
   savedQuoteMessage: string;
 };
 
-export type BillingWorkspaceMode = "bill_only" | "quote_and_bill";
+/** Which capture fields a brand's order forms show. */
+export type CaptureMode = "counter" | "project";
 
 /** Which workspace screen drives checkout: single Billing, or split Quotation / Bill tabs. */
 export type BillingDocumentMode = "retail" | "quotation" | "bill";
-
-export function getBillingWorkspaceMode(
-  _brandCode: string,
-  quotationBuilderEnabled: boolean,
-): BillingWorkspaceMode {
-  if (quotationBuilderEnabled) {
-    return "quote_and_bill";
-  }
-  return "bill_only";
-}
 
 export function formatBillingSavedMessage(
   template: string,
@@ -94,6 +95,8 @@ export function formatBillingSavedMessage(
 }
 
 export type WorkspaceProfile = {
+  /** `project` = enquiry → quotation → bill capture fields; `counter` = walk-in hospitality. */
+  capture: CaptureMode;
   billingPageTitle: string;
   ordersPageTitle: string;
   ordersNumberColumn: string;
@@ -136,6 +139,15 @@ const FURNITURE_BILLING_COPY: BillingPosCopy = {
     "Build a proforma quote for the customer. Share PDF or WhatsApp; payment is not collected yet.",
   billModeHint:
     "Issue a paid tax invoice after the customer accepts or pays.",
+  projectFields: {
+    dateLabel: "Delivery / installation date",
+    siteLabel: "Site address",
+    sitePlaceholder: "Project address, floor, city…",
+    leadLabel: "Lead / enquiry reference",
+    chargesLabel: "Delivery & installation charges",
+    chargesPlaceholder: "e.g. 4500",
+    depositLabel: "Advance / deposit %",
+  },
   emptyCartHint:
     "Add furniture lines from the catalog to build a quotation or bill.",
   addButton: "Add to quote",
@@ -149,6 +161,7 @@ const FURNITURE_BILLING_COPY: BillingPosCopy = {
 };
 
 const DEFAULT_PROFILE: WorkspaceProfile = {
+  capture: "counter",
   billingPageTitle: "Billing",
   ordersPageTitle: "Orders",
   ordersNumberColumn: "Bill #",
@@ -157,6 +170,7 @@ const DEFAULT_PROFILE: WorkspaceProfile = {
 };
 
 const CUBIG_PROFILE: WorkspaceProfile = {
+  capture: "project",
   billingPageTitle: "Bill",
   ordersPageTitle: "Quotes & bills",
   ordersNumberColumn: "Quote / bill #",

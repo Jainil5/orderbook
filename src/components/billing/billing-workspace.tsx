@@ -3,13 +3,18 @@
 import type { BrandRole, Customer, Offer, Product } from "@/types/database";
 import { BillingPos, type BillBrandSettings } from "@/components/billing/billing-pos";
 import { submitDemoOrder } from "@/lib/demo/server";
-import type { BillingDocumentMode, BillingPosCopy } from "@/lib/workspace/constants";
+import type {
+  BillingDocumentMode,
+  BillingPosCopy,
+  CaptureMode,
+} from "@/lib/workspace/constants";
 import {
   RETAIL_BILLING_COPY,
 } from "@/lib/workspace/constants";
 
 export function BillingWorkspace({
   documentMode = "retail",
+  captureMode = "counter",
   products,
   customers,
   offers,
@@ -25,6 +30,7 @@ export function BillingWorkspace({
   blockOversell = false,
 }: {
   documentMode?: BillingDocumentMode;
+  captureMode?: CaptureMode;
   products: Product[];
   customers: Customer[];
   offers: Offer[];
@@ -49,6 +55,7 @@ export function BillingWorkspace({
       taxRatePercent={taxRatePercent}
       copy={billingCopy}
       documentMode={documentMode}
+      captureMode={captureMode}
       brandName={brandName}
       brandCode={brandCode}
       brandSettings={brandSettings}
@@ -70,6 +77,7 @@ export function BillingWorkspace({
           tableTag: payload.tableTag,
           deliveryNotes: payload.deliveryNotes,
           depositPercent: payload.depositPercent,
+          feesTotal: payload.feesTotal,
           orderType: payload.orderType,
           serviceDate: payload.serviceDate,
           guests: payload.guests,

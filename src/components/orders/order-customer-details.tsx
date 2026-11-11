@@ -3,16 +3,37 @@ import type { Customer, Order } from "@/types/database";
 import { Card } from "@/components/ui/card";
 import { formatDate } from "@/lib/format";
 import { ORDER_TYPE_LABELS } from "@/lib/orders/order-labels";
+import type { CaptureMode } from "@/lib/workspace/constants";
+
+const CAPTION_LABELS: Record<CaptureMode, Record<string, string>> = {
+  counter: {
+    walkIn: "Walk-in / guest",
+    serviceDate: "Service date",
+    address: "Delivery address",
+    notes: "Delivery / site",
+    deposit: "Deposit",
+  },
+  project: {
+    walkIn: "Walk-in / enquiry",
+    serviceDate: "Delivery / installation date",
+    address: "Site address",
+    notes: "Site notes",
+    deposit: "Advance",
+  },
+};
 
 export function OrderCustomerDetails({
   order,
   customer,
   customerPhone,
+  captureMode = "counter",
 }: {
   order: Order;
   customer: Customer | null;
   customerPhone?: string | null;
+  captureMode?: CaptureMode;
 }) {
+  const labels = CAPTION_LABELS[captureMode];
   const displayName =
     customer?.name ??
     (order.customer_name_snapshot?.trim() || "Walk-in customer");
@@ -49,7 +70,7 @@ export function OrderCustomerDetails({
         <div>
           <dt className="text-[var(--ob-text-muted)]">Customer type</dt>
           <dd className="mt-0.5 font-medium">
-            {customer ? "Saved customer" : "Walk-in / guest"}
+            {customer ? "Saved customer" : labels.walkIn}
           </dd>
         </div>
         {customer?.notes || notes ? (
@@ -68,7 +89,7 @@ export function OrderCustomerDetails({
         ) : null}
         {order.service_date ? (
           <div>
-            <dt className="text-[var(--ob-text-muted)]">Service date</dt>
+            <dt className="text-[var(--ob-text-muted)]">{labels.serviceDate}</dt>
             <dd className="mt-0.5 font-medium">{order.service_date}</dd>
           </div>
         ) : null}
@@ -98,19 +119,19 @@ export function OrderCustomerDetails({
         ) : null}
         {order.delivery_address?.trim() ? (
           <div className="sm:col-span-2">
-            <dt className="text-[var(--ob-text-muted)]">Delivery address</dt>
+            <dt className="text-[var(--ob-text-muted)]">{labels.address}</dt>
             <dd className="mt-0.5">{order.delivery_address}</dd>
           </div>
         ) : null}
         {order.delivery_notes?.trim() ? (
           <div className="sm:col-span-2">
-            <dt className="text-[var(--ob-text-muted)]">Delivery / site</dt>
+            <dt className="text-[var(--ob-text-muted)]">{labels.notes}</dt>
             <dd className="mt-0.5">{order.delivery_notes}</dd>
           </div>
         ) : null}
         {order.deposit_percent != null ? (
           <div>
-            <dt className="text-[var(--ob-text-muted)]">Deposit</dt>
+            <dt className="text-[var(--ob-text-muted)]">{labels.deposit}</dt>
             <dd className="mt-0.5 font-medium">{order.deposit_percent}%</dd>
           </div>
         ) : null}

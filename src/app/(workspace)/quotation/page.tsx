@@ -29,6 +29,7 @@ export default async function QuotationPage() {
     <PageShell title={pageTitle}>
       <BillingWorkspace
         documentMode="quotation"
+        captureMode={ws.profile.capture}
         products={products}
         customers={customers}
         offers={offers}

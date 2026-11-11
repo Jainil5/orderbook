@@ -29,6 +29,7 @@ export default async function BillingPage() {
     <PageShell title={pageTitle}>
       <BillingWorkspace
         documentMode={documentMode}
+        captureMode={ws.profile.capture}
         products={products}
         customers={customers}
         offers={offers}
