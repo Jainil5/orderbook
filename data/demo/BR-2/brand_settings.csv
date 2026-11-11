@@ -1,0 +1,2 @@
+brand_id,currency_code,tax_rate_percent,receipt_header,receipt_footer,contact_email,contact_phone,quotation_builder_enabled,brand_website_url,block_oversell
+demo-cubig-furniture,INR,18,Cubig Furniture,Cubig Furniture · Surat · Modular office & home furniture · cubigfurniture.com,info@cubigfurniture.com,+91 93139 50917,true,https://cubigfurniture.com/,

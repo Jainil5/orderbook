@@ -1,0 +1,5 @@
+id,brand_id,name,role,phone,email,status,availability,created_at
+cf-staff-1,demo-cubig-furniture,Kiran Shetty,manager,+91 98000 22001,,active,available,2026-10-01T09:00:00.000Z
+cf-staff-2,demo-cubig-furniture,Farhan Ali,technician,+91 98000 22002,,active,busy,2026-10-02T09:00:00.000Z
+cf-staff-3,demo-cubig-furniture,Suresh Rao,technician,,,active,available,2026-10-02T09:00:00.000Z
+cf-staff-4,demo-cubig-furniture,Lakshmi Iyer,sales,+91 98000 22004,,active,off,2026-10-08T09:00:00.000Z

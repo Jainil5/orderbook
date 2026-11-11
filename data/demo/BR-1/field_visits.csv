@@ -1,0 +1,2 @@
+id,brand_id,customerId,staffId,purpose,status,checkInAt,checkOutAt,report
+bc-visit-1,demo-brewery-cafe,c3,bc-staff-1,Supplier meeting — next roast lot,planned,,,

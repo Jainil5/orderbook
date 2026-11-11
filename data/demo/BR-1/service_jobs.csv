@@ -1,0 +1,2 @@
+id,brand_id,serviceId,customerId,staff_ids,status,scheduledAt,notes
+bc-job-1,demo-brewery-cafe,bc-svc-1,c2,"[""bc-staff-1"",""bc-staff-2""]",scheduled,2026-11-13T08:21:25.073Z,Corporate tasting for 20 guests

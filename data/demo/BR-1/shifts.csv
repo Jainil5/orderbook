@@ -1,0 +1,3 @@
+id,brand_id,staffId,date,start,end,note
+bc-shift-1,demo-brewery-cafe,bc-staff-2,2026-11-11,08:00,16:00,Bar
+bc-shift-2,demo-brewery-cafe,bc-staff-3,2026-11-11,10:00,18:00,Kitchen

@@ -1,0 +1,3 @@
+id,brand_id,title,description,assigneeStaffId,customerId,priority,dueAt,status
+bc-task-1,demo-brewery-cafe,Restock oat milk,Check fridge count before evening rush,bc-staff-3,,high,2026-11-10T08:21:25.073Z,open
+bc-task-2,demo-brewery-cafe,Deep clean espresso machine,,bc-staff-2,,medium,2026-11-12T08:21:25.073Z,open
