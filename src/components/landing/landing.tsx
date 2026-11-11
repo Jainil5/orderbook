@@ -2,37 +2,24 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { motion, useReducedMotion, type Variants } from "motion/react";
-import {
-  ArrowRight,
-  BarChart3,
-  ClipboardList,
-  FileText,
-  Receipt,
-  Users,
-  Wallet,
-} from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
+import { ArrowRight } from "lucide-react";
 import { LogoMark } from "@/components/brand/logo-mark";
 import { Meteors } from "@/components/effects/meteors";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { BrandCards } from "@/components/showcase/brand-cards";
+import { CheckList } from "@/components/showcase/check-list";
+import { FeatureGrid } from "@/components/showcase/feature-grid";
+import { SiteFooter } from "@/components/showcase/site-footer";
+import {
+  SHOWCASE_CONTAINER as container,
+  SHOWCASE_CHILD as child,
+} from "@/components/showcase/motion";
 import { enterDemoWorkspace } from "@/lib/auth/demo";
+import type { DemoBrandSummary } from "@/lib/demo/showcase-stats";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
-
-const container: Variants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.12, delayChildren: 0.1 } },
-};
-
-const child: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
-  },
-};
 
 function SplitHeading({ text, accent }: { text: string; accent?: string }) {
   const reduceMotion = useReducedMotion();
@@ -102,59 +89,6 @@ function Typewriter({ words }: { words: string[] }) {
   );
 }
 
-const FEATURES = [
-  {
-    icon: Receipt,
-    title: "Billing & POS",
-    body: "Ring up counter sales in seconds — tender split, discounts and GST-ready bills included.",
-  },
-  {
-    icon: ClipboardList,
-    title: "Order lifecycle",
-    body: "Track every bill from kitchen and floor to completion, with unavailable-item handling built in.",
-  },
-  {
-    icon: FileText,
-    title: "Quotes & invoices",
-    body: "Send quotations for big-ticket work, convert accepted quotes into orders without retyping.",
-  },
-  {
-    icon: Wallet,
-    title: "Payments & collections",
-    body: "Partial payments, open balances and collection rates — know exactly what is still due.",
-  },
-  {
-    icon: BarChart3,
-    title: "Analytics studio",
-    body: "Revenue trends, category mix, tender split and margin & COGS across any date range.",
-  },
-  {
-    icon: Users,
-    title: "Staff & operations",
-    body: "Shifts, tasks, appointments, field visits and service jobs in one management desk.",
-  },
-];
-
-const VERTICALS: {
-  code: DemoBrandCode;
-  name: string;
-  tagline: string;
-  points: string[];
-}[] = [
-  {
-    code: "BR-1",
-    name: "Brewery Cafe",
-    tagline: "Fast counter service, kitchen tickets and a six-month sales story.",
-    points: ["POS & kitchen flow", "UPI / card / cash tenders", "Peak-hour analytics"],
-  },
-  {
-    code: "BR-2",
-    name: "Cubig Furniture",
-    tagline: "Quotation-led sales with jobs, visits and part payments.",
-    points: ["Quotes → orders", "Service jobs & field visits", "Collections tracking"],
-  },
-];
-
 function ShowcaseMock() {
   const reduceMotion = useReducedMotion();
   const bars = [38, 62, 45, 80, 58, 92, 71, 64, 88, 52, 76, 95];
@@ -204,7 +138,7 @@ function ShowcaseMock() {
   );
 }
 
-export function Landing() {
+export function Landing({ summaries }: { summaries: DemoBrandSummary[] }) {
   const reduceMotion = useReducedMotion();
   const [demoPending, setDemoPending] = useState<DemoBrandCode | null>(null);
 
@@ -284,27 +218,7 @@ export function Landing() {
         </section>
 
         {/* Features */}
-        <section id="features" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16">
-          <motion.h2
-            variants={child}
-            className="font-display text-2xl font-semibold tracking-tight sm:text-3xl"
-          >
-            Everything the counter and the back office need
-          </motion.h2>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((feature) => (
-              <motion.div key={feature.title} variants={child}>
-                <Card className="h-full p-5 transition-shadow hover:shadow-[var(--ob-shadow-md)]">
-                  <span className="inline-grid h-10 w-10 place-items-center rounded-[var(--ob-radius-md)] bg-[color-mix(in_srgb,var(--ob-primary)_14%,transparent)] text-[var(--ob-primary)]">
-                    <feature.icon className="h-5 w-5" aria-hidden />
-                  </span>
-                  <h3 className="mt-4 font-display text-lg font-semibold tracking-tight">{feature.title}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-[var(--ob-text-secondary)]">{feature.body}</p>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </section>
+        <FeatureGrid />
 
         {/* Product showcase */}
         <section id="product" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16">
@@ -318,17 +232,14 @@ export function Landing() {
                 charts. Zoom into trends, category mix, tender split and margin & COGS —
                 filtered by any date range, with day-part filters when lunch rush matters.
               </p>
-              <ul className="mt-6 space-y-3 text-sm text-[var(--ob-text-secondary)]">
-                <li className="flex items-start gap-2">
-                  <CheckDot /> Six months of deterministic demo history — no seeding chores
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckDot /> Light and dark themes tuned to the same indigo palette
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckDot /> Phone-first: every action reachable with one thumb
-                </li>
-              </ul>
+              <CheckList
+                className="mt-6"
+                items={[
+                  "Six months of deterministic demo history — no seeding chores",
+                  "Light and dark themes tuned to the same indigo palette",
+                  "Phone-first: every action reachable with one thumb",
+                ]}
+              />
             </motion.div>
             <motion.div variants={child}>
               <ShowcaseMock />
@@ -337,71 +248,10 @@ export function Landing() {
         </section>
 
         {/* Demo verticals */}
-        <section id="demos" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16">
-          <motion.h2
-            variants={child}
-            className="font-display text-2xl font-semibold tracking-tight sm:text-3xl"
-          >
-            Two live businesses, ready to poke at
-          </motion.h2>
-          <p className="mt-2 text-sm text-[var(--ob-text-secondary)]">
-            Demos are full workspaces — create orders, capture payments, move through the
-            kitchen screen. Nothing is saved to your account.
-          </p>
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
-            {VERTICALS.map((vertical) => (
-              <motion.div key={vertical.code} variants={child}>
-                <Card className="flex h-full flex-col p-6">
-                  <div className="flex items-center justify-between gap-3">
-                    <h3 className="font-display text-xl font-semibold tracking-tight">{vertical.name}</h3>
-                    <Badge tone="demo">{vertical.code}</Badge>
-                  </div>
-                  <p className="mt-2 text-sm text-[var(--ob-text-secondary)]">{vertical.tagline}</p>
-                  <ul className="mt-4 flex flex-wrap gap-2">
-                    {vertical.points.map((point) => (
-                      <li key={point}>
-                        <Badge tone="neutral">{point}</Badge>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-6 flex-1" />
-                  <Button
-                    variant="secondary"
-                    onClick={() => onExploreDemo(vertical.code)}
-                    loading={demoPending === vertical.code}
-                    className="w-full"
-                  >
-                    Open {vertical.name} demo
-                  </Button>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </section>
+        <BrandCards summaries={summaries} />
       </motion.main>
 
-      <footer className="border-t border-[var(--ob-border)]">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-8">
-          <div className="flex items-center gap-3">
-            <LogoMark size={30} />
-            <p className="text-sm text-[var(--ob-text-muted)]">
-              OrderBook by WebsiteIn — multi-business order management
-            </p>
-          </div>
-          <Link href="/login" className="text-sm font-medium text-[var(--ob-primary)] hover:underline">
-            Sign in →
-          </Link>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
-  );
-}
-
-function CheckDot() {
-  return (
-    <span
-      className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--ob-accent)]"
-      aria-hidden
-    />
   );
 }

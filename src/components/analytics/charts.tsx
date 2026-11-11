@@ -19,6 +19,7 @@ import {
 } from "recharts";
 import { formatMoney, type OdometerFormat } from "@/lib/format";
 import { Odometer } from "@/components/ui/odometer";
+import { cn } from "@/lib/cn";
 import type { Slice, TrendPoint } from "@/lib/analytics/snapshot";
 
 const grid = "var(--ob-border)";
@@ -334,18 +335,20 @@ export function MiniTrend({
   data,
   metric,
   currency,
+  heightClass = "h-28",
 }: {
   data: TrendPoint[];
   metric: Metric;
   currency: string;
+  heightClass?: string;
 }) {
   const gradientId = `mini-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const color = metric === "revenue" ? "var(--ob-series-1)" : "var(--ob-series-2)";
   if (data.length < 2) {
-    return <p className="flex h-28 items-center justify-center text-xs text-[var(--ob-text-muted)]">Not enough data.</p>;
+    return <p className={cn("flex items-center justify-center text-xs text-[var(--ob-text-muted)]", heightClass)}>Not enough data.</p>;
   }
   return (
-    <div className="h-28">
+    <div className={heightClass}>
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
           <defs>
@@ -383,16 +386,18 @@ export function MiniDonut({
   data,
   centerLabel,
   centerValue,
+  heightClass = "h-28",
 }: {
   data: (Slice & { color: string })[];
   centerLabel: string;
   centerValue: string;
+  heightClass?: string;
 }) {
   if (!data.length) {
-    return <p className="flex h-28 items-center justify-center text-xs text-[var(--ob-text-muted)]">No data.</p>;
+    return <p className={cn("flex items-center justify-center text-xs text-[var(--ob-text-muted)]", heightClass)}>No data.</p>;
   }
   return (
-    <div className="relative h-28">
+    <div className={cn("relative", heightClass)}>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie

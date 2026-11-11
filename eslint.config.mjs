@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Nested `git worktree` checkouts carry their own copies of src/; linting
+    // them from the main checkout duplicates every file and fails the gate.
+    ".worktrees/**",
   ]),
 ]);
 
