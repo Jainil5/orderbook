@@ -75,21 +75,23 @@ export function PosProductTileWithButton({
       onPointerLeave={onPointerRest}
       onPointerCancel={onPointerRest}
     >
-      <div className="relative">
+      {/* The image is out of flow so a tall merchant photo cannot set the tile's
+          intrinsic height — that would make every grid row max-content sized. */}
+      <div className="relative min-h-[84px] flex-1">
         <button
           type="button"
           onClick={onPeek}
           aria-label={`View details of ${product.name}`}
-          className="block w-full border-0 bg-transparent p-0 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ob-accent)]"
+          className="absolute inset-0 block border-0 bg-transparent p-0 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ob-accent)]"
         >
           <ProductThumbnail
             name={product.name}
             imageUrl={product.image_url}
             category={product.category}
-            size="wide"
+            size="fill"
           />
           {inCartQty > 0 ? (
-            <span className="absolute right-2 top-2 rounded-full bg-[var(--ob-primary)] px-2 py-0.5 text-xs font-semibold text-[var(--ob-primary-foreground)] shadow-sm">
+            <span className="absolute right-2 top-2 rounded-full bg-[var(--ob-primary)] px-2 py-0.5 text-xs font-semibold text-[var(--ob-primary-foreground)] shadow-[var(--ob-shadow-sm)]">
               ×{inCartQty}
             </span>
           ) : null}
@@ -103,16 +105,19 @@ export function PosProductTileWithButton({
           <Info className="h-4 w-4" aria-hidden />
         </button>
       </div>
-      <div className="flex flex-1 flex-col gap-1 p-2">
+      {/* Both optional lines are always occupied: a ragged text block would
+          push the flex-1 image to a different height in every tile. */}
+      <div className="flex shrink-0 flex-col gap-1 p-2">
+        <p className="ob-label-quiet truncate">{product.category?.trim() || "\u00a0"}</p>
         <p className="line-clamp-1 text-sm font-semibold leading-tight">
           {product.name}
         </p>
-        {product.description?.trim() ? (
-          <p className="line-clamp-1 text-xs leading-snug text-[var(--ob-text-muted)]">
-            {product.description}
-          </p>
-        ) : null}
-        <div className="flex flex-wrap items-center gap-1.5">
+        <p className="line-clamp-1 text-xs leading-snug text-[var(--ob-text-muted)]">
+          {product.description?.trim() || "\u00a0"}
+        </p>
+        {/* Sale items wrap price + strike-through + badge onto two lines in a
+            narrow column, so every tile reserves the same two lines. */}
+        <div className="flex min-h-14 flex-wrap items-center gap-1.5">
           <ProductPrice product={product} currencyCode={currencyCode} size="sm" />
           {stockLabel ? (
             <Badge tone={lowStock ? "warning" : "neutral"} className="text-[10px]">
@@ -129,7 +134,7 @@ export function PosProductTileWithButton({
         {product.unavailable ? (
           <p
             aria-disabled
-            className="mt-auto flex min-h-11 items-center justify-center rounded-[var(--ob-radius-md)] bg-[var(--ob-surface-muted)] py-2 text-xs font-medium text-[var(--ob-text-muted)]"
+            className="mt-auto flex min-h-11 items-center justify-center rounded-full border border-[var(--ob-line)] bg-[var(--ob-tint-wash)] py-2 text-[13px] font-semibold text-[var(--ob-text-muted)]"
           >
             Unavailable
           </p>

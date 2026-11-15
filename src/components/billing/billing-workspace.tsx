@@ -28,6 +28,7 @@ export function BillingWorkspace({
   receiptFooter,
   userRole = "owner",
   blockOversell = false,
+  canSaveBill = true,
 }: {
   documentMode?: BillingDocumentMode;
   captureMode?: CaptureMode;
@@ -44,6 +45,7 @@ export function BillingWorkspace({
   receiptFooter: string | null;
   userRole?: BrandRole;
   blockOversell?: boolean;
+  canSaveBill?: boolean;
 }) {
   return (
     <BillingPos
@@ -62,6 +64,7 @@ export function BillingWorkspace({
       receiptHeader={receiptHeader}
       receiptFooter={receiptFooter}
       blockOversell={blockOversell}
+      canSaveBill={canSaveBill}
       onSubmitOrder={async (payload) => {
         const input = {
           customerId: null,

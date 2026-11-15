@@ -7,6 +7,7 @@ import {
 import { BillingWorkspace } from "@/components/billing/billing-workspace";
 import { PageShell } from "@/components/workspace/page-shell";
 import { loadWorkspaceSession } from "@/lib/workspace/session";
+import { canAddWorkspaceRecords } from "@/lib/workspace/settings-access";
 import { redirect } from "next/navigation";
 
 export default async function BillingPage() {
@@ -47,6 +48,7 @@ export default async function BillingPage() {
         receiptHeader={ws.settings.receipt_header ?? ws.brand.name}
         receiptFooter={ws.settings.receipt_footer ?? null}
         blockOversell={Boolean(ws.settings.block_oversell)}
+        canSaveBill={canAddWorkspaceRecords(ws)}
       />
     </PageShell>
   );

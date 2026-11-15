@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Customer, OrderDiscountInput, Offer, Product, BrandRole } from "@/types/database";
 import { formatMoney } from "@/lib/format";
+import { DEMO_READ_ONLY_MESSAGE } from "@/lib/demo/read-only";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -14,6 +15,10 @@ import { localDayKey } from "@/lib/manager/time";
 import { ProductPrice } from "@/components/products/product-price";
 import { ProductThumbnail } from "@/components/products/product-thumbnail";
 import { PosProductTileWithButton } from "@/components/billing/pos-product-tile";
+import {
+  PosCatalogColumn,
+  posColumnHeight,
+} from "@/components/billing/pos-catalog-column";
 import { ProductPeekDialog } from "@/components/billing/product-peek-dialog";
 import {
   computeCartTotals,
@@ -49,9 +54,7 @@ import { buildBillDocumentFromCheckout } from "@/lib/documents/build-bill-docume
 import type { BillDocument } from "@/lib/documents/types";
 import {
   categoryLabel,
-  categoryTint,
   groupCategories,
-  groupProductsByCategory,
 } from "@/lib/products/catalog-groups";
 import type { BrandSettings } from "@/types/database";
 
@@ -85,6 +88,7 @@ export function BillingPos({
   offers = [],
   userRole = "owner",
   blockOversell = false,
+  canSaveBill = true,
   onSubmitOrder,
 }: {
   products: Product[];
@@ -102,6 +106,7 @@ export function BillingPos({
   offers?: Offer[];
   userRole?: BrandRole;
   blockOversell?: boolean;
+  canSaveBill?: boolean;
   onSubmitOrder: (payload: {
     lines: {
       productId: string;
@@ -614,7 +619,7 @@ export function BillingPos({
                   <div className="flex shrink-0 items-center gap-1">
                     <button
                       type="button"
-                      className="ob-touch-target flex h-11 w-11 shrink-0 items-center justify-center rounded border border-[var(--ob-border)] hover:bg-[var(--ob-surface-muted)]"
+                      className="ob-touch-target flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--ob-border)] hover:bg-[var(--ob-surface-muted)]"
                       onClick={() =>
                         setQty(
                           line.product.id,
@@ -641,7 +646,7 @@ export function BillingPos({
                     />
                     <button
                       type="button"
-                      className="ob-touch-target flex h-11 w-11 shrink-0 items-center justify-center rounded border border-[var(--ob-border)] hover:bg-[var(--ob-surface-muted)]"
+                      className="ob-touch-target flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--ob-border)] hover:bg-[var(--ob-surface-muted)]"
                       onClick={() =>
                         setQty(
                           line.product.id,
@@ -684,7 +689,9 @@ export function BillingPos({
           >
             {matchedCustomer
               ? `Existing customer: ${matchedCustomer.name}`
-              : "The customer is matched or created automatically."}
+              : canSaveBill
+                ? "The customer is matched or created automatically."
+                : "Enter a mobile to match a saved customer."}
           </span>
         </label>
         <label className="block">
@@ -1056,14 +1063,20 @@ export function BillingPos({
             {feedback}
           </p>
         ) : null}
-        <Button
-          className="ob-touch-target w-full"
-          onClick={() => handleSubmit()}
-          loading={submitting}
-          disabled={!cart.length}
-        >
-          {confirmLabel}
-        </Button>
+        {canSaveBill ? (
+          <Button
+            className="ob-touch-target w-full"
+            onClick={() => handleSubmit()}
+            loading={submitting}
+            disabled={!cart.length}
+          >
+            {confirmLabel}
+          </Button>
+        ) : (
+          <p className="rounded-[var(--ob-radius-md)] border border-dashed border-[var(--ob-border)] p-3 text-xs text-[var(--ob-text-muted)]">
+            {DEMO_READ_ONLY_MESSAGE}
+          </p>
+        )}
         {lastSavedDocument ? (
           <OrderDocumentActions
             document={lastSavedDocument}
@@ -1098,82 +1111,34 @@ export function BillingPos({
     );
   };
 
-  const gridClass = "ob-stagger grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4";
-  const allItemsGridClass =
-    "ob-stagger grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6";
-
   const catalogSection = (
-      <section className="min-w-0 flex-1 space-y-4 lg:w-[68%] xl:w-[72%]">
-        <Input
-          placeholder={copy.searchPlaceholder}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          aria-label="Search products"
-        />
-        <div className="flex flex-wrap gap-2">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => setCategory(cat)}
-              className={cn(
-                "flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition",
-                category === cat
-                  ? "border-[var(--ob-primary)] bg-[var(--ob-primary)] text-[var(--ob-primary-foreground)]"
-                  : "border-[var(--ob-border)] bg-[var(--ob-surface)] hover:bg-[var(--ob-surface-muted)]",
-              )}
-            >
-              {cat !== "All" ? (
-                <span
-                  aria-hidden
-                  className="h-2 w-2 rounded-full"
-                  style={{ backgroundColor: categoryTint(cat).accent }}
-                />
-              ) : null}
-              {cat}
-            </button>
-          ))}
-        </div>
-        {category === "All" && !search.trim() ? (
-          <div className="space-y-5">
-            {groupProductsByCategory(filtered).map((group) => {
-              const tint = categoryTint(group.category);
-              return (
-                <section key={group.category} className="rounded-[var(--ob-radius-lg)] p-3">
-                  <div className="mb-2 flex items-baseline gap-2">
-                    <h3
-                      className="text-sm font-semibold"
-                      style={{ color: tint.accent }}
-                    >
-                      {group.category}
-                    </h3>
-                    <span className="text-xs text-[var(--ob-text-muted)]">
-                      {group.products.length}
-                    </span>
-                  </div>
-                  <div className={allItemsGridClass}>
-                    {group.products.map(productTile)}
-                  </div>
-                </section>
-              );
-            })}
-          </div>
-        ) : (
-          <div className={gridClass}>{filtered.map(productTile)}</div>
-        )}
-      </section>
+    <PosCatalogColumn
+      searchPlaceholder={copy.searchPlaceholder}
+      search={search}
+      onSearch={setSearch}
+      categories={categories}
+      category={category}
+      onCategory={setCategory}
+      products={filtered}
+      renderTile={productTile}
+    />
   );
 
   const cartAside = (
-      <div className="hidden w-full lg:block lg:w-[32%] xl:w-[28%] lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto">
-        {cartPanel}
-      </div>
+    <div
+      className={cn(
+        "hidden w-full lg:block lg:w-[32%] lg:overflow-y-auto xl:w-[28%]",
+        posColumnHeight,
+      )}
+    >
+      {cartPanel}
+    </div>
   );
 
   return (
     <div className="relative space-y-4 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
       {modifierPick ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
+        <div className="ob-veil fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center">
           <Card className="w-full max-w-md p-4">
             <h3 className="font-semibold">{modifierPick.product.name}</h3>
             <p className="mt-1 text-sm text-[var(--ob-text-muted)]">
@@ -1247,7 +1212,7 @@ export function BillingPos({
         {cartAside}
       </div>
 
-      <div className="ob-safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-[var(--ob-border)] bg-[var(--ob-surface)] p-3 shadow-[var(--ob-shadow-md)] lg:hidden">
+      <div className="ob-glass-bar ob-safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-[var(--ob-border)] p-3 lg:hidden">
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs text-[var(--ob-text-muted)]">
@@ -1267,11 +1232,11 @@ export function BillingPos({
         <div className="fixed inset-0 z-40 lg:hidden">
           <button
             type="button"
-            className="absolute inset-0 bg-black/30"
+            className="ob-scrim absolute inset-0"
             aria-label="Close bill"
             onClick={() => setMobileCartOpen(false)}
           />
-          <div className="ob-safe-bottom absolute inset-x-0 bottom-0 max-h-[min(90vh,900px)] overflow-y-auto rounded-t-2xl bg-[var(--ob-bg)] p-4 pb-6">
+          <div className="ob-safe-bottom absolute inset-x-0 bottom-0 max-h-[min(90vh,900px)] overflow-y-auto rounded-t-[var(--ob-radius-2xl)] bg-[var(--ob-glass-strong)] p-4 pb-6">
             <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-[var(--ob-border)]" aria-hidden />
             <div className="mb-3 flex items-center justify-between gap-2">
               <p className="text-sm font-semibold">{cartTitle}</p>

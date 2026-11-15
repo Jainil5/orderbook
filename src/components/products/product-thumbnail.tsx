@@ -13,21 +13,23 @@ function initials(name: string): string {
 
 const sizeClasses = {
   /** Table / cart line */
-  sm: "h-10 w-12 rounded-[var(--ob-radius-md)]",
+  sm: "h-10 w-12 shrink-0 rounded-[var(--ob-radius-md)]",
   /** Product list */
-  md: "h-12 w-14 rounded-[var(--ob-radius-md)]",
+  md: "h-12 w-14 shrink-0 rounded-[var(--ob-radius-md)]",
   /** POS catalog tile, full-bleed top block */
-  square: "aspect-square w-full border-0 rounded-none",
+  square: "aspect-square w-full shrink-0 border-0 rounded-none",
   /** POS catalog tile, shortened banner above the description */
-  wide: "aspect-[2/1] w-full border-0 rounded-none",
+  wide: "aspect-[2/1] w-full shrink-0 border-0 rounded-none",
+  /** POS catalog tile inside a panel-sized row: the image absorbs the slack. */
+  fill: "h-full w-full border-0 rounded-none",
 } as const;
 
 const tagTones = [
-  "ob-tag-navy",
-  "ob-tag-teal",
-  "ob-tag-amber",
-  "ob-tag-violet",
-  "ob-tag-slate",
+  "ob-tag-leaf-faint",
+  "ob-tag-leaf",
+  "ob-tag-sand",
+  "ob-tag-leaf-strong",
+  "ob-tag-muted",
 ] as const;
 
 /**
@@ -58,12 +60,12 @@ export function ProductThumbnail({
 }) {
   const [failed, setFailed] = useState(false);
   const showImage = Boolean(imageUrl?.trim()) && !failed;
-  const labelled = size === "square" || size === "wide";
+  const labelled = size === "square" || size === "wide" || size === "fill";
 
   return (
     <div
       className={cn(
-        "relative shrink-0 overflow-hidden border border-[var(--ob-border)] bg-[var(--ob-surface-muted)]",
+        "relative overflow-hidden border border-[var(--ob-border)] bg-[var(--ob-surface-muted)]",
         sizeClasses[size],
         className,
       )}
