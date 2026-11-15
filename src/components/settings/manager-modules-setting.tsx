@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useWorkspace } from "@/components/workspace/workspace-provider";
 import { setManagerModuleHidden } from "@/lib/auth/settings-actions";
 import { MANAGER_MODULES, type ManagerModuleKey } from "@/lib/workspace/manager-modules";
 
@@ -13,9 +14,14 @@ export function ManagerModulesSetting({
   canEdit: boolean;
 }) {
   const router = useRouter();
+  const ws = useWorkspace();
   const [hiddenState, setHiddenState] = useState(hidden);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // A pipeline this business can never see is not a module worth offering to hide.
+  const applicable = MANAGER_MODULES.filter(
+    (m) => !m.projectOnly || ws.profile.capture === "project",
+  );
 
   async function onToggle(key: ManagerModuleKey, visible: boolean) {
     if (!canEdit || pending) return;
@@ -46,7 +52,7 @@ export function ManagerModulesSetting({
         the sidebar and Manager sub-navigation.
       </p>
       <div className="mt-3 space-y-2">
-        {MANAGER_MODULES.map((module) => {
+        {applicable.map((module) => {
           const visible = !hiddenState.includes(module.key);
           return (
             <label

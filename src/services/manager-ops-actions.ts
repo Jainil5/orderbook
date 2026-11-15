@@ -4,18 +4,21 @@ import { revalidatePath } from "next/cache";
 import { getDemoBrandPack } from "@/lib/demo/brands";
 import { mergeDemoCustomers } from "@/lib/demo/merge-entities";
 import {
-  appendDemoAudit,
   readDemoMutableBucket,
   updateDemoMutableBucket,
   type DemoMutableBucket,
 } from "@/lib/demo/mutable-store";
 import { mergeOperations } from "@/lib/demo/operations-data";
+import { readOnlyMessage } from "@/lib/demo/read-only";
 import { listDemoStaff } from "@/lib/demo/staff-data";
 import {
   validateAppointmentInput,
   type AppointmentInput,
 } from "@/lib/manager/appointments";
-import { newOpsId } from "@/lib/manager/ops-shared";
+import {
+  validateLeadInput,
+  type LeadInput,
+} from "@/lib/manager/leads";
 import { validateShiftInput, type ShiftInput } from "@/lib/manager/schedules";
 import {
   jobAdvanceError,
@@ -35,10 +38,10 @@ import {
   type VisitInput,
 } from "@/lib/manager/visits";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
-import type { Appointment, FieldVisit, Service, ServiceJob, Shift, Task, TaskStatus } from "@/types/operations";
+import { LEAD_STAGES, type LeadStage, type TaskStatus } from "@/types/operations";
 
 type OpsGuard =
-  | { ok: true; code: DemoBrandCode; brandId: string }
+  | { ok: true; code: DemoBrandCode }
   | { ok: false; message: string };
 
 async function guardOps(): Promise<OpsGuard> {
@@ -49,7 +52,7 @@ async function guardOps(): Promise<OpsGuard> {
   const cookieStore = await cookies();
   const code =
     parseDemoBrandCodeFromCookie(cookieStore.get(DEMO_WORKSPACE_COOKIE)?.value) ?? "BR-1";
-  return { ok: true, code, brandId: getDemoBrandPack(code).brand.id };
+  return { ok: true, code };
 }
 
 async function knownIds(code: DemoBrandCode) {
@@ -64,25 +67,22 @@ async function knownIds(code: DemoBrandCode) {
   };
 }
 
-type OpsListKey = "services" | "serviceJobs" | "appointments" | "tasks" | "shifts" | "visits";
+type OpsListKey =
+  | "services"
+  | "serviceJobs"
+  | "appointments"
+  | "tasks"
+  | "shifts"
+  | "visits"
+  | "leads";
 type OpsOverrideKey =
   | "serviceOverrides"
   | "serviceJobOverrides"
   | "appointmentOverrides"
   | "taskOverrides"
   | "shiftOverrides"
-  | "visitOverrides";
-
-async function appendOps(code: DemoBrandCode, key: OpsListKey, entity: { id: string }) {
-  await updateDemoMutableBucket(
-    code,
-    (bucket) =>
-      ({
-        ...bucket,
-        [key]: [...((bucket[key] ?? []) as { id: string }[]), entity],
-      }) as DemoMutableBucket,
-  );
-}
+  | "visitOverrides"
+  | "leadOverrides";
 
 async function loadMergedOps(code: DemoBrandCode) {
   return mergeOperations(getDemoBrandPack(code), await readDemoMutableBucket(code));
@@ -119,40 +119,13 @@ function revalidateOps(modulePath: string) {
   revalidatePath("/customers", "layout");
 }
 
-async function auditOps(
-  guard: { code: DemoBrandCode; brandId: string },
-  action: string,
-  entityType: string,
-  entityId: string,
-  detail: string,
-) {
-  await appendDemoAudit(guard.code, {
-    brand_id: guard.brandId,
-    actor_email: null,
-    action,
-    entity_type: entityType,
-    entity_id: entityId,
-    detail,
-  });
-}
-
 export async function saveServiceAction(id: string | null, input: ServiceInput) {
   const guard = await guardOps();
   if (!guard.ok) return guard;
   const parsed = validateServiceInput(input);
   if (!parsed.ok) return parsed;
-  if (id) {
-    await patchOps(guard.code, "serviceOverrides", id, parsed.value);
-  } else {
-    const service: Service = {
-      id: newOpsId("svc"),
-      brand_id: guard.brandId,
-      ...parsed.value,
-      isActive: true,
-    };
-    await appendOps(guard.code, "services", service);
-    await auditOps(guard, "service.created", "service", service.id, service.name);
-  }
+  if (!id) return readOnlyMessage();
+  await patchOps(guard.code, "serviceOverrides", id, parsed.value);
   revalidateOps("/manager/services");
   return { ok: true as const };
 }
@@ -182,18 +155,8 @@ export async function saveServiceJobAction(id: string | null, input: ServiceJobI
   if (!guard.ok) return guard;
   const parsed = validateServiceJobInput(input, await knownIds(guard.code));
   if (!parsed.ok) return parsed;
-  if (id) {
-    await patchOps(guard.code, "serviceJobOverrides", id, parsed.value);
-  } else {
-    const job: ServiceJob = {
-      id: newOpsId("job"),
-      brand_id: guard.brandId,
-      ...parsed.value,
-      status: "requested",
-    };
-    await appendOps(guard.code, "serviceJobs", job);
-    await auditOps(guard, "service_job.created", "service_job", job.id, job.notes || job.serviceId);
-  }
+  if (!id) return readOnlyMessage();
+  await patchOps(guard.code, "serviceJobOverrides", id, parsed.value);
   revalidateOps("/manager/services");
   return { ok: true as const };
 }
@@ -226,18 +189,8 @@ export async function saveAppointmentAction(id: string | null, input: Appointmen
   if (!guard.ok) return guard;
   const parsed = validateAppointmentInput(input, await knownIds(guard.code));
   if (!parsed.ok) return parsed;
-  if (id) {
-    await patchOps(guard.code, "appointmentOverrides", id, parsed.value);
-  } else {
-    const appointment: Appointment = {
-      id: newOpsId("apt"),
-      brand_id: guard.brandId,
-      ...parsed.value,
-      status: "scheduled",
-    };
-    await appendOps(guard.code, "appointments", appointment);
-    await auditOps(guard, "appointment.created", "appointment", appointment.id, appointment.title);
-  }
+  if (!id) return readOnlyMessage();
+  await patchOps(guard.code, "appointmentOverrides", id, parsed.value);
   revalidateOps("/manager/appointments");
   return { ok: true as const };
 }
@@ -271,18 +224,8 @@ export async function saveTaskAction(id: string | null, input: TaskInput) {
   if (!guard.ok) return guard;
   const parsed = validateTaskInput(input, await knownIds(guard.code));
   if (!parsed.ok) return parsed;
-  if (id) {
-    await patchOps(guard.code, "taskOverrides", id, parsed.value);
-  } else {
-    const task: Task = {
-      id: newOpsId("task"),
-      brand_id: guard.brandId,
-      ...parsed.value,
-      status: "open",
-    };
-    await appendOps(guard.code, "tasks", task);
-    await auditOps(guard, "task.created", "task", task.id, task.title);
-  }
+  if (!id) return readOnlyMessage();
+  await patchOps(guard.code, "taskOverrides", id, parsed.value);
   revalidateOps("/manager/tasks");
   return { ok: true as const };
 }
@@ -315,13 +258,8 @@ export async function saveShiftAction(id: string | null, input: ShiftInput) {
   if (!guard.ok) return guard;
   const parsed = validateShiftInput(input, (await knownIds(guard.code)).staffIds);
   if (!parsed.ok) return parsed;
-  if (id) {
-    await patchOps(guard.code, "shiftOverrides", id, parsed.value);
-  } else {
-    const shift: Shift = { id: newOpsId("shift"), brand_id: guard.brandId, ...parsed.value };
-    await appendOps(guard.code, "shifts", shift);
-    await auditOps(guard, "shift.created", "shift", shift.id, `${shift.date} ${shift.start}-${shift.end}`);
-  }
+  if (!id) return readOnlyMessage();
+  await patchOps(guard.code, "shiftOverrides", id, parsed.value);
   revalidateOps("/manager/schedules");
   return { ok: true as const };
 }
@@ -341,21 +279,8 @@ export async function saveVisitAction(id: string | null, input: VisitInput) {
   if (!guard.ok) return guard;
   const parsed = validateVisitInput(input, await knownIds(guard.code));
   if (!parsed.ok) return parsed;
-  if (id) {
-    await patchOps(guard.code, "visitOverrides", id, parsed.value);
-  } else {
-    const visit: FieldVisit = {
-      id: newOpsId("visit"),
-      brand_id: guard.brandId,
-      ...parsed.value,
-      status: "planned",
-      checkInAt: null,
-      checkOutAt: null,
-      report: null,
-    };
-    await appendOps(guard.code, "visits", visit);
-    await auditOps(guard, "visit.created", "visit", visit.id, visit.purpose);
-  }
+  if (!id) return readOnlyMessage();
+  await patchOps(guard.code, "visitOverrides", id, parsed.value);
   revalidateOps("/manager/visits");
   return { ok: true as const };
 }
@@ -400,5 +325,39 @@ export async function deleteVisitAction(id: string) {
     return { ok: false as const, message: "Visit not found." };
   await patchOps(guard.code, "visitOverrides", id, { deleted: true });
   revalidateOps("/manager/visits");
+  return { ok: true as const };
+}
+
+export async function saveLeadAction(id: string | null, input: LeadInput) {
+  const guard = await guardOps();
+  if (!guard.ok) return guard;
+  const parsed = validateLeadInput(input, await knownIds(guard.code));
+  if (!parsed.ok) return parsed;
+  if (!id) return readOnlyMessage();
+  await patchOps(guard.code, "leadOverrides", id, parsed.value);
+  revalidateOps("/manager/leads");
+  return { ok: true as const };
+}
+
+export async function setLeadStageAction(id: string, stage: LeadStage) {
+  if (!LEAD_STAGES.includes(stage)) {
+    return { ok: false as const, message: "Invalid stage." };
+  }
+  const guard = await guardOps();
+  if (!guard.ok) return guard;
+  if (!(await hasOpsRecord(guard.code, "leads", id)))
+    return { ok: false as const, message: "Lead not found." };
+  await patchOps(guard.code, "leadOverrides", id, { stage });
+  revalidateOps("/manager/leads");
+  return { ok: true as const };
+}
+
+export async function deleteLeadAction(id: string) {
+  const guard = await guardOps();
+  if (!guard.ok) return guard;
+  if (!(await hasOpsRecord(guard.code, "leads", id)))
+    return { ok: false as const, message: "Lead not found." };
+  await patchOps(guard.code, "leadOverrides", id, { deleted: true });
+  revalidateOps("/manager/leads");
   return { ok: true as const };
 }

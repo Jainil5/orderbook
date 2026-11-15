@@ -27,10 +27,10 @@ export function CommandPalette() {
   const links = useMemo(() => {
     const managerLinks = [
       { href: "/manager", label: "Manager overview" },
-      ...visibleManagerModules(ws.hiddenManagerModules).map((m) => ({ href: m.href, label: m.label })),
+      ...visibleManagerModules(ws.hiddenManagerModules, ws.profile.capture).map((m) => ({ href: m.href, label: m.label })),
     ];
     return [...LINKS, ...managerLinks];
-  }, [ws.hiddenManagerModules]);
+  }, [ws.hiddenManagerModules, ws.profile.capture]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -53,19 +53,19 @@ export function CommandPalette() {
   if (!open) return null;
 
   return (
-    <div className="ob-safe-top fixed inset-0 z-50 flex items-start justify-center bg-black/40 p-2 pt-[10vh] sm:p-4 sm:pt-[15vh]">
+    <div className="ob-veil ob-safe-top fixed inset-0 z-50 flex items-start justify-center p-2 pt-[10vh] sm:p-4 sm:pt-[15vh]">
       <button
         type="button"
         className="absolute inset-0"
         aria-label="Close command palette"
         onClick={() => setOpen(false)}
       />
-      <div className="relative z-10 w-full max-w-lg ob-card overflow-hidden shadow-xl">
-        <div className="flex items-center gap-2 border-b border-[var(--ob-border)] px-3">
-          <Search className="h-4 w-4 text-[var(--ob-text-muted)]" aria-hidden />
+      <div className="ob-drawer relative z-10 w-full max-w-lg overflow-hidden rounded-[var(--ob-radius-lg)] border border-[var(--ob-border)] shadow-[var(--ob-shadow-md)]">
+        <div className="flex items-center gap-2 border-b border-[var(--ob-border)] px-4">
+          <Search className="h-4 w-4 text-[var(--ob-leaf)]" aria-hidden />
           <input
             autoFocus
-            className="w-full py-3 text-sm outline-none"
+            className="w-full bg-transparent py-3.5 text-[15px] outline-none"
             placeholder="Jump to…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -76,7 +76,7 @@ export function CommandPalette() {
             <li key={item.href}>
               <button
                 type="button"
-                className="flex w-full px-4 py-3 text-left text-sm hover:bg-[var(--ob-surface-muted)]"
+                className="flex w-full px-4 py-3 text-left text-[15px] hover:bg-[var(--ob-tint-hover)] hover:text-[var(--ob-leaf)]"
                 onClick={() => {
                   setOpen(false);
                   router.push(item.href);
@@ -87,7 +87,7 @@ export function CommandPalette() {
             </li>
           ))}
         </ul>
-        <p className="border-t border-[var(--ob-border)] px-4 py-2 text-xs text-[var(--ob-text-muted)]">
+        <p className="ob-label-quiet border-t border-[var(--ob-border)] px-4 py-2.5">
           Tip: ⌘K / Ctrl+K anywhere in the workspace
         </p>
       </div>
@@ -99,7 +99,7 @@ export function CommandPaletteHint() {
   return (
     <Link
       href="/billing"
-      className="hidden rounded-md border border-[var(--ob-border)] px-2 py-1 text-xs text-[var(--ob-text-muted)] lg:inline"
+      className="ob-label-quiet hidden rounded-full border border-[var(--ob-line)] px-3 py-1 text-[var(--ob-text-muted)] lg:inline"
     >
       ⌘K
     </Link>

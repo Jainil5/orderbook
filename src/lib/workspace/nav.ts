@@ -71,10 +71,12 @@ export function buildWorkspaceNavItems(
       href: "/manager",
       label: "Manager",
       iconKey: "Manager",
-      children: visibleManagerModules(hiddenManagerModules).map((m) => ({
-        href: m.href,
-        label: m.label,
-      })),
+      children: visibleManagerModules(hiddenManagerModules, profile.capture).map(
+        (m) => ({
+          href: m.href,
+          label: m.label,
+        }),
+      ),
     },
     { href: "/analytics", label: "Analytics", iconKey: "Analytics" },
     { href: "/customers", label: "Customers", iconKey: "Customers" },

@@ -47,6 +47,14 @@ function input(over: Partial<LeadInput> = {}): LeadInput {
 
 const NOW = new Date(2026, 10, 11, 12, 0, 0);
 
+/** `validateLeadInput` is a discriminated union, so a failure message has to be
+ *  read through the `ok` arm. This keeps the negative cases one line each. */
+function errorMessage(result: ReturnType<typeof validateLeadInput>): string {
+  return result.ok ? "" : result.message;
+}
+
+const NO_STAFF = { staffIds: [] as string[] };
+
 describe("validateLeadInput", () => {
   it("accepts a complete enquiry and coerces the money and follow-up fields", () => {
     const parsed = validateLeadInput(input(), { staffIds: ["cf-staff-1"] });
@@ -61,30 +69,36 @@ describe("validateLeadInput", () => {
   });
 
   it("requires a name and something to quote for", () => {
-    expect(validateLeadInput(input({ contact_name: "  " }), {}).message).toMatch(
-      /name/i,
-    );
-    expect(validateLeadInput(input({ requirement: "" }), {}).message).toMatch(
-      /requirement/i,
-    );
+    expect(
+      errorMessage(validateLeadInput(input({ contact_name: "  " }), NO_STAFF)),
+    ).toMatch(/name/i);
+    expect(
+      errorMessage(validateLeadInput(input({ requirement: "" }), NO_STAFF)),
+    ).toMatch(/requirement/i);
   });
 
   it("rejects a value that is not a whole number of rupees", () => {
-    expect(validateLeadInput(input({ estimated_value: "abc" }), {}).message).toMatch(
-      /value/i,
+    expect(
+      errorMessage(validateLeadInput(input({ estimated_value: "abc" }), NO_STAFF)),
+    ).toMatch(/value/i);
+    expect(validateLeadInput(input({ estimated_value: "-500" }), NO_STAFF).ok).toBe(
+      false,
     );
-    expect(validateLeadInput(input({ estimated_value: "-500" }), {}).ok).toBe(false);
   });
 
   it("rejects an email that is not an email", () => {
-    expect(validateLeadInput(input({ email: "asha@" }), {}).message).toMatch(/email/i);
+    expect(
+      errorMessage(validateLeadInput(input({ email: "asha@" }), NO_STAFF)),
+    ).toMatch(/email/i);
   });
 
   it("rejects an owner who is not on the staff list", () => {
     expect(
-      validateLeadInput(input({ owner_staff_id: "ghost" }), {
-        staffIds: ["cf-staff-1"],
-      }).message,
+      errorMessage(
+        validateLeadInput(input({ owner_staff_id: "ghost" }), {
+          staffIds: ["cf-staff-1"],
+        }),
+      ),
     ).toMatch(/owner/i);
   });
 

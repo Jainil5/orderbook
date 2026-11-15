@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { listDemoStaff } from "@/lib/demo/staff-data";
 import { listDemoOrders, toDemoBrandCode } from "@/lib/demo/data";
 import { staffAvailabilitySummary } from "@/lib/manager/staff";
+import { pipelineSummary } from "@/lib/manager/leads";
 import { loadDemoOperations } from "@/lib/demo/operations-data";
 import { ongoingOrderCount, overviewRollups } from "@/lib/manager/ops-selectors";
 import { visibleManagerModules, type ManagerModuleKey } from "@/lib/workspace/manager-modules";
@@ -13,6 +14,7 @@ import { loadWorkspaceSession } from "@/lib/workspace/session";
 
 const MODULE_DESCRIPTIONS: Record<ManagerModuleKey, string> = {
   staff: "Profiles, roles and availability.",
+  leads: "Enquiry pipeline from first contact to won or lost.",
   services: "Service catalogue, requests and work orders.",
   appointments: "Meetings, tastings and scheduled sessions.",
   visits: "Field visits with check-in and reports.",
@@ -24,7 +26,7 @@ export default async function ManagerPage() {
   const ws = await loadWorkspaceSession();
   if (!ws) redirect("/login");
 
-  const modules = visibleManagerModules(ws.hiddenManagerModules);
+  const modules = visibleManagerModules(ws.hiddenManagerModules, ws.profile.capture);
 
 
   const brandCode = toDemoBrandCode(ws.brand.code);
@@ -40,6 +42,7 @@ export default async function ManagerPage() {
   const orders = await listDemoOrders(undefined, brandCode);
   const ongoing = ongoingOrderCount(orders);
   const openTasks = ops.tasks.filter((t) => t.status !== "done").length;
+  const pipeline = pipelineSummary(ops.leads);
   const count = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
   const detailCards: { label: string; value: number; detail: string; href: string }[] = [
     { label: "Ongoing orders", value: ongoing, detail: `of ${count(orders.length, "captured bill")}`, href: "/orders" },
@@ -53,6 +56,7 @@ export default async function ManagerPage() {
     });
   }
   const rollupCards: { label: string; value: number; detail: string; module: ManagerModuleKey; href: string }[] = [
+    { label: "Open leads", value: pipeline.openCount, detail: `of ${count(ops.leads.length, "captured lead")}`, href: "/manager/leads", module: "leads" },
     { label: "Today's appointments", value: rollups.todayAppointments, detail: `of ${ops.appointments.length} booked`, href: "/manager/appointments", module: "appointments" },
     { label: "Overdue tasks", value: rollups.overdueTasks, detail: `of ${count(openTasks, "open task")}`, href: "/manager/tasks", module: "tasks" },
     { label: "On shift now", value: rollups.onShiftNow, detail: `of ${count(ops.shifts.length, "rostered shift")}`, href: "/manager/schedules", module: "schedules" },
