@@ -1,0 +1,3 @@
+id,brand_id,serviceId,customerId,staff_ids,status,scheduledAt,notes
+cf-job-1,demo-cubig-furniture,cf-svc-2,fc2,"[""cf-staff-2""]",in_progress,2026-11-11T07:21:25.080Z,"Luna sofa + wardrobe, 3rd floor"
+cf-job-2,demo-cubig-furniture,cf-svc-1,fc4,[],requested,,Oslo dining table delivery

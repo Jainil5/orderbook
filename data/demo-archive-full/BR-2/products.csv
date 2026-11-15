@@ -1,0 +1,9 @@
+id,brand_id,name,description,sku,category,price,cost_price,unit,is_active,default_discount_percent,image_url,stock_qty,low_stock_threshold,wholesale_price,modifiers_json,unavailable
+fp1,demo-cubig-furniture,Oslo Dining Table,"Solid oak top, seats 6, matte steel legs",CB-DN-001,Dining,42900,22000,piece,true,,/demo/products/BR-2/CB-DN-001.jpg,,,,,
+fp2,demo-cubig-furniture,Mesh Office Chair,"Ergonomic lumbar, adjustable armrests",CB-OF-002,Office,12900,6200,piece,true,,/demo/products/BR-2/CB-OF-002.jpg,,,,,
+fp3,demo-cubig-furniture,Luna 3-Seater Sofa,"Performance fabric, deep seat, walnut legs",CB-LR-003,Living Room,68900,34000,piece,true,,/demo/products/BR-2/CB-LR-003.jpg,,,,,
+fp4,demo-cubig-furniture,Maple Wardrobe 2-Door,"Soft-close hinges, hanging + shelves",CB-BR-004,Bedroom,54900,28000,piece,true,,/demo/products/BR-2/CB-BR-004.jpg,,,,,
+fp5,demo-cubig-furniture,Study Desk with Drawer,"120 cm workspace, cable grommet",CB-OF-005,Office,18900,9100,piece,true,,/demo/products/BR-2/CB-OF-005.jpg,,,,,
+fp6,demo-cubig-furniture,Bedside Table (Pair),"Matching pair, drawer + open shelf",CB-BR-006,Bedroom,9900,4800,set,true,,/demo/products/BR-2/CB-BR-006.jpg,,,,,
+fp7,demo-cubig-furniture,Bar Stool — Counter Height,"Upholstered seat, powder-coated frame",CB-DN-007,Dining,6200,2900,piece,true,15,/demo/products/BR-2/CB-DN-007.jpg,,,,,
+fp8,demo-cubig-furniture,Custom Modular Shelf,Made-to-order sizing — quote line item,CB-MS-008,Living Room,24500,12000,unit,true,25,/demo/products/BR-2/CB-MS-008.jpg,,,,,

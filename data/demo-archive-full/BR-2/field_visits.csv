@@ -1,0 +1,3 @@
+id,brand_id,customerId,staffId,purpose,status,checkInAt,checkOutAt,report
+cf-visit-1,demo-cubig-furniture,fc2,cf-staff-2,Site measurement — living room,completed,2026-11-09T08:21:25.080Z,2026-11-09T09:21:25.080Z,Room 4.2m x 5.1m. Sofa fits along east wall; lift access confirmed.
+cf-visit-2,demo-cubig-furniture,fc4,cf-staff-3,Delivery site check,planned,,,

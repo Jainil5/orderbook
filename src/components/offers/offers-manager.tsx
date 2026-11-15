@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { saveOfferAction } from "@/services/operations-actions";
-import { canEditWorkspaceFeatures } from "@/lib/workspace/settings-access";
+import { canAddWorkspaceRecords } from "@/lib/workspace/settings-access";
 import { useWorkspace } from "@/components/workspace/workspace-provider";
 
 export function OffersManager({
@@ -19,7 +19,7 @@ export function OffersManager({
 }) {
   const ws = useWorkspace();
   const router = useRouter();
-  const canEdit = ws.mode === "demo" || canEditWorkspaceFeatures(ws);
+  const canAdd = canAddWorkspaceRecords(ws);
   const [offers] = useState(initialOffers);
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
@@ -34,7 +34,7 @@ export function OffersManager({
 
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
-    if (!canEdit) return;
+    if (!canAdd) return;
     setBusy(true);
     setFeedback(null);
     const num = Number(value);
@@ -61,7 +61,7 @@ export function OffersManager({
       {loadError ? (
         <p role="alert" className="text-sm text-[var(--ob-danger)]">{loadError}</p>
       ) : null}
-      {canEdit ? (
+      {canAdd ? (
         <form
           onSubmit={onCreate}
           className="ob-card grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4"

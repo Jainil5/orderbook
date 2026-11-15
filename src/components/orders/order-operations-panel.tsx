@@ -19,6 +19,8 @@ import {
   isDraftOrder,
   isPendingOrder,
 } from "@/lib/orders/order-rules";
+import { canAddWorkspaceRecords } from "@/lib/workspace/settings-access";
+import { useWorkspace } from "@/components/workspace/workspace-provider";
 
 const STATUS_ACTIONS: { status: OrderStatus; label: string }[] = [
   { status: "pending", label: "Pending" },
@@ -37,6 +39,7 @@ export function OrderOperationsPanel({
   publicQuoteUrl?: string | null;
 }) {
   const router = useRouter();
+  const canAdd = canAddWorkspaceRecords(useWorkspace());
   const [amount, setAmount] = useState("");
   const [splitLabel, setSplitLabel] = useState("");
   const [method, setMethod] = useState("UPI");
@@ -147,7 +150,9 @@ export function OrderOperationsPanel({
           </p>
           {!isDraftOrder(order) ? (
             <p className="mt-1 text-xs text-[var(--ob-text-muted)]">
-              Line items are locked — use credit note or refund for corrections.
+              {canAdd
+                ? "Line items are locked — use credit note or refund for corrections."
+                : "Line items and the payment ledger are fixed in this demo."}
             </p>
           ) : null}
         </div>
@@ -179,7 +184,7 @@ export function OrderOperationsPanel({
             {label}
           </Button>
         ))}
-        {canVoidOrCreditNote(order) && !order.parent_order_id ? (
+        {canAdd && canVoidOrCreditNote(order) && !order.parent_order_id ? (
           <Button
             type="button"
             variant="secondary"
@@ -193,41 +198,48 @@ export function OrderOperationsPanel({
       </div>
 
       {balance > 0 ? (
-        <form onSubmit={onPay} className="space-y-2">
-          <p className="text-xs font-medium text-[var(--ob-text-muted)]">
-            Record payment (split bill)
+        canAdd ? (
+          <form onSubmit={onPay} className="space-y-2">
+            <p className="text-xs font-medium text-[var(--ob-text-muted)]">
+              Record payment (split bill)
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              <Input
+                placeholder={`Amount (due ${formatMoney(balance, currencyCode)})`}
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
+              <Input
+                placeholder="Split label (e.g. Person A)"
+                value={splitLabel}
+                onChange={(e) => setSplitLabel(e.target.value)}
+              />
+              <select
+                className="ob-input"
+                value={method}
+                onChange={(e) => setMethod(e.target.value)}
+              >
+                <option value="UPI">UPI</option>
+                <option value="Cash">Cash</option>
+                <option value="Card">Card</option>
+                <option value="Bank transfer">Bank transfer</option>
+              </select>
+              <Button type="submit" loading={busy === "pay"}>
+                Record payment
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <p className="text-xs text-[var(--ob-text-muted)]">
+            {formatMoney(balance, currencyCode)} outstanding — the demo ledger is
+            read-only.
           </p>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            <Input
-              placeholder={`Amount (due ${formatMoney(balance, currencyCode)})`}
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
-            <Input
-              placeholder="Split label (e.g. Person A)"
-              value={splitLabel}
-              onChange={(e) => setSplitLabel(e.target.value)}
-            />
-            <select
-              className="ob-input"
-              value={method}
-              onChange={(e) => setMethod(e.target.value)}
-            >
-              <option value="UPI">UPI</option>
-              <option value="Cash">Cash</option>
-              <option value="Card">Card</option>
-              <option value="Bank transfer">Bank transfer</option>
-            </select>
-            <Button type="submit" loading={busy === "pay"}>
-              Record payment
-            </Button>
-          </div>
-        </form>
+        )
       ) : (
         <p className="text-sm text-[var(--ob-success)]">Fully paid.</p>
       )}
 
-      {order.amount_paid != null && order.amount_paid > 0 ? (
+      {canAdd && order.amount_paid != null && order.amount_paid > 0 ? (
         <form onSubmit={onRefund} className="grid gap-2 sm:grid-cols-3">
           <Input
             placeholder="Refund amount"

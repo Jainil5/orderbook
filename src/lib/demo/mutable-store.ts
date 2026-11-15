@@ -47,7 +47,9 @@ export type DemoMutableBucket = {
 
 type DemoMutableStore = Partial<Record<DemoBrandCode, DemoMutableBucket>>;
 
-function emptyBucket(): DemoMutableBucket {
+/** Shared by the read/write paths and by tests, so a new bucket field is added
+ *  in exactly one place. */
+export function emptyBucket(): DemoMutableBucket {
   return {
     customers: [],
     offers: [],

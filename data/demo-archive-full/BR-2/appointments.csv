@@ -1,0 +1,2 @@
+id,brand_id,title,customerId,staff_ids,startsAt,endsAt,location,serviceId,status,notes
+cf-apt-1,demo-cubig-furniture,Showroom walkthrough — Priya Homes,fc2,"[""cf-staff-4""]",2026-11-12T08:21:25.080Z,2026-11-12T09:21:25.080Z,Cubig showroom,,scheduled,Office fit-out shortlist

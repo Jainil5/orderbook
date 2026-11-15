@@ -1,2 +1,3 @@
 id,brand_id,title,customerId,staff_ids,startsAt,endsAt,location,serviceId,status,notes
-bc-apt-1,demo-brewery-cafe,Coffee tasting — Ananya,c2,"[""bc-staff-1""]",2026-11-11T10:30:00.000Z,2026-11-11T11:30:00.000Z,Cafe counter,,scheduled,Single-origin flight
+bc-apt-1,demo-brewery-cafe,Coffee tasting — Ananya,c2,"[""bc-staff-1""]",2026-11-14T05:00:00.000Z,2026-11-14T06:00:00.000Z,Cafe counter,bc-svc-1,scheduled,Single-origin flight
+bc-apt-2,demo-brewery-cafe,Latte art class — Rohan Kapoor,c3,"[""bc-staff-4""]",2026-11-16T10:00:00.000Z,2026-11-16T11:30:00.000Z,Back room,bc-svc-2,scheduled,Eight seats booked

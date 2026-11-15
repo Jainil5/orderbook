@@ -29,12 +29,14 @@ export function ServicesManager({
   customers,
   staff,
   canEdit,
+  canAdd,
 }: {
   services: Service[];
   jobs: ServiceJob[];
   customers: Person[];
   staff: Person[];
   canEdit: boolean;
+  canAdd: boolean;
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -100,125 +102,135 @@ export function ServicesManager({
 
   return (
     <div className="grid gap-4 lg:grid-cols-3">
-      <div className="space-y-4 lg:col-span-1">
-        <Card className="p-4">
-          <h2 className="font-semibold">{editingService ? `Edit ${editingService.name}` : "New service"}</h2>
-          <form
-            className="mt-3 space-y-3"
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const ok = await run(() =>
-                saveServiceAction(editingService?.id ?? null, {
-                  name: svcName,
-                  description: svcDescription,
-                  durationMinutes: svcDuration,
-                  price: svcPrice,
-                }),
-              );
-              if (ok) startServiceEdit(null);
-            }}
-          >
-            <label className="block text-sm">
-              <span className="text-[var(--ob-text-muted)]">Name</span>
-              <input className="ob-input mt-1 w-full" value={svcName} onChange={(e) => setSvcName(e.target.value)} required maxLength={120} disabled={!canEdit || pending} />
-            </label>
-            <label className="block text-sm">
-              <span className="text-[var(--ob-text-muted)]">Description (optional)</span>
-              <input className="ob-input mt-1 w-full" value={svcDescription} onChange={(e) => setSvcDescription(e.target.value)} maxLength={300} disabled={!canEdit || pending} />
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              <label className="block text-sm">
-                <span className="text-[var(--ob-text-muted)]">Duration (min)</span>
-                <input className="ob-input mt-1 w-full" type="number" min={5} max={480} value={svcDuration} onChange={(e) => setSvcDuration(e.target.value)} required disabled={!canEdit || pending} />
-              </label>
-              <label className="block text-sm">
-                <span className="text-[var(--ob-text-muted)]">Price</span>
-                <input className="ob-input mt-1 w-full" type="number" min={0} step="0.01" value={svcPrice} onChange={(e) => setSvcPrice(e.target.value)} required disabled={!canEdit || pending} />
-              </label>
-            </div>
-            <div className="flex gap-2">
-              <button type="submit" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={!canEdit || pending}>
-                {pending ? "Saving…" : editingService ? "Save changes" : "Add service"}
-              </button>
-              {editingService ? (
-                <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm disabled:opacity-50" disabled={pending} onClick={() => startServiceEdit(null)}>Cancel</button>
-              ) : null}
-            </div>
-          </form>
-        </Card>
-        <Card className="p-4">
-          <h2 className="font-semibold">{editingJob ? "Edit job" : "New service job"}</h2>
-          <form
-            className="mt-3 space-y-3"
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const ok = await run(() =>
-                saveServiceJobAction(editingJob?.id ?? null, {
-                  serviceId: jobService,
-                  customerId: jobCustomer,
-                  staffIds: jobStaff,
-                  scheduledAt: jobWhen || undefined,
-                  notes: jobNotes,
-                }),
-              );
-              if (ok) startJobEdit(null);
-            }}
-          >
-            <label className="block text-sm">
-              <span className="text-[var(--ob-text-muted)]">Service</span>
-              <select className="ob-input mt-1 w-full" value={jobService} onChange={(e) => setJobService(e.target.value)} disabled={!canEdit || pending}>
-                {services.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
-            </label>
-            <label className="block text-sm">
-              <span className="text-[var(--ob-text-muted)]">Customer</span>
-              <select className="ob-input mt-1 w-full" value={jobCustomer} onChange={(e) => setJobCustomer(e.target.value)} disabled={!canEdit || pending}>
-                {customers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-            </label>
-            <fieldset disabled={!canEdit || pending}>
-              <legend className="text-sm text-[var(--ob-text-muted)]">Assign staff</legend>
-              <div className="mt-1 space-y-1">
-                {staff.map((s) => (
-                  <label key={s.id} className="ob-touch-target flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={jobStaff.includes(s.id)}
-                      onChange={(e) =>
-                        setJobStaff(e.target.checked ? [...jobStaff, s.id] : jobStaff.filter((id) => id !== s.id))
-                      }
-                    />
-                    {s.name}
+      {error ? <p role="alert" className="text-sm text-[var(--ob-danger)] lg:col-span-3">{error}</p> : null}
+      {canAdd || editingService || editingJob ? (
+        <div className="space-y-4 lg:col-span-1">
+          {canAdd || editingService ? (
+            <Card className="p-4">
+              <h2 className="font-semibold">{editingService ? `Edit ${editingService.name}` : "New service"}</h2>
+              <form
+                className="mt-3 space-y-3"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const ok = await run(() =>
+                    saveServiceAction(editingService?.id ?? null, {
+                      name: svcName,
+                      description: svcDescription,
+                      durationMinutes: svcDuration,
+                      price: svcPrice,
+                    }),
+                  );
+                  if (ok) startServiceEdit(null);
+                }}
+              >
+                <label className="block text-sm">
+                  <span className="text-[var(--ob-text-muted)]">Name</span>
+                  <input className="ob-input mt-1 w-full" value={svcName} onChange={(e) => setSvcName(e.target.value)} required maxLength={120} disabled={!canEdit || pending} />
+                </label>
+                <label className="block text-sm">
+                  <span className="text-[var(--ob-text-muted)]">Description (optional)</span>
+                  <input className="ob-input mt-1 w-full" value={svcDescription} onChange={(e) => setSvcDescription(e.target.value)} maxLength={300} disabled={!canEdit || pending} />
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="block text-sm">
+                    <span className="text-[var(--ob-text-muted)]">Duration (min)</span>
+                    <input className="ob-input mt-1 w-full" type="number" min={5} max={480} value={svcDuration} onChange={(e) => setSvcDuration(e.target.value)} required disabled={!canEdit || pending} />
                   </label>
-                ))}
-              </div>
-            </fieldset>
-            <label className="block text-sm">
-              <span className="text-[var(--ob-text-muted)]">Scheduled at (optional)</span>
-              <input className="ob-input mt-1 w-full" type="datetime-local" value={jobWhen} onChange={(e) => setJobWhen(e.target.value)} disabled={!canEdit || pending} />
-            </label>
-            <label className="block text-sm">
-              <span className="text-[var(--ob-text-muted)]">Notes (optional)</span>
-              <input className="ob-input mt-1 w-full" value={jobNotes} onChange={(e) => setJobNotes(e.target.value)} maxLength={300} disabled={!canEdit || pending} />
-            </label>
-            <div className="flex gap-2">
-              <button type="submit" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={!canEdit || pending || services.length === 0 || customers.length === 0}>
-                {pending ? "Saving…" : editingJob ? "Save job" : "Request job"}
-              </button>
-              {editingJob ? (
-                <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm disabled:opacity-50" disabled={pending} onClick={() => startJobEdit(null)}>Cancel</button>
-              ) : null}
-            </div>
-          </form>
-        </Card>
-        {error ? <p role="alert" className="text-sm text-[var(--ob-danger)]">{error}</p> : null}
-      </div>
-      <div className="space-y-4 lg:col-span-2">
+                  <label className="block text-sm">
+                    <span className="text-[var(--ob-text-muted)]">Price</span>
+                    <input className="ob-input mt-1 w-full" type="number" min={0} step="0.01" value={svcPrice} onChange={(e) => setSvcPrice(e.target.value)} required disabled={!canEdit || pending} />
+                  </label>
+                </div>
+                <div className="flex gap-2">
+                  <button type="submit" className="ob-press ob-btn-primary ob-touch-target rounded-full px-4 py-1.5 text-sm font-semibold disabled:opacity-50" disabled={!canEdit || pending}>
+                    {pending ? "Saving…" : editingService ? "Save changes" : "Add service"}
+                  </button>
+                  {editingService ? (
+                    <button type="button" className="ob-touch-target ob-btn-ghost rounded-full px-4 py-1.5 text-sm font-semibold disabled:opacity-50" disabled={pending} onClick={() => startServiceEdit(null)}>Cancel</button>
+                  ) : null}
+                </div>
+              </form>
+            </Card>
+          ) : null}
+          {canAdd || editingJob ? (
+            <Card className="p-4">
+              <h2 className="font-semibold">{editingJob ? "Edit job" : "New service job"}</h2>
+              <form
+                className="mt-3 space-y-3"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const ok = await run(() =>
+                    saveServiceJobAction(editingJob?.id ?? null, {
+                      serviceId: jobService,
+                      customerId: jobCustomer,
+                      staffIds: jobStaff,
+                      scheduledAt: jobWhen || undefined,
+                      notes: jobNotes,
+                    }),
+                  );
+                  if (ok) startJobEdit(null);
+                }}
+              >
+                <label className="block text-sm">
+                  <span className="text-[var(--ob-text-muted)]">Service</span>
+                  <select className="ob-input mt-1 w-full" value={jobService} onChange={(e) => setJobService(e.target.value)} disabled={!canEdit || pending}>
+                    {services.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </select>
+                </label>
+                <label className="block text-sm">
+                  <span className="text-[var(--ob-text-muted)]">Customer</span>
+                  <select className="ob-input mt-1 w-full" value={jobCustomer} onChange={(e) => setJobCustomer(e.target.value)} disabled={!canEdit || pending}>
+                    {customers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </label>
+                <fieldset disabled={!canEdit || pending}>
+                  <legend className="text-sm text-[var(--ob-text-muted)]">Assign staff</legend>
+                  <div className="mt-1 space-y-1">
+                    {staff.map((s) => (
+                      <label key={s.id} className="ob-touch-target flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={jobStaff.includes(s.id)}
+                          onChange={(e) =>
+                            setJobStaff(e.target.checked ? [...jobStaff, s.id] : jobStaff.filter((id) => id !== s.id))
+                          }
+                        />
+                        {s.name}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+                <label className="block text-sm">
+                  <span className="text-[var(--ob-text-muted)]">Scheduled at (optional)</span>
+                  <input className="ob-input mt-1 w-full" type="datetime-local" value={jobWhen} onChange={(e) => setJobWhen(e.target.value)} disabled={!canEdit || pending} />
+                </label>
+                <label className="block text-sm">
+                  <span className="text-[var(--ob-text-muted)]">Notes (optional)</span>
+                  <input className="ob-input mt-1 w-full" value={jobNotes} onChange={(e) => setJobNotes(e.target.value)} maxLength={300} disabled={!canEdit || pending} />
+                </label>
+                <div className="flex gap-2">
+                  <button type="submit" className="ob-press ob-btn-primary ob-touch-target rounded-full px-4 py-1.5 text-sm font-semibold disabled:opacity-50" disabled={!canEdit || pending || services.length === 0 || customers.length === 0}>
+                    {pending ? "Saving…" : editingJob ? "Save job" : "Request job"}
+                  </button>
+                  {editingJob ? (
+                    <button type="button" className="ob-touch-target ob-btn-ghost rounded-full px-4 py-1.5 text-sm font-semibold disabled:opacity-50" disabled={pending} onClick={() => startJobEdit(null)}>Cancel</button>
+                  ) : null}
+                </div>
+              </form>
+            </Card>
+          ) : null}
+        </div>
+      ) : null}
+      <div className={canAdd || editingService || editingJob ? "space-y-4 lg:col-span-2" : "space-y-4 lg:col-span-3"}>
         <section>
           <h2 className="mb-2 text-sm font-semibold">Service catalogue</h2>
           <div className="space-y-2">
             {services.length === 0 ? (
-              <Card className="p-4 text-sm text-[var(--ob-text-muted)]">No services yet. Add one to start taking jobs.</Card>
+              <Card className="p-4 text-sm text-[var(--ob-text-muted)]">
+                {canAdd
+                  ? "No services yet. Add one to start taking jobs."
+                  : "No services left in this demo."}
+              </Card>
             ) : services.map((s) => (
               <Card key={s.id} className="p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -231,9 +243,9 @@ export function ServicesManager({
                   </div>
                   {canEdit ? (
                     <div className="flex flex-wrap gap-2">
-                      <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm disabled:opacity-50" disabled={pending} onClick={() => run(() => toggleServiceActiveAction(s.id, !s.isActive))}>{s.isActive ? "Deactivate" : "Activate"}</button>
-                      <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm disabled:opacity-50" disabled={pending} onClick={() => startServiceEdit(s)}>Edit</button>
-                      <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm disabled:opacity-50" disabled={pending} onClick={() => run(() => deleteServiceAction(s.id))}>Delete</button>
+                      <button type="button" className="ob-touch-target ob-btn-ghost rounded-full px-3 py-1.5 text-sm font-semibold disabled:opacity-50" disabled={pending} onClick={() => run(() => toggleServiceActiveAction(s.id, !s.isActive))}>{s.isActive ? "Deactivate" : "Activate"}</button>
+                      <button type="button" className="ob-touch-target ob-btn-ghost rounded-full px-3 py-1.5 text-sm font-semibold disabled:opacity-50" disabled={pending} onClick={() => startServiceEdit(s)}>Edit</button>
+                      <button type="button" className="ob-touch-target ob-btn-ghost rounded-full px-3 py-1.5 text-sm font-semibold disabled:opacity-50" disabled={pending} onClick={() => run(() => deleteServiceAction(s.id))}>Delete</button>
                     </div>
                   ) : null}
                 </div>
@@ -265,12 +277,12 @@ export function ServicesManager({
                         {canEdit ? (
                           <div className="flex flex-wrap gap-2">
                             {nextJobStatus(j.status) ? (
-                              <button type="button" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-3 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={pending} onClick={() => run(() => advanceServiceJobAction(j.id))}>
+                              <button type="button" className="ob-press ob-btn-primary ob-touch-target rounded-full px-3 py-1.5 text-sm font-semibold disabled:opacity-50" disabled={pending} onClick={() => run(() => advanceServiceJobAction(j.id))}>
                                 Mark {SERVICE_JOB_STATUS_LABELS[nextJobStatus(j.status)!].toLowerCase()}
                               </button>
                             ) : null}
-                            <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm disabled:opacity-50" disabled={pending} onClick={() => startJobEdit(j)}>Edit</button>
-                            <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm disabled:opacity-50" disabled={pending} onClick={() => run(() => deleteServiceJobAction(j.id))}>Delete</button>
+                            <button type="button" className="ob-touch-target ob-btn-ghost rounded-full px-3 py-1.5 text-sm font-semibold disabled:opacity-50" disabled={pending} onClick={() => startJobEdit(j)}>Edit</button>
+                            <button type="button" className="ob-touch-target ob-btn-ghost rounded-full px-3 py-1.5 text-sm font-semibold disabled:opacity-50" disabled={pending} onClick={() => run(() => deleteServiceJobAction(j.id))}>Delete</button>
                           </div>
                         ) : null}
                       </div>

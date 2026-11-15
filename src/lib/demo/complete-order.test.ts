@@ -27,7 +27,7 @@ vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 import { completeDemoOrder } from "./server";
 import { getDemoOrder } from "./data";
 import { appendDemoOrderRecord } from "./order-store";
-import { readDemoMutableBucket, updateDemoMutableBucket } from "./mutable-store";
+import { readDemoMutableBucket } from "./mutable-store";
 import { DEMO_WORKSPACE_COOKIE } from "@/lib/workspace/constants";
 
 function makeStoredOrder(overrides: Partial<Order> = {}): Order {
@@ -60,33 +60,12 @@ describe("completeDemoOrder", () => {
     jar.map.set(DEMO_WORKSPACE_COOKIE, "BR-1");
   });
 
-  it("completes a pending order and auto-records the chosen method", async () => {
+  it("patches status only, leaving the read-only payment ledger untouched", async () => {
     const order = makeStoredOrder();
     await appendDemoOrderRecord("BR-1", order, emptyItems);
 
     const res = await completeDemoOrder(order.id);
     expect(res).toEqual({ ok: true, orderNumber: "BC-7001" });
-
-    const after = await getDemoOrder(order.id, "BR-1");
-    expect(after?.status).toBe("completed");
-    expect(after?.payment_status).toBe("paid");
-    expect(after?.amount_paid).toBe(745.5);
-
-    const bucket = await readDemoMutableBucket("BR-1");
-    expect(bucket.payments[0]).toMatchObject({
-      order_id: order.id,
-      amount: 745.5,
-      method: "UPI",
-      status: "paid",
-    });
-  });
-
-  it("completes without payment when method is null (payment pending)", async () => {
-    const order = makeStoredOrder({ payment_method: null });
-    await appendDemoOrderRecord("BR-1", order, emptyItems);
-
-    const res = await completeDemoOrder(order.id);
-    expect(res.ok).toBe(true);
 
     const after = await getDemoOrder(order.id, "BR-1");
     expect(after?.status).toBe("completed");
@@ -121,34 +100,20 @@ describe("completeDemoOrder", () => {
     });
   });
 
-  it("completes a fixture order via orderPatches fallback", async () => {
-    // Pack order o1 is a fixture (not in the cookie order store); a prior
-    // patch made it pending with a payment intent.
-    await updateDemoMutableBucket("BR-1", (b) => ({
-      ...b,
-      orderPatches: {
-        ...b.orderPatches,
-        o1: { status: "pending", payment_status: "pending", payment_method: "Cash" },
-      },
-    }));
-
-    const res = await completeDemoOrder("o1");
+  it("completes a pack order via orderPatches fallback", async () => {
+    // o-BC-1060 ships as a pending counter order, so it lives in the CSV pack
+    // rather than the cookie order store.
+    const res = await completeDemoOrder("o-BC-1060");
     expect(res.ok).toBe(true);
 
-    const after = await getDemoOrder("o1", "BR-1");
+    const after = await getDemoOrder("o-BC-1060", "BR-1");
     expect(after?.status).toBe("completed");
-    expect(after?.payment_status).toBe("paid");
+    expect(after?.payment_status).toBe("pending");
 
     const bucket = await readDemoMutableBucket("BR-1");
-    expect(bucket.orderPatches.o1).toMatchObject({
+    expect(bucket.orderPatches["o-BC-1060"]).toMatchObject({
       status: "completed",
-      payment_status: "paid",
-      amount_paid: after?.grand_total,
     });
-    expect(bucket.payments[0]).toMatchObject({
-      order_id: "o1",
-      method: "Cash",
-      amount: after?.grand_total,
-    });
+    expect(bucket.payments).toHaveLength(0);
   });
 });

@@ -1,2 +1,3 @@
 id,brand_id,name,description,durationMinutes,price,isActive
 bc-svc-1,demo-brewery-cafe,Catering Coffee Bar,Pop-up espresso bar for events,120,5000,true
+bc-svc-2,demo-brewery-cafe,Latte Art Workshop,Ninety-minute barista class for up to eight guests,90,1200,true

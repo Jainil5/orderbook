@@ -1,0 +1,3 @@
+id,brand_id,title,description,assigneeStaffId,customerId,priority,dueAt,status
+cf-task-1,demo-cubig-furniture,Send sofa care guide to Priya Homes,,cf-staff-4,fc2,medium,2026-11-12T08:21:25.080Z,open
+cf-task-2,demo-cubig-furniture,Confirm lift booking for Shah delivery,"Tower B, service lift",cf-staff-1,fc4,high,2026-11-10T08:21:25.080Z,open

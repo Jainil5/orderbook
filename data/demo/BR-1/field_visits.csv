@@ -1,2 +1,3 @@
 id,brand_id,customerId,staffId,purpose,status,checkInAt,checkOutAt,report
 bc-visit-1,demo-brewery-cafe,c3,bc-staff-1,Supplier meeting — next roast lot,planned,,,
+bc-visit-2,demo-brewery-cafe,c9,bc-staff-3,Allergen audit at the pastry counter,completed,2026-11-11T09:00:00.000Z,2026-11-11T10:00:00.000Z,Supplier swapped almond flour for a nut-free blend.

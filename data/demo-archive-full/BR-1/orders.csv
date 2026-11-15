@@ -1,0 +1,275 @@
+id,brand_id,order_number,status,payment_status,customer_id,customer_name_snapshot,subtotal,discount_total,tax_total,fees_total,grand_total,notes,created_at,table_tag,delivery_notes,order_type,service_date,guests,delivery_address,payment_method,payment_reference,deposit_percent,amount_paid,offer_code_snapshot,public_token,parent_order_id,order_kind
+o1,demo-brewery-cafe,BC-1042,completed,paid,c2,Ananya Mehta,680,68,30.6,0,642.6,,2026-11-11T03:21:25.073Z,,,,,,,,,,,,,,
+o2,demo-brewery-cafe,BC-1041,completed,paid,,Walk-in Guest,450,0,22.5,0,472.5,Table 4,2026-11-10T04:21:25.073Z,,,,,,,,,,,,,,
+hist-BC-1,demo-brewery-cafe,BC-H1,completed,paid,h-cust-26,Aarav Sharma,780,0,39,0,819,,2026-05-02T14:42:00.000Z,,,dine_in,2026-05-02,4,,UPI,,,819,,,,sale
+hist-BC-2,demo-brewery-cafe,BC-H2,completed,paid,,Walk-in Guest,740,0,37,0,777,,2026-05-09T07:40:00.000Z,,,takeaway,2026-05-09,,,UPI,,,777,,,,sale
+hist-BC-3,demo-brewery-cafe,BC-H3,completed,paid,h-cust-14,Siddharth Gupta,2660,0,133,0,2793,,2026-05-28T09:06:00.000Z,,,takeaway,2026-05-28,,,UPI,,,2793,,,,sale
+hist-BC-4,demo-brewery-cafe,BC-H4,completed,paid,h-cust-12,Manav Menon,1420,0,71,0,1491,,2026-05-25T11:59:00.000Z,,,dine_in,2026-05-25,3,,UPI,,,1491,,,,sale
+hist-BC-5,demo-brewery-cafe,BC-H5,completed,paid,h-cust-16,Gaurav Gupta,840,0,42,0,882,,2026-05-16T08:39:00.000Z,,,dine_in,2026-05-16,4,,Cash,,,882,,,,sale
+hist-BC-6,demo-brewery-cafe,BC-H6,completed,paid,h-cust-13,Ira Bose,1620,0,81,0,1701,,2026-05-28T12:10:00.000Z,,,dine_in,2026-05-28,4,,Cash,,,1701,,,,sale
+hist-BC-7,demo-brewery-cafe,BC-H7,completed,paid,,Walk-in Guest,270,0,13.5,0,283.5,,2026-05-23T03:01:00.000Z,,,delivery,2026-05-23,,"80 Bandra West, Linking Road",Cash,,,283.5,,,,sale
+hist-BC-8,demo-brewery-cafe,BC-H8,completed,paid,h-cust-26,Aarav Sharma,1500,0,75,0,1575,,2026-05-12T04:57:00.000Z,,,dine_in,2026-05-12,4,,Card,,,1575,,,,sale
+hist-BC-9,demo-brewery-cafe,BC-H9,completed,paid,h-cust-14,Siddharth Gupta,1008,112,50.4,0,1058.4,,2026-05-18T02:39:00.000Z,,,takeaway,2026-05-18,,,Card,,,1058.4,HAPPY10,,,sale
+hist-BC-10,demo-brewery-cafe,BC-H10,completed,paid,h-cust-32,Naveen Pillai,540,0,27,0,567,,2026-05-14T11:25:00.000Z,,,dine_in,2026-05-14,2,,UPI,,,567,,,,sale
+hist-BC-11,demo-brewery-cafe,BC-H11,completed,paid,h-cust-35,Farhan Patel,360,0,18,0,378,,2026-05-11T05:15:00.000Z,,,dine_in,2026-05-11,3,,UPI,,,378,,,,sale
+hist-BC-12,demo-brewery-cafe,BC-H12,completed,paid,h-cust-26,Aarav Sharma,540,0,27,0,567,,2026-05-13T03:17:00.000Z,,,delivery,2026-05-13,,"59 Koramangala, 5th Block",UPI,,,567,,,,sale
+hist-BC-13,demo-brewery-cafe,BC-H13,completed,paid,h-cust-33,Yash Nair,690,0,34.5,0,724.5,,2026-05-07T09:31:00.000Z,,,takeaway,2026-05-07,,,UPI,,,724.5,,,,sale
+hist-BC-14,demo-brewery-cafe,BC-H14,completed,paid,,Walk-in Guest,1355,75,67.75,0,1422.75,,2026-05-09T08:32:00.000Z,,,dine_in,2026-05-09,3,,UPI,,,1422.75,,,,sale
+hist-BC-15,demo-brewery-cafe,BC-H15,completed,paid,,Walk-in Guest,1800,0,90,0,1890,,2026-05-08T08:34:00.000Z,,,dine_in,2026-05-08,3,,Cash,,,1890,,,,sale
+hist-BC-16,demo-brewery-cafe,BC-H16,completed,paid,h-cust-31,Rahul Verma,960,0,48,0,1008,,2026-05-08T09:31:00.000Z,,,dine_in,2026-05-08,3,,Cash,,,1008,,,,sale
+hist-BC-17,demo-brewery-cafe,BC-H17,completed,paid,,Walk-in Guest,680,0,34,0,714,,2026-05-08T15:22:00.000Z,,,dine_in,2026-05-08,3,,Cash,,,714,,,,sale
+hist-BC-18,demo-brewery-cafe,BC-H18,completed,paid,h-cust-24,Rahul Rao,612,68,30.6,0,642.6,,2026-05-08T12:13:00.000Z,,,dine_in,2026-05-08,4,,Card,,,642.6,HAPPY10,,,sale
+hist-BC-19,demo-brewery-cafe,BC-H19,completed,paid,h-cust-17,Rohan Gupta,725,75,36.25,0,761.25,,2026-05-27T08:15:00.000Z,,,takeaway,2026-05-27,,,Card,,,761.25,,,,sale
+hist-BC-20,demo-brewery-cafe,BC-H20,cancelled,refunded,h-cust-8,Arjun Rao,1810,0,90.5,0,1900.5,,2026-05-30T09:47:00.000Z,,,online,2026-05-30,,,,Zomato-4256,,0,,,,sale
+hist-BC-21,demo-brewery-cafe,BC-H21,completed,paid,,Walk-in Guest,1110,0,55.5,0,1165.5,,2026-05-08T15:10:00.000Z,,,dine_in,2026-05-08,4,,UPI,,,1165.5,,,,sale
+hist-BC-22,demo-brewery-cafe,BC-H22,completed,paid,h-cust-31,Rahul Verma,1890,0,94.5,0,1984.5,,2026-05-11T03:49:00.000Z,,,delivery,2026-05-11,,"53 Indiranagar, 100 Ft Road",UPI,,,1984.5,,,,sale
+hist-BC-23,demo-brewery-cafe,BC-H23,completed,paid,h-cust-29,Tara Reddy,1340,0,67,0,1407,,2026-05-22T04:20:00.000Z,,,dine_in,2026-05-22,2,,UPI,,,1407,,,,sale
+hist-BC-24,demo-brewery-cafe,BC-H24,completed,paid,h-cust-18,Pooja Bhatt,1230,0,61.5,0,1291.5,,2026-05-06T02:45:00.000Z,,,dine_in,2026-05-06,3,,UPI,,,1291.5,,,,sale
+hist-BC-25,demo-brewery-cafe,BC-H25,completed,paid,h-cust-16,Gaurav Gupta,1530,0,76.5,0,1606.5,,2026-05-13T08:44:00.000Z,,,delivery,2026-05-13,,"35 Salt Lake, Sector V",Cash,,,1606.5,,,,sale
+hist-BC-26,demo-brewery-cafe,BC-H26,completed,paid,h-cust-24,Rahul Rao,2440,0,122,0,2562,,2026-05-15T02:35:00.000Z,,,takeaway,2026-05-15,,,Cash,,,2562,,,,sale
+hist-BC-27,demo-brewery-cafe,BC-H27,completed,paid,,Walk-in Guest,2440,200,122,0,2562,,2026-05-30T12:24:00.000Z,,,dine_in,2026-05-30,2,,Cash,,,2562,HAPPY10,,,sale
+hist-BC-28,demo-brewery-cafe,BC-H28,completed,paid,h-cust-16,Gaurav Gupta,440,0,22,0,462,,2026-05-25T15:28:00.000Z,,,takeaway,2026-05-25,,,Card,,,462,,,,sale
+hist-BC-29,demo-brewery-cafe,BC-H29,completed,paid,,Walk-in Guest,2880,0,144,0,3024,,2026-05-25T11:20:00.000Z,,,dine_in,2026-05-25,2,,Card,,,3024,,,,sale
+hist-BC-30,demo-brewery-cafe,BC-H30,completed,paid,h-cust-22,Leela Patel,2370,0,118.5,0,2488.5,,2026-05-02T11:10:00.000Z,,,dine_in,2026-05-02,4,,UPI,,,2488.5,,,,sale
+hist-BC-31,demo-brewery-cafe,BC-H31,completed,paid,h-cust-18,Pooja Bhatt,250,0,12.5,0,262.5,,2026-06-20T11:33:00.000Z,,,dine_in,2026-06-20,1,,UPI,,,262.5,,,,sale
+hist-BC-32,demo-brewery-cafe,BC-H32,completed,paid,,Walk-in Guest,1690,0,84.5,0,1774.5,,2026-06-27T08:01:00.000Z,,,dine_in,2026-06-27,1,,UPI,,,1774.5,,,,sale
+hist-BC-33,demo-brewery-cafe,BC-H33,completed,paid,h-cust-12,Manav Menon,2160,0,108,0,2268,,2026-06-03T08:47:00.000Z,,,dine_in,2026-06-03,1,,UPI,,,2268,,,,sale
+hist-BC-34,demo-brewery-cafe,BC-H34,completed,paid,h-cust-2,Gaurav Rao,1110,0,55.5,0,1165.5,,2026-06-01T04:06:00.000Z,,,dine_in,2026-06-01,3,,UPI,,,1165.5,,,,sale
+hist-BC-35,demo-brewery-cafe,BC-H35,completed,paid,h-cust-32,Naveen Pillai,900,0,45,0,945,,2026-06-20T07:05:00.000Z,,,dine_in,2026-06-20,4,,Cash,,,945,,,,sale
+hist-BC-36,demo-brewery-cafe,BC-H36,completed,paid,,Walk-in Guest,1530,170,76.5,0,1606.5,,2026-06-11T11:32:00.000Z,,,dine_in,2026-06-11,3,,Cash,,,1606.5,HAPPY10,,,sale
+hist-BC-37,demo-brewery-cafe,BC-H37,completed,paid,h-cust-21,Manav Bose,1160,0,58,0,1218,,2026-06-05T03:02:00.000Z,,,takeaway,2026-06-05,,,Cash,,,1218,,,,sale
+hist-BC-38,demo-brewery-cafe,BC-H38,completed,paid,,Walk-in Guest,780,0,39,0,819,,2026-06-01T02:43:00.000Z,,,online,2026-06-01,,,Card,Zomato-8205,,819,,,,sale
+hist-BC-39,demo-brewery-cafe,BC-H39,completed,paid,h-cust-37,Nikhil Nair,1020,0,51,0,1071,,2026-06-16T13:26:00.000Z,,,dine_in,2026-06-16,1,,Card,,,1071,,,,sale
+hist-BC-40,demo-brewery-cafe,BC-H40,cancelled,refunded,h-cust-16,Gaurav Gupta,1050,0,52.5,0,1102.5,,2026-06-02T12:50:00.000Z,,,delivery,2026-06-02,,"23 Bandra West, Linking Road",,,,0,,,,sale
+hist-BC-41,demo-brewery-cafe,BC-H41,completed,paid,h-cust-3,Saanvi Reddy,1900,0,95,0,1995,,2026-06-09T12:38:00.000Z,,,online,2026-06-09,,,UPI,Zomato-2481,,1995,,,,sale
+hist-BC-42,demo-brewery-cafe,BC-H42,completed,paid,,Walk-in Guest,180,0,9,0,189,,2026-06-28T03:13:00.000Z,,,takeaway,2026-06-28,,,UPI,,,189,,,,sale
+hist-BC-43,demo-brewery-cafe,BC-H43,completed,paid,h-cust-24,Rahul Rao,770,0,38.5,0,808.5,,2026-06-19T11:06:00.000Z,,,dine_in,2026-06-19,1,,UPI,,,808.5,,,,sale
+hist-BC-44,demo-brewery-cafe,BC-H44,completed,paid,h-cust-32,Naveen Pillai,840,0,42,0,882,,2026-06-23T14:54:00.000Z,,,delivery,2026-06-23,,"39 Andheri East, Sahar Road",UPI,,,882,,,,sale
+hist-BC-45,demo-brewery-cafe,BC-H45,completed,paid,h-cust-22,Leela Patel,250,0,12.5,0,262.5,,2026-06-26T04:22:00.000Z,,,dine_in,2026-06-26,4,,Cash,,,262.5,,,,sale
+hist-BC-46,demo-brewery-cafe,BC-H46,completed,paid,h-cust-14,Siddharth Gupta,180,0,9,0,189,,2026-06-27T09:43:00.000Z,,,dine_in,2026-06-27,4,,Cash,,,189,,,,sale
+hist-BC-47,demo-brewery-cafe,BC-H47,completed,paid,h-cust-7,Aarav Chopra,670,0,33.5,0,703.5,,2026-06-25T13:56:00.000Z,,,online,2026-06-25,,,Cash,Zomato-9351,,703.5,,,,sale
+hist-BC-48,demo-brewery-cafe,BC-H48,completed,paid,h-cust-30,Yash Bose,790,150,39.5,0,829.5,,2026-06-18T04:11:00.000Z,,,takeaway,2026-06-18,,,Card,,,829.5,,,,sale
+hist-BC-49,demo-brewery-cafe,BC-H49,completed,paid,h-cust-21,Manav Bose,540,0,27,0,567,,2026-06-14T03:09:00.000Z,,,dine_in,2026-06-14,2,,Card,,,567,,,,sale
+hist-BC-50,demo-brewery-cafe,BC-H50,completed,paid,h-cust-28,Karan Iyer,740,0,37,0,777,,2026-06-08T14:16:00.000Z,,,takeaway,2026-06-08,,,UPI,,,777,,,,sale
+hist-BC-51,demo-brewery-cafe,BC-H51,completed,paid,h-cust-38,Siddharth Rao,1400,0,70,0,1470,,2026-06-08T02:30:00.000Z,,,dine_in,2026-06-08,4,,UPI,,,1470,,,,sale
+hist-BC-52,demo-brewery-cafe,BC-H52,completed,paid,h-cust-15,Aarav Mehta,1790,0,89.5,0,1879.5,,2026-06-07T07:43:00.000Z,,,takeaway,2026-06-07,,,UPI,,,1879.5,,,,sale
+hist-BC-53,demo-brewery-cafe,BC-H53,completed,paid,h-cust-20,Pooja Patel,1440,0,72,0,1512,,2026-06-20T08:24:00.000Z,,,dine_in,2026-06-20,2,,UPI,,,1512,,,,sale
+hist-BC-54,demo-brewery-cafe,BC-H54,completed,paid,,Walk-in Guest,1233,137,61.65,0,1294.65,,2026-06-06T02:41:00.000Z,,,dine_in,2026-06-06,1,,UPI,,,1294.65,HAPPY10,,,sale
+hist-BC-55,demo-brewery-cafe,BC-H55,completed,paid,h-cust-39,Ira Chopra,280,0,14,0,294,,2026-06-19T06:23:00.000Z,,,takeaway,2026-06-19,,,Cash,,,294,,,,sale
+hist-BC-56,demo-brewery-cafe,BC-H56,completed,paid,h-cust-18,Pooja Bhatt,2620,0,131,0,2751,,2026-06-18T08:03:00.000Z,,,dine_in,2026-06-18,2,,Cash,,,2751,,,,sale
+hist-BC-57,demo-brewery-cafe,BC-H57,completed,paid,,Walk-in Guest,1000,0,50,0,1050,,2026-06-20T02:38:00.000Z,,,takeaway,2026-06-20,,,Cash,,,1050,,,,sale
+hist-BC-58,demo-brewery-cafe,BC-H58,completed,paid,h-cust-11,Sameer Pillai,1080,0,54,0,1134,,2026-06-24T14:33:00.000Z,,,takeaway,2026-06-24,,,Card,,,1134,,,,sale
+hist-BC-59,demo-brewery-cafe,BC-H59,completed,paid,h-cust-5,Saanvi Desai,1800,0,90,0,1890,,2026-06-10T02:36:00.000Z,,,delivery,2026-06-10,,"17 Bandra West, Linking Road",Card,,,1890,,,,sale
+hist-BC-60,demo-brewery-cafe,BC-H60,cancelled,refunded,h-cust-20,Pooja Patel,1830,0,91.5,0,1921.5,,2026-06-16T13:27:00.000Z,,,takeaway,2026-06-16,,,,,,0,,,,sale
+hist-BC-61,demo-brewery-cafe,BC-H61,completed,paid,h-cust-9,Riya Pillai,2080,0,104,0,2184,,2026-06-27T04:57:00.000Z,,,takeaway,2026-06-27,,,UPI,,,2184,,,,sale
+hist-BC-62,demo-brewery-cafe,BC-H62,completed,paid,h-cust-37,Nikhil Nair,1590,0,79.5,0,1669.5,,2026-06-27T11:25:00.000Z,,,dine_in,2026-06-27,2,,UPI,,,1669.5,,,,sale
+hist-BC-63,demo-brewery-cafe,BC-H63,completed,paid,h-cust-18,Pooja Bhatt,210,0,10.5,0,220.5,,2026-06-09T10:56:00.000Z,,,online,2026-06-09,,,UPI,Zomato-2167,,220.5,,,,sale
+hist-BC-64,demo-brewery-cafe,BC-H64,completed,paid,h-cust-21,Manav Bose,1390,0,69.5,0,1459.5,,2026-06-10T12:21:00.000Z,,,dine_in,2026-06-10,4,,UPI,,,1459.5,,,,sale
+hist-BC-65,demo-brewery-cafe,BC-H65,completed,paid,h-cust-28,Karan Iyer,900,0,45,0,945,,2026-07-02T14:04:00.000Z,,,delivery,2026-07-02,,"47 Bandra West, Linking Road",Cash,,,945,,,,sale
+hist-BC-66,demo-brewery-cafe,BC-H66,completed,paid,,Walk-in Guest,1460,0,73,0,1533,,2026-07-14T05:23:00.000Z,,,dine_in,2026-07-14,1,,Cash,,,1533,,,,sale
+hist-BC-67,demo-brewery-cafe,BC-H67,completed,paid,h-cust-2,Gaurav Rao,1080,0,54,0,1134,,2026-07-23T04:05:00.000Z,,,dine_in,2026-07-23,1,,Cash,,,1134,,,,sale
+hist-BC-68,demo-brewery-cafe,BC-H68,completed,paid,h-cust-39,Ira Chopra,1070,150,53.5,0,1123.5,,2026-07-22T04:02:00.000Z,,,dine_in,2026-07-22,4,,Card,,,1123.5,,,,sale
+hist-BC-69,demo-brewery-cafe,BC-H69,completed,paid,h-cust-21,Manav Bose,260,0,13,0,273,,2026-07-16T06:06:00.000Z,,,takeaway,2026-07-16,,,Card,,,273,,,,sale
+hist-BC-70,demo-brewery-cafe,BC-H70,completed,paid,h-cust-22,Leela Patel,1170,0,58.5,0,1228.5,,2026-07-23T04:31:00.000Z,,,dine_in,2026-07-23,1,,UPI,,,1228.5,,,,sale
+hist-BC-71,demo-brewery-cafe,BC-H71,completed,paid,h-cust-10,Ira Rao,640,0,32,0,672,,2026-07-16T15:16:00.000Z,,,dine_in,2026-07-16,3,,UPI,,,672,,,,sale
+hist-BC-72,demo-brewery-cafe,BC-H72,completed,paid,h-cust-21,Manav Bose,1512,168,75.6,0,1587.6,,2026-07-16T08:35:00.000Z,,,delivery,2026-07-16,,"14 Koramangala, 5th Block",UPI,,,1587.6,HAPPY10,,,sale
+hist-BC-73,demo-brewery-cafe,BC-H73,completed,paid,,Walk-in Guest,520,0,26,0,546,,2026-07-03T05:34:00.000Z,,,dine_in,2026-07-03,3,,UPI,,,546,,,,sale
+hist-BC-74,demo-brewery-cafe,BC-H74,completed,paid,h-cust-27,Anika Pillai,500,0,25,0,525,,2026-07-10T14:15:00.000Z,,,dine_in,2026-07-10,1,,UPI,,,525,,,,sale
+hist-BC-75,demo-brewery-cafe,BC-H75,completed,paid,h-cust-8,Arjun Rao,1330,0,66.5,0,1396.5,,2026-07-01T13:26:00.000Z,,,dine_in,2026-07-01,4,,Cash,,,1396.5,,,,sale
+hist-BC-76,demo-brewery-cafe,BC-H76,completed,paid,,Walk-in Guest,940,0,47,0,987,,2026-07-18T09:50:00.000Z,,,dine_in,2026-07-18,3,,Cash,,,987,,,,sale
+hist-BC-77,demo-brewery-cafe,BC-H77,completed,paid,h-cust-40,Aditya Verma,1200,0,60,0,1260,,2026-07-24T08:50:00.000Z,,,dine_in,2026-07-24,2,,Cash,,,1260,,,,sale
+hist-BC-78,demo-brewery-cafe,BC-H78,completed,paid,,Walk-in Guest,995,75,49.75,0,1044.75,,2026-07-05T04:34:00.000Z,,,dine_in,2026-07-05,3,,Card,,,1044.75,,,,sale
+hist-BC-79,demo-brewery-cafe,BC-H79,completed,paid,,Walk-in Guest,120,0,6,0,126,,2026-07-14T02:57:00.000Z,,,takeaway,2026-07-14,,,Card,,,126,,,,sale
+hist-BC-80,demo-brewery-cafe,BC-H80,cancelled,refunded,,Walk-in Guest,600,0,30,0,630,,2026-07-22T15:15:00.000Z,,,dine_in,2026-07-22,3,,,,,0,,,,sale
+hist-BC-81,demo-brewery-cafe,BC-H81,completed,paid,,Walk-in Guest,540,60,27,0,567,,2026-07-22T12:15:00.000Z,,,dine_in,2026-07-22,1,,UPI,,,567,HAPPY10,,,sale
+hist-BC-82,demo-brewery-cafe,BC-H82,completed,paid,,Walk-in Guest,1785,75,89.25,0,1874.25,,2026-07-21T06:19:00.000Z,,,takeaway,2026-07-21,,,UPI,,,1874.25,,,,sale
+hist-BC-83,demo-brewery-cafe,BC-H83,completed,paid,h-cust-13,Ira Bose,1390,0,69.5,0,1459.5,,2026-07-10T12:51:00.000Z,,,takeaway,2026-07-10,,,UPI,,,1459.5,,,,sale
+hist-BC-84,demo-brewery-cafe,BC-H84,completed,paid,h-cust-39,Ira Chopra,720,0,36,0,756,,2026-07-11T04:08:00.000Z,,,takeaway,2026-07-11,,,UPI,,,756,,,,sale
+hist-BC-85,demo-brewery-cafe,BC-H85,completed,paid,h-cust-12,Manav Menon,450,0,22.5,0,472.5,,2026-07-27T12:38:00.000Z,,,dine_in,2026-07-27,1,,Cash,,,472.5,,,,sale
+hist-BC-86,demo-brewery-cafe,BC-H86,completed,paid,,Walk-in Guest,1670,0,83.5,0,1753.5,,2026-07-31T04:38:00.000Z,,,takeaway,2026-07-31,,,Cash,,,1753.5,,,,sale
+hist-BC-87,demo-brewery-cafe,BC-H87,completed,paid,,Walk-in Guest,750,0,37.5,0,787.5,,2026-07-23T04:21:00.000Z,,,dine_in,2026-07-23,4,,Cash,,,787.5,,,,sale
+hist-BC-88,demo-brewery-cafe,BC-H88,completed,paid,,Walk-in Guest,990,0,49.5,0,1039.5,,2026-07-19T04:11:00.000Z,,,dine_in,2026-07-19,2,,Card,,,1039.5,,,,sale
+hist-BC-89,demo-brewery-cafe,BC-H89,completed,paid,h-cust-2,Gaurav Rao,560,0,28,0,588,,2026-07-01T09:37:00.000Z,,,dine_in,2026-07-01,3,,Card,,,588,,,,sale
+hist-BC-90,demo-brewery-cafe,BC-H90,completed,paid,h-cust-2,Gaurav Rao,1008,112,50.4,0,1058.4,,2026-07-23T14:46:00.000Z,,,delivery,2026-07-23,,"11 Salt Lake, Sector V",UPI,,,1058.4,HAPPY10,,,sale
+hist-BC-91,demo-brewery-cafe,BC-H91,completed,paid,,Walk-in Guest,1320,0,66,0,1386,,2026-07-29T05:19:00.000Z,,,dine_in,2026-07-29,3,,UPI,,,1386,,,,sale
+hist-BC-92,demo-brewery-cafe,BC-H92,completed,paid,,Walk-in Guest,1480,0,74,0,1554,,2026-07-21T06:40:00.000Z,,,dine_in,2026-07-21,1,,UPI,,,1554,,,,sale
+hist-BC-93,demo-brewery-cafe,BC-H93,completed,paid,,Walk-in Guest,1740,0,87,0,1827,,2026-07-16T09:55:00.000Z,,,takeaway,2026-07-16,,,UPI,,,1827,,,,sale
+hist-BC-94,demo-brewery-cafe,BC-H94,completed,paid,h-cust-29,Tara Reddy,770,150,38.5,0,808.5,,2026-07-24T05:31:00.000Z,,,dine_in,2026-07-24,4,,UPI,,,808.5,,,,sale
+hist-BC-95,demo-brewery-cafe,BC-H95,completed,paid,h-cust-5,Saanvi Desai,690,0,34.5,0,724.5,,2026-07-24T14:51:00.000Z,,,delivery,2026-07-24,,"28 Bandra West, Linking Road",Cash,,,724.5,,,,sale
+hist-BC-96,demo-brewery-cafe,BC-H96,completed,paid,h-cust-34,Aditya Desai,840,0,42,0,882,,2026-07-31T09:54:00.000Z,,,takeaway,2026-07-31,,,Cash,,,882,,,,sale
+hist-BC-97,demo-brewery-cafe,BC-H97,completed,paid,,Walk-in Guest,1140,0,57,0,1197,,2026-07-08T10:04:00.000Z,,,dine_in,2026-07-08,4,,Cash,,,1197,,,,sale
+hist-BC-98,demo-brewery-cafe,BC-H98,completed,paid,h-cust-14,Siddharth Gupta,1940,0,97,0,2037,,2026-07-02T12:29:00.000Z,,,dine_in,2026-07-02,1,,Card,,,2037,,,,sale
+hist-BC-99,demo-brewery-cafe,BC-H99,completed,paid,h-cust-38,Siddharth Rao,324,36,16.2,0,340.2,,2026-07-15T12:44:00.000Z,,,dine_in,2026-07-15,1,,Card,,,340.2,HAPPY10,,,sale
+hist-BC-100,demo-brewery-cafe,BC-H100,cancelled,refunded,h-cust-30,Yash Bose,360,0,18,0,378,,2026-07-10T12:05:00.000Z,,,takeaway,2026-07-10,,,,,,0,,,,sale
+hist-BC-101,demo-brewery-cafe,BC-H101,completed,paid,,Walk-in Guest,2520,0,126,0,2646,,2026-07-25T04:18:00.000Z,,,online,2026-07-25,,,UPI,Zomato-2648,,2646,,,,sale
+hist-BC-102,demo-brewery-cafe,BC-H102,completed,paid,,Walk-in Guest,780,0,39,0,819,,2026-07-24T05:35:00.000Z,,,takeaway,2026-07-24,,,UPI,,,819,,,,sale
+hist-BC-103,demo-brewery-cafe,BC-H103,completed,paid,h-cust-26,Aarav Sharma,1050,0,52.5,0,1102.5,,2026-07-25T05:51:00.000Z,,,delivery,2026-07-25,,"52 Salt Lake, Sector V",UPI,,,1102.5,,,,sale
+hist-BC-104,demo-brewery-cafe,BC-H104,completed,paid,h-cust-11,Sameer Pillai,730,0,36.5,0,766.5,,2026-08-17T13:00:00.000Z,,,takeaway,2026-08-17,,,UPI,,,766.5,,,,sale
+hist-BC-105,demo-brewery-cafe,BC-H105,completed,paid,h-cust-8,Arjun Rao,1010,0,50.5,0,1060.5,,2026-08-28T08:17:00.000Z,,,dine_in,2026-08-28,2,,Cash,,,1060.5,,,,sale
+hist-BC-106,demo-brewery-cafe,BC-H106,completed,paid,h-cust-14,Siddharth Gupta,1300,0,65,0,1365,,2026-08-01T11:03:00.000Z,,,dine_in,2026-08-01,1,,Cash,,,1365,,,,sale
+hist-BC-107,demo-brewery-cafe,BC-H107,completed,paid,h-cust-20,Pooja Patel,2150,0,107.5,0,2257.5,,2026-08-12T12:06:00.000Z,,,delivery,2026-08-12,,"67 Indiranagar, 100 Ft Road",Cash,,,2257.5,,,,sale
+hist-BC-108,demo-brewery-cafe,BC-H108,completed,paid,,Walk-in Guest,936,104,46.8,0,982.8,,2026-08-25T05:53:00.000Z,,,delivery,2026-08-25,,"61 Salt Lake, Sector V",Card,,,982.8,HAPPY10,,,sale
+hist-BC-109,demo-brewery-cafe,BC-H109,completed,paid,,Walk-in Guest,1460,0,73,0,1533,,2026-08-01T07:39:00.000Z,,,takeaway,2026-08-01,,,Card,,,1533,,,,sale
+hist-BC-110,demo-brewery-cafe,BC-H110,completed,paid,,Walk-in Guest,2460,0,123,0,2583,,2026-08-23T10:37:00.000Z,,,dine_in,2026-08-23,1,,UPI,,,2583,,,,sale
+hist-BC-111,demo-brewery-cafe,BC-H111,completed,paid,,Walk-in Guest,230,0,11.5,0,241.5,,2026-08-21T11:53:00.000Z,,,dine_in,2026-08-21,4,,UPI,,,241.5,,,,sale
+hist-BC-112,demo-brewery-cafe,BC-H112,completed,paid,h-cust-39,Ira Chopra,440,0,22,0,462,,2026-08-17T14:52:00.000Z,,,dine_in,2026-08-17,1,,UPI,,,462,,,,sale
+hist-BC-113,demo-brewery-cafe,BC-H113,completed,paid,h-cust-29,Tara Reddy,890,0,44.5,0,934.5,,2026-08-09T04:52:00.000Z,,,dine_in,2026-08-09,4,,UPI,,,934.5,,,,sale
+hist-BC-114,demo-brewery-cafe,BC-H114,completed,paid,,Walk-in Guest,1150,0,57.5,0,1207.5,,2026-08-21T15:14:00.000Z,,,dine_in,2026-08-21,2,,UPI,,,1207.5,,,,sale
+hist-BC-115,demo-brewery-cafe,BC-H115,completed,paid,h-cust-30,Yash Bose,2400,0,120,0,2520,,2026-08-13T07:45:00.000Z,,,dine_in,2026-08-13,4,,Cash,,,2520,,,,sale
+hist-BC-116,demo-brewery-cafe,BC-H116,completed,paid,,Walk-in Guest,1680,0,84,0,1764,,2026-08-19T04:13:00.000Z,,,dine_in,2026-08-19,4,,Cash,,,1764,,,,sale
+hist-BC-117,demo-brewery-cafe,BC-H117,completed,paid,,Walk-in Guest,945,105,47.25,0,992.25,,2026-08-02T12:09:00.000Z,,,dine_in,2026-08-02,2,,Cash,,,992.25,HAPPY10,,,sale
+hist-BC-118,demo-brewery-cafe,BC-H118,completed,paid,h-cust-4,Rohan Kapoor,1180,0,59,0,1239,,2026-08-23T12:59:00.000Z,,,takeaway,2026-08-23,,,Card,,,1239,,,,sale
+hist-BC-119,demo-brewery-cafe,BC-H119,completed,paid,h-cust-35,Farhan Patel,680,0,34,0,714,,2026-08-29T07:11:00.000Z,,,dine_in,2026-08-29,2,,Card,,,714,,,,sale
+hist-BC-120,demo-brewery-cafe,BC-H120,cancelled,refunded,,Walk-in Guest,1180,0,59,0,1239,,2026-08-31T13:49:00.000Z,,,online,2026-08-31,,,,Zomato-9543,,0,,,,sale
+hist-BC-121,demo-brewery-cafe,BC-H121,completed,paid,,Walk-in Guest,990,0,49.5,0,1039.5,,2026-08-01T13:38:00.000Z,,,dine_in,2026-08-01,4,,UPI,,,1039.5,,,,sale
+hist-BC-122,demo-brewery-cafe,BC-H122,completed,paid,h-cust-37,Nikhil Nair,1970,0,98.5,0,2068.5,,2026-08-23T07:55:00.000Z,,,dine_in,2026-08-23,1,,UPI,,,2068.5,,,,sale
+hist-BC-123,demo-brewery-cafe,BC-H123,completed,paid,h-cust-1,Saanvi Pillai,610,0,30.5,0,640.5,,2026-08-21T08:43:00.000Z,,,delivery,2026-08-21,,"48 Indiranagar, 100 Ft Road",UPI,,,640.5,,,,sale
+hist-BC-124,demo-brewery-cafe,BC-H124,completed,paid,h-cust-32,Naveen Pillai,180,0,9,0,189,,2026-08-11T03:39:00.000Z,,,dine_in,2026-08-11,1,,UPI,,,189,,,,sale
+hist-BC-125,demo-brewery-cafe,BC-H125,completed,paid,,Walk-in Guest,680,0,34,0,714,,2026-08-15T12:13:00.000Z,,,takeaway,2026-08-15,,,Cash,,,714,,,,sale
+hist-BC-126,demo-brewery-cafe,BC-H126,completed,paid,h-cust-32,Naveen Pillai,1098,122,54.9,0,1152.9,,2026-08-24T08:33:00.000Z,,,takeaway,2026-08-24,,,Cash,,,1152.9,HAPPY10,,,sale
+hist-BC-127,demo-brewery-cafe,BC-H127,completed,paid,h-cust-8,Arjun Rao,400,0,20,0,420,,2026-08-20T02:57:00.000Z,,,dine_in,2026-08-20,1,,Cash,,,420,,,,sale
+hist-BC-128,demo-brewery-cafe,BC-H128,completed,paid,h-cust-8,Arjun Rao,1940,0,97,0,2037,,2026-08-10T06:23:00.000Z,,,delivery,2026-08-10,,"15 Bandra West, Linking Road",Card,,,2037,,,,sale
+hist-BC-129,demo-brewery-cafe,BC-H129,completed,paid,h-cust-1,Saanvi Pillai,1200,0,60,0,1260,,2026-08-16T03:50:00.000Z,,,takeaway,2026-08-16,,,Card,,,1260,,,,sale
+hist-BC-130,demo-brewery-cafe,BC-H130,completed,paid,h-cust-1,Saanvi Pillai,980,0,49,0,1029,,2026-08-15T09:56:00.000Z,,,takeaway,2026-08-15,,,UPI,,,1029,,,,sale
+hist-BC-131,demo-brewery-cafe,BC-H131,completed,paid,h-cust-40,Aditya Verma,1160,0,58,0,1218,,2026-08-15T11:39:00.000Z,,,dine_in,2026-08-15,4,,UPI,,,1218,,,,sale
+hist-BC-132,demo-brewery-cafe,BC-H132,completed,paid,h-cust-33,Yash Nair,280,0,14,0,294,,2026-08-06T15:14:00.000Z,,,delivery,2026-08-06,,"39 Koramangala, 5th Block",UPI,,,294,,,,sale
+hist-BC-133,demo-brewery-cafe,BC-H133,completed,paid,h-cust-40,Aditya Verma,530,0,26.5,0,556.5,,2026-08-24T12:51:00.000Z,,,dine_in,2026-08-24,4,,UPI,,,556.5,,,,sale
+hist-BC-134,demo-brewery-cafe,BC-H134,completed,paid,h-cust-2,Gaurav Rao,1100,0,55,0,1155,,2026-08-14T06:32:00.000Z,,,takeaway,2026-08-14,,,UPI,,,1155,,,,sale
+hist-BC-135,demo-brewery-cafe,BC-H135,completed,paid,h-cust-2,Gaurav Rao,468,52,23.4,0,491.4,,2026-08-20T14:27:00.000Z,,,dine_in,2026-08-20,3,,Cash,,,491.4,HAPPY10,,,sale
+hist-BC-136,demo-brewery-cafe,BC-H136,completed,paid,h-cust-19,Rahul Menon,440,0,22,0,462,,2026-08-16T09:13:00.000Z,,,dine_in,2026-08-16,3,,Cash,,,462,,,,sale
+hist-BC-137,demo-brewery-cafe,BC-H137,completed,paid,h-cust-1,Saanvi Pillai,1120,0,56,0,1176,,2026-08-19T11:51:00.000Z,,,online,2026-08-19,,,Cash,Zomato-3926,,1176,,,,sale
+hist-BC-138,demo-brewery-cafe,BC-H138,completed,paid,,Walk-in Guest,720,0,36,0,756,,2026-08-22T07:43:00.000Z,,,takeaway,2026-08-22,,,Card,,,756,,,,sale
+hist-BC-139,demo-brewery-cafe,BC-H139,completed,paid,h-cust-19,Rahul Menon,750,0,37.5,0,787.5,,2026-08-15T15:00:00.000Z,,,dine_in,2026-08-15,3,,Card,,,787.5,,,,sale
+hist-BC-140,demo-brewery-cafe,BC-H140,cancelled,refunded,h-cust-10,Ira Rao,1770,0,88.5,0,1858.5,,2026-08-12T13:25:00.000Z,,,dine_in,2026-08-12,3,,,,,0,,,,sale
+hist-BC-141,demo-brewery-cafe,BC-H141,completed,paid,h-cust-40,Aditya Verma,500,0,25,0,525,,2026-08-11T13:32:00.000Z,,,dine_in,2026-08-11,2,,UPI,,,525,,,,sale
+hist-BC-142,demo-brewery-cafe,BC-H142,completed,paid,,Walk-in Guest,1710,0,85.5,0,1795.5,,2026-08-01T06:58:00.000Z,,,takeaway,2026-08-01,,,UPI,,,1795.5,,,,sale
+hist-BC-143,demo-brewery-cafe,BC-H143,completed,paid,,Walk-in Guest,1500,0,75,0,1575,,2026-08-12T04:46:00.000Z,,,takeaway,2026-08-12,,,UPI,,,1575,,,,sale
+hist-BC-144,demo-brewery-cafe,BC-H144,completed,paid,h-cust-36,Aarav Chopra,396,44,19.8,0,415.8,,2026-08-23T15:22:00.000Z,,,dine_in,2026-08-23,1,,UPI,,,415.8,HAPPY10,,,sale
+hist-BC-145,demo-brewery-cafe,BC-H145,completed,paid,h-cust-38,Siddharth Rao,460,0,23,0,483,,2026-08-28T13:43:00.000Z,,,dine_in,2026-08-28,2,,Cash,,,483,,,,sale
+hist-BC-146,demo-brewery-cafe,BC-H146,completed,paid,h-cust-19,Rahul Menon,260,0,13,0,273,,2026-08-21T04:58:00.000Z,,,takeaway,2026-08-21,,,Cash,,,273,,,,sale
+hist-BC-147,demo-brewery-cafe,BC-H147,completed,paid,,Walk-in Guest,2220,0,111,0,2331,,2026-08-25T10:51:00.000Z,,,delivery,2026-08-25,,"77 Indiranagar, 100 Ft Road",Cash,,,2331,,,,sale
+hist-BC-148,demo-brewery-cafe,BC-H148,completed,paid,,Walk-in Guest,2670,0,133.5,0,2803.5,,2026-09-19T11:06:00.000Z,,,takeaway,2026-09-19,,,Card,,,2803.5,,,,sale
+hist-BC-149,demo-brewery-cafe,BC-H149,completed,paid,h-cust-38,Siddharth Rao,1280,0,64,0,1344,,2026-09-10T08:25:00.000Z,,,delivery,2026-09-10,,"48 Andheri East, Sahar Road",Card,,,1344,,,,sale
+hist-BC-150,demo-brewery-cafe,BC-H150,completed,paid,h-cust-19,Rahul Menon,730,0,36.5,0,766.5,,2026-09-14T06:56:00.000Z,,,delivery,2026-09-14,,"56 Andheri East, Sahar Road",UPI,,,766.5,,,,sale
+hist-BC-151,demo-brewery-cafe,BC-H151,completed,paid,,Walk-in Guest,500,0,25,0,525,,2026-09-26T11:50:00.000Z,,,takeaway,2026-09-26,,,UPI,,,525,,,,sale
+hist-BC-152,demo-brewery-cafe,BC-H152,completed,paid,h-cust-14,Siddharth Gupta,1460,0,73,0,1533,,2026-09-24T14:33:00.000Z,,,dine_in,2026-09-24,2,,UPI,,,1533,,,,sale
+hist-BC-153,demo-brewery-cafe,BC-H153,completed,paid,h-cust-27,Anika Pillai,612,68,30.6,0,642.6,,2026-09-24T06:34:00.000Z,,,dine_in,2026-09-24,4,,UPI,,,642.6,HAPPY10,,,sale
+hist-BC-154,demo-brewery-cafe,BC-H154,completed,paid,,Walk-in Guest,180,0,9,0,189,,2026-09-12T09:04:00.000Z,,,delivery,2026-09-12,,"63 Salt Lake, Sector V",UPI,,,189,,,,sale
+hist-BC-155,demo-brewery-cafe,BC-H155,completed,paid,,Walk-in Guest,2180,0,109,0,2289,,2026-09-12T05:42:00.000Z,,,dine_in,2026-09-12,3,,Cash,,,2289,,,,sale
+hist-BC-156,demo-brewery-cafe,BC-H156,completed,paid,h-cust-17,Rohan Gupta,720,0,36,0,756,,2026-09-25T03:25:00.000Z,,,dine_in,2026-09-25,3,,Cash,,,756,,,,sale
+hist-BC-157,demo-brewery-cafe,BC-H157,completed,paid,,Walk-in Guest,1620,0,81,0,1701,,2026-09-08T14:37:00.000Z,,,takeaway,2026-09-08,,,Cash,,,1701,,,,sale
+hist-BC-158,demo-brewery-cafe,BC-H158,completed,paid,,Walk-in Guest,520,0,26,0,546,,2026-09-08T13:26:00.000Z,,,dine_in,2026-09-08,4,,Card,,,546,,,,sale
+hist-BC-159,demo-brewery-cafe,BC-H159,completed,paid,h-cust-38,Siddharth Rao,520,0,26,0,546,,2026-09-17T10:37:00.000Z,,,dine_in,2026-09-17,1,,Card,,,546,,,,sale
+hist-BC-160,demo-brewery-cafe,BC-H160,cancelled,refunded,h-cust-26,Aarav Sharma,500,0,25,0,525,,2026-09-05T06:14:00.000Z,,,dine_in,2026-09-05,1,,,,,0,,,,sale
+hist-BC-161,demo-brewery-cafe,BC-H161,completed,paid,h-cust-15,Aarav Mehta,2560,0,128,0,2688,,2026-09-24T14:28:00.000Z,,,dine_in,2026-09-24,1,,UPI,,,2688,,,,sale
+hist-BC-162,demo-brewery-cafe,BC-H162,completed,paid,h-cust-14,Siddharth Gupta,1152,128,57.6,0,1209.6,,2026-09-01T08:41:00.000Z,,,takeaway,2026-09-01,,,UPI,,,1209.6,HAPPY10,,,sale
+hist-BC-163,demo-brewery-cafe,BC-H163,completed,paid,h-cust-22,Leela Patel,1320,0,66,0,1386,,2026-09-25T12:19:00.000Z,,,dine_in,2026-09-25,2,,UPI,,,1386,,,,sale
+hist-BC-164,demo-brewery-cafe,BC-H164,completed,paid,h-cust-14,Siddharth Gupta,1200,0,60,0,1260,,2026-09-19T13:11:00.000Z,,,dine_in,2026-09-19,3,,UPI,,,1260,,,,sale
+hist-BC-165,demo-brewery-cafe,BC-H165,completed,paid,h-cust-36,Aarav Chopra,1440,0,72,0,1512,,2026-09-27T11:11:00.000Z,,,delivery,2026-09-27,,"2 Indiranagar, 100 Ft Road",Cash,,,1512,,,,sale
+hist-BC-166,demo-brewery-cafe,BC-H166,completed,paid,h-cust-21,Manav Bose,940,0,47,0,987,,2026-09-15T02:37:00.000Z,,,takeaway,2026-09-15,,,Cash,,,987,,,,sale
+hist-BC-167,demo-brewery-cafe,BC-H167,completed,paid,h-cust-16,Gaurav Gupta,1050,0,52.5,0,1102.5,,2026-09-04T05:49:00.000Z,,,dine_in,2026-09-04,1,,Cash,,,1102.5,,,,sale
+hist-BC-168,demo-brewery-cafe,BC-H168,completed,paid,h-cust-25,Tara Malhotra,555,75,27.75,0,582.75,,2026-09-30T14:48:00.000Z,,,delivery,2026-09-30,,"2 Salt Lake, Sector V",Card,,,582.75,,,,sale
+hist-BC-169,demo-brewery-cafe,BC-H169,completed,paid,h-cust-6,Ira Desai,960,0,48,0,1008,,2026-09-23T05:58:00.000Z,,,dine_in,2026-09-23,4,,Card,,,1008,,,,sale
+hist-BC-170,demo-brewery-cafe,BC-H170,completed,paid,h-cust-40,Aditya Verma,1700,0,85,0,1785,,2026-09-27T04:32:00.000Z,,,dine_in,2026-09-27,4,,UPI,,,1785,,,,sale
+hist-BC-171,demo-brewery-cafe,BC-H171,completed,paid,h-cust-26,Aarav Sharma,864,96,43.2,0,907.2,,2026-09-12T12:58:00.000Z,,,dine_in,2026-09-12,2,,UPI,,,907.2,HAPPY10,,,sale
+hist-BC-172,demo-brewery-cafe,BC-H172,completed,paid,h-cust-3,Saanvi Reddy,1270,0,63.5,0,1333.5,,2026-09-19T03:29:00.000Z,,,dine_in,2026-09-19,4,,UPI,,,1333.5,,,,sale
+hist-BC-173,demo-brewery-cafe,BC-H173,completed,paid,h-cust-9,Riya Pillai,700,0,35,0,735,,2026-09-19T05:46:00.000Z,,,takeaway,2026-09-19,,,UPI,,,735,,,,sale
+hist-BC-174,demo-brewery-cafe,BC-H174,completed,paid,,Walk-in Guest,1510,0,75.5,0,1585.5,,2026-09-09T15:16:00.000Z,,,dine_in,2026-09-09,1,,UPI,,,1585.5,,,,sale
+hist-BC-175,demo-brewery-cafe,BC-H175,completed,paid,h-cust-38,Siddharth Rao,600,0,30,0,630,,2026-09-07T15:11:00.000Z,,,dine_in,2026-09-07,3,,Cash,,,630,,,,sale
+hist-BC-176,demo-brewery-cafe,BC-H176,completed,paid,,Walk-in Guest,1245,225,62.25,0,1307.25,,2026-09-05T13:31:00.000Z,,,takeaway,2026-09-05,,,Cash,,,1307.25,,,,sale
+hist-BC-177,demo-brewery-cafe,BC-H177,completed,paid,h-cust-26,Aarav Sharma,1540,0,77,0,1617,,2026-09-04T10:04:00.000Z,,,dine_in,2026-09-04,1,,Cash,,,1617,,,,sale
+hist-BC-178,demo-brewery-cafe,BC-H178,completed,paid,h-cust-1,Saanvi Pillai,590,0,29.5,0,619.5,,2026-09-17T10:18:00.000Z,,,takeaway,2026-09-17,,,Card,,,619.5,,,,sale
+hist-BC-179,demo-brewery-cafe,BC-H179,completed,paid,h-cust-40,Aditya Verma,500,0,25,0,525,,2026-09-19T06:36:00.000Z,,,dine_in,2026-09-19,1,,Card,,,525,,,,sale
+hist-BC-180,demo-brewery-cafe,BC-H180,cancelled,refunded,,Walk-in Guest,306,34,15.3,0,321.3,,2026-09-18T14:15:00.000Z,,,takeaway,2026-09-18,,,,,,0,HAPPY10,,,sale
+hist-BC-181,demo-brewery-cafe,BC-H181,completed,paid,h-cust-20,Pooja Patel,1040,0,52,0,1092,,2026-09-27T14:04:00.000Z,,,takeaway,2026-09-27,,,UPI,,,1092,,,,sale
+hist-BC-182,demo-brewery-cafe,BC-H182,completed,paid,h-cust-39,Ira Chopra,260,0,13,0,273,,2026-09-28T08:40:00.000Z,,,dine_in,2026-09-28,1,,UPI,,,273,,,,sale
+hist-BC-183,demo-brewery-cafe,BC-H183,completed,paid,h-cust-23,Sameer Patel,1070,0,53.5,0,1123.5,,2026-09-01T02:59:00.000Z,,,takeaway,2026-09-01,,,UPI,,,1123.5,,,,sale
+hist-BC-184,demo-brewery-cafe,BC-H184,completed,paid,,Walk-in Guest,940,0,47,0,987,,2026-09-20T05:42:00.000Z,,,dine_in,2026-09-20,2,,UPI,,,987,,,,sale
+hist-BC-185,demo-brewery-cafe,BC-H185,completed,paid,,Walk-in Guest,280,0,14,0,294,,2026-09-09T04:58:00.000Z,,,dine_in,2026-09-09,1,,Cash,,,294,,,,sale
+hist-BC-186,demo-brewery-cafe,BC-H186,completed,paid,h-cust-19,Rahul Menon,1270,0,63.5,0,1333.5,,2026-09-08T05:28:00.000Z,,,dine_in,2026-09-08,4,,Cash,,,1333.5,,,,sale
+hist-BC-187,demo-brewery-cafe,BC-H187,completed,paid,,Walk-in Guest,1210,0,60.5,0,1270.5,,2026-09-29T12:18:00.000Z,,,dine_in,2026-09-29,4,,Cash,,,1270.5,,,,sale
+hist-BC-188,demo-brewery-cafe,BC-H188,completed,paid,h-cust-28,Karan Iyer,1960,0,98,0,2058,,2026-09-18T14:09:00.000Z,,,dine_in,2026-09-18,3,,Card,,,2058,,,,sale
+hist-BC-189,demo-brewery-cafe,BC-H189,completed,paid,h-cust-32,Naveen Pillai,1575,325,78.75,0,1653.75,,2026-09-04T13:07:00.000Z,,,takeaway,2026-09-04,,,Card,,,1653.75,HAPPY10,,,sale
+hist-BC-190,demo-brewery-cafe,BC-H190,completed,paid,h-cust-20,Pooja Patel,1220,0,61,0,1281,,2026-09-11T13:45:00.000Z,,,takeaway,2026-09-11,,,UPI,,,1281,,,,sale
+hist-BC-191,demo-brewery-cafe,BC-H191,completed,paid,h-cust-24,Rahul Rao,270,0,13.5,0,283.5,,2026-09-20T06:53:00.000Z,,,dine_in,2026-09-20,4,,UPI,,,283.5,,,,sale
+hist-BC-192,demo-brewery-cafe,BC-H192,completed,paid,h-cust-32,Naveen Pillai,1440,0,72,0,1512,,2026-09-21T07:07:00.000Z,,,dine_in,2026-09-21,2,,UPI,,,1512,,,,sale
+hist-BC-193,demo-brewery-cafe,BC-H193,completed,paid,h-cust-2,Gaurav Rao,540,0,27,0,567,,2026-09-03T04:46:00.000Z,,,dine_in,2026-09-03,1,,UPI,,,567,,,,sale
+hist-BC-194,demo-brewery-cafe,BC-H194,completed,paid,h-cust-1,Saanvi Pillai,1130,0,56.5,0,1186.5,,2026-09-17T04:42:00.000Z,,,dine_in,2026-09-17,1,,UPI,,,1186.5,,,,sale
+hist-BC-195,demo-brewery-cafe,BC-H195,completed,paid,,Walk-in Guest,1180,0,59,0,1239,,2026-09-05T05:43:00.000Z,,,delivery,2026-09-05,,"75 Andheri East, Sahar Road",Cash,,,1239,,,,sale
+hist-BC-196,demo-brewery-cafe,BC-H196,completed,paid,h-cust-12,Manav Menon,360,0,18,0,378,,2026-09-24T05:08:00.000Z,,,dine_in,2026-09-24,1,,Cash,,,378,,,,sale
+hist-BC-197,demo-brewery-cafe,BC-H197,completed,paid,,Walk-in Guest,230,0,11.5,0,241.5,,2026-09-25T03:26:00.000Z,,,dine_in,2026-09-25,4,,Cash,,,241.5,,,,sale
+hist-BC-198,demo-brewery-cafe,BC-H198,completed,paid,h-cust-17,Rohan Gupta,130,130,6.5,0,136.5,,2026-10-10T15:12:00.000Z,,,dine_in,2026-10-10,3,,Card,,,136.5,FOOD50,,,sale
+hist-BC-199,demo-brewery-cafe,BC-H199,completed,paid,,Walk-in Guest,2120,0,106,0,2226,,2026-10-22T03:31:00.000Z,,,takeaway,2026-10-22,,,Card,,,2226,,,,sale
+hist-BC-200,demo-brewery-cafe,BC-H200,cancelled,refunded,h-cust-20,Pooja Patel,710,0,35.5,0,745.5,,2026-10-20T13:41:00.000Z,,,dine_in,2026-10-20,1,,,,,0,,,,sale
+hist-BC-201,demo-brewery-cafe,BC-H201,completed,paid,,Walk-in Guest,460,0,23,0,483,,2026-10-30T11:28:00.000Z,,,delivery,2026-10-30,,"64 Bandra West, Linking Road",UPI,,,483,,,,sale
+hist-BC-202,demo-brewery-cafe,BC-H202,completed,paid,h-cust-24,Rahul Rao,1490,0,74.5,0,1564.5,,2026-10-24T02:59:00.000Z,,,takeaway,2026-10-24,,,UPI,,,1564.5,,,,sale
+hist-BC-203,demo-brewery-cafe,BC-H203,completed,paid,h-cust-37,Nikhil Nair,1880,0,94,0,1974,,2026-10-25T15:18:00.000Z,,,dine_in,2026-10-25,4,,UPI,,,1974,,,,sale
+hist-BC-204,demo-brewery-cafe,BC-H204,completed,paid,,Walk-in Guest,850,0,42.5,0,892.5,,2026-10-30T10:40:00.000Z,,,dine_in,2026-10-30,4,,UPI,,,892.5,,,,sale
+hist-BC-205,demo-brewery-cafe,BC-H205,completed,paid,h-cust-39,Ira Chopra,800,0,40,0,840,,2026-10-25T02:32:00.000Z,,,takeaway,2026-10-25,,,Cash,,,840,,,,sale
+hist-BC-206,demo-brewery-cafe,BC-H206,completed,paid,h-cust-11,Sameer Pillai,690,0,34.5,0,724.5,,2026-10-27T07:12:00.000Z,,,takeaway,2026-10-27,,,Cash,,,724.5,,,,sale
+hist-BC-207,demo-brewery-cafe,BC-H207,completed,paid,,Walk-in Guest,1071,119,53.55,0,1124.55,,2026-10-23T06:10:00.000Z,,,takeaway,2026-10-23,,,Cash,,,1124.55,HAPPY10,,,sale
+hist-BC-208,demo-brewery-cafe,BC-H208,completed,paid,,Walk-in Guest,760,0,38,0,798,,2026-10-19T05:24:00.000Z,,,online,2026-10-19,,,Card,Zomato-2214,,798,,,,sale
+hist-BC-209,demo-brewery-cafe,BC-H209,completed,paid,h-cust-3,Saanvi Reddy,1430,0,71.5,0,1501.5,,2026-10-02T14:06:00.000Z,,,takeaway,2026-10-02,,,Card,,,1501.5,,,,sale
+hist-BC-210,demo-brewery-cafe,BC-H210,completed,paid,h-cust-8,Arjun Rao,1600,0,80,0,1680,,2026-10-14T05:20:00.000Z,,,takeaway,2026-10-14,,,UPI,,,1680,,,,sale
+hist-BC-211,demo-brewery-cafe,BC-H211,completed,paid,h-cust-2,Gaurav Rao,260,0,13,0,273,,2026-10-10T07:05:00.000Z,,,delivery,2026-10-10,,"48 Salt Lake, Sector V",UPI,,,273,,,,sale
+hist-BC-212,demo-brewery-cafe,BC-H212,completed,paid,h-cust-16,Gaurav Gupta,2390,0,119.5,0,2509.5,,2026-10-31T09:28:00.000Z,,,dine_in,2026-10-31,3,,UPI,,,2509.5,,,,sale
+hist-BC-213,demo-brewery-cafe,BC-H213,completed,paid,h-cust-28,Karan Iyer,1830,0,91.5,0,1921.5,,2026-10-28T03:00:00.000Z,,,dine_in,2026-10-28,4,,UPI,,,1921.5,,,,sale
+hist-BC-214,demo-brewery-cafe,BC-H214,completed,paid,h-cust-13,Ira Bose,1200,0,60,0,1260,,2026-10-12T08:17:00.000Z,,,delivery,2026-10-12,,"22 Bandra West, Linking Road",UPI,,,1260,,,,sale
+hist-BC-215,demo-brewery-cafe,BC-H215,completed,paid,h-cust-37,Nikhil Nair,450,150,22.5,0,472.5,,2026-10-27T04:03:00.000Z,,,dine_in,2026-10-27,3,,Cash,,,472.5,,,,sale
+hist-BC-216,demo-brewery-cafe,BC-H216,completed,paid,,Walk-in Guest,1125,125,56.25,0,1181.25,,2026-10-19T15:13:00.000Z,,,dine_in,2026-10-19,1,,Cash,,,1181.25,HAPPY10,,,sale
+hist-BC-217,demo-brewery-cafe,BC-H217,completed,paid,h-cust-26,Aarav Sharma,1760,0,88,0,1848,,2026-10-04T05:29:00.000Z,,,dine_in,2026-10-04,1,,Cash,,,1848,,,,sale
+hist-BC-218,demo-brewery-cafe,BC-H218,completed,paid,h-cust-31,Rahul Verma,2250,0,112.5,0,2362.5,,2026-10-21T08:02:00.000Z,,,dine_in,2026-10-21,4,,Card,,,2362.5,,,,sale
+hist-BC-219,demo-brewery-cafe,BC-H219,completed,paid,h-cust-30,Yash Bose,620,0,31,0,651,,2026-10-28T06:46:00.000Z,,,delivery,2026-10-28,,"11 Indiranagar, 100 Ft Road",Card,,,651,,,,sale
+hist-BC-220,demo-brewery-cafe,BC-H220,cancelled,refunded,,Walk-in Guest,1960,0,98,0,2058,,2026-10-05T06:33:00.000Z,,,takeaway,2026-10-05,,,,,,0,,,,sale
+hist-BC-221,demo-brewery-cafe,BC-H221,completed,paid,h-cust-22,Leela Patel,1050,0,52.5,0,1102.5,,2026-10-17T08:03:00.000Z,,,dine_in,2026-10-17,2,,UPI,,,1102.5,,,,sale
+hist-BC-222,demo-brewery-cafe,BC-H222,completed,paid,h-cust-40,Aditya Verma,790,0,39.5,0,829.5,,2026-10-08T05:00:00.000Z,,,dine_in,2026-10-08,2,,UPI,,,829.5,,,,sale
+hist-BC-223,demo-brewery-cafe,BC-H223,completed,paid,h-cust-11,Sameer Pillai,1660,0,83,0,1743,,2026-10-08T12:59:00.000Z,,,takeaway,2026-10-08,,,UPI,,,1743,,,,sale
+hist-BC-224,demo-brewery-cafe,BC-H224,completed,paid,,Walk-in Guest,260,0,13,0,273,,2026-10-11T05:52:00.000Z,,,dine_in,2026-10-11,4,,UPI,,,273,,,,sale
+hist-BC-225,demo-brewery-cafe,BC-H225,completed,paid,h-cust-9,Riya Pillai,1332,148,66.6,0,1398.6,,2026-10-03T03:09:00.000Z,,,dine_in,2026-10-03,2,,Cash,,,1398.6,HAPPY10,,,sale
+hist-BC-226,demo-brewery-cafe,BC-H226,completed,paid,h-cust-10,Ira Rao,1380,0,69,0,1449,,2026-10-06T02:57:00.000Z,,,dine_in,2026-10-06,3,,Cash,,,1449,,,,sale
+hist-BC-227,demo-brewery-cafe,BC-H227,completed,paid,h-cust-18,Pooja Bhatt,1630,0,81.5,0,1711.5,,2026-10-22T12:38:00.000Z,,,takeaway,2026-10-22,,,Cash,,,1711.5,,,,sale
+hist-BC-228,demo-brewery-cafe,BC-H228,completed,paid,h-cust-18,Pooja Bhatt,1800,0,90,0,1890,,2026-10-21T03:51:00.000Z,,,delivery,2026-10-21,,"27 Indiranagar, 100 Ft Road",Card,,,1890,,,,sale
+hist-BC-229,demo-brewery-cafe,BC-H229,completed,paid,,Walk-in Guest,1150,0,57.5,0,1207.5,,2026-10-17T08:59:00.000Z,,,delivery,2026-10-17,,"26 Salt Lake, Sector V",Card,,,1207.5,,,,sale
+hist-BC-230,demo-brewery-cafe,BC-H230,completed,paid,h-cust-7,Aarav Chopra,1630,0,81.5,0,1711.5,,2026-10-16T03:54:00.000Z,,,takeaway,2026-10-16,,,UPI,,,1711.5,,,,sale
+hist-BC-231,demo-brewery-cafe,BC-H231,completed,paid,h-cust-38,Siddharth Rao,440,0,22,0,462,,2026-10-11T05:54:00.000Z,,,dine_in,2026-10-11,3,,UPI,,,462,,,,sale
+hist-BC-232,demo-brewery-cafe,BC-H232,completed,paid,h-cust-35,Farhan Patel,720,0,36,0,756,,2026-10-18T10:46:00.000Z,,,takeaway,2026-10-18,,,UPI,,,756,,,,sale
+hist-BC-233,demo-brewery-cafe,BC-H233,completed,paid,h-cust-23,Sameer Patel,1400,0,70,0,1470,,2026-10-30T07:59:00.000Z,,,dine_in,2026-10-30,4,,UPI,,,1470,,,,sale
+hist-BC-234,demo-brewery-cafe,BC-H234,completed,paid,h-cust-22,Leela Patel,918,102,45.9,0,963.9,,2026-10-16T07:50:00.000Z,,,dine_in,2026-10-16,2,,UPI,,,963.9,HAPPY10,,,sale
+hist-BC-235,demo-brewery-cafe,BC-H235,completed,paid,h-cust-28,Karan Iyer,520,0,26,0,546,,2026-10-30T03:39:00.000Z,,,dine_in,2026-10-30,4,,Cash,,,546,,,,sale
+hist-BC-236,demo-brewery-cafe,BC-H236,completed,paid,,Walk-in Guest,1390,0,69.5,0,1459.5,,2026-10-31T03:06:00.000Z,,,dine_in,2026-10-31,3,,Cash,,,1459.5,,,,sale
+hist-BC-237,demo-brewery-cafe,BC-H237,completed,paid,h-cust-35,Farhan Patel,940,300,47,0,987,,2026-10-31T03:10:00.000Z,,,dine_in,2026-10-31,4,,Cash,,,987,,,,sale
+hist-BC-238,demo-brewery-cafe,BC-H238,completed,paid,,Walk-in Guest,1830,0,91.5,0,1921.5,,2026-10-05T06:20:00.000Z,,,dine_in,2026-10-05,1,,Card,,,1921.5,,,,sale
+hist-BC-239,demo-brewery-cafe,BC-H239,completed,paid,h-cust-29,Tara Reddy,1030,150,51.5,0,1081.5,,2026-10-22T03:29:00.000Z,,,dine_in,2026-10-22,1,,Card,,,1081.5,,,,sale
+hist-BC-240,demo-brewery-cafe,BC-H240,cancelled,refunded,h-cust-29,Tara Reddy,250,0,12.5,0,262.5,,2026-10-14T11:31:00.000Z,,,dine_in,2026-10-14,1,,,,,0,,,,sale
+hist-BC-241,demo-brewery-cafe,BC-H241,completed,paid,h-cust-38,Siddharth Rao,760,0,38,0,798,,2026-10-12T14:20:00.000Z,,,dine_in,2026-10-12,4,,UPI,,,798,,,,sale
+hist-BC-242,demo-brewery-cafe,BC-H242,completed,paid,h-cust-13,Ira Bose,380,0,19,0,399,,2026-10-17T02:32:00.000Z,,,dine_in,2026-10-17,2,,UPI,,,399,,,,sale
+hist-BC-243,demo-brewery-cafe,BC-H243,completed,paid,h-cust-36,Aarav Chopra,1764,196,88.2,0,1852.2,,2026-10-19T03:30:00.000Z,,,dine_in,2026-10-19,4,,UPI,,,1852.2,HAPPY10,,,sale
+hist-BC-244,demo-brewery-cafe,BC-H244,completed,paid,h-cust-29,Tara Reddy,2010,0,100.5,0,2110.5,,2026-10-19T03:57:00.000Z,,,dine_in,2026-10-19,4,,UPI,,,2110.5,,,,sale
+hist-BC-245,demo-brewery-cafe,BC-H245,completed,paid,h-cust-37,Nikhil Nair,220,0,11,0,231,,2026-10-09T04:30:00.000Z,,,delivery,2026-10-09,,"75 Bandra West, Linking Road",Cash,,,231,,,,sale
+hist-BC-246,demo-brewery-cafe,BC-H246,completed,paid,h-cust-3,Saanvi Reddy,740,0,37,0,777,,2026-10-31T12:56:00.000Z,,,dine_in,2026-10-31,2,,Cash,,,777,,,,sale
+hist-BC-247,demo-brewery-cafe,BC-H247,completed,paid,h-cust-14,Siddharth Gupta,180,0,9,0,189,,2026-10-01T14:42:00.000Z,,,online,2026-10-01,,,Cash,Zomato-9369,,189,,,,sale
+hist-BC-248,demo-brewery-cafe,BC-H248,completed,paid,h-cust-15,Aarav Mehta,560,0,28,0,588,,2026-10-09T03:14:00.000Z,,,dine_in,2026-10-09,4,,Card,,,588,,,,sale
+hist-BC-249,demo-brewery-cafe,BC-H249,completed,paid,h-cust-38,Siddharth Rao,730,0,36.5,0,766.5,,2026-10-15T04:52:00.000Z,,,takeaway,2026-10-15,,,Card,,,766.5,,,,sale
+hist-BC-250,demo-brewery-cafe,BC-H250,completed,paid,h-cust-36,Aarav Chopra,1470,0,73.5,0,1543.5,,2026-10-26T13:21:00.000Z,,,online,2026-10-26,,,UPI,Zomato-9732,,1543.5,,,,sale
+hist-BC-251,demo-brewery-cafe,BC-H251,completed,paid,h-cust-24,Rahul Rao,890,0,44.5,0,934.5,,2026-10-13T03:34:00.000Z,,,delivery,2026-10-13,,"87 Salt Lake, Sector V",UPI,,,934.5,,,,sale
+hist-BC-252,demo-brewery-cafe,BC-H252,completed,paid,,Walk-in Guest,351,39,17.55,0,368.55,,2026-10-01T03:34:00.000Z,,,takeaway,2026-10-01,,,UPI,,,368.55,HAPPY10,,,sale
+hist-BC-253,demo-brewery-cafe,BC-H253,completed,paid,,Walk-in Guest,680,0,34,0,714,,2026-10-03T07:44:00.000Z,,,takeaway,2026-10-03,,,UPI,,,714,,,,sale
+hist-BC-254,demo-brewery-cafe,BC-H254,completed,pending,h-cust-29,Tara Reddy,1880,0,94,0,1974,,2026-11-01T08:01:00.000Z,,,dine_in,2026-11-01,2,,,,,0,,,,sale
+hist-BC-255,demo-brewery-cafe,BC-H255,completed,pending,,Walk-in Guest,320,0,16,0,336,,2026-11-04T10:00:00.000Z,,,dine_in,2026-11-04,2,,,,,0,,,,sale
+hist-BC-256,demo-brewery-cafe,BC-H256,completed,pending,h-cust-12,Manav Menon,1140,0,57,0,1197,,2026-11-04T02:58:00.000Z,,,takeaway,2026-11-04,,,,,,0,,,,sale
+hist-BC-257,demo-brewery-cafe,BC-H257,completed,paid,,Walk-in Guest,230,0,11.5,0,241.5,,2026-11-06T10:25:00.000Z,,,dine_in,2026-11-06,1,,Cash,,,241.5,,,,sale
+hist-BC-258,demo-brewery-cafe,BC-H258,completed,paid,,Walk-in Guest,2180,0,109,0,2289,,2026-11-11T03:33:00.000Z,,,delivery,2026-11-11,,"57 Bandra West, Linking Road",Card,,,2289,,,,sale
+hist-BC-259,demo-brewery-cafe,BC-H259,completed,paid,,Walk-in Guest,1740,0,87,0,1827,,2026-11-09T09:45:00.000Z,,,dine_in,2026-11-09,4,,Card,,,1827,,,,sale
+hist-BC-260,demo-brewery-cafe,BC-H260,cancelled,refunded,h-cust-31,Rahul Verma,1980,0,99,0,2079,,2026-11-08T09:28:00.000Z,,,delivery,2026-11-08,,"37 Salt Lake, Sector V",,,,0,,,,sale
+hist-BC-261,demo-brewery-cafe,BC-H261,completed,paid,h-cust-10,Ira Rao,1350,150,67.5,0,1417.5,,2026-11-06T09:05:00.000Z,,,dine_in,2026-11-06,2,,UPI,,,1417.5,HAPPY10,,,sale
+hist-BC-262,demo-brewery-cafe,BC-H262,completed,paid,h-cust-20,Pooja Patel,1640,0,82,0,1722,,2026-11-06T13:06:00.000Z,,,dine_in,2026-11-06,1,,UPI,,,1722,,,,sale
+hist-BC-263,demo-brewery-cafe,BC-H263,completed,paid,h-cust-40,Aditya Verma,1180,0,59,0,1239,,2026-11-08T07:09:00.000Z,,,takeaway,2026-11-08,,,UPI,,,1239,,,,sale
+hist-BC-264,demo-brewery-cafe,BC-H264,completed,paid,,Walk-in Guest,1950,0,97.5,0,2047.5,,2026-11-05T04:49:00.000Z,,,dine_in,2026-11-05,4,,UPI,,,2047.5,,,,sale
+hist-BC-265,demo-brewery-cafe,BC-H265,completed,paid,h-cust-39,Ira Chopra,1520,0,76,0,1596,,2026-11-11T08:21:24.073Z,,,dine_in,2026-11-11,1,,Cash,,,1596,,,,sale
+hist-BC-266,demo-brewery-cafe,BC-H266,completed,paid,h-cust-19,Rahul Menon,750,0,37.5,0,787.5,,2026-11-08T06:04:00.000Z,,,dine_in,2026-11-08,2,,Cash,,,787.5,,,,sale
+hist-BC-267,demo-brewery-cafe,BC-H267,completed,paid,,Walk-in Guest,230,0,11.5,0,241.5,,2026-11-09T07:16:00.000Z,,,dine_in,2026-11-09,1,,Cash,,,241.5,,,,sale
+hist-BC-268,demo-brewery-cafe,BC-H268,completed,paid,h-cust-8,Arjun Rao,1340,0,67,0,1407,,2026-11-05T10:50:00.000Z,,,dine_in,2026-11-05,1,,Card,,,1407,,,,sale
+hist-BC-269,demo-brewery-cafe,BC-H269,completed,paid,,Walk-in Guest,1160,0,58,0,1218,,2026-11-06T14:10:00.000Z,,,takeaway,2026-11-06,,,Card,,,1218,,,,sale
+hist-BC-270,demo-brewery-cafe,BC-H270,pending,pending,h-cust-25,Tara Malhotra,970,0,48.5,0,1018.5,,2026-11-11T07:41:25.073Z,,,dine_in,2026-11-11,1,,,,,0,,,,sale
+hist-BC-271,demo-brewery-cafe,BC-H271,pending,pending,,Walk-in Guest,1660,0,83,0,1743,,2026-11-11T07:01:25.073Z,,,delivery,2026-11-11,,"66 Indiranagar, 100 Ft Road",,,,0,,,,sale
+hist-BC-272,demo-brewery-cafe,BC-H272,pending,pending,,Walk-in Guest,2300,0,115,0,2415,,2026-11-11T06:21:25.073Z,,,online,2026-11-11,,,,Zomato-8181,,0,,,,sale

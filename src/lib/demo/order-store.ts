@@ -1,10 +1,11 @@
 import { cookies } from "next/headers";
 import type { Order, OrderItem } from "@/types/database";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
+import { DEMO_LIMITS } from "@/lib/demo/read-only";
 import { readChunkedCookie, writeChunkedCookie } from "./chunked-cookie";
 
 export const DEMO_ORDERS_COOKIE = "ob_demo_orders_v1";
-const MAX_STORED_ORDERS_PER_BRAND = 40;
+const MAX_STORED_ORDERS_PER_BRAND = DEMO_LIMITS.orders;
 
 type BrandBucket = { orders: Order[]; orderItems: OrderItem[] };
 type DemoOrderStore = Partial<Record<DemoBrandCode, BrandBucket>>;

@@ -22,12 +22,14 @@ export function AppointmentsManager({
   staff,
   services,
   canEdit,
+  canAdd,
 }: {
   appointments: Appointment[];
   customers: Option[];
   staff: Option[];
   services: Option[];
   canEdit: boolean;
+  canAdd: boolean;
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -91,86 +93,88 @@ export function AppointmentsManager({
 
   return (
     <div className="grid gap-4 lg:grid-cols-3">
-      <Card className="h-fit p-4 lg:col-span-1">
-        <h2 className="font-semibold">{editing ? "Edit appointment" : "New appointment"}</h2>
-        <form
-          className="mt-3 space-y-3"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            const ok = await run(() =>
-              saveAppointmentAction(editing?.id ?? null, {
-                title,
-                customerId: customerId || undefined,
-                staffIds,
-                startsAt,
-                endsAt,
-                location,
-                serviceId: serviceId || undefined,
-                notes,
-              }),
-            );
-            if (ok) startEdit(null);
-          }}
-        >
-          <label className="block text-sm">
-            <span className="text-[var(--ob-text-muted)]">Title</span>
-            <input className="ob-input mt-1 w-full" value={title} onChange={(e) => setTitle(e.target.value)} required maxLength={120} disabled={!canEdit || pending} />
-          </label>
-          <label className="block text-sm">
-            <span className="text-[var(--ob-text-muted)]">Customer (optional)</span>
-            <select className="ob-input mt-1 w-full" value={customerId} onChange={(e) => setCustomerId(e.target.value)} disabled={!canEdit || pending}>
-              <option value="">None</option>
-              {customers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </label>
-          <fieldset disabled={!canEdit || pending}>
-            <legend className="text-sm text-[var(--ob-text-muted)]">Staff</legend>
-            <div className="mt-1 space-y-1">
-              {staff.map((s) => (
-                <label key={s.id} className="ob-touch-target flex items-center gap-2 text-sm">
-                  <input type="checkbox" checked={staffIds.includes(s.id)} onChange={(e) => setStaffIds(e.target.checked ? [...staffIds, s.id] : staffIds.filter((id) => id !== s.id))} />
-                  {s.name}
-                </label>
-              ))}
+      {error ? <p role="alert" className="text-sm text-[var(--ob-danger)] lg:col-span-3">{error}</p> : null}
+      {canAdd || editing ? (
+        <Card className="h-fit p-4 lg:col-span-1">
+          <h2 className="font-semibold">{editing ? "Edit appointment" : "New appointment"}</h2>
+          <form
+            className="mt-3 space-y-3"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const ok = await run(() =>
+                saveAppointmentAction(editing?.id ?? null, {
+                  title,
+                  customerId: customerId || undefined,
+                  staffIds,
+                  startsAt,
+                  endsAt,
+                  location,
+                  serviceId: serviceId || undefined,
+                  notes,
+                }),
+              );
+              if (ok) startEdit(null);
+            }}
+          >
+            <label className="block text-sm">
+              <span className="text-[var(--ob-text-muted)]">Title</span>
+              <input className="ob-input mt-1 w-full" value={title} onChange={(e) => setTitle(e.target.value)} required maxLength={120} disabled={!canEdit || pending} />
+            </label>
+            <label className="block text-sm">
+              <span className="text-[var(--ob-text-muted)]">Customer (optional)</span>
+              <select className="ob-input mt-1 w-full" value={customerId} onChange={(e) => setCustomerId(e.target.value)} disabled={!canEdit || pending}>
+                <option value="">None</option>
+                {customers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </label>
+            <fieldset disabled={!canEdit || pending}>
+              <legend className="text-sm text-[var(--ob-text-muted)]">Staff</legend>
+              <div className="mt-1 space-y-1">
+                {staff.map((s) => (
+                  <label key={s.id} className="ob-touch-target flex items-center gap-2 text-sm">
+                    <input type="checkbox" checked={staffIds.includes(s.id)} onChange={(e) => setStaffIds(e.target.checked ? [...staffIds, s.id] : staffIds.filter((id) => id !== s.id))} />
+                    {s.name}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <label className="block text-sm">
+                <span className="text-[var(--ob-text-muted)]">Starts</span>
+                <input className="ob-input mt-1 w-full" type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} required disabled={!canEdit || pending} />
+              </label>
+              <label className="block text-sm">
+                <span className="text-[var(--ob-text-muted)]">Ends</span>
+                <input className="ob-input mt-1 w-full" type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} required disabled={!canEdit || pending} />
+              </label>
             </div>
-          </fieldset>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <label className="block text-sm">
-              <span className="text-[var(--ob-text-muted)]">Starts</span>
-              <input className="ob-input mt-1 w-full" type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} required disabled={!canEdit || pending} />
+              <span className="text-[var(--ob-text-muted)]">Location (optional)</span>
+              <input className="ob-input mt-1 w-full" value={location} onChange={(e) => setLocation(e.target.value)} maxLength={160} disabled={!canEdit || pending} />
             </label>
             <label className="block text-sm">
-              <span className="text-[var(--ob-text-muted)]">Ends</span>
-              <input className="ob-input mt-1 w-full" type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} required disabled={!canEdit || pending} />
+              <span className="text-[var(--ob-text-muted)]">Service (optional)</span>
+              <select className="ob-input mt-1 w-full" value={serviceId} onChange={(e) => setServiceId(e.target.value)} disabled={!canEdit || pending}>
+                <option value="">None</option>
+                {services.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
             </label>
-          </div>
-          <label className="block text-sm">
-            <span className="text-[var(--ob-text-muted)]">Location (optional)</span>
-            <input className="ob-input mt-1 w-full" value={location} onChange={(e) => setLocation(e.target.value)} maxLength={160} disabled={!canEdit || pending} />
-          </label>
-          <label className="block text-sm">
-            <span className="text-[var(--ob-text-muted)]">Service (optional)</span>
-            <select className="ob-input mt-1 w-full" value={serviceId} onChange={(e) => setServiceId(e.target.value)} disabled={!canEdit || pending}>
-              <option value="">None</option>
-              {services.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
-          </label>
-          <label className="block text-sm">
-            <span className="text-[var(--ob-text-muted)]">Notes (optional)</span>
-            <input className="ob-input mt-1 w-full" value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={300} disabled={!canEdit || pending} />
-          </label>
-          {error ? <p role="alert" className="text-sm text-[var(--ob-danger)]">{error}</p> : null}
-          <div className="flex gap-2">
-            <button type="submit" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={!canEdit || pending}>
-              {pending ? "Saving…" : editing ? "Save changes" : "Schedule"}
-            </button>
-            {editing ? (
-              <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm disabled:opacity-50" disabled={pending} onClick={() => startEdit(null)}>Cancel</button>
-            ) : null}
-          </div>
-        </form>
-      </Card>
-      <div className="space-y-4 lg:col-span-2">
+            <label className="block text-sm">
+              <span className="text-[var(--ob-text-muted)]">Notes (optional)</span>
+              <input className="ob-input mt-1 w-full" value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={300} disabled={!canEdit || pending} />
+            </label>
+            <div className="flex gap-2">
+              <button type="submit" className="ob-press ob-btn-primary ob-touch-target rounded-full px-4 py-1.5 text-sm font-semibold disabled:opacity-50" disabled={!canEdit || pending}>
+                {pending ? "Saving…" : editing ? "Save changes" : "Schedule"}
+              </button>
+              {editing ? (
+                <button type="button" className="ob-touch-target ob-btn-ghost rounded-full px-4 py-1.5 text-sm font-semibold disabled:opacity-50" disabled={pending} onClick={() => startEdit(null)}>Cancel</button>
+              ) : null}
+            </div>
+          </form>
+        </Card>
+      ) : null}
+      <div className={canAdd || editing ? "space-y-4 lg:col-span-2" : "space-y-4 lg:col-span-3"}>
         {sections === null ? (
           <p className="text-sm text-[var(--ob-text-muted)]">Loading appointments…</p>
         ) : sections.map((section) => (
@@ -199,12 +203,12 @@ export function AppointmentsManager({
                     <div className="flex flex-wrap gap-2">
                       {a.status === "scheduled" ? (
                         <>
-                          <button type="button" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-3 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={pending} onClick={() => run(() => setAppointmentStatusAction(a.id, "completed"))}>Complete</button>
-                          <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" disabled={pending} onClick={() => run(() => setAppointmentStatusAction(a.id, "cancelled"))}>Cancel</button>
+                          <button type="button" className="ob-press ob-btn-primary ob-touch-target rounded-full px-3 py-1.5 text-sm font-semibold disabled:opacity-50" disabled={pending} onClick={() => run(() => setAppointmentStatusAction(a.id, "completed"))}>Complete</button>
+                          <button type="button" className="ob-touch-target ob-btn-ghost rounded-full px-3 py-1.5 text-sm font-semibold" disabled={pending} onClick={() => run(() => setAppointmentStatusAction(a.id, "cancelled"))}>Cancel</button>
                         </>
                       ) : null}
-                      <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm disabled:opacity-50" disabled={pending} onClick={() => startEdit(a)}>Edit</button>
-                      <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" disabled={pending} onClick={() => run(() => deleteAppointmentAction(a.id))}>Delete</button>
+                      <button type="button" className="ob-touch-target ob-btn-ghost rounded-full px-3 py-1.5 text-sm font-semibold disabled:opacity-50" disabled={pending} onClick={() => startEdit(a)}>Edit</button>
+                      <button type="button" className="ob-touch-target ob-btn-ghost rounded-full px-3 py-1.5 text-sm font-semibold" disabled={pending} onClick={() => run(() => deleteAppointmentAction(a.id))}>Delete</button>
                     </div>
                   ) : null}
                 </div>

@@ -9,6 +9,7 @@ import { readDemoMutableBucket } from "@/lib/demo/mutable-store";
 import { loadDemoOperations } from "@/lib/demo/operations-data";
 import { listDemoStaff } from "@/lib/demo/staff-data";
 import { loadWorkspaceSession } from "@/lib/workspace/session";
+import { canAddWorkspaceRecords } from "@/lib/workspace/settings-access";
 
 export default async function ServicesPage() {
   const ws = await loadWorkspaceSession();
@@ -29,6 +30,8 @@ export default async function ServicesPage() {
         customers={customers.map((c) => ({ id: c.id, name: c.name }))}
         staff={staff.filter((s) => s.status === "active").map((s) => ({ id: s.id, name: s.name }))}
         canEdit
+
+        canAdd={canAddWorkspaceRecords(ws)}
       />
     </PageShell>
   );

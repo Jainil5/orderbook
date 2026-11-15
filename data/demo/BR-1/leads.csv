@@ -1,1 +1,3 @@
 id,brand_id,contact_name,phone,email,source,requirement,site_address,stage,estimated_value,owner_staff_id,next_action_at,quotation_number,created_at
+bc-lead-1,demo-brewery-cafe,Kape Events,+91 98200 44117,hello@kapeevents.in,Referral,Pop-up coffee bar for a 120-guest product launch,"Jio World Centre, BKC, Mumbai 400051",quote_sent,48000,bc-staff-1,2026-11-14T10:00:00.000Z,BC-Q-2201,2026-11-06T12:30:00.000Z
+bc-lead-2,demo-brewery-cafe,Fox & Hound Bistro,+91 98330 77421,,Instagram,Espresso machine service plus two baristas for a weekend,"Turner Road, Bandra West, Mumbai 400050",new,32000,,,,2026-11-11T16:10:00.000Z

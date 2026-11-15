@@ -1,0 +1,5 @@
+id,brand_id,name,role,phone,email,status,availability,created_at
+bc-staff-1,demo-brewery-cafe,Asha Menon,manager,+91 98000 11001,,active,available,2026-10-01T09:00:00.000Z
+bc-staff-2,demo-brewery-cafe,Rohan Pillai,cashier,+91 98000 11002,,active,busy,2026-10-01T09:00:00.000Z
+bc-staff-3,demo-brewery-cafe,Meera Nair,kitchen,,,active,available,2026-10-05T09:00:00.000Z
+bc-staff-4,demo-brewery-cafe,Devan Kurup,kitchen,,,active,off,2026-10-05T09:00:00.000Z

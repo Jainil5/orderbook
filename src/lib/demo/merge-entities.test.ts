@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { mergeDemoProducts } from "./merge-entities";
-import type { DemoMutableBucket } from "./mutable-store";
+import { emptyBucket, type DemoMutableBucket } from "./mutable-store";
 import type { Product } from "@/types/database";
 
 function baseProduct(id: string, overrides: Partial<Product> = {}): Product {
@@ -19,32 +19,7 @@ function baseProduct(id: string, overrides: Partial<Product> = {}): Product {
 }
 
 function bucketWith(partial: Partial<DemoMutableBucket>): DemoMutableBucket {
-  return {
-    customers: [],
-    offers: [],
-    payments: [],
-    orderPatches: {},
-    productOverrides: {},
-    auditLog: [],
-    stockAdjustments: [],
-    refunds: [],
-    staff: [],
-    staffOverrides: {},
-    services: [],
-    serviceOverrides: {},
-    serviceJobs: [],
-    serviceJobOverrides: {},
-    appointments: [],
-    appointmentOverrides: {},
-    tasks: [],
-    taskOverrides: {},
-    shifts: [],
-    shiftOverrides: {},
-    visits: [],
-    visitOverrides: {},
-    products: [],
-    ...partial,
-  };
+  return { ...emptyBucket(), ...partial };
 }
 
 describe("mergeDemoProducts", () => {

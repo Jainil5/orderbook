@@ -15,10 +15,12 @@ export function SchedulesManager({
   shifts,
   staff,
   canEdit,
+  canAdd,
 }: {
   shifts: Shift[];
   staff: Option[];
   canEdit: boolean;
+  canAdd: boolean;
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -72,69 +74,71 @@ export function SchedulesManager({
 
   return (
     <div className="grid gap-4 lg:grid-cols-3">
-      <Card className="h-fit p-4 lg:col-span-1">
-        <h2 className="font-semibold">{editing ? "Edit shift" : "Add shift"}</h2>
-        <form
-          className="mt-3 space-y-3"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            const ok = await run(() => saveShiftAction(editing?.id ?? null, { staffId, date, start, end, note }));
-            if (ok) startEdit(null);
-          }}
-        >
-          <label className="block text-sm">
-            <span className="text-[var(--ob-text-muted)]">Staff member</span>
-            <select className="ob-input mt-1 w-full" value={staffId} onChange={(e) => setStaffId(e.target.value)} disabled={!canEdit || pending}>
-              {staff.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
-          </label>
-          <label className="block text-sm">
-            <span className="text-[var(--ob-text-muted)]">Date</span>
-            <input className="ob-input mt-1 w-full" type="date" value={date} onChange={(e) => setDate(e.target.value)} required disabled={!canEdit || pending} />
-          </label>
-          <div className="grid grid-cols-2 gap-2">
+      {error ? <p role="alert" className="text-sm text-[var(--ob-danger)] lg:col-span-3">{error}</p> : null}
+      {canAdd || editing ? (
+        <Card className="h-fit p-4 lg:col-span-1">
+          <h2 className="font-semibold">{editing ? "Edit shift" : "Add shift"}</h2>
+          <form
+            className="mt-3 space-y-3"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const ok = await run(() => saveShiftAction(editing?.id ?? null, { staffId, date, start, end, note }));
+              if (ok) startEdit(null);
+            }}
+          >
             <label className="block text-sm">
-              <span className="text-[var(--ob-text-muted)]">Start</span>
-              <input className="ob-input mt-1 w-full" type="time" value={start} onChange={(e) => setStart(e.target.value)} required disabled={!canEdit || pending} />
+              <span className="text-[var(--ob-text-muted)]">Staff member</span>
+              <select className="ob-input mt-1 w-full" value={staffId} onChange={(e) => setStaffId(e.target.value)} disabled={!canEdit || pending}>
+                {staff.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
             </label>
             <label className="block text-sm">
-              <span className="text-[var(--ob-text-muted)]">End</span>
-              <input className="ob-input mt-1 w-full" type="time" value={end} onChange={(e) => setEnd(e.target.value)} required disabled={!canEdit || pending} />
+              <span className="text-[var(--ob-text-muted)]">Date</span>
+              <input className="ob-input mt-1 w-full" type="date" value={date} onChange={(e) => setDate(e.target.value)} required disabled={!canEdit || pending} />
             </label>
-          </div>
-          <label className="block text-sm">
-            <span className="text-[var(--ob-text-muted)]">Note (optional)</span>
-            <input className="ob-input mt-1 w-full" value={note} onChange={(e) => setNote(e.target.value)} maxLength={120} disabled={!canEdit || pending} />
-          </label>
-          {error ? <p role="alert" className="text-sm text-[var(--ob-danger)]">{error}</p> : null}
-          <div className="flex gap-2">
-            <button type="submit" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={!canEdit || pending || staff.length === 0}>
-              {pending ? "Saving…" : editing ? "Save changes" : "Add shift"}
-            </button>
-            {editing ? (
-              <>
-                <button
-                  type="button"
-                  className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm disabled:opacity-50"
-                  disabled={!canEdit || pending}
-                  onClick={async () => {
-                    const ok = await run(() => deleteShiftAction(editing.id));
-                    if (ok) startEdit(null);
-                  }}
-                >
-                  Delete
-                </button>
-                <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm disabled:opacity-50" disabled={pending} onClick={() => startEdit(null)}>Cancel</button>
-              </>
-            ) : null}
-          </div>
-        </form>
-      </Card>
-      <div className="min-w-0 lg:col-span-2">
+            <div className="grid grid-cols-2 gap-2">
+              <label className="block text-sm">
+                <span className="text-[var(--ob-text-muted)]">Start</span>
+                <input className="ob-input mt-1 w-full" type="time" value={start} onChange={(e) => setStart(e.target.value)} required disabled={!canEdit || pending} />
+              </label>
+              <label className="block text-sm">
+                <span className="text-[var(--ob-text-muted)]">End</span>
+                <input className="ob-input mt-1 w-full" type="time" value={end} onChange={(e) => setEnd(e.target.value)} required disabled={!canEdit || pending} />
+              </label>
+            </div>
+            <label className="block text-sm">
+              <span className="text-[var(--ob-text-muted)]">Note (optional)</span>
+              <input className="ob-input mt-1 w-full" value={note} onChange={(e) => setNote(e.target.value)} maxLength={120} disabled={!canEdit || pending} />
+            </label>
+            <div className="flex gap-2">
+              <button type="submit" className="ob-press ob-btn-primary ob-touch-target rounded-full px-4 py-1.5 text-sm font-semibold disabled:opacity-50" disabled={!canEdit || pending || staff.length === 0}>
+                {pending ? "Saving…" : editing ? "Save changes" : "Add shift"}
+              </button>
+              {editing ? (
+                <>
+                  <button
+                    type="button"
+                    className="ob-touch-target ob-btn-ghost rounded-full px-4 py-1.5 text-sm font-semibold disabled:opacity-50"
+                    disabled={!canEdit || pending}
+                    onClick={async () => {
+                      const ok = await run(() => deleteShiftAction(editing.id));
+                      if (ok) startEdit(null);
+                    }}
+                  >
+                    Delete
+                  </button>
+                  <button type="button" className="ob-touch-target ob-btn-ghost rounded-full px-4 py-1.5 text-sm font-semibold disabled:opacity-50" disabled={pending} onClick={() => startEdit(null)}>Cancel</button>
+                </>
+              ) : null}
+            </div>
+          </form>
+        </Card>
+      ) : null}
+      <div className={canAdd || editing ? "min-w-0 lg:col-span-2" : "min-w-0 lg:col-span-3"}>
         <div className="mb-3 flex items-center justify-between gap-2">
-          <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" onClick={() => setAnchor(new Date(anchor.getTime() - 7 * 86400000))}>← Prev week</button>
+          <button type="button" className="ob-touch-target ob-btn-ghost rounded-full px-3 py-1.5 text-sm font-semibold" onClick={() => setAnchor(new Date(anchor.getTime() - 7 * 86400000))}>← Prev week</button>
           <p className="text-sm font-medium">{mounted ? `${dayLabel(days[0])} – ${dayLabel(days[6])}` : "…"}</p>
-          <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" onClick={() => setAnchor(new Date(anchor.getTime() + 7 * 86400000))}>Next week →</button>
+          <button type="button" className="ob-touch-target ob-btn-ghost rounded-full px-3 py-1.5 text-sm font-semibold" onClick={() => setAnchor(new Date(anchor.getTime() + 7 * 86400000))}>Next week →</button>
         </div>
         <div className="overflow-x-auto rounded-lg border border-[var(--ob-border)]">
           <table className="w-full min-w-[640px] border-collapse text-sm">
@@ -148,14 +152,14 @@ export function SchedulesManager({
             </thead>
             <tbody>
               {staff.length === 0 ? (
-                <tr><td colSpan={8} className="p-3 text-[var(--ob-text-muted)]">No active staff. Add staff first.</td></tr>
+                <tr><td colSpan={8} className="p-3 text-[var(--ob-text-muted)]">{canAdd ? "No active staff. Add staff first." : "No active staff."}</td></tr>
               ) : staff.map((member) => {
                 const onShift = weekHasToday && shifts.some((s) => s.staffId === member.id && isOnShift(s, now));
                 return (
                   <tr key={member.id} className="border-t border-[var(--ob-border)]">
                     <td className="p-2 align-top font-medium">
                       {member.name}
-                      {onShift ? <span className="ml-1 rounded bg-[#e8f4ec] px-1.5 py-0.5 text-xs text-[#15803d]">On shift</span> : null}
+                      {onShift ? <span className="ml-1 rounded-full bg-[color-mix(in_srgb,var(--ob-success)_12%,var(--ob-surface))] px-1.5 py-0.5 text-xs text-[var(--ob-success)]">On shift</span> : null}
                     </td>
                     {days.map((day) => {
                       const cell = shifts.filter((s) => s.staffId === member.id && s.date === day);
@@ -167,7 +171,7 @@ export function SchedulesManager({
                             <button
                               key={s.id}
                               type="button"
-                              className="ob-touch-target mb-1 block w-full rounded bg-[var(--ob-surface-muted)] px-2 py-1 text-left text-xs hover:bg-[var(--ob-border)] disabled:opacity-50"
+                              className="ob-touch-target mb-1 block w-full rounded-full bg-[var(--ob-surface-muted)] px-2 py-1 text-left text-xs hover:bg-[var(--ob-border)] disabled:opacity-50"
                               disabled={pending}
                               onClick={() => startEdit(s)}
                               title={s.note || undefined}

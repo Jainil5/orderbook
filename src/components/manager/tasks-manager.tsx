@@ -24,11 +24,13 @@ export function TasksManager({
   staff,
   customers,
   canEdit,
+  canAdd,
 }: {
   tasks: Task[];
   staff: Option[];
   customers: Option[];
   canEdit: boolean;
+  canAdd: boolean;
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -94,71 +96,73 @@ export function TasksManager({
 
   return (
     <div className="grid gap-4 lg:grid-cols-3">
-      <Card className="h-fit p-4 lg:col-span-1">
-        <h2 className="font-semibold">{editing ? "Edit task" : "New task"}</h2>
-        <form
-          className="mt-3 space-y-3"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            const ok = await run(() =>
-              saveTaskAction(editing?.id ?? null, {
-                title,
-                description,
-                assigneeStaffId: assignee || undefined,
-                customerId: customerId || undefined,
-                priority,
-                dueAt: dueAt || undefined,
-              }),
-            );
-            if (ok) startEdit(null);
-          }}
-        >
-          <label className="block text-sm">
-            <span className="text-[var(--ob-text-muted)]">Title</span>
-            <input className="ob-input mt-1 w-full" value={title} onChange={(e) => setTitle(e.target.value)} required maxLength={120} disabled={!canEdit || pending} />
-          </label>
-          <label className="block text-sm">
-            <span className="text-[var(--ob-text-muted)]">Description (optional)</span>
-            <input className="ob-input mt-1 w-full" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={500} disabled={!canEdit || pending} />
-          </label>
-          <label className="block text-sm">
-            <span className="text-[var(--ob-text-muted)]">Assignee (optional)</span>
-            <select className="ob-input mt-1 w-full" value={assignee} onChange={(e) => setAssignee(e.target.value)} disabled={!canEdit || pending}>
-              <option value="">Unassigned</option>
-              {staff.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
-          </label>
-          <label className="block text-sm">
-            <span className="text-[var(--ob-text-muted)]">Customer (optional)</span>
-            <select className="ob-input mt-1 w-full" value={customerId} onChange={(e) => setCustomerId(e.target.value)} disabled={!canEdit || pending}>
-              <option value="">None</option>
-              {customers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </label>
-          <div className="grid grid-cols-2 gap-2">
+      {error ? <p role="alert" className="text-sm text-[var(--ob-danger)] lg:col-span-3">{error}</p> : null}
+      {canAdd || editing ? (
+        <Card className="h-fit p-4 lg:col-span-1">
+          <h2 className="font-semibold">{editing ? "Edit task" : "New task"}</h2>
+          <form
+            className="mt-3 space-y-3"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const ok = await run(() =>
+                saveTaskAction(editing?.id ?? null, {
+                  title,
+                  description,
+                  assigneeStaffId: assignee || undefined,
+                  customerId: customerId || undefined,
+                  priority,
+                  dueAt: dueAt || undefined,
+                }),
+              );
+              if (ok) startEdit(null);
+            }}
+          >
             <label className="block text-sm">
-              <span className="text-[var(--ob-text-muted)]">Priority</span>
-              <select className="ob-input mt-1 w-full" value={priority} onChange={(e) => setPriority(e.target.value)} disabled={!canEdit || pending}>
-                {TASK_PRIORITIES.map((p) => <option key={p} value={p}>{TASK_PRIORITY_LABELS[p]}</option>)}
+              <span className="text-[var(--ob-text-muted)]">Title</span>
+              <input className="ob-input mt-1 w-full" value={title} onChange={(e) => setTitle(e.target.value)} required maxLength={120} disabled={!canEdit || pending} />
+            </label>
+            <label className="block text-sm">
+              <span className="text-[var(--ob-text-muted)]">Description (optional)</span>
+              <input className="ob-input mt-1 w-full" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={500} disabled={!canEdit || pending} />
+            </label>
+            <label className="block text-sm">
+              <span className="text-[var(--ob-text-muted)]">Assignee (optional)</span>
+              <select className="ob-input mt-1 w-full" value={assignee} onChange={(e) => setAssignee(e.target.value)} disabled={!canEdit || pending}>
+                <option value="">Unassigned</option>
+                {staff.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </label>
             <label className="block text-sm">
-              <span className="text-[var(--ob-text-muted)]">Due (optional)</span>
-              <input className="ob-input mt-1 w-full" type="datetime-local" value={dueAt} onChange={(e) => setDueAt(e.target.value)} disabled={!canEdit || pending} />
+              <span className="text-[var(--ob-text-muted)]">Customer (optional)</span>
+              <select className="ob-input mt-1 w-full" value={customerId} onChange={(e) => setCustomerId(e.target.value)} disabled={!canEdit || pending}>
+                <option value="">None</option>
+                {customers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
             </label>
-          </div>
-          {error ? <p role="alert" className="text-sm text-[var(--ob-danger)]">{error}</p> : null}
-          <div className="flex gap-2">
-            <button type="submit" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-4 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={!canEdit || pending}>
-              {pending ? "Saving…" : editing ? "Save changes" : "Add task"}
-            </button>
-            {editing ? (
-              <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-4 text-sm disabled:opacity-50" disabled={pending} onClick={() => startEdit(null)}>Cancel</button>
-            ) : null}
-          </div>
-        </form>
-      </Card>
-      <div className="lg:col-span-2">
+            <div className="grid grid-cols-2 gap-2">
+              <label className="block text-sm">
+                <span className="text-[var(--ob-text-muted)]">Priority</span>
+                <select className="ob-input mt-1 w-full" value={priority} onChange={(e) => setPriority(e.target.value)} disabled={!canEdit || pending}>
+                  {TASK_PRIORITIES.map((p) => <option key={p} value={p}>{TASK_PRIORITY_LABELS[p]}</option>)}
+                </select>
+              </label>
+              <label className="block text-sm">
+                <span className="text-[var(--ob-text-muted)]">Due (optional)</span>
+                <input className="ob-input mt-1 w-full" type="datetime-local" value={dueAt} onChange={(e) => setDueAt(e.target.value)} disabled={!canEdit || pending} />
+              </label>
+            </div>
+            <div className="flex gap-2">
+              <button type="submit" className="ob-press ob-btn-primary ob-touch-target rounded-full px-4 py-1.5 text-sm font-semibold disabled:opacity-50" disabled={!canEdit || pending}>
+                {pending ? "Saving…" : editing ? "Save changes" : "Add task"}
+              </button>
+              {editing ? (
+                <button type="button" className="ob-touch-target ob-btn-ghost rounded-full px-4 py-1.5 text-sm font-semibold disabled:opacity-50" disabled={pending} onClick={() => startEdit(null)}>Cancel</button>
+              ) : null}
+            </div>
+          </form>
+        </Card>
+      ) : null}
+      <div className={canAdd || editing ? "lg:col-span-2" : "lg:col-span-3"}>
         <div className="mb-3 flex flex-wrap gap-2">
           {filters.map((f) => (
             <button
@@ -197,15 +201,15 @@ export function TasksManager({
                   {canEdit ? (
                     <div className="flex flex-wrap gap-2">
                       {t.status === "open" ? (
-                        <button type="button" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-3 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={pending} onClick={() => run(() => setTaskStatusAction(t.id, "in_progress"))}>Start</button>
+                        <button type="button" className="ob-press ob-btn-primary ob-touch-target rounded-full px-3 py-1.5 text-sm font-semibold disabled:opacity-50" disabled={pending} onClick={() => run(() => setTaskStatusAction(t.id, "in_progress"))}>Start</button>
                       ) : null}
                       {t.status !== "done" ? (
-                        <button type="button" className="ob-touch-target rounded-md bg-[var(--ob-primary)] px-3 text-sm font-medium text-[var(--ob-primary-foreground)] disabled:opacity-50" disabled={pending} onClick={() => run(() => setTaskStatusAction(t.id, "done"))}>Done</button>
+                        <button type="button" className="ob-press ob-btn-primary ob-touch-target rounded-full px-3 py-1.5 text-sm font-semibold disabled:opacity-50" disabled={pending} onClick={() => run(() => setTaskStatusAction(t.id, "done"))}>Done</button>
                       ) : (
-                        <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" disabled={pending} onClick={() => run(() => setTaskStatusAction(t.id, "open"))}>Reopen</button>
+                        <button type="button" className="ob-touch-target ob-btn-ghost rounded-full px-3 py-1.5 text-sm font-semibold" disabled={pending} onClick={() => run(() => setTaskStatusAction(t.id, "open"))}>Reopen</button>
                       )}
-                      <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm disabled:opacity-50" disabled={pending} onClick={() => startEdit(t)}>Edit</button>
-                      <button type="button" className="ob-touch-target rounded-md border border-[var(--ob-border)] px-3 text-sm" disabled={pending} onClick={() => run(() => deleteTaskAction(t.id))}>Delete</button>
+                      <button type="button" className="ob-touch-target ob-btn-ghost rounded-full px-3 py-1.5 text-sm font-semibold disabled:opacity-50" disabled={pending} onClick={() => startEdit(t)}>Edit</button>
+                      <button type="button" className="ob-touch-target ob-btn-ghost rounded-full px-3 py-1.5 text-sm font-semibold" disabled={pending} onClick={() => run(() => deleteTaskAction(t.id))}>Delete</button>
                     </div>
                   ) : null}
                 </div>

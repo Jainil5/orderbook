@@ -1,12 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getDemoBrandPack } from "@/lib/demo/brands";
-import { appendDemoAudit, updateDemoMutableBucket } from "@/lib/demo/mutable-store";
+import { updateDemoMutableBucket } from "@/lib/demo/mutable-store";
 import { listDemoStaff } from "@/lib/demo/staff-data";
+import { readOnlyMessage } from "@/lib/demo/read-only";
 import { validateStaffInput, type StaffInput } from "@/lib/manager/staff";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
-import type { StaffAvailability, StaffMember } from "@/types/manager";
+import type { StaffAvailability } from "@/types/manager";
 
 async function resolveDemoBrandCode() {
   const { cookies } = await import("next/headers");
@@ -37,32 +37,8 @@ async function hasStaffRecord(code: DemoBrandCode, id: string) {
 const STAFF_NOT_FOUND = { ok: false as const, message: "Staff member not found." };
 
 export async function createStaffAction(input: StaffInput) {
-  const parsed = validateStaffInput(input);
-  if (!parsed.ok) return parsed;
-  const code = await resolveDemoBrandCode();
-  const pack = getDemoBrandPack(code);
-  const member: StaffMember = {
-    id: `staff-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    brand_id: pack.brand.id,
-    ...parsed.value,
-    status: "active",
-    availability: "available",
-    created_at: new Date().toISOString(),
-  };
-  await updateDemoMutableBucket(code, (bucket) => ({
-    ...bucket,
-    staff: [...(bucket.staff ?? []), member],
-  }));
-  await appendDemoAudit(code, {
-    brand_id: pack.brand.id,
-    actor_email: null,
-    action: "staff.created",
-    entity_type: "staff",
-    entity_id: member.id,
-    detail: member.name,
-  });
-  revalidateManager();
-  return { ok: true as const };
+  void input;
+  return readOnlyMessage();
 }
 
 export async function updateStaffAction(id: string, input: StaffInput) {

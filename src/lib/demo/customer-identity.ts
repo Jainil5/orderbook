@@ -27,24 +27,3 @@ export function findCustomerByPhone(
     }) ?? null
   );
 }
-
-export function matchOrCreateCustomerId(
-  customers: Customer[],
-  phone: string | null | undefined,
-  name: string | null | undefined,
-  brandId: string,
-): { id: string | null; created?: Customer } {
-  const digits = phone ? phoneDigits(phone) : null;
-  if (!digits) return { id: null };
-  const match = findCustomerByPhone(customers, phone ?? "");
-  if (match) return { id: match.id };
-  const created: Customer = {
-    id: `demo-cust-${Date.now()}`,
-    brand_id: brandId,
-    name: name?.trim() || "User",
-    email: null,
-    phone: normalizeCustomerPhone(phone!) ?? phone!.trim(),
-    notes: null,
-  };
-  return { id: created.id, created };
-}

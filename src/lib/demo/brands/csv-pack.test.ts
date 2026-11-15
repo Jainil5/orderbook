@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { getDemoBrandPack } from "./index";
+import { DEMO_LIMITS } from "../read-only";
 
 const ROOT = resolve(import.meta.dirname, "../../../..");
 
@@ -37,6 +38,23 @@ describe("CSV demo packs", () => {
       expect(max).toBeGreaterThanOrEqual(today.getTime());
       expect(max).toBeLessThan(today.getTime() + 86400000);
     });
+    it(`${code}: stays inside the caps with a floor of rows per table`, () => {
+      expect(pack.orders).toHaveLength(20);
+      expect(pack.products.length).toBeLessThanOrEqual(DEMO_LIMITS.products);
+      expect(pack.customers.length).toBeLessThanOrEqual(DEMO_LIMITS.customers);
+      expect(pack.payments.length).toBeLessThanOrEqual(DEMO_LIMITS.payments);
+      const tables = [
+        pack.offers,
+        pack.staff,
+        pack.services,
+        pack.serviceJobs,
+        pack.appointments,
+        pack.visits,
+        pack.shifts,
+        pack.tasks,
+      ];
+      for (const rows of tables) expect(rows.length).toBeGreaterThanOrEqual(2);
+    });
   }
   it("BR-1 menu realism (ported from brewery-cafe.test.ts)", () => {
     const pack = getDemoBrandPack("BR-1");
@@ -50,8 +68,8 @@ describe("CSV demo packs", () => {
       "Peri Peri Fries",
     ]);
     expect(lines.reduce((s, l) => s + l.line_total, 0)).toBe(order!.subtotal);
-    expect(pack.products.filter((p) => p.category === "Sides & Dips")).toHaveLength(6);
-    expect(pack.products.filter((p) => p.category === "Desserts")).toHaveLength(3);
+    expect(pack.products.filter((p) => p.category === "Sides & Dips")).toHaveLength(2);
+    expect(pack.products.filter((p) => p.category === "Desserts")).toHaveLength(2);
     const pastry = pack.products.find((p) => p.name === "Seasonal Pastry");
     expect(pastry?.default_discount_percent).toBe(50);
   });

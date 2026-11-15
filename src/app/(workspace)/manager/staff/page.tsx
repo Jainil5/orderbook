@@ -5,6 +5,7 @@ import { StaffManager } from "@/components/manager/staff-manager";
 import { listDemoStaff } from "@/lib/demo/staff-data";
 import { toDemoBrandCode } from "@/lib/demo/data";
 import { loadWorkspaceSession } from "@/lib/workspace/session";
+import { canAddWorkspaceRecords } from "@/lib/workspace/settings-access";
 
 export default async function StaffPage() {
   const ws = await loadWorkspaceSession();
@@ -16,7 +17,11 @@ export default async function StaffPage() {
   return (
     <PageShell title="Staff">
       <ManagerSubnav activeHref="/manager/staff" />
-      <StaffManager staff={staff} canEdit />
+      <StaffManager
+        staff={staff}
+        canEdit
+        canAdd={canAddWorkspaceRecords(ws)}
+      />
     </PageShell>
   );
 }

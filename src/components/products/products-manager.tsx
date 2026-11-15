@@ -141,6 +141,7 @@ export function ProductsManager({
 
   const canEdit =
     mode === "demo" ? true : canManageProducts(userRole);
+  const canAdd = mode === "demo" ? false : canManageProducts(userRole);
 
   const categories = useMemo(() => {
     const set = new Set<string>();
@@ -345,7 +346,7 @@ export function ProductsManager({
             <option value="inactive">Inactive</option>
           </select>
         </div>
-        {canEdit ? (
+        {canAdd ? (
           <Button type="button" onClick={openCreate}>
             <Plus className="h-4 w-4" aria-hidden />
             Add product
@@ -357,7 +358,7 @@ export function ProductsManager({
         <EmptyState
           title="No products match"
           description={
-            canEdit
+            canAdd
               ? "Add a product or adjust your filters."
               : "Try changing search or filters."
           }
@@ -543,16 +544,14 @@ export function ProductsManager({
         ref={dialogRef}
         className={cn(
           "w-[min(100%,32rem)] max-h-[90vh] overflow-y-auto rounded-[var(--ob-radius-lg)]",
-          "border border-[var(--ob-border)] bg-[var(--ob-surface)] p-0 shadow-[var(--ob-shadow-md)]",
-          "backdrop:bg-black/40",
-          "max-sm:fixed max-sm:inset-0 max-sm:m-0 max-sm:h-[100dvh] max-sm:max-h-none max-sm:w-full max-sm:rounded-none",
+          "border border-[var(--ob-border)] bg-[var(--ob-glass-strong)] p-0 shadow-[var(--ob-shadow-md)]",
+          "backdrop:bg-[var(--ob-scrim-bg)] backdrop:backdrop-blur-[3px]",
+          "max-sm:w-[calc(100vw-2rem)] max-sm:rounded-[var(--ob-radius-xl)]",
         )}
         onClose={() => setFormError(null)}
       >
         <form onSubmit={handleSave} className="p-6">
-          <h2 className="text-lg font-semibold">
-            {editingId ? "Edit product" : "Add product"}
-          </h2>
+          <h2 className="text-lg font-semibold">Edit product</h2>
           <p className="mt-1 text-sm text-[var(--ob-text-muted)]">
             Changes apply to Billing and new orders.
             {mode === "demo"
@@ -730,26 +729,28 @@ export function ProductsManager({
             <div className="rounded-[var(--ob-radius-md)] border border-[var(--ob-border)] p-3">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-medium">Add-ons / modifiers</p>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="text-xs"
-                  onClick={() =>
-                    setForm((f) => ({
-                      ...f,
-                      modifiers: [
-                        ...f.modifiers,
-                        {
-                          id: `mod-${Date.now()}`,
-                          name: "",
-                          price: 0,
-                        },
-                      ],
-                    }))
-                  }
-                >
-                  Add modifier
-                </Button>
+                {canAdd ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="text-xs"
+                    onClick={() =>
+                      setForm((f) => ({
+                        ...f,
+                        modifiers: [
+                          ...f.modifiers,
+                          {
+                            id: `mod-${Date.now()}`,
+                            name: "",
+                            price: 0,
+                          },
+                        ],
+                      }))
+                    }
+                  >
+                    Add modifier
+                  </Button>
+                ) : null}
               </div>
               {form.modifiers.length ? (
                 <ul className="mt-2 space-y-2">
@@ -842,7 +843,7 @@ export function ProductsManager({
               />
               Active (visible in Billing)
             </label>
-            {editingId && canEdit ? (
+            {editingId && canAdd ? (
               <StockAdjustmentPanel
                 productId={editingId}
                 recent={stockAdjustmentsByProductId[editingId] ?? []}
