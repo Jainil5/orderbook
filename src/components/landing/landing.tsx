@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowRight } from "lucide-react";
-import { LogoMark } from "@/components/brand/logo-mark";
 import { Wordmark } from "@/components/brand/wordmark";
 import { FlowField } from "@/components/effects/flow-field";
 import { Badge } from "@/components/ui/badge";
@@ -163,8 +162,7 @@ export function Landing({ summaries }: { summaries: DemoBrandSummary[] }) {
 
       <header className="ob-glass-bar sticky top-0 z-40 border-b border-[var(--ob-border)]">
         <div className="mx-auto flex h-[72px] max-w-6xl items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-3">
-            <LogoMark size={36} spin={!reduceMotion} />
+          <Link href="/" className="ob-press">
             <Wordmark
               className="font-display block font-extrabold leading-none"
               size={21}
@@ -198,10 +196,7 @@ export function Landing({ summaries }: { summaries: DemoBrandSummary[] }) {
       <motion.main variants={container} initial={reduceMotion ? "show" : "hidden"} animate="show">
         {/* Hero */}
         <section className="relative mx-auto max-w-6xl px-4 pb-20 pt-16 sm:pt-24">
-          <motion.div variants={child} className="flex justify-center">
-            <LogoMark size={72} spin={!reduceMotion} />
-          </motion.div>
-          <motion.p variants={child} className="ob-label mt-6 text-center">
+          <motion.p variants={child} className="ob-label text-center">
             WebsiteIn · OrderBook
           </motion.p>
           <motion.h1

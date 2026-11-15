@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CheckList } from "@/components/showcase/check-list";
@@ -102,7 +101,6 @@ export function BrandCards({
                       {copy.tagline}
                     </p>
                   </div>
-                  <Badge tone="demo">{summary.code}</Badge>
                 </div>
 
                 <dl className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
