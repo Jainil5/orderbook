@@ -64,7 +64,7 @@ export function OrdersTable({
               </div>
               <Link
                 href={`/orders/${o.id}`}
-                className="ob-touch-target mt-3 inline-flex w-full items-center justify-center rounded-[var(--ob-radius-md)] border border-[var(--ob-border)] bg-[var(--ob-surface-muted)] px-3 py-2.5 text-sm font-medium"
+                className="ob-press ob-btn-ghost ob-touch-target mt-3 inline-flex w-full items-center justify-center rounded-full px-4 py-2.5 text-sm font-semibold"
               >
                 {viewOrderDetailLabel(o)}
               </Link>
@@ -133,7 +133,7 @@ export function OrdersTable({
                   <td className="px-4 py-3 align-top text-right">
                     <Link
                       href={`/orders/${o.id}`}
-                      className="inline-flex items-center justify-center rounded-[var(--ob-radius-md)] border border-[var(--ob-border)] bg-[var(--ob-surface)] px-3 py-1.5 text-xs font-medium text-[var(--ob-text)] transition hover:bg-[var(--ob-surface-muted)]"
+                      className="ob-press ob-btn-ghost inline-flex items-center justify-center rounded-full px-4 py-1.5 text-xs font-semibold"
                     >
                       {viewOrderDetailLabel(o)}
                     </Link>

@@ -14,7 +14,7 @@ export function LogoMark({
   const rings = [0, 1, 2];
   const mark = (
     <span
-      className="ob-mark relative grid place-items-center rounded-[30%] text-white"
+      className="ob-mark relative grid place-items-center rounded-[30%] text-[var(--ob-leaf-ink)]"
       style={{ width: size, height: size }}
     >
       <svg

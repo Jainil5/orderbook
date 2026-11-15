@@ -24,15 +24,9 @@ export function StatCard({
   spark?: number[];
 }) {
   return (
-    <div className="ob-card group relative overflow-hidden p-4">
-      <span
-        className="absolute inset-y-0 left-0 w-1 bg-[var(--ob-primary)] transition-all duration-300 group-hover:w-1.5 group-hover:bg-[var(--ob-accent)]"
-        aria-hidden
-      />
-      <p className="text-xs font-medium uppercase tracking-wide text-[var(--ob-text-muted)]">
-        {label}
-      </p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight">
+    <div className="ob-card relative overflow-hidden p-4">
+      <p className="ob-label-quiet">{label}</p>
+      <p className="ob-num mt-2 text-[clamp(26px,2.4vw,34px)] leading-none">
         {numericValue === undefined ? (
           value
         ) : (
@@ -42,17 +36,20 @@ export function StatCard({
         )}
       </p>
       {spark && spark.length > 1 ? (
-        <div className="mt-2">
+        <div className="mt-3">
           <Sparkline data={spark} />
         </div>
       ) : null}
       {hint ? (
         <p
           className={cn(
-            "mt-2 text-xs font-medium",
-            tone === "up" && "text-[var(--ob-success)]",
-            tone === "down" && "text-[var(--ob-danger)]",
-            tone === "neutral" && "text-[var(--ob-text-muted)]",
+            "mt-3 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.13em]",
+            tone === "up" &&
+              "bg-[color-mix(in_srgb,var(--ob-success)_15%,transparent)] text-[var(--ob-success)]",
+            tone === "down" &&
+              "bg-[color-mix(in_srgb,var(--ob-danger)_15%,transparent)] text-[var(--ob-danger)]",
+            tone === "neutral" &&
+              "bg-[var(--ob-surface-muted)] text-[var(--ob-text-muted)]",
           )}
         >
           {hint}

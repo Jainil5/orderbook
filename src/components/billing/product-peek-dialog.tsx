@@ -52,10 +52,10 @@ export function ProductPeekDialog({
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
-      className="m-auto w-[min(100%,26rem)] bg-transparent p-0 text-left backdrop:bg-black/50"
+      className="m-auto w-[min(100%,26rem)] bg-transparent p-0 text-left backdrop:bg-[var(--ob-scrim-bg)] backdrop:backdrop-blur-[3px]"
     >
       {product ? (
-        <div className="ob-animate-in max-h-[90dvh] overflow-hidden overflow-y-auto rounded-[var(--ob-radius-lg)] border border-[var(--ob-border)] bg-[var(--ob-surface)] shadow-[var(--ob-shadow-md)]">
+        <div className="ob-animate-in max-h-[90dvh] overflow-hidden overflow-y-auto rounded-[var(--ob-radius-lg)] border border-[var(--ob-border)] bg-[var(--ob-glass-strong)] shadow-[var(--ob-shadow-md)]">
           <div className="relative">
             <ProductThumbnail
               name={product.name}

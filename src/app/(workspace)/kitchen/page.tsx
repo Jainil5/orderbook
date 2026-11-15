@@ -21,8 +21,8 @@ export default async function KitchenPage() {
     <PageShell
       title="Kitchen board"
       headerActions={
-        <Link href="/billing" className="text-sm text-[var(--ob-primary)]">
-          New order
+        <Link href="/orders" className="text-sm text-[var(--ob-primary)]">
+          All orders
         </Link>
       }
     >

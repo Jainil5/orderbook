@@ -418,8 +418,8 @@ export function AnalyticsStudio({
                 onClick={() => toggleMetric(metric)}
                 className={
                   on
-                    ? "rounded-full bg-[var(--ob-primary)] px-3 py-1.5 text-xs font-medium text-[var(--ob-primary-foreground)]"
-                    : "rounded-full border border-[var(--ob-border)] px-3 py-1.5 text-xs font-medium"
+                    ? "ob-press rounded-full bg-[var(--ob-leaf)] px-3 py-1.5 text-[13px] font-semibold text-[var(--ob-leaf-ink)]"
+                    : "ob-press rounded-full border border-[var(--ob-line)] px-3 py-1.5 text-[13px] font-semibold text-[var(--ob-text-muted)] hover:border-[var(--ob-line-hover)] hover:text-[var(--ob-text)]"
                 }
               >
                 {metric === "revenue" ? "Revenue" : "Orders"}
@@ -924,8 +924,8 @@ export function AnalyticsStudio({
                   onClick={() => togglePanel(panel.id)}
                   className={
                     on
-                      ? "rounded-full bg-[var(--ob-primary)] px-3 py-1.5 text-xs font-medium text-[var(--ob-primary-foreground)]"
-                      : "rounded-full bg-[var(--ob-surface-muted)] px-3 py-1.5 text-xs font-medium text-[var(--ob-text-secondary)]"
+                      ? "ob-press rounded-full bg-[var(--ob-leaf)] px-3 py-1.5 text-[13px] font-semibold text-[var(--ob-leaf-ink)]"
+                      : "ob-press rounded-full bg-[var(--ob-tint-wash)] px-3 py-1.5 text-[13px] font-semibold text-[var(--ob-text-secondary)] hover:text-[var(--ob-text)]"
                   }
                 >
                   {panel.label}

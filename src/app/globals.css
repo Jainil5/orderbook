@@ -1,142 +1,365 @@
 @import "tailwindcss";
 
-/* dark: variants follow the data-theme attribute, not OS preference. */
+/* Theme switching follows the data-theme attribute, never the OS preference. */
 @custom-variant dark ([data-theme="dark"] &);
 
 :root {
-  --ob-bg: #f7f8fb;
-  --ob-surface: #ffffff;
-  --ob-surface-muted: #eef0f6;
-  --ob-border: #e2e6ef;
-  --ob-border-strong: #ccd3e3;
-  --ob-text: #1a2233;
-  --ob-text-secondary: #3d4761;
-  --ob-text-muted: #66718c;
-  --ob-primary: #4f46e5;
-  --ob-primary-hover: #4338ca;
-  --ob-primary-foreground: #ffffff;
-  --ob-accent: #0d9488;
-  --ob-focus: #4f46e5;
-  --ob-success: #059669;
-  --ob-warning: #b45309;
-  --ob-danger: #dc2626;
-  --ob-demo: #7c3aed;
-  --ob-sidebar: #14182b;
-  --ob-sidebar-text: #eef0f9;
-  --ob-sidebar-muted: #9aa3c0;
-  --ob-sidebar-line: rgb(255 255 255 / 0.08);
-  --ob-accent-2: #6366f1;
-  --ob-glow: rgb(79 70 229 / 0.2);
-  --ob-gradient-primary: linear-gradient(120deg, #4f46e5, #0d9488, #4f46e5);
-  --ob-ambient-a: rgb(79 70 229 / 0.06);
-  --ob-ambient-b: rgb(13 148 136 / 0.05);
-  --ob-series-1: #4f46e5;
-  --ob-series-2: #0d9488;
-  --ob-series-3: #d97706;
-  --ob-series-4: #7c3aed;
-  --ob-series-5: #0891b2;
-  --ob-series-6: #e11d48;
-  --ob-series-7: #65a30d;
-  --ob-series-8: #ea580c;
-  --ob-radius-sm: 0.375rem;
-  --ob-radius-md: 0.625rem;
-  --ob-radius-lg: 1rem;
-  --ob-shadow-sm: 0 1px 2px rgb(18 26 39 / 0.04);
-  --ob-shadow-md: 0 12px 32px rgb(18 26 39 / 0.06);
-  --ob-space-1: 0.25rem;
-  --ob-space-2: 0.5rem;
-  --ob-space-3: 0.75rem;
-  --ob-space-4: 1rem;
-  --ob-space-6: 1.5rem;
-  --ob-space-8: 2rem;
-  --background: var(--ob-bg);
-  --foreground: var(--ob-text);
+  /* Native controls (date pickers, scrollbars, select menus) follow the
+     theme, not the OS. Dark is the default field. */
+  color-scheme: dark;
+
+  /*
+   * Dark Botanical / Lab Green. One dark green field, one saturated green
+   * accent, one warm sand accent. No purple, no blue, no second brand colour:
+   * --ob-leaf is the only saturated thing in the layout, so it always reads as
+   * "action or emphasis". Everything else is a color-mix() off these — no
+   * component is allowed to hardcode a colour.
+   */
+  --ob-bg: #06120d;
+  --ob-surface: #0d2018;
+  --ob-leaf: #5fd68a;
+  --ob-leaf-ink: #04210f;
+  --ob-sand: #d2c391;
+  --ob-red: #ff4d5a;
+  --ob-text: #eaf3ec;
+  --ob-muted: #98b3a3;
+  --ob-line: rgb(190 235 205 / 0.14);
+
+  /* Derived surfaces and rules — all mixed from the tokens above. */
+  --ob-surface-muted: color-mix(in srgb, var(--ob-surface) 62%, var(--ob-bg));
+  --ob-border: var(--ob-line);
+  --ob-border-strong: color-mix(in srgb, var(--ob-leaf) 32%, var(--ob-line));
+  --ob-text-secondary: color-mix(in srgb, var(--ob-text) 78%, var(--ob-muted));
+  --ob-text-muted: var(--ob-muted);
+  --ob-tint-hover: color-mix(in srgb, var(--ob-leaf) 13%, transparent);
+  --ob-tint-wash: color-mix(in srgb, var(--ob-leaf) 10%, transparent);
+  --ob-tint-badge: color-mix(in srgb, var(--ob-leaf) 18%, transparent);
+  --ob-line-hover: color-mix(in srgb, var(--ob-leaf) 38%, var(--ob-line));
+  --ob-line-emphasis: color-mix(in srgb, var(--ob-leaf) 24%, var(--ob-line));
+
+  /* Aliases so components keep their semantic names. */
+  --ob-primary: var(--ob-leaf);
+  --ob-primary-hover: color-mix(in srgb, var(--ob-leaf) 84%, #ffffff);
+  --ob-primary-foreground: var(--ob-leaf-ink);
+  --ob-accent: var(--ob-leaf);
+  --ob-accent-2: color-mix(in srgb, var(--ob-leaf) 46%, var(--ob-text));
+  --ob-focus: var(--ob-leaf);
+  --ob-success: var(--ob-leaf);
+  --ob-warning: var(--ob-sand);
+  --ob-danger: var(--ob-red);
+  --ob-danger-ink: #26030a;
+  --ob-demo: var(--ob-sand);
+  --ob-gradient-primary: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--ob-leaf) 82%, #ffffff),
+    var(--ob-leaf)
+  );
+
+  /* Workspace chrome sits one shade darker than the page. */
+  --ob-sidebar: #08180f;
+  --ob-sidebar-text: var(--ob-text);
+  --ob-sidebar-muted: var(--ob-muted);
+  --ob-sidebar-line: var(--ob-line);
+
+  /* Ambient light: leaf from the top-right, sand from the bottom-left. */
+  --ob-glow: color-mix(in srgb, var(--ob-leaf) 18%, transparent);
+  --ob-ambient-a: color-mix(in srgb, var(--ob-leaf) 9%, transparent);
+  --ob-ambient-b: color-mix(in srgb, var(--ob-sand) 6%, transparent);
+
+  /* The glass recipe. The inset 1px top-edge is on every floating surface —
+     that single line is what stops the cards looking flat. */
+  --ob-glass: color-mix(in srgb, var(--ob-surface) 82%, transparent);
+  --ob-glass-strong: color-mix(in srgb, var(--ob-surface) 96%, transparent);
+  --ob-scrim-bg: color-mix(in srgb, #030a07 62%, transparent);
+  /* The flow field is a background, not a texture: on paper the same strokes
+     turn into fur, so the light theme keeps them barely there. */
+  --ob-flow-leaf: 0.15;
+  --ob-flow-sand: 0.12;
+  --ob-flow-fade: 0.07;
+  --ob-crest: #ffffff;
+  --ob-inset-light: inset 0 1px 0 rgb(190 235 205 / 0.07);
+  --ob-shadow-sm: 0 18px 34px -26px rgb(0 0 0 / 0.7), var(--ob-inset-light);
+  --ob-shadow-md: 0 34px 64px -28px rgb(0 0 0 / 0.85), var(--ob-inset-light);
+  --ob-leaf-glow: 0 10px 30px -8px var(--ob-leaf);
+  --ob-glare-core: color-mix(in srgb, var(--ob-sand) 70%, #ffffff);
+
+  /* Type. Bricolage for headlines, numbers, prices and the wordmark — at 600
+     or 800 only. Instrument Sans for body, UI, links and every uppercase
+     micro-label. */
+  --font-body: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
+  --font-heading:
+    var(--font-bricolage), var(--font-instrument), ui-sans-serif, sans-serif;
+  --fs-display: clamp(46px, 9.2vw, 134px);
+  --fs-hero: clamp(40px, 6vw, 76px);
+  --fs-h2: clamp(33px, 5.4vw, 70px);
+  --fs-h3: clamp(24px, 2.6vw, 33px);
+  --fs-lead: clamp(17px, 1.7vw, 21px);
+  --fs-body: 17px;
+  --fs-price: 60px;
+
+  /* Two shape languages: pills and soft superellipses. Nothing square, and
+     nothing under 14px except the 2px dash bullets. */
+  --ob-radius-xs: 14px;
+  --ob-radius-sm: 16px;
+  --ob-radius-md: 20px;
+  --ob-radius-lg: 26px;
+  --ob-radius-xl: 28px;
+  --ob-radius-2xl: 30px;
+  --ob-radius-pill: 999px;
+
+  /* Data viz stays inside the family: leaf and sand, then mixes between them
+     and toward ink. Only one deep tone, so no series disappears into the
+     field. Hue never outshouts --ob-leaf. */
+  --ob-series-1: var(--ob-leaf);
+  --ob-series-2: var(--ob-sand);
+  --ob-series-3: color-mix(in srgb, var(--ob-leaf) 55%, var(--ob-text));
+  --ob-series-4: color-mix(in srgb, var(--ob-sand) 55%, var(--ob-leaf));
+  --ob-series-5: color-mix(in srgb, var(--ob-leaf) 70%, var(--ob-bg));
+  --ob-series-6: color-mix(in srgb, var(--ob-sand) 75%, var(--ob-muted));
+  --ob-series-7: color-mix(in srgb, var(--ob-leaf) 30%, var(--ob-sand));
+  --ob-series-8: var(--ob-muted);
 }
 
-[data-theme="dark"] {
-  --ob-bg: #0e1220;
-  --ob-surface: #161c2c;
-  --ob-surface-muted: #1d2537;
-  --ob-border: #26304a;
-  --ob-border-strong: #39466b;
-  --ob-text: #e9edf8;
-  --ob-text-secondary: #c3cbe0;
-  --ob-text-muted: #8b96b3;
-  --ob-primary: #818cf8;
-  --ob-primary-hover: #a5b4fc;
-  --ob-primary-foreground: #0e1220;
-  --ob-accent: #5eead4;
-  --ob-focus: #818cf8;
-  --ob-success: #34d399;
-  --ob-warning: #fbbf24;
-  --ob-danger: #f87171;
-  --ob-demo: #a78bfa;
-  --ob-sidebar: #101526;
-  --ob-accent-2: #6366f1;
-  --ob-glow: rgb(129 140 248 / 0.4);
-  --ob-gradient-primary: linear-gradient(120deg, #6366f1, #0d9488, #6366f1);
-  --ob-ambient-a: rgb(99 102 241 / 0.14);
-  --ob-ambient-b: rgb(94 234 212 / 0.08);
-  --ob-series-1: #818cf8;
-  --ob-series-2: #5eead4;
-  --ob-series-3: #fbbf24;
-  --ob-series-4: #c4b5fd;
-  --ob-series-5: #67e8f9;
-  --ob-series-6: #f9a8d4;
-  --ob-series-7: #a3e635;
-  --ob-series-8: #fb923c;
+/*
+ * The light companion: the same hue family read as paper. Ink takes the dark
+ * field colour, --ob-leaf darkens until it holds contrast on paper, and the
+ * inset top-edge light flips to white.
+ */
+[data-theme="light"] {
+  color-scheme: light;
+
+  --ob-bg: #f1f5ee;
+  --ob-surface: #fbfdf8;
+  --ob-leaf: #16794a;
+  --ob-leaf-ink: #f2fff6;
+  --ob-sand: #8a6a1c;
+  --ob-red: #b3242c;
+  --ob-text: #0a1a12;
+  --ob-muted: #4a6a57;
+  --ob-line: rgb(12 58 36 / 0.14);
+
+  --ob-surface-muted: color-mix(in srgb, var(--ob-surface) 55%, var(--ob-bg));
+  --ob-border-strong: color-mix(in srgb, var(--ob-leaf) 26%, var(--ob-line));
+  --ob-primary-hover: color-mix(in srgb, var(--ob-leaf) 82%, #000000);
+  --ob-accent-2: color-mix(in srgb, var(--ob-leaf) 55%, var(--ob-text));
+  --ob-danger-ink: #ffffff;
+  --ob-gradient-primary: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--ob-leaf) 90%, #ffffff),
+    color-mix(in srgb, var(--ob-leaf) 84%, #000000)
+  );
+
+  --ob-sidebar: #08180f;
+  --ob-sidebar-text: #eaf3ec;
+  --ob-sidebar-muted: #98b3a3;
+
+  --ob-glow: color-mix(in srgb, var(--ob-leaf) 14%, transparent);
+  --ob-ambient-a: color-mix(in srgb, var(--ob-leaf) 7%, transparent);
+  --ob-ambient-b: color-mix(in srgb, var(--ob-sand) 6%, transparent);
+
+  --ob-glass: color-mix(in srgb, var(--ob-surface) 88%, transparent);
+  --ob-glass-strong: color-mix(in srgb, var(--ob-surface) 97%, transparent);
+  --ob-scrim-bg: color-mix(in srgb, #06231a 38%, transparent);
+  --ob-flow-leaf: 0.06;
+  --ob-flow-sand: 0.05;
+  --ob-flow-fade: 0.11;
+  /* On paper the crest dips deep instead of flashing white. */
+  --ob-crest: #0b5c33;
+  --ob-inset-light: inset 0 1px 0 rgb(255 255 255 / 0.75);
+  --ob-shadow-sm: 0 14px 28px -22px rgb(6 30 20 / 0.35), var(--ob-inset-light);
+  --ob-shadow-md: 0 30px 56px -30px rgb(6 30 20 / 0.4), var(--ob-inset-light);
+  --ob-glare-core: color-mix(in srgb, var(--ob-sand) 55%, #ffffff);
+
+  --ob-series-1: var(--ob-leaf);
+  --ob-series-2: var(--ob-sand);
+  --ob-series-3: color-mix(in srgb, var(--ob-leaf) 55%, var(--ob-text));
+  --ob-series-4: color-mix(in srgb, var(--ob-sand) 55%, var(--ob-leaf));
+  --ob-series-5: color-mix(in srgb, var(--ob-leaf) 75%, var(--ob-muted));
+  --ob-series-6: color-mix(in srgb, var(--ob-sand) 80%, var(--ob-muted));
+  --ob-series-7: color-mix(in srgb, var(--ob-leaf) 30%, var(--ob-sand));
+  --ob-series-8: var(--ob-muted);
+}
+
+/* Tailwind v4 reads its scale from here, so the shape language stays one
+   decision instead of 250 scattered rounded-* classes. */
+@theme {
+  --radius-sm: 14px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-2xl: 28px;
+  --radius-3xl: 30px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
-  --font-display: var(--font-fraunces);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
+  --font-display:
+    var(--font-bricolage), var(--font-instrument), ui-sans-serif, sans-serif;
+  /* Monospace is a printed-receipt tool, not a UI face: a system stack keeps
+     the design to two webfonts. */
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --color-ob-surface: var(--ob-surface);
   --color-ob-border: var(--ob-border);
   --color-ob-primary: var(--ob-primary);
   --color-ob-muted: var(--ob-text-muted);
   --color-ob-demo: var(--ob-demo);
+  --color-ob-leaf: var(--ob-leaf);
+  --color-ob-sand: var(--ob-sand);
+}
+
+html {
+  scroll-behavior: smooth;
+  /* The floating header never covers a heading on an anchor jump. */
+  scroll-padding-top: 120px;
 }
 
 body {
   background: var(--ob-bg);
   color: var(--ob-text);
-  font-family: var(--font-inter), system-ui, sans-serif;
-  font-size: 1.0625rem;
-  line-height: 1.55;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  /* Tight, almost condensed, big — this is what makes the type read designed. */
+  letter-spacing: -0.025em;
+  line-height: 1.06;
+}
+
+h1 {
+  font-weight: 800;
+  line-height: 1.02;
+}
+
+:focus-visible {
+  /* The only focus style in the system: 2px leaf, 3px offset. */
+  outline: 2px solid var(--ob-leaf);
+  outline-offset: 3px;
 }
 
 .ob-workspace {
-  font-size: 1.0625rem;
+  font-size: var(--fs-body);
   background:
     radial-gradient(900px 420px at 100% -10%, var(--ob-ambient-a), transparent 55%),
     radial-gradient(700px 360px at 0% 100%, var(--ob-ambient-b), transparent 50%),
     var(--ob-bg);
 }
 
-*:focus-visible {
-  outline: 2px solid var(--ob-focus);
-  outline-offset: 2px;
+/* ── Type roles ───────────────────────────────────────────────────────────
+   Layered as components, so a call-site utility (text-sm, tracking-tight)
+   can still win over the default treatment. */
+@layer components {
+
+/* The signature label treatment: Instrument Sans, uppercase, wide tracking,
+   leaf. It opens every section and tags every piece of meta. */
+.ob-label {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ob-leaf);
 }
+
+.ob-label-quiet {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ob-text-muted);
+}
+
+/* Section opener: "01 / Services", then a hairline that dies at 120px. */
+.ob-sec-label {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ob-leaf);
+}
+
+.ob-sec-label::after {
+  content: "";
+  flex: 1;
+  max-width: 120px;
+  height: 1px;
+  background: var(--ob-leaf);
+  opacity: 0.35;
+}
+
+.ob-lead {
+  font-size: var(--fs-lead);
+  line-height: 1.55;
+  color: var(--ob-text-muted);
+  max-width: 54ch;
+}
+
+/* Prices, stats, counts: Bricolage 800 with tabular figures. */
+.ob-num {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Line lengths are capped everywhere — that is what keeps the huge type
+   readable. */
+.ob-h1-cap {
+  max-width: 14ch;
+}
+
+.ob-h2-cap {
+  max-width: 18ch;
+}
+
+.ob-fineprint {
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  color: var(--ob-text-muted);
+  max-width: 92ch;
+}
+
+}
+
+/* ── Surfaces ───────────────────────────────────────────────────────────── */
 
 .ob-card {
   position: relative;
-  background: var(--ob-surface);
+  background: var(--ob-glass);
   border: 1px solid var(--ob-border);
   border-radius: var(--ob-radius-lg);
   box-shadow: var(--ob-shadow-sm);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
   transition:
-    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.28s ease,
-    border-color 0.2s ease;
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
 }
 
 .ob-card:hover {
   transform: translateY(-3px);
   box-shadow: var(--ob-shadow-md);
-  border-color: color-mix(in srgb, var(--ob-primary) 18%, var(--ob-border));
+  border-color: var(--ob-line-hover);
+}
+
+/* The exception: dense text surfaces read better opaque than as glass. */
+.ob-card-solid {
+  background: var(--ob-surface);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 @media (hover: none), (pointer: coarse) {
@@ -146,8 +369,90 @@ body {
     border-color: var(--ob-border);
   }
 
+  .ob-glare:hover::before,
+  .ob-glare-top:hover::before {
+    animation: none;
+  }
+
   .ob-tile:hover img {
     transform: none;
+  }
+}
+
+/*
+ * Signature motion A — the glare sweep. A blurred light band passes *behind*
+ * the text on glass; on solid surfaces .ob-glare-top puts it in front so it
+ * reads as a reflection. Children lift to z-index 1 so the band never crosses
+ * them.
+ */
+.ob-glare,
+.ob-glare-top {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.ob-glare::before,
+.ob-glare-top::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: -30%;
+  left: 0;
+  width: 34%;
+  height: 160%;
+  rotate: 16deg;
+  filter: blur(9px);
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--ob-leaf) 32%, transparent),
+    var(--ob-glare-core),
+    color-mix(in srgb, var(--ob-leaf) 32%, transparent),
+    transparent
+  );
+}
+
+.ob-glare-top::before {
+  z-index: 3;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--ob-leaf) 22%, transparent),
+    color-mix(in srgb, var(--ob-glare-core) 55%, transparent),
+    color-mix(in srgb, var(--ob-leaf) 22%, transparent),
+    transparent
+  );
+}
+
+.ob-glare > * {
+  position: relative;
+  z-index: 1;
+}
+
+.ob-glare:hover::before,
+.ob-glare:focus-within::before,
+.ob-glare-top:hover::before,
+.ob-glare-top:focus-within::before {
+  animation: ob-glare 0.85s linear forwards;
+}
+
+@keyframes ob-glare {
+  0% {
+    translate: -150% 0;
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.9;
+  }
+  60% {
+    opacity: 0.7;
+  }
+  100% {
+    translate: 320% 0;
+    opacity: 0;
   }
 }
 
@@ -155,6 +460,27 @@ body {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ob-line-hover) transparent;
+}
+
+/* A horizontal strip should not announce itself with a browser-default
+   gutter: hairline thumb, no track. */
+.ob-scroll-x::-webkit-scrollbar {
+  height: 6px;
+}
+
+.ob-scroll-x::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ob-scroll-x::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--ob-line);
+}
+
+.ob-scroll-x::-webkit-scrollbar-thumb:hover {
+  background: var(--ob-line-hover);
 }
 
 .ob-safe-top {
@@ -170,22 +496,71 @@ body {
   min-width: 2.75rem;
 }
 
-.ob-card table tbody tr {
-  transition: background 0.15s ease;
+/* Table heads take the quiet-label role rather than a shrunken body line:
+   same uppercase, same tracking. Layered so a call site can still restyle a
+   single column. */
+@layer components {
+  .ob-card thead th {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ob-text-muted);
+  }
 }
 
-.ob-card table tbody tr:hover {
-  background: color-mix(in srgb, var(--ob-primary) 8%, var(--ob-surface));
+/* Row hover is a leaf wash, never a grey, and the contents brighten into it. */
+.ob-card table tbody tr,
+.ob-row {
+  transition:
+    background-color 0.2s ease,
+    border-color 0.25s ease;
+}
+
+.ob-card table tbody tr:hover,
+.ob-row:hover {
+  background: var(--ob-tint-hover);
+}
+
+.ob-row:hover .ob-dash {
+  background: var(--ob-leaf);
+}
+
+/* Hairline-divided strips: the 1px gap *is* the rule. */
+.ob-strip {
+  display: grid;
+  overflow: hidden;
+  gap: 1px;
+  border: 1px solid var(--ob-border);
+  border-radius: var(--ob-radius-md);
+  background: var(--ob-line);
+}
+
+.ob-strip > * {
+  background: var(--ob-glass-strong);
+}
+
+/* Sticky chrome gets the card glass recipe plus the -webkit twin that
+   Tailwind cannot emit. */
+.ob-glass-bar {
+  background: var(--ob-glass);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  box-shadow: var(--ob-inset-light);
 }
 
 .ob-input {
   width: 100%;
   border: 1px solid var(--ob-border);
-  border-radius: var(--ob-radius-md);
-  background: var(--ob-surface);
-  padding: 0.75rem 0.875rem;
-  font-size: 1rem;
-  transition: border-color 0.15s ease;
+  border-radius: var(--ob-radius-xs);
+  background: var(--ob-glass);
+  padding: 0.75rem 0.9375rem;
+  font-size: var(--fs-body);
+  color: var(--ob-text);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .ob-input:hover {
@@ -193,15 +568,15 @@ body {
 }
 
 .ob-input:focus {
-  border-color: var(--ob-focus);
+  border-color: var(--ob-leaf);
   outline: none;
-  box-shadow: 0 0 0 3px rgb(37 99 235 / 0.15);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ob-leaf) 22%, transparent);
 }
 
 @keyframes ob-fade-in {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(28px);
   }
   to {
     opacity: 1;
@@ -212,7 +587,7 @@ body {
 @keyframes ob-rise {
   from {
     opacity: 0;
-    transform: translateY(18px) scale(0.985);
+    transform: translateY(28px) scale(0.99);
   }
   to {
     opacity: 1;
@@ -235,6 +610,18 @@ body {
   }
   to {
     opacity: 1;
+  }
+}
+
+/* The sheet opens toward you, the way the mobile nav panel does. */
+@keyframes ob-flip-in {
+  from {
+    opacity: 0;
+    transform: perspective(1000px) rotateX(-32deg) translateY(-12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(1000px) rotateX(0deg) translateY(0) scale(1);
   }
 }
 
@@ -262,46 +649,58 @@ body {
   }
 }
 
+/* Badges and tags drop in from below and settle. */
+@keyframes ob-drop {
+  from {
+    translate: 0 18px;
+    opacity: 0;
+  }
+  to {
+    translate: 0 0;
+    opacity: 1;
+  }
+}
+
 .ob-animate-in,
 .ob-page-enter {
-  animation: ob-fade-in 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: ob-fade-in 1s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* `backwards` fills the stagger delay; `both` would keep the end transform
    applied forever, which overrides any hover or tilt transform on the child. */
 .ob-stagger > * {
-  animation: ob-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation: ob-rise 1s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 .ob-stagger > *:nth-child(1) {
-  animation-delay: 0.02s;
+  animation-delay: 0s;
 }
 .ob-stagger > *:nth-child(2) {
-  animation-delay: 0.07s;
+  animation-delay: 0.1s;
 }
 .ob-stagger > *:nth-child(3) {
-  animation-delay: 0.12s;
+  animation-delay: 0.2s;
 }
 .ob-stagger > *:nth-child(4) {
-  animation-delay: 0.17s;
+  animation-delay: 0.3s;
 }
 .ob-stagger > *:nth-child(5) {
-  animation-delay: 0.22s;
+  animation-delay: 0.35s;
 }
-.ob-stagger > *:nth-child(6) {
-  animation-delay: 0.27s;
-}
-.ob-stagger > *:nth-child(n + 7) {
-  animation-delay: 0.32s;
+.ob-stagger > *:nth-child(n + 6) {
+  animation-delay: 0.4s;
 }
 
+/* Nav rows are pills; the active marker inside one is a Motion layoutId span. */
 .ob-nav-link {
   position: relative;
   overflow: hidden;
+  border-radius: var(--ob-radius-pill);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
-/* The active marker itself is the Motion layoutId pill in app-shell; this
-   rule only keeps the icon nudge. */
 .ob-nav-link svg {
   transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -313,10 +712,11 @@ body {
 
 .ob-press {
   transition:
-    transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
-    background-color 0.18s ease,
-    box-shadow 0.18s ease,
-    opacity 0.18s ease;
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.25s ease,
+    opacity 0.2s ease;
 }
 
 .ob-press:hover:not(:disabled) {
@@ -327,30 +727,32 @@ body {
   transform: translateY(1px) scale(0.97);
 }
 
-/* Premium primary: themed gradient with a soft glow in dark. */
+/* The button: solid leaf, ink text, pill, leaf glow on hover. */
 .ob-btn-primary {
   background: var(--ob-gradient-primary);
   background-size: 200% 200%;
-  color: #fff;
+  color: var(--ob-leaf-ink);
   transition:
-    transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
     background-position 0.4s ease,
     box-shadow 0.25s ease,
-    opacity 0.18s ease;
+    opacity 0.2s ease;
 }
 
 .ob-btn-primary:hover:not(:disabled) {
   background-position: 100% 50%;
+  box-shadow: var(--ob-leaf-glow);
 }
 
-[data-theme="dark"] .ob-btn-primary:not(:disabled) {
-  box-shadow: 0 6px 22px -8px var(--ob-glow);
+/* Ghost: transparent, hairline, text-coloured — always the second button. */
+.ob-btn-ghost {
+  border: 1px solid var(--ob-border);
+  color: var(--ob-text);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .ob-btn-primary {
-    transition: none;
-  }
+.ob-btn-ghost:hover:not(:disabled) {
+  border-color: var(--ob-line-hover);
+  background: var(--ob-tint-wash);
 }
 
 .ob-tile img {
@@ -372,41 +774,43 @@ body {
   transition:
     transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 0.3s ease,
-    border-color 0.2s ease;
+    border-color 0.25s ease;
 }
 
 .ob-card.ob-tilt[data-tilting="true"] {
-  transition: box-shadow 0.3s ease, border-color 0.2s ease;
+  transition:
+    box-shadow 0.3s ease,
+    border-color 0.25s ease;
 }
 
 /*
  * Photo-less product, drawn from the shop's own materials: ruled stock, a
- * punched hang-tag hole, initials in the receipt monospace. The tint follows
- * the category, so an unphotographed shelf still reads as one group.
+ * punched hang-tag hole, initials in the receipt monospace. Stock tints mix
+ * leaf toward sand, so an unphotographed shelf still reads as one group.
  */
 .ob-tag {
   position: relative;
   background-image: repeating-linear-gradient(
     var(--ob-tag-angle, 38deg),
-    rgb(18 26 39 / 0.06) 0 1px,
+    color-mix(in srgb, var(--ob-line) 60%, transparent) 0 1px,
     transparent 1px 6px
   );
 }
 
-.ob-tag-navy {
-  background-color: rgb(27 56 84 / 0.1);
+.ob-tag-leaf-faint {
+  background-color: color-mix(in srgb, var(--ob-leaf) 6%, var(--ob-surface));
 }
-.ob-tag-teal {
-  background-color: rgb(15 118 110 / 0.11);
+.ob-tag-leaf {
+  background-color: color-mix(in srgb, var(--ob-leaf) 11%, var(--ob-surface));
 }
-.ob-tag-amber {
-  background-color: rgb(180 83 9 / 0.1);
+.ob-tag-sand {
+  background-color: color-mix(in srgb, var(--ob-sand) 12%, var(--ob-surface));
 }
-.ob-tag-violet {
-  background-color: rgb(109 40 217 / 0.09);
+.ob-tag-leaf-strong {
+  background-color: color-mix(in srgb, var(--ob-leaf) 16%, var(--ob-surface));
 }
-.ob-tag-slate {
-  background-color: rgb(107 119 137 / 0.12);
+.ob-tag-muted {
+  background-color: color-mix(in srgb, var(--ob-muted) 14%, var(--ob-surface));
 }
 
 .ob-tag::after {
@@ -443,7 +847,7 @@ body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  border: 1.5px solid var(--ob-accent);
+  border: 1.5px solid var(--ob-leaf);
   animation: ob-ripple 3s ease-out infinite;
   pointer-events: none;
 }
@@ -467,12 +871,27 @@ body {
   }
 }
 
+/* Mobile nav sheet: glass, flipped open, over a dimmed and blurred field. */
 .ob-drawer {
-  animation: ob-slide-in 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  background: var(--ob-glass-strong);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  animation: ob-flip-in 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .ob-scrim {
+  background: var(--ob-scrim-bg);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
   animation: ob-scrim 0.25s ease;
+}
+
+/* Same field as .ob-scrim without the entry animation, for the container that
+   holds the modal itself rather than a close-target behind it. */
+.ob-veil {
+  background: var(--ob-scrim-bg);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
 }
 
 .ob-ambient {
@@ -490,6 +909,14 @@ body {
   background: radial-gradient(circle, var(--ob-glow), transparent 68%);
   animation: ob-sheen 14s ease infinite;
   z-index: 0;
+}
+
+/* Flow-field canvas: fixed behind everything, still running while you scroll. */
+.ob-flow {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
 }
 
 /* Cursor-following radial highlight on every card. The delegated CardGlow
@@ -515,74 +942,100 @@ body {
   opacity: 0.75;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .ob-animate-in,
-  .ob-page-enter,
-  .ob-stagger > *,
-  .ob-mark,
-  .ob-mark--ripple .ob-ripple-ring,
-  .ob-drawer,
-  .ob-scrim,
-  .ob-tile.ob-pop,
-  .ob-ambient::before {
-    animation: none !important;
+/*
+ * Signature motion D — the wordmark wave. Each letter is its own span with an
+ * index-based delay, cresting leaf to white in phase. The footer repeats the
+ * same wave at giant scale, sinking through the bottom edge.
+ */
+@keyframes ob-wave {
+  0%,
+  55%,
+  100% {
+    translate: 0 0;
   }
-
-  .ob-card::after {
-    transition: none;
-  }
-
-  .ob-card:hover,
-  .ob-press:hover:not(:disabled),
-  .ob-press:active:not(:disabled),
-  .ob-tile:hover img,
-  .ob-card.ob-tilt,
-  .ob-nav-link:hover svg,
-  .ob-nav-link[data-active="true"] svg {
-    transform: none;
+  25% {
+    translate: 0 -5px;
   }
 }
 
-.ob-meteor {
-  position: absolute;
-  width: 2px;
+@keyframes ob-crest {
+  0%,
+  55%,
+  100% {
+    color: var(--ob-leaf);
+  }
+  25% {
+    color: var(--ob-crest);
+  }
+}
+
+.ob-wave .ch {
+  display: inline-block;
+  animation: ob-wave 3.2s ease-in-out infinite;
+}
+
+.ob-wave .ch-crest {
+  animation:
+    ob-wave 3.2s ease-in-out infinite,
+    ob-crest 3.2s ease-in-out infinite;
+}
+
+@keyframes ob-fwave {
+  0%,
+  60%,
+  100% {
+    translate: 0 0;
+    color: color-mix(in srgb, var(--ob-leaf) 17%, var(--ob-surface));
+  }
+  30% {
+    translate: 0 -0.055em;
+    color: color-mix(in srgb, var(--ob-leaf) 46%, var(--ob-surface));
+  }
+}
+
+.ob-foot-mark {
+  --mark-w: min(calc(100vw - 96px), 1380px);
+  display: block;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: calc(var(--mark-w) / 5.15);
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+  white-space: nowrap;
+  overflow: hidden;
+  color: color-mix(in srgb, var(--ob-leaf) 17%, var(--ob-surface));
+  -webkit-mask-image: linear-gradient(#000 70%, rgb(0 0 0 / 0.5));
+  mask-image: linear-gradient(#000 70%, rgb(0 0 0 / 0.5));
+}
+
+.ob-foot-mark .ch {
+  display: inline-block;
+  animation: ob-fwave 5.2s ease-in-out infinite;
+}
+
+/* Dash bullets are the only sub-14px shape in the system. */
+.ob-dash {
+  flex: none;
+  width: 12px;
   height: 2px;
-  border-radius: 999px;
-  background: var(--ob-accent);
-  box-shadow: 0 0 6px var(--ob-glow);
-  animation: ob-meteor linear infinite;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--ob-leaf) 72%, transparent);
+  transition: background-color 0.2s ease;
 }
 
-.ob-meteor::before {
+/* The step rail: one hairline running through 19px ring dots. */
+.ob-steps {
+  position: relative;
+}
+
+.ob-steps::before {
   content: "";
   position: absolute;
-  top: 0;
-  right: 1px;
-  width: var(--ob-meteor-length, 90px);
-  height: 1.5px;
-  border-radius: 999px;
-  background: linear-gradient(
-    to left,
-    color-mix(in srgb, var(--ob-accent) 60%, transparent),
-    transparent
-  );
-}
-
-@keyframes ob-meteor {
-  0% {
-    transform: translate3d(0, 0, 0) rotate(35deg);
-    opacity: 0;
-  }
-  8% {
-    opacity: 1;
-  }
-  55% {
-    opacity: 1;
-  }
-  100% {
-    transform: translate3d(140px, 260px, 0) rotate(35deg);
-    opacity: 0;
-  }
+  top: 9px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--ob-line);
 }
 
 @media print {
@@ -608,13 +1061,7 @@ body {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .ob-grow-bar {
-    animation: none;
-  }
-}
-
-/* Blinking caret for the landing hero typewriter. */
+/* Blinking caret for the hero typewriter. */
 @keyframes ob-caret {
   50% {
     opacity: 0;
@@ -622,7 +1069,21 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [style*="ob-caret"] {
-    animation: none;
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+
+  .ob-card:hover,
+  .ob-press:hover:not(:disabled),
+  .ob-press:active:not(:disabled),
+  .ob-tile:hover img,
+  .ob-card.ob-tilt,
+  .ob-nav-link:hover svg,
+  .ob-nav-link[data-active="true"] svg {
+    transform: none;
   }
 }

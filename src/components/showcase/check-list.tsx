@@ -9,13 +9,10 @@ export function CheckList({
   className?: string;
 }) {
   return (
-    <ul className={cn("space-y-2.5 text-sm text-[var(--ob-text-secondary)]", className)}>
+    <ul className={cn("space-y-3 text-[15px] text-[var(--ob-text-secondary)]", className)}>
       {items.map((item) => (
-        <li key={item} className="flex items-start gap-2.5">
-          <span
-            className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--ob-accent)]"
-            aria-hidden
-          />
+        <li key={item} className="flex items-start gap-3">
+          <span className="ob-dash mt-[10px]" aria-hidden />
           <span>{item}</span>
         </li>
       ))}

@@ -67,13 +67,13 @@ export function NotificationStack() {
         className={cn(
           "ob-press ob-touch-target relative inline-flex items-center justify-center rounded-full border",
           open
-            ? "border-[var(--ob-primary)] bg-[var(--ob-surface-muted)]"
-            : "border-[var(--ob-border)] bg-[var(--ob-surface)] hover:border-[var(--ob-border-strong)]",
+            ? "border-[var(--ob-line-hover)] bg-[var(--ob-tint-badge)]"
+            : "border-[var(--ob-line)] bg-[var(--ob-tint-wash)] hover:border-[var(--ob-line-hover)]",
         )}
       >
         <Bell size={18} />
         {unreadCount > 0 ? (
-          <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-[var(--ob-danger)] px-1 text-[10px] font-semibold leading-none text-white">
+          <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-[var(--ob-danger)] px-1 text-[10px] font-semibold leading-none text-[var(--ob-danger-ink)]">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         ) : null}

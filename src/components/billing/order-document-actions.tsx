@@ -50,8 +50,8 @@ export function OrderDocumentActions({
     <div
       className={
         compact
-          ? "mt-3 space-y-2 rounded-[var(--ob-radius-md)] border border-[var(--ob-success)]/30 bg-emerald-50/50 p-3 dark:bg-emerald-950/20"
-          : "rounded-[var(--ob-radius-md)] border border-[var(--ob-success)]/30 bg-emerald-50/50 p-4 dark:bg-emerald-950/20"
+          ? "mt-3 space-y-2 rounded-[var(--ob-radius-md)] border border-[color-mix(in_srgb,var(--ob-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--ob-success)_8%,var(--ob-surface))] p-3"
+          : "rounded-[var(--ob-radius-md)] border border-[color-mix(in_srgb,var(--ob-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--ob-success)_8%,var(--ob-surface))] p-4"
       }
     >
       <p className="text-sm font-medium text-[var(--ob-success)]">

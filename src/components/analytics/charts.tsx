@@ -50,8 +50,8 @@ function Tip({
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-[var(--ob-border)] bg-[var(--ob-surface)] px-3 py-2 text-xs text-[var(--ob-text)] shadow-md">
-      <p className="mb-1 font-medium text-[var(--ob-text)]">{label}</p>
+    <div className="ob-glass-bar rounded-[var(--ob-radius-xs)] border border-[var(--ob-line)] px-3 py-2 text-[13px] text-[var(--ob-text)]">
+      <p className="ob-label-quiet mb-1">{label}</p>
       {payload.map((entry) => (
         <p
           key={String(entry.dataKey)}
@@ -143,7 +143,7 @@ export function TrendChart({
         <ComposedChart {...common}>
           <defs>
             <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="var(--ob-series-1)" stopOpacity={0.28} />
+              <stop offset="0%" stopColor="var(--ob-series-1)" stopOpacity={0.18} />
               <stop offset="100%" stopColor="var(--ob-series-1)" stopOpacity={0.02} />
             </linearGradient>
           </defs>
@@ -176,7 +176,7 @@ export function TrendChart({
               strokeWidth={2.5}
               dot={{ r: 3, fill: "var(--ob-series-1)" }}
               animationDuration={900}
-              style={{ filter: "drop-shadow(0 0 6px var(--ob-series-1))" }}
+              style={{ filter: `drop-shadow(0 0 9px color-mix(in srgb, var(--ob-series-1) 45%, transparent))` }}
             />
           ) : null}
           {showRevenue && kind === "area" ? (
@@ -189,7 +189,7 @@ export function TrendChart({
               strokeWidth={2.5}
               fill="url(#revenueFill)"
               animationDuration={900}
-              style={{ filter: "drop-shadow(0 0 6px var(--ob-series-1))" }}
+              style={{ filter: `drop-shadow(0 0 9px color-mix(in srgb, var(--ob-series-1) 40%, transparent))` }}
             />
           ) : null}
           {showOrders && kind === "bar" ? (
@@ -213,6 +213,7 @@ export function TrendChart({
               strokeWidth={2.5}
               dot={{ r: 3, fill: "var(--ob-series-2)" }}
               animationDuration={900}
+              style={{ filter: `drop-shadow(0 0 9px color-mix(in srgb, var(--ob-series-2) 45%, transparent))` }}
             />
           ) : null}
         </ComposedChart>
@@ -258,7 +259,9 @@ export function ShareDonut({
                 fill={entry.color}
                 style={
                   active === index
-                    ? { filter: `drop-shadow(0 0 8px ${entry.color})` }
+                    ? {
+                        filter: `drop-shadow(0 0 10px color-mix(in srgb, ${entry.color} 55%, transparent))`,
+                      }
                     : undefined
                 }
               />
@@ -307,7 +310,7 @@ export function Sparkline({
         <AreaChart data={points} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity={0.3} />
+              <stop offset="0%" stopColor={color} stopOpacity={0.18} />
               <stop offset="100%" stopColor={color} stopOpacity={0.02} />
             </linearGradient>
           </defs>
@@ -319,6 +322,7 @@ export function Sparkline({
             fill={`url(#${gradientId})`}
             dot={false}
             animationDuration={900}
+            style={{ filter: `drop-shadow(0 0 7px color-mix(in srgb, ${color} 40%, transparent))` }}
           />
         </AreaChart>
       </ResponsiveContainer>
@@ -353,7 +357,7 @@ export function MiniTrend({
         <AreaChart data={data} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity={0.32} />
+              <stop offset="0%" stopColor={color} stopOpacity={0.2} />
               <stop offset="100%" stopColor={color} stopOpacity={0.03} />
             </linearGradient>
           </defs>
@@ -370,7 +374,7 @@ export function MiniTrend({
             fill={`url(#${gradientId})`}
             dot={false}
             animationDuration={900}
-            style={{ filter: `drop-shadow(0 0 5px ${color})` }}
+            style={{ filter: `drop-shadow(0 0 7px color-mix(in srgb, ${color} 40%, transparent))` }}
           />
         </AreaChart>
       </ResponsiveContainer>

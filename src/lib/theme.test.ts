@@ -17,10 +17,10 @@ describe("theme resolution", () => {
     expect(parseTheme("")).toBeNull();
   });
 
-  it("prefers the server cookie, then localStorage, then light", () => {
+  it("prefers the server cookie, then localStorage, then dark", () => {
     expect(resolveInitialTheme("dark", "light")).toBe("dark");
     expect(resolveInitialTheme(null, "dark")).toBe("dark");
-    expect(resolveInitialTheme(null, null)).toBe("light");
+    expect(resolveInitialTheme(null, null)).toBe("dark");
     expect(resolveInitialTheme("garbage", "dark")).toBe("dark");
     expect(resolveInitialTheme("light", null)).toBe("light");
   });

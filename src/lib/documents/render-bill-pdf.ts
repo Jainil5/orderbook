@@ -12,15 +12,15 @@ import {
 } from "@/lib/documents/pdf-layout";
 
 const COLORS = {
-  primary: [27, 54, 84] as const,
-  primaryLight: [232, 237, 243] as const,
-  text: [18, 24, 38] as const,
-  muted: [107, 119, 137] as const,
-  border: [207, 214, 224] as const,
-  rowAlt: [248, 250, 252] as const,
+  primary: [20, 20, 19] as const,
+  primaryLight: [240, 240, 238] as const,
+  text: [20, 20, 19] as const,
+  muted: [111, 111, 108] as const,
+  border: [201, 201, 197] as const,
+  rowAlt: [247, 247, 245] as const,
   white: [255, 255, 255] as const,
-  accent: [15, 118, 110] as const,
-  success: [21, 128, 61] as const,
+  accent: [130, 130, 126] as const,
+  success: [47, 107, 76] as const,
 };
 
 const MARGIN = 44;

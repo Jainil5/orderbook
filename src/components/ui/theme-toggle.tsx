@@ -57,7 +57,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
       title={isDark ? "Light mode" : "Dark mode"}
       className={cn(
-        "ob-press ob-touch-target inline-flex items-center justify-center rounded-full border border-[var(--ob-border)] bg-[var(--ob-surface)] text-[var(--ob-text-secondary)] hover:text-[var(--ob-text)]",
+        "ob-press ob-touch-target inline-flex items-center justify-center rounded-full border border-[var(--ob-line)] bg-[var(--ob-tint-wash)] text-[var(--ob-text-secondary)] hover:border-[var(--ob-line-hover)] hover:text-[var(--ob-leaf)]",
         className,
       )}
     >

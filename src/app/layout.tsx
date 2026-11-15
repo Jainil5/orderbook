@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { Fraunces, Inter, Geist_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 import { CardGlow } from "@/components/effects/card-glow";
 import {
@@ -9,22 +9,19 @@ import {
   THEME_INIT_SCRIPT,
 } from "@/lib/theme";
 
-const inter = Inter({
-  variable: "--font-inter",
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
   subsets: ["latin"],
+  weight: "variable",
+  axes: ["opsz"],
   display: "swap",
 });
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+const instrument = Instrument_Sans({
+  variable: "--font-instrument",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  weight: "variable",
   display: "swap",
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
@@ -36,6 +33,7 @@ export const metadata: Metadata = {
 export const viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: "#06120d",
   viewportFit: "cover" as const,
 };
 
@@ -50,7 +48,7 @@ export default async function RootLayout({
     <html
       lang="en"
       data-theme={theme}
-      className={`${inter.variable} ${fraunces.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${bricolage.variable} ${instrument.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>

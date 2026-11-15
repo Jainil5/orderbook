@@ -74,7 +74,7 @@ export function RangeSelector({
       <div
         role="radiogroup"
         aria-label="Date range"
-        className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1"
+        className="ob-scroll-x -mx-1 flex gap-1.5 px-1 pb-1"
       >
         {RANGE_PRESETS.map((preset) => {
           const selected = preset.id === initialPreset;
@@ -85,10 +85,10 @@ export function RangeSelector({
               role="radio"
               aria-checked={selected}
               onClick={() => pickPreset(preset.id)}
-              className={`ob-press shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium min-h-[2.75rem] transition ${
+              className={`ob-press shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-[13px] font-semibold min-h-[2.75rem] ${
                 selected
-                  ? "bg-[var(--ob-primary)] text-[var(--ob-primary-foreground)]"
-                  : "border border-[var(--ob-border)] text-[var(--ob-text-secondary)] hover:border-[var(--ob-primary)]"
+                  ? "bg-[var(--ob-leaf)] text-[var(--ob-leaf-ink)]"
+                  : "border border-[var(--ob-line)] bg-[var(--ob-tint-wash)] text-[var(--ob-text-muted)] hover:border-[var(--ob-line-hover)] hover:text-[var(--ob-text)]"
               }`}
             >
               {preset.label}
@@ -98,7 +98,7 @@ export function RangeSelector({
       </div>
       <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
         <label className="text-sm">
-          <span className="text-xs text-[var(--ob-text-muted)]">From</span>
+          <span className="ob-label-quiet">From</span>
           <Input
             type="date"
             value={draft.from}
@@ -107,7 +107,7 @@ export function RangeSelector({
           />
         </label>
         <label className="text-sm">
-          <span className="text-xs text-[var(--ob-text-muted)]">To</span>
+          <span className="ob-label-quiet">To</span>
           <Input
             type="date"
             value={draft.to}
@@ -123,7 +123,7 @@ export function RangeSelector({
         >
           Apply custom range
         </Button>
-        <p className="text-xs text-[var(--ob-text-muted)] sm:ml-auto sm:self-center">
+        <p className="ob-label-quiet sm:ml-auto sm:self-center">
           {initialPreset
             ? `Showing ${presetLabel(initialPreset)}`
             : `Showing ${resolvedFrom} to ${resolvedTo}`}

@@ -6,10 +6,12 @@ export function EmptyState({
   description?: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-[var(--ob-radius-lg)] border border-dashed border-[var(--ob-border)] bg-[var(--ob-surface)] px-6 py-12 text-center">
-      <p className="text-base font-medium text-[var(--ob-text)]">{title}</p>
+    <div className="flex flex-col items-center justify-center rounded-[var(--ob-radius-lg)] border border-dashed border-[var(--ob-line-hover)] bg-[var(--ob-glass-strong)] px-6 py-12 text-center">
+      <p className="font-display text-[19px] font-semibold text-[var(--ob-text)]">
+        {title}
+      </p>
       {description ? (
-        <p className="mt-2 max-w-md text-sm text-[var(--ob-text-muted)]">
+        <p className="mt-2 max-w-md text-[15px] text-[var(--ob-text-muted)]">
           {description}
         </p>
       ) : null}

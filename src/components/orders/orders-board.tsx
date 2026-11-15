@@ -244,7 +244,7 @@ function OngoingRow({
         </Button>
         <Link
           href={`/orders/${o.id}`}
-          className="ob-touch-target inline-flex items-center rounded-[var(--ob-radius-md)] px-3 text-sm font-medium text-[var(--ob-text-secondary)] hover:bg-[var(--ob-surface-muted)]"
+          className="ob-press ob-btn-ghost ob-touch-target inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold"
         >
           Cancel / detail
         </Link>

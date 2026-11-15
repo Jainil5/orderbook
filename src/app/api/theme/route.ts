@@ -5,7 +5,7 @@ export async function POST(request: Request): Promise<Response> {
   const body = (await request.json().catch(() => null)) as {
     theme?: unknown;
   } | null;
-  const theme: Theme = parseTheme(body?.theme as string) ?? "light";
+  const theme: Theme = parseTheme(body?.theme as string) ?? "dark";
   const cookieStore = await cookies();
   cookieStore.set(THEME_COOKIE, theme, {
     path: "/",

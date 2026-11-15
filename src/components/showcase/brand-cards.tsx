@@ -42,12 +42,26 @@ export function BrandCards({
 
   return (
     <section id={id} className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16">
+      <motion.p
+        variants={SHOWCASE_CHILD}
+        initial={reduceMotion ? "show" : "hidden"}
+        whileInView="show"
+        viewport={reveal}
+        className="ob-sec-label"
+      >
+        03 / Live demos
+      </motion.p>
       <motion.h2
         variants={SHOWCASE_CHILD}
         initial={reduceMotion ? "show" : "hidden"}
         whileInView="show"
         viewport={reveal}
-        className="font-display text-2xl font-semibold tracking-tight sm:text-3xl"
+        className="ob-h2-cap mt-5 font-display font-extrabold"
+        style={{
+          fontSize: "var(--fs-h2)",
+          lineHeight: 1.02,
+          letterSpacing: "-0.025em",
+        }}
       >
         {title}
       </motion.h2>
@@ -56,7 +70,7 @@ export function BrandCards({
         initial={reduceMotion ? "show" : "hidden"}
         whileInView="show"
         viewport={reveal}
-        className="mt-2 max-w-2xl text-sm text-[var(--ob-text-secondary)]"
+        className="ob-lead mt-4"
       >
         {intro}
       </motion.p>
@@ -65,23 +79,26 @@ export function BrandCards({
         initial={reduceMotion ? "show" : "hidden"}
         whileInView="show"
         viewport={reveal}
-        className="mt-8 grid gap-5 lg:grid-cols-2"
+        className="mt-10 grid gap-5 lg:grid-cols-2"
       >
         {summaries.map((summary) => {
           const copy = BRAND_CARD_COPY[summary.code];
           const Icon = copy.icon;
           return (
             <motion.div key={summary.code} variants={SHOWCASE_CHILD}>
-              <Card className="flex h-full flex-col p-6 sm:p-7">
+              <Card className="ob-glare flex h-full flex-col p-6 sm:p-7">
                 <div className="flex items-start gap-4">
-                  <span className="grid size-12 shrink-0 place-items-center rounded-[var(--ob-radius-lg)] bg-[color-mix(in_srgb,var(--ob-primary)_14%,transparent)] text-[var(--ob-primary)]">
+                  <span className="grid size-12 shrink-0 place-items-center rounded-[var(--ob-radius-md)] bg-[var(--ob-tint-badge)] text-[var(--ob-leaf)]">
                     <Icon className="size-6" aria-hidden />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-display text-xl font-semibold tracking-tight">
+                    <h3
+                      className="font-display text-[25px] font-semibold"
+                      style={{ letterSpacing: "-0.02em", lineHeight: 1.1 }}
+                    >
                       {copy.name}
                     </h3>
-                    <p className="mt-1 text-sm leading-relaxed text-[var(--ob-text-secondary)]">
+                    <p className="mt-1 text-[15px] leading-relaxed text-[var(--ob-text-secondary)]">
                       {copy.tagline}
                     </p>
                   </div>
@@ -97,26 +114,22 @@ export function BrandCards({
                   ].map((stat) => (
                     <div
                       key={stat.label}
-                      className="rounded-[var(--ob-radius-md)] bg-[var(--ob-surface-muted)] px-3 py-2.5"
+                      className="rounded-full bg-[var(--ob-tint-wash)] px-3.5 py-2"
                     >
-                      <dt className="text-[11px] uppercase tracking-wide text-[var(--ob-text-muted)]">
-                        {stat.label}
-                      </dt>
-                      <dd className="mt-0.5 font-display text-xl font-semibold">
+                      <dt className="ob-label-quiet">{stat.label}</dt>
+                      <dd className="ob-num mt-0.5 text-[19px] leading-none">
                         {stat.value}
                       </dd>
                     </div>
                   ))}
                 </dl>
-                <p className="mt-3 text-xs text-[var(--ob-text-muted)]">
+                <p className="ob-fineprint mt-3">
                   {summary.historyMonths} months of trading history, rebased so
                   the newest bill is today.
                 </p>
 
                 <div className="mt-6 flex-1">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--ob-text-muted)]">
-                    Inside this demo
-                  </p>
+                  <p className="ob-label">Inside this demo</p>
                   <CheckList className="mt-3" items={copy.highlights} />
                 </div>
 
@@ -125,7 +138,7 @@ export function BrandCards({
                   onClick={() => enter(summary.code)}
                   disabled={pending !== null}
                   loading={pending === summary.code}
-                  className="mt-6 min-h-[2.75rem] w-full"
+                  className="mt-6 w-full"
                 >
                   Open {copy.name} demo
                 </Button>

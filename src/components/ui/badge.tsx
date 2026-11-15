@@ -10,7 +10,7 @@ export function Badge({
   className?: string;
 }) {
   const tint = (token: string) =>
-    `bg-[color-mix(in_srgb,var(${token})_14%,transparent)] text-[var(${token})] ring-1 ring-inset ring-[color-mix(in_srgb,var(${token})_30%,transparent)]`;
+    `bg-[color-mix(in_srgb,var(${token})_15%,transparent)] text-[var(${token})] ring-1 ring-inset ring-[color-mix(in_srgb,var(${token})_32%,transparent)]`;
   const tones = {
     neutral:
       "bg-[var(--ob-surface-muted)] text-[var(--ob-text-secondary)] ring-1 ring-inset ring-[var(--ob-border)]",
@@ -22,7 +22,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-semibold",
+        "inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.13em]",
         tones[tone],
         className,
       )}

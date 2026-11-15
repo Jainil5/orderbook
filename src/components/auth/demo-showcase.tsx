@@ -52,11 +52,11 @@ function MiniCard({
   return (
     <div className="ob-card flex h-full flex-col p-5">
       <div className="flex items-baseline justify-between gap-2">
-        <h3 className="text-sm font-semibold text-[var(--ob-text-secondary)]">
+        <h3 className="ob-label-quiet truncate text-[var(--ob-text-secondary)]">
           {title}
         </h3>
         {caption ? (
-          <span className="text-xs tabular-nums text-[var(--ob-text-muted)]">
+          <span className="ob-num text-xs text-[var(--ob-text-muted)]">
             {caption}
           </span>
         ) : null}
@@ -146,10 +146,10 @@ export function DemoShowcase({ stats }: { stats: DemoShowcaseStats }) {
   return (
     <section className="space-y-4">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 px-1">
-        <h2 className="font-display text-xl font-semibold tracking-tight">
+        <h2 className="font-display text-[26px] font-semibold" style={{ letterSpacing: "-0.02em" }}>
           Live from {stats.brandName}
         </h2>
-        <p className="text-sm text-[var(--ob-text-muted)]">
+        <p className="text-[15px] text-[var(--ob-text-muted)]">
           {compactMoney(stats.periodRevenue, currency)} across{" "}
           {stats.periodBills} bills · last {trend.length} days
         </p>
