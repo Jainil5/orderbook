@@ -1,0 +1,2 @@
+brand_id,earn_mode,earn_amount_per_point,earn_points_per_order,point_value,expiry_days,redemption_enabled,tiers_json
+demo-cubig-furniture,per_order,0,120,0.25,,true,"[{""id"":""trade"",""name"":""Trade"",""min_spend"":100000,""discount_percent"":5},{""id"":""preferred"",""name"":""Preferred"",""min_spend"":300000,""discount_percent"":8},{""id"":""signature"",""name"":""Signature"",""min_spend"":600000,""discount_percent"":12}]"

@@ -1,11 +1,11 @@
-id,brand_id,name,email,phone,notes,price_tier
-fc1,demo-cubig-furniture,Walk-in / Showroom,,,,
-fc2,demo-cubig-furniture,Priya Homes Interiors,projects@priyahomes.in,+91 98100 33445,Interior designer — trade pricing applies,wholesale
-fc3,demo-cubig-furniture,Northstar Coworking,facilities@northstar.io,+91 98765 12000,"40-seat fit-out, PO-based payments",wholesale
-fc4,demo-cubig-furniture,Arjun & Meera Shah,arjun.shah@gmail.com,+91 99887 66554,"3 BHK, Tower B delivery — book the service lift",retail
-fc5,demo-cubig-furniture,Meraki Cafe & Roastery,hello@meraki.cafe,+91 90998 76543,Café contract: 12 tables and a service counter,wholesale
-fc6,demo-cubig-furniture,Sagar Mehta,,+91 98795 44120,Executive cabin refit at Shreeji Chambers,retail
-fc7,demo-cubig-furniture,Anjali Shah,anjali.shah@example.in,+91 91672 33890,White laminate preference,retail
-fc8,demo-cubig-furniture,Tejas Panchal,,+91 94279 55021,2 BHK studio couch project,retail
-fc9,demo-cubig-furniture,Bluebird Preschool,hello@bluebird.edu.in,+91 96013 77420,Low tables and cubby storage — PO 2026-114,wholesale
-fc10,demo-cubig-furniture,Zoya Boutique,zoya.boutique@example.in,+91 70431 88990,"Billing counter, trial rooms and garment rails",retail
+id,brand_id,name,email,phone,notes,price_tier,status,source,tags,address,date_of_birth,gender,created_at,marketing_consent,opted_out,custom_fields
+fc1,demo-cubig-furniture,Walk-in / Showroom,,,,retail,active,Showroom,walk-in,,,,2026-05-01T10:00:00.000Z,false,false,
+fc2,demo-cubig-furniture,Priya Homes Interiors,projects@priyahomes.in,+91 98100 33445,Interior designer — trade pricing applies,wholesale,active,Referral,trade|designer,"B/12 Shrinand Residency, Pal, Surat 395009",,female,2026-06-18T11:20:00.000Z,true,false,"{""Design firm"":""Priya Homes"",""PO series"":""PH-2026""}"
+fc3,demo-cubig-furniture,Northstar Coworking,facilities@northstar.io,+91 98765 12000,"40-seat fit-out, PO-based payments",wholesale,active,Tender,corporate|tender,"4th floor, Times Square, Adajan, Surat 395009",,other,2026-07-09T09:40:00.000Z,true,false,"{""GST number"":""24AAACN5512P1ZK""}"
+fc4,demo-cubig-furniture,Arjun & Meera Shah,arjun.shah@gmail.com,+91 99887 66554,"3 BHK, Tower B delivery — book the service lift",retail,active,Instagram,residential,"Tower B, Shyamal Rising, Vesu, Surat 395007",,other,2026-08-22T14:05:00.000Z,true,false,"{""Site contact"":""Meera""}"
+fc5,demo-cubig-furniture,Meraki Cafe & Roastery,hello@meraki.cafe,+91 90998 76543,Café contract: 12 tables and a service counter,wholesale,inactive,Instagram,hospitality|refund,"Ghoddil Road, Surat 395003",,other,2026-08-30T10:00:00.000Z,false,false,"{""GST number"":""24AADCM1204L1Z8""}"
+fc6,demo-cubig-furniture,Sagar Mehta,,+91 98795 44120,Executive cabin refit at Shreeji Chambers,retail,active,Referral,commercial|damage-claim,"Office No. 7, Shreeji Chambers, Majura Gate, Surat 395001",1979-12-04,male,2026-09-12T16:20:00.000Z,true,false,
+fc7,demo-cubig-furniture,Anjali Shah,anjali.shah@example.in,+91 91672 33890,White laminate preference,retail,active,Walk-in,residential|laminate,"Harmony Bungalow, Dumas Road, Surat 395008",1991-05-19,female,2026-10-22T15:45:00.000Z,true,false,
+fc8,demo-cubig-furniture,Tejas Panchal,,+91 94279 55021,2 BHK studio couch project,retail,active,Referral,residential,"Shanti Residency, Udhna, Surat 394210",1994-07-08,male,2026-10-15T10:05:00.000Z,true,false,
+fc9,demo-cubig-furniture,Bluebird Preschool,hello@bluebird.edu.in,+91 96013 77420,Low tables and cubby storage — PO 2026-114,wholesale,active,Google,institution|po,"Adajan Road, Surat 395009",,other,2026-10-08T11:20:00.000Z,true,false,"{""PO number"":""2026-114""}"
+fc10,demo-cubig-furniture,Zoya Boutique,zoya.boutique@example.in,+91 70431 88990,"Billing counter, trial rooms and garment rails",retail,active,Instagram,retail-fitout|repeat,"Snehdeep Society, Majura Gate, Surat 395001",1986-10-27,female,2026-09-05T13:10:00.000Z,true,false,"{""Season"":""festive""}"

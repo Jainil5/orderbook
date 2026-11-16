@@ -1,0 +1,2 @@
+brand_id,earn_mode,earn_amount_per_point,earn_points_per_order,point_value,expiry_days,redemption_enabled,tiers_json
+demo-brewery-cafe,per_amount,20,0,0.5,365,true,"[{""id"":""bronze"",""name"":""Bronze"",""min_spend"":0,""discount_percent"":0},{""id"":""silver"",""name"":""Silver"",""min_spend"":1200,""discount_percent"":5},{""id"":""gold"",""name"":""Gold"",""min_spend"":2300,""discount_percent"":10}]"

@@ -1,0 +1,9 @@
+id,brand_id,name,description,kind,rules_json,member_ids,created_at
+bc-seg-1,demo-brewery-cafe,VIP regulars,Three or more paid orders and three thousand rupees or more of lifetime spend,dynamic,"{""minOrders"":3,""minSpend"":3000}",,2026-08-01T09:00:00.000Z
+bc-seg-2,demo-brewery-cafe,New this quarter,Joined in the last forty-five days,dynamic,"{""joinedWithinDays"":45}",,2026-08-01T09:00:00.000Z
+bc-seg-3,demo-brewery-cafe,Lapsed,Nothing purchased for forty-five days or longer,dynamic,"{""inactiveDays"":45}",,2026-08-01T09:00:00.000Z
+bc-seg-4,demo-brewery-cafe,Outstanding dues,At least one bill that is not fully paid,dynamic,"{""hasOutstandingDues"":true}",,2026-08-01T09:00:00.000Z
+bc-seg-5,demo-brewery-cafe,Unresolved complaints,Carrying an open or in-progress complaint,dynamic,"{""hasOpenComplaints"":true}",,2026-09-15T09:00:00.000Z
+bc-seg-6,demo-brewery-cafe,Nut allergy — kitchen flag,Hand-picked list the kitchen reads before every service,manual,,c9,2026-09-15T09:00:00.000Z
+bc-seg-7,demo-brewery-cafe,Corporate accounts,Tagged corporate — invoice and account terms apply,dynamic,"{""tags"":[""corporate""]}",,2026-10-01T09:00:00.000Z
+bc-seg-8,demo-brewery-cafe,Rated us below three stars,Anyone whose review scored one to two stars,dynamic,"{""maxRating"":2}",,2026-10-01T09:00:00.000Z

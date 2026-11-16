@@ -20,6 +20,15 @@ export function formatDate(value: string | Date, locale = "en-IN"): string {
   }).format(d);
 }
 
+/** Picks the noun form that matches a count, so a screen never reads "1 bills". */
+export function pluralize(
+  count: number,
+  singular: string,
+  pluralForm = `${singular}s`,
+): string {
+  return count === 1 ? singular : pluralForm;
+}
+
 export function formatQuantity(qty: number, unit?: string | null): string {
   const n = Number.isInteger(qty) ? qty.toString() : qty.toFixed(2);
   return unit ? `${n} ${unit}` : n;

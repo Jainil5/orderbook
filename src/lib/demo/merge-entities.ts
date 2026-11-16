@@ -1,4 +1,5 @@
 import type { DemoMutableBucket } from "@/lib/demo/mutable-store";
+import { mergeOpsEntities } from "@/lib/manager/ops-shared";
 import type {
   Customer,
   Offer,
@@ -11,10 +12,12 @@ export function mergeDemoCustomers(
   base: Customer[],
   bucket: DemoMutableBucket,
 ): Customer[] {
-  const byId = new Map<string, Customer>();
-  for (const c of base) byId.set(c.id, c);
-  for (const c of bucket.customers) byId.set(c.id, c);
-  return Array.from(byId.values()).sort((a, b) => a.name.localeCompare(b.name));
+  // CRM edits (status, tags, consent, custom fields) ride on the same record
+  // billing reads, so overrides have to land here rather than in a CRM-only
+  // reader — otherwise the directory and an invoice would disagree.
+  return mergeOpsEntities(base, bucket.customers, bucket.customerOverrides ?? {}).sort(
+    (a, b) => a.name.localeCompare(b.name),
+  );
 }
 
 export function mergeDemoOffers(base: Offer[], bucket: DemoMutableBucket): Offer[] {

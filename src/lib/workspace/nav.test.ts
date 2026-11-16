@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { CRM_MODULES } from "@/lib/workspace/crm-modules";
 import { buildWorkspaceNavItems } from "@/lib/workspace/nav";
 import { getWorkspaceProfile } from "@/lib/workspace/constants";
 
@@ -62,8 +63,35 @@ describe("buildWorkspaceNavItems", () => {
     expect(manager?.children).toHaveLength(5);
   });
 
+  it("gives Customers the CRM modules as children", () => {
+    const customers = buildWorkspaceNavItems(false, profile).find(
+      (i) => i.href === "/customers",
+    );
+    expect(customers?.iconKey).toBe("Customers");
+    expect(customers?.children?.map((c) => c.href)).toEqual([
+      "/customers/directory",
+      "/customers/leads",
+      "/customers/interactions",
+      "/customers/reviews",
+      "/customers/segments",
+      "/customers/campaigns",
+      "/customers/loyalty",
+    ]);
+  });
+
+  it("lists only module routes under Customers, never a record", () => {
+    const customers = buildWorkspaceNavItems(false, profile).find(
+      (i) => i.href === "/customers",
+    );
+    for (const child of customers?.children ?? []) {
+      expect(child.href).not.toContain("[");
+      expect(CRM_MODULES.some((m) => m.href === child.href)).toBe(true);
+    }
+  });
+
   it("flat items have no children", () => {
     const items = buildWorkspaceNavItems(false, profile);
-    expect(items.filter((i) => i.href !== "/manager").every((i) => !i.children)).toBe(true);
+    const grouped = new Set(["/manager", "/customers"]);
+    expect(items.filter((i) => !grouped.has(i.href)).every((i) => !i.children)).toBe(true);
   });
 });

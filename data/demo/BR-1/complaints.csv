@@ -1,0 +1,6 @@
+id,brand_id,customer_id,review_id,interaction_id,subject,detail,severity,status,owner_staff_id,raised_at,resolved_at
+bc-cmp-1,demo-brewery-cafe,c4,bc-rev-1b,bc-int-6,Delivery left at the wrong gate,"Second time this month. Rider used a stale address on the ticket; customer wants the saved address corrected before the next order.",high,open,bc-staff-1,2026-11-11T14:20:00.000Z,
+bc-cmp-2,demo-brewery-cafe,c5,bc-rev-4,bc-int-2,Confusing part-payment bill,"Table of five split the bill, card machine declined the second half and the printed total did not match what was charged.",medium,in_progress,bc-staff-2,2026-11-10T17:00:00.000Z,
+bc-cmp-3,demo-brewery-cafe,,bc-rev-6,,Friday afternoon music too loud,"Third week running. Regulars who work from the cafe have asked for a quieter level before 4pm.",low,resolved,bc-staff-1,2026-09-26T09:00:00.000Z,2026-10-04T10:30:00.000Z
+bc-cmp-4,demo-brewery-cafe,c7,bc-rev-8,bc-int-7,Wrong order delivered to the wrong address,"Full refund on BC-1054 after four phone calls. Account manager relationship at risk — he runs the Friday team lunch.",high,in_progress,bc-staff-1,2026-11-08T19:40:00.000Z,
+bc-cmp-5,demo-brewery-cafe,c6,,,Two cancelled orders in a row,"Rider cancelled at the door in August, order grounded the wrong beans in November. Customer has stopped ordering.",medium,open,bc-staff-2,2026-11-05T12:00:00.000Z,

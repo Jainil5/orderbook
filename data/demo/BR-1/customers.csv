@@ -1,11 +1,11 @@
-id,brand_id,name,email,phone,notes,price_tier
-c1,demo-brewery-cafe,Walk-in Guest,,,,
-c2,demo-brewery-cafe,Ananya Mehta,ananya@example.com,+91 90000 11111,"Oat flat white, most mornings",retail
-c3,demo-brewery-cafe,Rohan Kapoor,rohan@example.com,+91 90000 22222,Corporate coffee runs — invoice to his office,retail
-c4,demo-brewery-cafe,Aarav Sharma,aarav.sharma@example.com,+91 98274 89892,,retail
-c5,demo-brewery-cafe,Ira Bose,,+91 98834 57882,"Sits at Table 9, always the seasonal pastry",retail
-c6,demo-brewery-cafe,Siddharth Gupta,sid.gupta@example.com,+91 98900 17192,,retail
-c7,demo-brewery-cafe,Manav Menon,,+91 98591 69901,Orders the Friday team lunch,retail
-c8,demo-brewery-cafe,Gaurav Gupta,gaurav@example.com,+91 98674 84952,Sunday brunch table for four,retail
-c9,demo-brewery-cafe,Leela Patel,,+91 98943 24101,Allergic to nuts — flag every order to the kitchen,retail
-c10,demo-brewery-cafe,Arjun Rao,arjun.rao@example.com,+91 98912 24454,,retail
+id,brand_id,name,email,phone,notes,price_tier,status,source,tags,address,date_of_birth,gender,created_at,marketing_consent,opted_out,custom_fields
+c1,demo-brewery-cafe,Walk-in Guest,,,,retail,active,Walk-in,walk-in,,,,2026-05-01T09:00:00.000Z,false,false,
+c2,demo-brewery-cafe,Ananya Mehta,ananya@example.com,+91 90000 11111,"Oat flat white, most mornings",retail,active,Instagram,regular|oat-milk,"14 Carter Road, Bandra West, Mumbai 400051",1992-03-14,female,2026-05-16T09:10:00.000Z,true,false,
+c3,demo-brewery-cafe,Rohan Kapoor,rohan@example.com,+91 90000 22222,"Corporate coffee runs — invoice to his office",retail,active,Referral,corporate,"4th floor, Times Square, Adajan, Surat 395009",1984-09-02,male,2026-06-02T11:00:00.000Z,true,false,"{""GST number"":""24AAFCR8821K1Z9""}"
+c4,demo-brewery-cafe,Aarav Sharma,aarav.sharma@example.com,+91 98274 89892,,retail,active,Zomato,delivery,"12 Linking Road, Bandra West, Mumbai 400050",1995-11-21,male,2026-08-14T15:30:00.000Z,true,false,
+c5,demo-brewery-cafe,Ira Bose,,+91 98834 57882,"Sits at Table 9, always the seasonal pastry",retail,active,Walk-in,regular|table-9,"Shop 4, Sundar Nagar, Mumbai 400034",1990-06-07,female,2026-09-21T11:45:00.000Z,false,false,
+c6,demo-brewery-cafe,Siddharth Gupta,sid.gupta@example.com,+91 98900 17192,,retail,inactive,Instagram,at-risk,"23 Bandra West, Linking Road, Mumbai 400050",1987-01-30,male,2026-06-11T13:05:00.000Z,true,false,
+c7,demo-brewery-cafe,Manav Menon,,+91 98591 69901,Orders the Friday team lunch,retail,active,Referral,corporate|friday-lunch,"Jio World Centre, BKC, Mumbai 400051",1983-04-18,male,2026-07-31T10:20:00.000Z,true,false,
+c8,demo-brewery-cafe,Gaurav Gupta,gaurav@example.com,+91 98674 84952,Sunday brunch table for four,retail,active,Google,brunch,"904 Ranjit Sagar, Vesu, Surat 395007",1988-11-13,male,2026-10-02T09:00:00.000Z,true,false,
+c9,demo-brewery-cafe,Leela Patel,,+91 98943 24101,Allergic to nuts — flag every order to the kitchen,retail,active,Walk-in,vip|allergy-nuts,"Flat 202, Sea Breeze, Girgaon, Mumbai 400004",1985-02-11,female,2026-05-20T08:15:00.000Z,false,true,
+c10,demo-brewery-cafe,Arjun Rao,arjun.rao@example.com,+91 98912 24454,,retail,active,Zomato,prepaid,"Harmony Bungalow, Dumas Road, Surat 395008",1998-08-26,male,2026-10-21T10:35:00.000Z,true,false,

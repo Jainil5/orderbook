@@ -1,0 +1,9 @@
+id,brand_id,name,description,kind,rules_json,member_ids,created_at
+cf-seg-1,demo-cubig-furniture,Trade and designer accounts,Wholesale price list holders who order on behalf of clients,dynamic,"{""priceTier"":""wholesale""}",,2026-07-01T09:00:00.000Z
+cf-seg-2,demo-cubig-furniture,High-value projects,Two lakh rupees or more of lifetime billed value,dynamic,"{""minSpend"":200000}",,2026-07-01T09:00:00.000Z
+cf-seg-3,demo-cubig-furniture,Dormant over 150 days,No purchase in the last five months,dynamic,"{""inactiveDays"":150}",,2026-07-01T09:00:00.000Z
+cf-seg-4,demo-cubig-furniture,Dues outstanding,Quotation or bill with payment still open,dynamic,"{""hasOutstandingDues"":true}",,2026-07-01T09:00:00.000Z
+cf-seg-5,demo-cubig-furniture,Open complaints,Carrying an unresolved complaint right now,dynamic,"{""hasOpenComplaints"":true}",,2026-09-01T09:00:00.000Z
+cf-seg-6,demo-cubig-furniture,Repeat buyers,More than one completed project billed,dynamic,"{""minOrders"":2}",,2026-09-01T09:00:00.000Z
+cf-seg-7,demo-cubig-furniture,Festive showroom shortlist,Hand-picked for the December open-house invite,manual,,"fc4|fc7|fc8|fc10",2026-10-20T09:00:00.000Z
+cf-seg-8,demo-cubig-furniture,Rated us three stars or less,Anyone whose review scored one to three stars,dynamic,"{""maxRating"":3}",,2026-10-20T09:00:00.000Z

@@ -90,3 +90,11 @@ export function json<T>(v: string): T | null {
   if (v === "") return null;
   return JSON.parse(v) as T;
 }
+
+/** Multi-value cells (`tags`, `member_ids`) use `|` so commas stay CSV-safe. */
+export function pipeList(v: string | undefined): string[] {
+  return (v ?? "")
+    .split("|")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}

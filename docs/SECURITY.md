@@ -42,3 +42,34 @@ public surface tidy.
   or written to disk at runtime, so serverless hosts (Vercel) work unchanged.
 - Demo edits persist in chunked httpOnly cookies per browser; clearing site
   data resets the sandbox to the repo dataset.
+
+## CRM writes
+
+The CRM is the one module that may create rows in the demo, and every write
+goes through `src/services/crm-actions.ts`, which holds four rules:
+
+- **Tenancy comes from the cookie, never the form.** `brand_id` is taken from
+  the pack resolved out of the httpOnly `ob_demo_workspace` cookie; a payload
+  that names somebody else's id is not honoured.
+- **Foreign keys are checked on the server.** Each `*_id` field is validated
+  against the merged rows the server itself reads (`knownIds`), so a browser
+  cannot claim a customer, staff member, offer or segment that does not exist.
+- **Numbers are re-derived, not trusted.** Amounts, points and funnel counters
+  are recomputed from the validators in `src/lib/crm/*` — a signed ledger
+  amount follows its `kind`, campaign counters are capped at the audience that
+  consent allows right now, and a redemption is refused against the live
+  balance rather than the one the page rendered.
+- **Nothing leaves the browser.** No messaging provider is connected, so no
+  action sends, posts or claims delivery; a campaign's counters stay zero until
+  a human logs what they saw.
+
+Review sentiment is a deterministic lexicon score, not a model call, so no
+customer text is sent anywhere for analysis.
+
+## Production schema
+
+`docs/SUPABASE_CRM_SCHEMA.sql` records the intended Postgres shape — per-brand
+tenancy, foreign keys, indexes, and row-level security policies that deny reads
+outside the caller's brands and refuse a write whose `brand_id` the caller
+cannot claim. The demo does not connect to a database and never executes that
+file; it is the contract to implement when the CRM moves onto real storage.

@@ -21,7 +21,16 @@ import type {
   Task,
 } from "@/types/operations";
 import { LEAD_STAGES } from "@/types/operations";
-import { bool, json, num, reqNum, reqStr, str, type CsvRow } from "./parse-csv";
+import {
+  bool,
+  json,
+  num,
+  pipeList,
+  reqNum,
+  reqStr,
+  str,
+  type CsvRow,
+} from "./parse-csv";
 
 export function mapBrand(
   r: CsvRow,
@@ -75,7 +84,18 @@ export function mapProduct(r: CsvRow, source: string): Product {
   };
 }
 
+const CUSTOMER_STATUSES = ["active", "inactive", "archived"] as const;
+const CUSTOMER_GENDERS = ["male", "female", "other"] as const;
+
 export function mapCustomer(r: CsvRow, source: string): Customer {
+  const status = str(r.status);
+  if (status && !(CUSTOMER_STATUSES as readonly string[]).includes(status)) {
+    throw new Error(`Invalid customer status "${status}" in ${source}`);
+  }
+  const gender = str(r.gender);
+  if (gender && !(CUSTOMER_GENDERS as readonly string[]).includes(gender)) {
+    throw new Error(`Invalid customer gender "${gender}" in ${source}`);
+  }
   return {
     id: reqStr(r.id, "id", source),
     brand_id: reqStr(r.brand_id, "brand_id", source),
@@ -84,6 +104,16 @@ export function mapCustomer(r: CsvRow, source: string): Customer {
     phone: str(r.phone),
     notes: str(r.notes),
     price_tier: r.price_tier === "" ? null : (r.price_tier as Customer["price_tier"]),
+    status: (status as Customer["status"]) ?? "active",
+    source: str(r.source),
+    tags: pipeList(r.tags ?? ""),
+    address: str(r.address),
+    date_of_birth: str(r.date_of_birth),
+    gender: (gender as Customer["gender"]) ?? null,
+    created_at: str(r.created_at),
+    marketing_consent: r.marketing_consent === "" ? false : bool(r.marketing_consent),
+    opted_out: r.opted_out === "" ? false : bool(r.opted_out),
+    custom_fields: json<Record<string, string>>(r.custom_fields),
   };
 }
 
@@ -284,5 +314,7 @@ export function mapLead(r: CsvRow, source: string): Lead {
     next_action_at: str(r.next_action_at),
     quotation_number: str(r.quotation_number),
     created_at: reqStr(r.created_at, "created_at", source),
+    converted_customer_id: str(r.converted_customer_id),
+    converted_at: str(r.converted_at),
   };
 }

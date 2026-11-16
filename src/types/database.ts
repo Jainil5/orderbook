@@ -88,6 +88,8 @@ export type CustomerUpsertInput = {
   price_tier?: "retail" | "wholesale" | null;
 };
 
+export type CustomerStatus = "active" | "inactive" | "archived";
+
 export type Customer = {
   id: string;
   brand_id: string;
@@ -96,6 +98,23 @@ export type Customer = {
   phone: string | null;
   notes?: string | null;
   price_tier?: "retail" | "wholesale" | null;
+  /**
+   * CRM enrichment on the same record billing already uses. Every field is
+   * optional so a pack that predates the CRM columns still loads.
+   */
+  status?: CustomerStatus;
+  source?: string | null;
+  tags?: string[];
+  address?: string | null;
+  /** Calendar day `YYYY-MM-DD`; drives birthday offers only. */
+  date_of_birth?: string | null;
+  gender?: "male" | "female" | "other" | null;
+  created_at?: string | null;
+  /** Marketing consent is opt-in; `opted_out` wins over it. */
+  marketing_consent?: boolean;
+  opted_out?: boolean;
+  /** Free-form CRM fields keyed by the brand's own labels. */
+  custom_fields?: Record<string, string> | null;
 };
 
 export type OrderStatus =

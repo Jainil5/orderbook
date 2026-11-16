@@ -1,0 +1,18 @@
+id,brand_id,customer_id,kind,points,reason,order_id,expires_at,created_at
+cf-ly-1,demo-cubig-furniture,fc2,earn,120,Project billed on CF-2203,o-CF-2203,,2026-08-22T14:05:00.000Z
+cf-ly-2,demo-cubig-furniture,fc2,earn,120,Advance billed on CF-2213,o-CF-2213,,2026-10-24T11:30:00.000Z
+cf-ly-3,demo-cubig-furniture,fc2,bonus,300,Referred the Bluebird preschool fit-out,,,2026-10-09T09:00:00.000Z
+cf-ly-4,demo-cubig-furniture,fc2,redeem,-200,Applied against quotation CF-Q-4471,,,2026-11-05T16:00:00.000Z
+cf-ly-5,demo-cubig-furniture,fc3,earn,120,Breakout lounge chairs on CF-2206,o-CF-2206,,2026-09-14T12:00:00.000Z
+cf-ly-6,demo-cubig-furniture,fc4,earn,120,Dining set on CF-2205,o-CF-2205,,2026-09-02T15:20:00.000Z
+cf-ly-7,demo-cubig-furniture,fc4,earn,120,Sofa install on CF-2214,o-CF-2214,,2026-11-02T10:00:00.000Z
+cf-ly-8,demo-cubig-furniture,fc7,earn,120,Wardrobes billed on CF-2211,o-CF-2211,,2026-10-28T13:45:00.000Z
+cf-ly-9,demo-cubig-furniture,fc8,earn,120,Studio couch on CF-2210,o-CF-2210,,2026-10-19T16:30:00.000Z
+cf-ly-10,demo-cubig-furniture,fc9,earn,120,Low tables billed on CF-2212,o-CF-2212,,2026-10-21T09:10:00.000Z
+cf-ly-11,demo-cubig-furniture,fc10,earn,120,Shelf sample on CF-2204,o-CF-2204,,2026-08-30T11:00:00.000Z
+cf-ly-12,demo-cubig-furniture,fc10,earn,120,Boutique counter on CF-2208,o-CF-2208,,2026-10-06T14:40:00.000Z
+cf-ly-13,demo-cubig-furniture,fc10,adjust,-60,Corrected a double credit from the sample order,,,2026-10-07T09:00:00.000Z
+cf-ly-14,demo-cubig-furniture,fc6,earn,120,Cabin refit on CF-2207,o-CF-2207,,2026-09-27T10:15:00.000Z
+cf-ly-15,demo-cubig-furniture,fc6,adjust,-120,Reversed after the CF-2207 refund and credit note,o-CF-CN-0044,,2026-10-14T12:00:00.000Z
+cf-ly-16,demo-cubig-furniture,fc5,earn,120,Cafe counter on CF-2209,o-CF-2209,,2026-09-08T13:00:00.000Z
+cf-ly-17,demo-cubig-furniture,fc5,adjust,-120,Reversed when the contract was cancelled and refunded,o-CF-2209,,2026-10-30T17:20:00.000Z

@@ -50,3 +50,15 @@ export function dueAtMs(dueAt: string): number {
 export function minutesSince(iso: string, now: Date): number {
   return Math.max(0, Math.floor((now.getTime() - new Date(iso).getTime()) / 60000));
 }
+
+const DAY_MS = 86_400_000;
+
+/**
+ * Whole local calendar days between an instant and `now` — negative for the
+ * future. Midnight-to-midnight, so a bill at 23:00 is not "yesterday" twice.
+ */
+export function wholeDaysSince(iso: string, now: Date): number {
+  const startOfDay = (d: Date) =>
+    new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  return Math.round((startOfDay(now) - startOfDay(new Date(iso))) / DAY_MS);
+}

@@ -1,0 +1,7 @@
+id,brand_id,customer_id,tier_id,started_at,expires_at,status,notes
+bc-mem-1,demo-brewery-cafe,c4,gold,2026-11-11T06:35:00.000Z,2027-11-11T06:35:00.000Z,active,Tier reached on bill BC-1057 — 10% counter discount
+bc-mem-2,demo-brewery-cafe,c2,silver,2026-10-27T06:45:00.000Z,2027-10-27T06:45:00.000Z,active,Standing Tuesday regular
+bc-mem-3,demo-brewery-cafe,c7,silver,2026-07-31T10:20:00.000Z,2027-07-31T10:20:00.000Z,active,Runs the Friday team lunch
+bc-mem-4,demo-brewery-cafe,c5,bronze,2026-09-21T11:45:00.000Z,2027-09-21T11:45:00.000Z,active,No discount tier — table 9 courtesy seat
+bc-mem-5,demo-brewery-cafe,c9,bronze,2026-10-31T08:15:00.000Z,2027-10-31T08:15:00.000Z,active,Allergy card on file
+bc-mem-6,demo-brewery-cafe,c6,bronze,2026-06-11T13:05:00.000Z,2026-11-01T00:05:00.000Z,expired,Lapsed after two cancelled orders

@@ -14,6 +14,14 @@ export type DatedPack = Pick<
   | "tasks"
   | "shifts"
   | "leads"
+  | "customers"
+  | "interactions"
+  | "reviews"
+  | "complaints"
+  | "segments"
+  | "campaigns"
+  | "loyaltyLedger"
+  | "memberships"
 >;
 
 function startOfDayMs(d: Date): number {
@@ -36,7 +44,7 @@ export function computeOffsetDays(maxIso: string, now: Date): number {
   return Math.round((startOfDayMs(now) - startOfDayMs(new Date(maxIso))) / DAY_MS);
 }
 
-function shiftNullableIso(v: string | null, days: number): string | null {
+function shiftNullableIso(v: string | null | undefined, days: number): string | null {
   return v == null ? null : shiftIso(v, days);
 }
 
@@ -86,6 +94,49 @@ export function rebasePackDates<T extends DatedPack>(pack: T, now: Date = new Da
       ...l,
       created_at: shiftIso(l.created_at, days),
       next_action_at: shiftNullableIso(l.next_action_at, days),
+      converted_at: shiftNullableIso(l.converted_at, days),
+    })),
+    // `date_of_birth` is deliberately left alone: it is month/day data, and
+    // shifting it would sweep every birthday off the calendar each run.
+    customers: pack.customers.map((c) => ({
+      ...c,
+      created_at: shiftNullableIso(c.created_at, days),
+    })),
+    interactions: pack.interactions.map((i) => ({
+      ...i,
+      occurred_at: shiftIso(i.occurred_at, days),
+      next_follow_up_at: shiftNullableIso(i.next_follow_up_at, days),
+    })),
+    reviews: pack.reviews.map((r) => ({
+      ...r,
+      reviewed_at: shiftIso(r.reviewed_at, days),
+      responded_at: shiftNullableIso(r.responded_at, days),
+    })),
+    complaints: pack.complaints.map((c) => ({
+      ...c,
+      raised_at: shiftIso(c.raised_at, days),
+      resolved_at: shiftNullableIso(c.resolved_at, days),
+    })),
+    segments: pack.segments.map((s) => ({
+      ...s,
+      created_at: shiftIso(s.created_at, days),
+    })),
+    campaigns: pack.campaigns.map((c) => ({
+      ...c,
+      starts_at: shiftNullableIso(c.starts_at, days),
+      ends_at: shiftNullableIso(c.ends_at, days),
+      created_at: shiftIso(c.created_at, days),
+      updated_at: shiftIso(c.updated_at, days),
+    })),
+    loyaltyLedger: pack.loyaltyLedger.map((e) => ({
+      ...e,
+      created_at: shiftIso(e.created_at, days),
+      expires_at: shiftNullableIso(e.expires_at, days),
+    })),
+    memberships: pack.memberships.map((m) => ({
+      ...m,
+      started_at: shiftIso(m.started_at, days),
+      expires_at: shiftNullableIso(m.expires_at, days),
     })),
   };
 }

@@ -1,0 +1,15 @@
+id,brand_id,customer_id,kind,points,reason,order_id,expires_at,created_at
+bc-ly-1,demo-brewery-cafe,c2,earn,24,Bill BC-1041,o-BC-1041,2027-05-16T09:10:00.000Z,2026-05-16T09:10:00.000Z
+bc-ly-2,demo-brewery-cafe,c2,bonus,50,Welcome bonus on sign-up,,,2026-05-16T09:15:00.000Z
+bc-ly-3,demo-brewery-cafe,c2,earn,43,Bill BC-1049,o-BC-1049,2027-10-27T06:45:00.000Z,2026-10-27T06:45:00.000Z
+bc-ly-4,demo-brewery-cafe,c2,earn,48,Bill BC-1053 with Food Friday,o-BC-1053,2027-11-07T13:30:00.000Z,2026-11-07T13:30:00.000Z
+bc-ly-5,demo-brewery-cafe,c2,redeem,-100,Redeemed for a 250g bean purchase,,,2026-11-08T10:00:00.000Z
+bc-ly-6,demo-brewery-cafe,c4,earn,77,Bill BC-1047,o-BC-1047,2027-10-12T12:50:00.000Z,2026-10-12T12:50:00.000Z
+bc-ly-7,demo-brewery-cafe,c4,earn,43,Bill BC-1057 with Happy Hour,o-BC-1057,2027-11-11T06:35:00.000Z,2026-11-11T06:35:00.000Z
+bc-ly-8,demo-brewery-cafe,c5,earn,61,Bill BC-1045,o-BC-1045,2027-09-21T11:45:00.000Z,2026-09-21T11:45:00.000Z
+bc-ly-9,demo-brewery-cafe,c7,earn,99,Bill BC-1042,o-BC-1042,2027-07-31T10:20:00.000Z,2026-07-31T10:20:00.000Z
+bc-ly-10,demo-brewery-cafe,c9,earn,23,Bill BC-1050,o-BC-1050,2027-10-31T08:15:00.000Z,2026-10-31T08:15:00.000Z
+bc-ly-11,demo-brewery-cafe,c9,adjust,20,Goodwill after the pastry case label check,,,2026-11-02T09:00:00.000Z
+bc-ly-12,demo-brewery-cafe,c6,expire,-35,Annual expiry on last year's balance,,,2026-11-01T00:05:00.000Z
+bc-ly-13,demo-brewery-cafe,c10,adjust,10,Transferred from the old loyalty card app,,,2026-10-21T10:40:00.000Z
+bc-ly-14,demo-brewery-cafe,c7,expire,-25,Points from a closed account lapsed,,,2026-10-15T00:05:00.000Z

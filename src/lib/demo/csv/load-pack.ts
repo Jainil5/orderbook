@@ -20,6 +20,16 @@ import {
   mapTask,
   mapLead,
 } from "./mappers";
+import {
+  mapCampaign,
+  mapComplaint,
+  mapInteraction,
+  mapLoyaltyEntry,
+  mapLoyaltyRules,
+  mapMembership,
+  mapReview,
+  mapSegment,
+} from "./crm-mappers";
 
 import b1Brand from "../../../../data/demo/BR-1/brand.csv";
 import b1Settings from "../../../../data/demo/BR-1/brand_settings.csv";
@@ -37,6 +47,14 @@ import b1Visits from "../../../../data/demo/BR-1/field_visits.csv";
 import b1Shifts from "../../../../data/demo/BR-1/shifts.csv";
 import b1Tasks from "../../../../data/demo/BR-1/tasks.csv";
 import b1Leads from "../../../../data/demo/BR-1/leads.csv";
+import b1Interactions from "../../../../data/demo/BR-1/interactions.csv";
+import b1Reviews from "../../../../data/demo/BR-1/reviews.csv";
+import b1Complaints from "../../../../data/demo/BR-1/complaints.csv";
+import b1Segments from "../../../../data/demo/BR-1/segments.csv";
+import b1Campaigns from "../../../../data/demo/BR-1/campaigns.csv";
+import b1LoyaltyRules from "../../../../data/demo/BR-1/loyalty_rules.csv";
+import b1LoyaltyLedger from "../../../../data/demo/BR-1/loyalty_ledger.csv";
+import b1Memberships from "../../../../data/demo/BR-1/memberships.csv";
 
 import b2Brand from "../../../../data/demo/BR-2/brand.csv";
 import b2Settings from "../../../../data/demo/BR-2/brand_settings.csv";
@@ -54,6 +72,14 @@ import b2Visits from "../../../../data/demo/BR-2/field_visits.csv";
 import b2Shifts from "../../../../data/demo/BR-2/shifts.csv";
 import b2Tasks from "../../../../data/demo/BR-2/tasks.csv";
 import b2Leads from "../../../../data/demo/BR-2/leads.csv";
+import b2Interactions from "../../../../data/demo/BR-2/interactions.csv";
+import b2Reviews from "../../../../data/demo/BR-2/reviews.csv";
+import b2Complaints from "../../../../data/demo/BR-2/complaints.csv";
+import b2Segments from "../../../../data/demo/BR-2/segments.csv";
+import b2Campaigns from "../../../../data/demo/BR-2/campaigns.csv";
+import b2LoyaltyRules from "../../../../data/demo/BR-2/loyalty_rules.csv";
+import b2LoyaltyLedger from "../../../../data/demo/BR-2/loyalty_ledger.csv";
+import b2Memberships from "../../../../data/demo/BR-2/memberships.csv";
 
 type BrandCsvFiles = {
   brand: string;
@@ -72,6 +98,14 @@ type BrandCsvFiles = {
   shifts: string;
   tasks: string;
   leads: string;
+  interactions: string;
+  reviews: string;
+  complaints: string;
+  segments: string;
+  campaigns: string;
+  loyaltyRules: string;
+  loyaltyLedger: string;
+  memberships: string;
 };
 
 const FILES: Record<DemoBrandCode, BrandCsvFiles> = {
@@ -80,12 +114,18 @@ const FILES: Record<DemoBrandCode, BrandCsvFiles> = {
     orders: b1Orders, items: b1Items, payments: b1Payments, offers: b1Offers,
     staff: b1Staff, services: b1Services, jobs: b1Jobs, appointments: b1Appointments,
     visits: b1Visits, shifts: b1Shifts, tasks: b1Tasks, leads: b1Leads,
+    interactions: b1Interactions, reviews: b1Reviews, complaints: b1Complaints,
+    segments: b1Segments, campaigns: b1Campaigns, loyaltyRules: b1LoyaltyRules,
+    loyaltyLedger: b1LoyaltyLedger, memberships: b1Memberships,
   },
   "BR-2": {
     brand: b2Brand, settings: b2Settings, products: b2Products, customers: b2Customers,
     orders: b2Orders, items: b2Items, payments: b2Payments, offers: b2Offers,
     staff: b2Staff, services: b2Services, jobs: b2Jobs, appointments: b2Appointments,
     visits: b2Visits, shifts: b2Shifts, tasks: b2Tasks, leads: b2Leads,
+    interactions: b2Interactions, reviews: b2Reviews, complaints: b2Complaints,
+    segments: b2Segments, campaigns: b2Campaigns, loyaltyRules: b2LoyaltyRules,
+    loyaltyLedger: b2LoyaltyLedger, memberships: b2Memberships,
   },
 };
 
@@ -116,6 +156,26 @@ export function loadDemoBrandPack(code: DemoBrandCode): DemoBrandPack {
     shifts: rows(f.shifts, "shifts.csv").map((r) => mapShift(r, src("shifts.csv"))),
     tasks: rows(f.tasks, "tasks.csv").map((r) => mapTask(r, src("tasks.csv"))),
     leads: rows(f.leads, "leads.csv").map((r) => mapLead(r, src("leads.csv"))),
+    interactions: rows(f.interactions, "interactions.csv").map((r) =>
+      mapInteraction(r, src("interactions.csv")),
+    ),
+    reviews: rows(f.reviews, "reviews.csv").map((r) => mapReview(r, src("reviews.csv"))),
+    complaints: rows(f.complaints, "complaints.csv").map((r) =>
+      mapComplaint(r, src("complaints.csv")),
+    ),
+    segments: rows(f.segments, "segments.csv").map((r) => mapSegment(r, src("segments.csv"))),
+    campaigns: rows(f.campaigns, "campaigns.csv").map((r) =>
+      mapCampaign(r, src("campaigns.csv")),
+    ),
+    loyaltyRules: rows(f.loyaltyRules, "loyalty_rules.csv").map((r) =>
+      mapLoyaltyRules(r, src("loyalty_rules.csv")),
+    ),
+    loyaltyLedger: rows(f.loyaltyLedger, "loyalty_ledger.csv").map((r) =>
+      mapLoyaltyEntry(r, src("loyalty_ledger.csv")),
+    ),
+    memberships: rows(f.memberships, "memberships.csv").map((r) =>
+      mapMembership(r, src("memberships.csv")),
+    ),
   };
   const rebased = rebasePackDates(pack);
   cache.set(code, rebased);

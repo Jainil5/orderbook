@@ -1,0 +1,7 @@
+id,brand_id,customer_id,tier_id,started_at,expires_at,status,notes
+cf-mem-1,demo-cubig-furniture,fc2,preferred,2026-10-24T11:30:00.000Z,2027-10-24T11:30:00.000Z,active,Tier review date — points themselves never expire under this ruleset
+cf-mem-2,demo-cubig-furniture,fc3,trade,2026-09-14T12:00:00.000Z,2027-09-14T12:00:00.000Z,active,Opened on the 40-seat fit-out tender
+cf-mem-3,demo-cubig-furniture,fc4,trade,2026-11-02T10:00:00.000Z,2027-11-02T10:00:00.000Z,active,Crossed the threshold on lifetime spend — retail account on a trade tier
+cf-mem-4,demo-cubig-furniture,fc10,trade,2026-10-06T14:40:00.000Z,2027-10-06T14:40:00.000Z,active,Festive fit-out — second order took the account over
+cf-mem-5,demo-cubig-furniture,fc6,trade,2026-09-27T10:15:00.000Z,2027-09-27T10:15:00.000Z,cancelled,Held while the CF-2207 credit note and damage claim are open
+cf-mem-6,demo-cubig-furniture,fc5,trade,2026-09-08T13:00:00.000Z,2026-10-30T17:20:00.000Z,expired,Ends with the cancelled Meraki cafe contract

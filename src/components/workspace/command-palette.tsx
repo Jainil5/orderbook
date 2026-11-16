@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { useWorkspace } from "@/components/workspace/workspace-provider";
+import { CRM_MODULES } from "@/lib/workspace/crm-modules";
 import { visibleManagerModules } from "@/lib/workspace/manager-modules";
 
 const LINKS = [
@@ -14,7 +15,7 @@ const LINKS = [
   { href: "/products?tab=offers", label: "Offers & discounts" },
   { href: "/orders", label: "Orders" },
   { href: "/kitchen", label: "Kitchen board" },
-  { href: "/customers", label: "Customers" },
+  { href: "/customers", label: "CRM overview" },
   { href: "/analytics", label: "Analytics" },
   { href: "/settings", label: "Settings" },
 ];
@@ -29,7 +30,11 @@ export function CommandPalette() {
       { href: "/manager", label: "Manager overview" },
       ...visibleManagerModules(ws.hiddenManagerModules, ws.profile.capture).map((m) => ({ href: m.href, label: m.label })),
     ];
-    return [...LINKS, ...managerLinks];
+    const crmLinks = CRM_MODULES.map((m) => ({
+      href: m.href,
+      label: m.key === "directory" ? "Customer directory" : `CRM ${m.label}`,
+    }));
+    return [...LINKS, ...managerLinks, ...crmLinks];
   }, [ws.hiddenManagerModules, ws.profile.capture]);
 
   useEffect(() => {

@@ -110,4 +110,10 @@ export type Lead = {
   /** Quotation number once a quotation has been built from this lead. */
   quotation_number: string | null;
   created_at: string;
+  /**
+   * Set by the CRM when the enquiry converts: the customer the pipeline entry
+   * became, so the history survives the move out of the board.
+   */
+  converted_customer_id?: string | null;
+  converted_at?: string | null;
 };

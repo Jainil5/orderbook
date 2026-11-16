@@ -3,7 +3,7 @@
 process.env.TZ = "Asia/Kolkata";
 
 import { describe, expect, it } from "vitest";
-import { dueAtMs, localDayKey, localTimeKey, toLocalInputValue } from "./time";
+import { dueAtMs, localDayKey, localTimeKey, toLocalInputValue, wholeDaysSince } from "./time";
 
 describe("localDayKey / localTimeKey", () => {
   it("keys the pre-05:30 IST window onto the local day", () => {
@@ -32,5 +32,20 @@ describe("dueAtMs", () => {
   });
   it("keeps the instant of a full timestamp", () => {
     expect(dueAtMs("2026-11-08T12:00:00.000Z")).toBe(Date.parse("2026-11-08T12:00:00.000Z"));
+  });
+});
+
+describe("wholeDaysSince", () => {
+  const now = new Date("2026-11-16T09:00:00.000+05:30");
+
+  it("counts local calendar days, not 24-hour slices", () => {
+    // 23:00 IST on 14 Nov is already 15 Nov in UTC.
+    expect(wholeDaysSince("2026-11-14T17:30:00.000Z", now)).toBe(2);
+    expect(wholeDaysSince("2026-11-16T01:00:00.000Z", now)).toBe(0);
+    expect(wholeDaysSince("2026-10-16T09:00:00.000Z", now)).toBe(31);
+  });
+
+  it("returns a negative number for the future", () => {
+    expect(wholeDaysSince("2026-11-20T09:00:00.000Z", now)).toBe(-4);
   });
 });

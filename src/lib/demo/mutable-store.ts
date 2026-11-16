@@ -13,8 +13,20 @@ import type {
 } from "@/types/database";
 import type { StaffMember } from "@/types/manager";
 import type { Appointment, FieldVisit, Lead, Service, ServiceJob, Shift, Task } from "@/types/operations";
+import type {
+  CustomerComplaint,
+  CustomerInteraction,
+  CustomerReview,
+  CustomerSegment,
+  LoyaltyEntry,
+  LoyaltyRules,
+  MarketingCampaign,
+  Membership,
+} from "@/types/crm";
 
 export const DEMO_MUTABLE_COOKIE = "ob_demo_mutable_v1";
+
+type Overrides<T> = Record<string, Partial<T> & { deleted?: boolean }>;
 
 export type DemoMutableBucket = {
   customers: Customer[];
@@ -43,6 +55,23 @@ export type DemoMutableBucket = {
   visitOverrides: Record<string, Partial<FieldVisit> & { deleted?: boolean }>;
   leads: Lead[];
   leadOverrides: Record<string, Partial<Lead> & { deleted?: boolean }>;
+  /** CRM edits to pack customers: status, tags, consent, custom fields. */
+  customerOverrides: Overrides<Customer>;
+  interactions: CustomerInteraction[];
+  interactionOverrides: Overrides<CustomerInteraction>;
+  reviews: CustomerReview[];
+  reviewOverrides: Overrides<CustomerReview>;
+  complaints: CustomerComplaint[];
+  complaintOverrides: Overrides<CustomerComplaint>;
+  segments: CustomerSegment[];
+  segmentOverrides: Overrides<CustomerSegment>;
+  campaigns: MarketingCampaign[];
+  campaignOverrides: Overrides<MarketingCampaign>;
+  /** The ledger is append-only: a wrong entry is corrected by an `adjust` row. */
+  loyaltyLedger: LoyaltyEntry[];
+  loyaltyRulesOverride: Partial<LoyaltyRules> | null;
+  memberships: Membership[];
+  membershipOverrides: Overrides<Membership>;
 };
 
 type DemoMutableStore = Partial<Record<DemoBrandCode, DemoMutableBucket>>;
@@ -76,6 +105,21 @@ export function emptyBucket(): DemoMutableBucket {
     visitOverrides: {},
     leads: [],
     leadOverrides: {},
+    customerOverrides: {},
+    interactions: [],
+    interactionOverrides: {},
+    reviews: [],
+    reviewOverrides: {},
+    complaints: [],
+    complaintOverrides: {},
+    segments: [],
+    segmentOverrides: {},
+    campaigns: [],
+    campaignOverrides: {},
+    loyaltyLedger: [],
+    loyaltyRulesOverride: null,
+    memberships: [],
+    membershipOverrides: {},
   };
 }
 
