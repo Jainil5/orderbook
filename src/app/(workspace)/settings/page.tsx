@@ -145,7 +145,11 @@ export default function SettingsPage() {
               initialEnabled={Boolean(ws.settings.quotation_builder_enabled)}
               canEdit={canEdit}
             />
-            <ManagerModulesSetting hidden={ws.hiddenManagerModules} canEdit={canEdit} />
+            <ManagerModulesSetting
+              hidden={ws.hiddenManagerModules}
+              industry={ws.industry}
+              canEdit={canEdit}
+            />
           </Card>
         ) : null}
 

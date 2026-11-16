@@ -9,12 +9,26 @@ import {
 } from "@/lib/workspace/constants";
 import {
   readBrandWebsitePref,
+  readIndustryPref,
   readManagerModulesPref,
   readQuotationBuilderPref,
   readReceiptSettingsPref,
 } from "@/lib/workspace/prefs";
+import {
+  isIndustryId,
+  type IndustryId,
+} from "@/lib/workspace/managers";
 import type { ManagerModuleKey } from "@/lib/workspace/manager-modules";
 import type { Brand, BrandMember, BrandRole, BrandSettings } from "@/types/database";
+
+function resolveIndustry(
+  brandCode: string,
+  profileIndustry: IndustryId,
+): Promise<IndustryId> {
+  return readIndustryPref(brandCode).then((pref) =>
+    isIndustryId(pref) ? pref : profileIndustry,
+  );
+}
 
 async function mergeBrandSettings(
   settings: BrandSettings,
@@ -51,6 +65,7 @@ export type WorkspaceSession =
       member: BrandMember;
       role: BrandRole;
       profile: WorkspaceProfile;
+      industry: IndustryId;
       hiddenManagerModules: ManagerModuleKey[];
     }
   | {
@@ -60,6 +75,7 @@ export type WorkspaceSession =
       userEmail: null;
       role: "owner";
       profile: WorkspaceProfile;
+      industry: IndustryId;
       hiddenManagerModules: ManagerModuleKey[];
     };
 
@@ -76,6 +92,7 @@ export async function loadWorkspaceSession(): Promise<WorkspaceSession | null> {
     const settings = await mergeBrandSettings(live.settings, live.brand.code);
     const hiddenManagerModules =
       (await readManagerModulesPref(live.brand.code)) ?? [];
+    const profile = getWorkspaceProfile(live.brand.code);
     return {
       mode: "live",
       brand: live.brand,
@@ -83,7 +100,8 @@ export async function loadWorkspaceSession(): Promise<WorkspaceSession | null> {
       userEmail: live.userEmail,
       member: live.member,
       role: live.member.role,
-      profile: getWorkspaceProfile(live.brand.code),
+      profile,
+      industry: await resolveIndustry(live.brand.code, profile.industry),
       hiddenManagerModules,
     };
   }
@@ -93,13 +111,15 @@ export async function loadWorkspaceSession(): Promise<WorkspaceSession | null> {
     const settings = await mergeBrandSettings(meta.settings, meta.brand.code);
     const hiddenManagerModules =
       (await readManagerModulesPref(meta.brand.code)) ?? [];
+    const profile = getWorkspaceProfile(meta.brand.code);
     return {
       mode: "demo",
       brand: meta.brand,
       settings,
       userEmail: null,
       role: "owner",
-      profile: getWorkspaceProfile(meta.brand.code),
+      profile,
+      industry: await resolveIndustry(meta.brand.code, profile.industry),
       hiddenManagerModules,
     };
   }

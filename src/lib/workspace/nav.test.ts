@@ -1,22 +1,32 @@
 import { describe, expect, it } from "vitest";
 import { buildWorkspaceNavItems } from "@/lib/workspace/nav";
 import { getWorkspaceProfile } from "@/lib/workspace/constants";
+import type { ManagerModuleKey } from "@/lib/workspace/manager-modules";
 
 const profile = getWorkspaceProfile("BR-1");
 
 describe("buildWorkspaceNavItems", () => {
-  it("keeps existing flat items in order for retail mode", () => {
+  it("uses the final primary navigation order", () => {
     const items = buildWorkspaceNavItems(false, profile);
     expect(items.map((i) => i.href)).toEqual([
       "/dashboard",
       "/billing",
       "/orders",
-      "/products",
       "/manager",
-      "/analytics",
       "/customers",
-      "/payments",
+      "/analytics",
+      "/ai",
       "/settings",
+    ]);
+    expect(items.map((i) => i.label)).toEqual([
+      "Dashboard",
+      "Billing",
+      "Orders",
+      "Manager",
+      "Customers",
+      "Analytics",
+      "OrderBook AI",
+      "Settings",
     ]);
   });
 
@@ -31,31 +41,64 @@ describe("buildWorkspaceNavItems", () => {
     expect(items.find((i) => i.href === "/orders")?.label).toBe("Quotes & bills");
   });
 
-  it("adds Manager with all six children by default", () => {
+  it("moves Products and Payments out of the primary nav", () => {
+    const hrefs = buildWorkspaceNavItems(true, getWorkspaceProfile("BR-2")).map(
+      (i) => i.href,
+    );
+    expect(hrefs).not.toContain("/products");
+    expect(hrefs).not.toContain("/payments");
+  });
+
+  it("lists the four managers as Manager children", () => {
     const manager = buildWorkspaceNavItems(false, profile).find(
       (i) => i.href === "/manager",
     );
     expect(manager?.iconKey).toBe("Manager");
     expect(manager?.children?.map((c) => c.href)).toEqual([
+      "/manager/productivity",
       "/manager/staff",
-      "/manager/services",
-      "/manager/appointments",
-      "/manager/visits",
-      "/manager/schedules",
-      "/manager/tasks",
+      "/manager/products",
+      "/manager/finance",
+    ]);
+    expect(manager?.children?.map((c) => c.label)).toEqual([
+      "Productivity",
+      "Staff",
+      "Products",
+      "Finance",
     ]);
   });
 
-  it("drops hidden modules from Manager children", () => {
+  it("hides a manager once every one of its sections is hidden", () => {
+    const hidden: ManagerModuleKey[] = [
+      "catalogue",
+      "services",
+      "inventory",
+      "procurement",
+      "intelligence",
+    ];
+    const manager = buildWorkspaceNavItems(false, profile, hidden).find(
+      (i) => i.href === "/manager",
+    );
+    expect(manager?.children?.some((c) => c.href === "/manager/products")).toBe(
+      false,
+    );
+    expect(manager?.children).toHaveLength(3);
+  });
+
+  it("keeps a manager visible when only some sections are hidden", () => {
     const manager = buildWorkspaceNavItems(false, profile, ["visits"]).find(
       (i) => i.href === "/manager",
     );
-    expect(manager?.children?.some((c) => c.href === "/manager/visits")).toBe(false);
-    expect(manager?.children).toHaveLength(5);
+    expect(manager?.children?.map((c) => c.href)).toContain(
+      "/manager/productivity",
+    );
+    expect(manager?.children).toHaveLength(4);
   });
 
   it("flat items have no children", () => {
     const items = buildWorkspaceNavItems(false, profile);
-    expect(items.filter((i) => i.href !== "/manager").every((i) => !i.children)).toBe(true);
+    expect(
+      items.filter((i) => i.href !== "/manager").every((i) => !i.children),
+    ).toBe(true);
   });
 });

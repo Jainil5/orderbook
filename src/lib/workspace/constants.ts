@@ -1,5 +1,6 @@
-export const DEMO_WORKSPACE_COOKIE = "ob_demo_workspace";
+import type { IndustryId } from "@/lib/workspace/managers";
 
+export const DEMO_WORKSPACE_COOKIE = "ob_demo_workspace";
 export const DEMO_BRAND_CODES = ["BR-1", "BR-2"] as const;
 export type DemoBrandCode = (typeof DEMO_BRAND_CODES)[number];
 
@@ -30,6 +31,7 @@ export const WORKSPACE_ROUTE_PREFIXES = [
   "/offers",
   "/catalog",
   "/manager",
+  "/ai",
   "/analytics",
   "/customers",
   "/settings",
@@ -98,6 +100,8 @@ export type WorkspaceProfile = {
   ordersPageTitle: string;
   ordersNumberColumn: string;
   billingPos: BillingPosCopy;
+  /** Business type this profile ships as; drives the default module preset. */
+  industry: IndustryId;
   navLabelOverrides: Partial<
     Record<
       | "Dashboard"
@@ -153,6 +157,7 @@ const DEFAULT_PROFILE: WorkspaceProfile = {
   ordersPageTitle: "Orders",
   ordersNumberColumn: "Bill #",
   billingPos: RETAIL_BILLING_COPY,
+  industry: "cafe",
   navLabelOverrides: {},
 };
 
@@ -161,6 +166,7 @@ const CUBIG_PROFILE: WorkspaceProfile = {
   ordersPageTitle: "Quotes & bills",
   ordersNumberColumn: "Quote / bill #",
   billingPos: FURNITURE_BILLING_COPY,
+  industry: "furniture",
   navLabelOverrides: {
     Orders: "Quotes & bills",
   },

@@ -4,14 +4,30 @@ import { revalidatePath } from "next/cache";
 import { loadLiveWorkspace } from "@/lib/auth/actions";
 import {
   readManagerModulesPref,
+  updatePrefsEntry,
   writeBrandWebsitePref,
   writeManagerModulesPref,
   writeQuotationBuilderPref,
 } from "@/lib/workspace/prefs";
 import { isManagerModuleKey } from "@/lib/workspace/manager-modules";
+import { getIndustryPreset, isIndustryId } from "@/lib/workspace/managers";
 import { normalizeBrandWebsiteUrl } from "@/lib/security/input";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { canEditBrandSettings } from "@/lib/security/authorization";
+
+/** Brand code for the active workspace: live session, else the demo cookie. */
+async function activeBrandCode(): Promise<string> {
+  const { cookies } = await import("next/headers");
+  const { DEMO_WORKSPACE_COOKIE, parseDemoBrandCodeFromCookie } = await import(
+    "@/lib/workspace/constants"
+  );
+  const cookieStore = await cookies();
+  return (
+    parseDemoBrandCodeFromCookie(
+      cookieStore.get(DEMO_WORKSPACE_COOKIE)?.value,
+    ) ?? "BR-1"
+  );
+}
 
 export async function setQuotationBuilderEnabled(enabled: boolean) {
   const live = await loadLiveWorkspace();
@@ -150,8 +166,42 @@ export async function setReceiptSettings(input: {
   return { ok: true as const };
 }
 
-export async function setManagerModuleHidden(moduleKey: string, hidden: boolean) {
-  if (!isManagerModuleKey(moduleKey)) {
+/**
+ * Switch the workspace to a business-type preset. The preset hides the
+ * sections that business type usually does not run; anything the owner had
+ * already turned off stays off, and every section can be re-enabled by hand.
+ */
+export async function applyIndustryPreset(industryId: string) {
+  if (!isIndustryId(industryId)) {
+    return { ok: false as const, message: "Unknown business type." };
+  }
+
+  const live = await loadLiveWorkspace();
+  if (live && !canEditBrandSettings(live.member.role)) {
+    return { ok: false as const, message: "Not allowed." };
+  }
+
+  const brandCode = live ? live.brand.code : await activeBrandCode();
+  const preset = getIndustryPreset(industryId)!;
+  const current = (await readManagerModulesPref(brandCode)) ?? [];
+  const hidden = Array.from(
+    new Set([...current, ...preset.hiddenSections].filter(isManagerModuleKey)),
+  );
+
+  await writeManagerModulesPref(brandCode, hidden);
+  await updatePrefsEntry(brandCode, { industry: preset.id });
+  revalidatePath("/settings");
+  revalidatePath("/manager");
+  return { ok: true as const, hidden };
+}
+
+/** Show or hide one Manager section without touching the rest. */
+export async function setManagerSectionsHidden(
+  keys: string[],
+  hidden: boolean,
+) {
+  const valid = keys.filter(isManagerModuleKey);
+  if (valid.length !== keys.length) {
     return { ok: false as const, message: "Unknown module." };
   }
 
@@ -160,28 +210,14 @@ export async function setManagerModuleHidden(moduleKey: string, hidden: boolean)
     return { ok: false as const, message: "Not allowed." };
   }
 
-  // No brand_settings column exists for this yet; the cookie pref is the
-  // store for both modes until the live schema catches up.
-  const brandCode = live
-    ? live.brand.code
-    : await (async () => {
-        const { cookies } = await import("next/headers");
-        const { DEMO_WORKSPACE_COOKIE, parseDemoBrandCodeFromCookie } =
-          await import("@/lib/workspace/constants");
-        const cookieStore = await cookies();
-        return (
-          parseDemoBrandCodeFromCookie(
-            cookieStore.get(DEMO_WORKSPACE_COOKIE)?.value,
-          ) ?? "BR-1"
-        );
-      })();
-
+  const brandCode = live ? live.brand.code : await activeBrandCode();
   const current = (await readManagerModulesPref(brandCode)) ?? [];
   const next = hidden
-    ? Array.from(new Set([...current, moduleKey]))
-    : current.filter((k) => k !== moduleKey);
+    ? Array.from(new Set([...current, ...valid]))
+    : current.filter((k) => !valid.includes(k));
+
   await writeManagerModulesPref(brandCode, next);
   revalidatePath("/settings");
   revalidatePath("/manager");
-  return { ok: true as const };
+  return { ok: true as const, hidden: next };
 }

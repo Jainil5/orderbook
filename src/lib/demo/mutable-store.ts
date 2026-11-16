@@ -13,6 +13,17 @@ import type {
 } from "@/types/database";
 import type { StaffMember } from "@/types/manager";
 import type { Appointment, FieldVisit, Service, ServiceJob, Shift, Task } from "@/types/operations";
+import type {
+  AttendanceRecord,
+  CashMovement,
+  CashSession,
+  Expense,
+  LeaveRequest,
+  Note,
+  PurchaseOrder,
+  Supplier,
+} from "@/types/business";
+import type { ExternalEvent, PendingSyncAction } from "@/types/integrations";
 
 export const DEMO_MUTABLE_COOKIE = "ob_demo_mutable_v1";
 
@@ -39,6 +50,44 @@ export type DemoMutableBucket = {
   shiftOverrides: Record<string, Partial<Shift> & { deleted?: boolean }>;
   visits: FieldVisit[];
   visitOverrides: Record<string, Partial<FieldVisit> & { deleted?: boolean }>;
+  notes: Note[];
+  noteOverrides: Record<string, Partial<Note> & { deleted?: boolean }>;
+  expenses: Expense[];
+  expenseOverrides: Record<string, Partial<Expense> & { deleted?: boolean }>;
+  suppliers: Supplier[];
+  supplierOverrides: Record<string, Partial<Supplier> & { deleted?: boolean }>;
+  purchaseOrders: PurchaseOrder[];
+  purchaseOrderOverrides: Record<
+    string,
+    Partial<PurchaseOrder> & { deleted?: boolean }
+  >;
+  attendance: AttendanceRecord[];
+  attendanceOverrides: Record<
+    string,
+    Partial<AttendanceRecord> & { deleted?: boolean }
+  >;
+  leave: LeaveRequest[];
+  leaveOverrides: Record<string, Partial<LeaveRequest> & { deleted?: boolean }>;
+  cashMovements: CashMovement[];
+  cashMovementOverrides: Record<
+    string,
+    Partial<CashMovement> & { deleted?: boolean }
+  >;
+  cashSessions: CashSession[];
+  cashSessionOverrides: Record<
+    string,
+    Partial<CashSession> & { deleted?: boolean }
+  >;
+  externalEvents: ExternalEvent[];
+  externalEventOverrides: Record<
+    string,
+    Partial<ExternalEvent> & { deleted?: boolean }
+  >;
+  syncActions: PendingSyncAction[];
+  syncActionOverrides: Record<
+    string,
+    Partial<PendingSyncAction> & { deleted?: boolean }
+  >;
 };
 
 type DemoMutableStore = Partial<Record<DemoBrandCode, DemoMutableBucket>>;
@@ -67,6 +116,26 @@ function emptyBucket(): DemoMutableBucket {
     shiftOverrides: {},
     visits: [],
     visitOverrides: {},
+    notes: [],
+    noteOverrides: {},
+    expenses: [],
+    expenseOverrides: {},
+    suppliers: [],
+    supplierOverrides: {},
+    purchaseOrders: [],
+    purchaseOrderOverrides: {},
+    attendance: [],
+    attendanceOverrides: {},
+    leave: [],
+    leaveOverrides: {},
+    cashMovements: [],
+    cashMovementOverrides: {},
+    cashSessions: [],
+    cashSessionOverrides: {},
+    externalEvents: [],
+    externalEventOverrides: {},
+    syncActions: [],
+    syncActionOverrides: {},
   };
 }
 

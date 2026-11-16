@@ -6,18 +6,18 @@ import {
 
 export const WORKSPACE_PREFS_COOKIE = "ob_workspace_prefs";
 
-type PrefsStore = Record<
-  string,
-  {
-    quotationBuilderEnabled?: boolean;
-    brandWebsiteUrl?: string | null;
-    receiptHeader?: string;
-    receiptFooter?: string | null;
-    contactEmail?: string | null;
-    contactPhone?: string | null;
-    hiddenManagerModules?: string[];
-  }
->;
+export type PrefsEntry = {
+  quotationBuilderEnabled?: boolean;
+  brandWebsiteUrl?: string | null;
+  receiptHeader?: string;
+  receiptFooter?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  hiddenManagerModules?: string[];
+  industry?: string;
+};
+
+type PrefsStore = Record<string, PrefsEntry>;
 
 function parseStore(raw: string | undefined): PrefsStore {
   if (!raw) return {};
@@ -142,16 +142,37 @@ export async function writeManagerModulesPref(
   brandCode: string,
   hidden: ManagerModuleKey[],
 ): Promise<void> {
+  await updatePrefsEntry(brandCode, { hiddenManagerModules: hidden });
+}
+
+/**
+ * Generic pref access so feature areas never add one-off cookie readers.
+ * Values are per brand code and live only in the httpOnly prefs cookie.
+ */
+export async function readPrefsEntry(brandCode: string): Promise<PrefsEntry> {
   const cookieStore = await cookies();
   const store = parseStore(cookieStore.get(WORKSPACE_PREFS_COOKIE)?.value);
-  store[brandCode.toUpperCase()] = {
-    ...store[brandCode.toUpperCase()],
-    hiddenManagerModules: hidden,
-  };
+  return store[brandCode.toUpperCase()] ?? {};
+}
+
+export async function updatePrefsEntry(
+  brandCode: string,
+  patch: PrefsEntry,
+): Promise<void> {
+  const cookieStore = await cookies();
+  const store = parseStore(cookieStore.get(WORKSPACE_PREFS_COOKIE)?.value);
+  const key = brandCode.toUpperCase();
+  store[key] = { ...store[key], ...patch };
   cookieStore.set(WORKSPACE_PREFS_COOKIE, JSON.stringify(store), {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
   });
+}
+
+export async function readIndustryPref(
+  brandCode: string,
+): Promise<string | undefined> {
+  return (await readPrefsEntry(brandCode)).industry;
 }

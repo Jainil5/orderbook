@@ -17,6 +17,7 @@ import {
   Users,
   CreditCard,
   Settings,
+  Sparkles,
   PanelLeftClose,
   PanelLeft,
   LogOut,
@@ -40,6 +41,7 @@ const icons = {
   Analytics: LineChart,
   Customers: Users,
   Payments: CreditCard,
+  AI: Sparkles,
   Settings: Settings,
 } as const;
 

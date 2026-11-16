@@ -1,8 +1,6 @@
 import type { WorkspaceProfile } from "@/lib/workspace/constants";
-import {
-  visibleManagerModules,
-  type ManagerModuleKey,
-} from "@/lib/workspace/manager-modules";
+import { visibleManagers } from "@/lib/workspace/managers";
+import type { ManagerModuleKey } from "@/lib/workspace/manager-modules";
 
 export type WorkspaceNavChild = { href: string; label: string };
 
@@ -20,6 +18,7 @@ export type WorkspaceNavItem = {
     | "Analytics"
     | "Customers"
     | "Payments"
+    | "AI"
     | "Settings";
   children?: WorkspaceNavChild[];
 };
@@ -66,19 +65,18 @@ export function buildWorkspaceNavItems(
       label: profile.ordersPageTitle,
       iconKey: "Orders",
     },
-    { href: "/products", label: "Products", iconKey: "Products" },
     {
       href: "/manager",
       label: "Manager",
       iconKey: "Manager",
-      children: visibleManagerModules(hiddenManagerModules).map((m) => ({
+      children: visibleManagers(hiddenManagerModules).map((m) => ({
         href: m.href,
-        label: m.label,
+        label: m.shortLabel,
       })),
     },
-    { href: "/analytics", label: "Analytics", iconKey: "Analytics" },
     { href: "/customers", label: "Customers", iconKey: "Customers" },
-    { href: "/payments", label: "Payments", iconKey: "Payments" },
+    { href: "/analytics", label: "Analytics", iconKey: "Analytics" },
+    { href: "/ai", label: "OrderBook AI", iconKey: "AI" },
     { href: "/settings", label: "Settings", iconKey: "Settings" },
   );
 

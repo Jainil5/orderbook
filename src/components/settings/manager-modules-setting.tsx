@@ -2,18 +2,34 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { setManagerModuleHidden } from "@/lib/auth/settings-actions";
-import { MANAGER_MODULES, type ManagerModuleKey } from "@/lib/workspace/manager-modules";
+import {
+  applyIndustryPreset,
+  setManagerSectionsHidden,
+} from "@/lib/auth/settings-actions";
+import {
+  asSectionKey,
+  type ManagerModuleKey,
+} from "@/lib/workspace/manager-modules";
+import {
+  INDUSTRY_PRESETS,
+  MANAGERS,
+  type IndustryId,
+} from "@/lib/workspace/managers";
+
+type SectionToggle = { key: ManagerModuleKey; label: string; description: string };
 
 export function ManagerModulesSetting({
   hidden,
+  industry,
   canEdit,
 }: {
   hidden: ManagerModuleKey[];
+  industry: IndustryId;
   canEdit: boolean;
 }) {
   const router = useRouter();
-  const [hiddenState, setHiddenState] = useState(hidden);
+  const [hiddenState, setHiddenState] = useState<ManagerModuleKey[]>(hidden);
+  const [industryState, setIndustryState] = useState<IndustryId>(industry);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,11 +38,9 @@ export function ManagerModulesSetting({
     setPending(true);
     setError(null);
     try {
-      const result = await setManagerModuleHidden(key, !visible);
+      const result = await setManagerSectionsHidden([key], !visible);
       if (result.ok) {
-        setHiddenState((prev) =>
-          visible ? prev.filter((k) => k !== key) : [...prev, key],
-        );
+        setHiddenState(result.hidden);
         router.refresh();
       } else {
         setError(result.message);
@@ -38,34 +52,94 @@ export function ManagerModulesSetting({
     }
   }
 
+  async function onPresetChange(next: IndustryId) {
+    if (!canEdit || pending) return;
+    setPending(true);
+    setError(null);
+    try {
+      const result = await applyIndustryPreset(next);
+      if (result.ok) {
+        setIndustryState(next);
+        setHiddenState(result.hidden);
+        router.refresh();
+      } else {
+        setError(result.message);
+      }
+    } catch {
+      setError("Could not apply the preset. Try again.");
+    } finally {
+      setPending(false);
+    }
+  }
+
   return (
     <div className="mt-4 border-t border-[var(--ob-border)] pt-4">
-      <span className="font-medium">Manager modules</span>
+      <span className="font-medium">Business type &amp; Manager modules</span>
       <p className="mt-1 text-sm text-[var(--ob-text-muted)]">
-        Hide modules this business doesn&apos;t use. Hidden modules disappear from
-        the sidebar and Manager sub-navigation.
+        Pick the business type closest to yours to switch on the managers it
+        uses, then fine-tune individual sections. Hidden sections disappear
+        from the sidebar, Manager navigation and dashboards.
       </p>
-      <div className="mt-3 space-y-2">
-        {MANAGER_MODULES.map((module) => {
-          const visible = !hiddenState.includes(module.key);
+
+      <label className="mt-3 block max-w-xs text-sm">
+        <span className="text-[var(--ob-text-muted)]">Business type</span>
+        <select
+          className="ob-input mt-1 w-full"
+          value={industryState}
+          disabled={!canEdit || pending}
+          onChange={(e) => onPresetChange(e.target.value as IndustryId)}
+        >
+          {INDUSTRY_PRESETS.map((preset) => (
+            <option key={preset.id} value={preset.id}>
+              {preset.label}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <div className="mt-4 space-y-4">
+        {MANAGERS.map((manager) => {
+          const sections: SectionToggle[] = manager.sections.flatMap((s) => {
+            const key = asSectionKey(s.key);
+            return key
+              ? [{ key, label: s.navLabel, description: s.description }]
+              : [];
+          });
+          if (!sections.length) return null;
           return (
-            <label
-              key={module.key}
-              className="ob-touch-target flex items-center gap-3 text-sm"
-            >
-              <input
-                type="checkbox"
-                className="h-4 w-4"
-                checked={visible}
-                disabled={!canEdit || pending}
-                onChange={(e) => onToggle(module.key, e.target.checked)}
-              />
-              {module.label}
-            </label>
+            <div key={manager.key}>
+              <p className="text-sm font-medium">{manager.label}</p>
+              <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                {sections.map((section) => {
+                  const visible = !hiddenState.includes(section.key);
+                  return (
+                    <label
+                      key={section.key}
+                      className="ob-touch-target flex items-start gap-3 text-sm"
+                      title={section.description}
+                    >
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-4 w-4"
+                        checked={visible}
+                        disabled={!canEdit || pending}
+                        onChange={(e) => onToggle(section.key, e.target.checked)}
+                      />
+                      <span>{section.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
           );
         })}
       </div>
-      {error ? <p className="mt-2 text-sm text-[var(--ob-danger)]">{error}</p> : null}
+
+      {error ? (
+        <p className="mt-2 text-sm text-[var(--ob-danger)]" role="alert">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }
