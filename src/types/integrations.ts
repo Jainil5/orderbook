@@ -124,3 +124,27 @@ export type SyncRunLog = {
   imported: number;
   message: string | null;
 };
+
+/**
+ * Compact sync-run row kept in the brand's `brand_settings` row (no id/brand
+ * fields, because the row is already scoped to one brand).
+ */
+export type IntegrationRun = {
+  integration: IntegrationId;
+  ranAt: string;
+  ok: boolean;
+  imported: number;
+  message: string | null;
+};
+
+export type IntegrationStatusEntry = {
+  lastSyncAt?: string;
+  lastError?: string;
+  calendarId?: string | null;
+};
+
+/** Status-only slice of the prefs cookie; never contains credentials. */
+export type IntegrationPrefs = {
+  status?: Partial<Record<IntegrationId, IntegrationStatusEntry>>;
+  runs?: IntegrationRun[];
+};

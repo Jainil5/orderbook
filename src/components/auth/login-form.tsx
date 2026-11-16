@@ -1,25 +1,35 @@
 "use client";
 
-import { useActionState } from "react";
+import { useEffect, useState, useActionState } from "react";
 import { loginWithBrandCode, type LoginState } from "@/lib/auth/actions";
 import { enterDemoWorkspace } from "@/lib/auth/demo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
 
-export function LoginForm() {
+export function LoginForm({
+  demoBrand,
+  next,
+}: {
+  /** Set when the URL came from a demo link, e.g. `/demo/orders?brand=BR-2`. */
+  demoBrand?: DemoBrandCode | null;
+  /** Where that link wanted to go, already validated on the server. */
+  next?: string | null;
+}) {
   const [showPassword, setShowPassword] = useState(false);
   const [state, action, pending] = useActionState<LoginState | null, FormData>(
     loginWithBrandCode,
     null,
   );
-  const [demoPending, setDemoPending] = useState<DemoBrandCode | null>(null);
 
-  async function onExploreDemo(brandCode: DemoBrandCode) {
-    setDemoPending(brandCode);
-    await enterDemoWorkspace(brandCode);
-  }
+  /* A demo link used to open the workspace on the first request. Keeping that
+     means signing in here on arrival, so the only difference a visitor sees is
+     one extra redirect through `/login`. Both props are plain strings, so this
+     runs once per link rather than on every render, and there is no loading
+     state to show: the action navigates away. */
+  useEffect(() => {
+    if (demoBrand) void enterDemoWorkspace(demoBrand, next);
+  }, [demoBrand, next]);
 
   return (
     <div className="mx-auto flex min-h-[100dvh] max-w-md flex-col justify-center px-4 py-8 ob-safe-top ob-safe-bottom sm:py-12">
@@ -80,24 +90,23 @@ export function LoginForm() {
         <p className="mt-6 text-center text-xs font-medium uppercase tracking-wide text-[var(--ob-text-muted)]">
           Explore without signing in
         </p>
-        <Button
-          type="button"
-          variant="secondary"
-          className="mt-3 w-full"
-          loading={demoPending === "BR-1"}
-          onClick={() => onExploreDemo("BR-1")}
-        >
-          Brewery Cafe (BR-1)
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          className="mt-2 w-full"
-          loading={demoPending === "BR-2"}
-          onClick={() => onExploreDemo("BR-2")}
-        >
-          Cubig Furniture (BR-2)
-        </Button>
+        {/* Real forms, not onClick handlers: the demo entry has to work the
+            moment this HTML is on screen, before the page's JS has arrived.
+            A tap on a button that only React can wire up does nothing at all,
+            and over a slow connection that looks like a broken page. The bound
+            arguments travel inside the action reference, so this is still the
+            same `enterDemoWorkspace` server action, and `next` was validated on
+            the server before it got here. */}
+        <form action={enterDemoWorkspace.bind(null, "BR-1", next)} className="mt-3">
+          <Button type="submit" variant="secondary" className="w-full">
+            Brewery Cafe (BR-1)
+          </Button>
+        </form>
+        <form action={enterDemoWorkspace.bind(null, "BR-2", next)} className="mt-2">
+          <Button type="submit" variant="secondary" className="w-full">
+            Cubig Furniture (BR-2)
+          </Button>
+        </form>
         <p className="mt-2 text-center text-xs text-[var(--ob-text-muted)]">
           Full workspace with sample products, quotes, bills, and analytics.
         </p>

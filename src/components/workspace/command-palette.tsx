@@ -4,6 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
+import { CRM_SECTIONS } from "@/lib/workspace/crm-nav";
+
+/** Derived from the CRM section list so the palette cannot drift from the nav. */
+const CRM_LINKS = CRM_SECTIONS.map((section) => ({
+  href: section.href,
+  label: `CRM — ${section.label}`,
+}));
 
 const LINKS = [
   { href: "/billing", label: "Open billing / bill" },
@@ -19,7 +26,7 @@ const LINKS = [
   { href: "/ai", label: "OrderBook AI" },
   { href: "/orders", label: "Orders" },
   { href: "/kitchen", label: "Kitchen board" },
-  { href: "/customers", label: "Customers" },
+  ...CRM_LINKS,
   { href: "/analytics", label: "Analytics" },
   { href: "/settings", label: "Settings" },
 ];

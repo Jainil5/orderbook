@@ -103,7 +103,8 @@ export type PurchaseOrder = {
   id: string;
   brand_id: string;
   poNumber: string;
-  supplierId: string;
+  /** Draft orders can exist before a supplier is chosen. */
+  supplierId: string | null;
   status: PurchaseOrderStatus;
   expectedOn: string | null;
   createdAt: string;

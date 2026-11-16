@@ -1,28 +1,25 @@
-import { BREWERY_CAFE_DEMO } from "@/lib/demo/brands/brewery-cafe";
-import { CUBIG_FURNITURE_DEMO } from "@/lib/demo/brands/cubig-furniture";
-import type { DemoBrandPack } from "@/lib/demo/brands/types";
-import {
-  DEFAULT_DEMO_BRAND_CODE,
-  type DemoBrandCode,
-} from "@/lib/workspace/constants";
+/**
+ * The demo brand packs, CSV-backed.
+ *
+ * `getDemoBrandPack` now returns the same pack shape with record arrays read
+ * from `data/*.csv` (auto-seeded from the raw fixtures on first access), so
+ * every existing consumer — demo loaders, operations, staff, the AI area —
+ * switches to CSV as its base data without changing call sites. The untouched
+ * fixtures remain available from `./packs` (`getRawDemoBrandPack`) for seeding
+ * and comparison.
+ */
 
-const PACKS: Record<DemoBrandCode, DemoBrandPack> = {
-  "BR-1": BREWERY_CAFE_DEMO,
-  "BR-2": CUBIG_FURNITURE_DEMO,
-};
+import { csvPackFor } from "@/lib/csv/source";
+import type { DemoBrandCode } from "@/lib/workspace/constants";
 
-export function getDemoBrandPack(code: DemoBrandCode): DemoBrandPack {
-  return PACKS[code];
+export {
+  DEMO_BRAND_CODES,
+  getRawDemoBrandPack,
+  resolveDemoBrandCode,
+  BREWERY_CAFE_DEMO,
+  CUBIG_FURNITURE_DEMO,
+} from "@/lib/demo/brands/packs";
+
+export function getDemoBrandPack(code: DemoBrandCode) {
+  return csvPackFor(code);
 }
-
-export function resolveDemoBrandCode(
-  value: string | null | undefined,
-): DemoBrandCode {
-  if (!value) return DEFAULT_DEMO_BRAND_CODE;
-  const normalized = value.trim().toUpperCase();
-  if (normalized === "1") return "BR-1";
-  if (normalized in PACKS) return normalized as DemoBrandCode;
-  return DEFAULT_DEMO_BRAND_CODE;
-}
-
-export { BREWERY_CAFE_DEMO, CUBIG_FURNITURE_DEMO };

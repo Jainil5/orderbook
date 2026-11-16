@@ -1,0 +1,5 @@
+id,brand_id,source,externalId,kind,title,startsAt,endsAt,location,accountLabel,customerId,attendeeCount,snippet,needsFollowUp,syncedAt
+bc-ext-1,demo-brewery-cafe,google_calendar,seed-bc-ext-1,event,Roastery pickup — Sector 18,2026-11-17T11:00:00.000Z,2026-11-17T12:00:00.000Z,Okhla Phase 2,owner@brewery-cafe.demo,,1,,false,2026-11-15T07:38:00.000Z
+bc-ext-2,demo-brewery-cafe,gmail,seed-bc-ext-2,email,Re: Table for six on Friday,2026-11-16T16:00:00.000Z,2026-11-16T17:00:00.000Z,,hello@brewery-cafe.demo,c2,,Could you hold the corner table for six at 4pm Friday?,true,2026-11-16T07:38:00.000Z
+cf-ext-1,demo-cubig-furniture,google_calendar,seed-cf-ext-1,event,Site measurement — Kulkarni dining,2026-11-17T16:00:00.000Z,2026-11-17T17:30:00.000Z,Bandra West,works@cubeeg-furniture.demo,fc2,2,,false,2026-11-15T07:38:00.000Z
+cf-ext-2,demo-cubig-furniture,gmail,seed-cf-ext-2,email,Ply supplier — revised lead time,2026-11-16T10:30:00.000Z,2026-11-16T11:00:00.000Z,,works@cubeeg-furniture.demo,,,Wrc ply lot slips to next week; teak schedule unchanged.,true,2026-11-16T07:38:00.000Z

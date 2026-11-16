@@ -357,6 +357,123 @@ body {
   background: var(--ob-surface);
 }
 
+/* ------------------------------------------------------------------ */
+/* CRM — "Dark Botanical / Lab Green"                                   */
+/*                                                                      */
+/* The rest of OrderBook stays on its existing navy/teal tokens. The CRM */
+/* is the one area with its own skin, so it layers three variables on    */
+/* top instead of re-theming the whole app: a deep botanical ink for     */
+/* headers and rails, a lab green for live/positive signals, and a       */
+/* soft leaf wash for surfaces. Anything that is NOT a CRM-specific      */
+/* signal keeps using --ob-* so the two halves never disagree about, say */
+/* what "danger" looks like.                                             */
+/* ------------------------------------------------------------------ */
+:root {
+  --crm-ink: #0d1f18;
+  --crm-ink-soft: #16302a;
+  --crm-leaf: #1f5f4c;
+  --crm-lab: #2fb673;
+  --crm-lab-strong: #1d8f57;
+  --crm-wash: #eef6f1;
+  --crm-wash-line: #d6e7dd;
+  --crm-bark: #4b5b54;
+  --crm-amber: #b45309;
+  --crm-rust: #b91c1c;
+}
+
+/* Panel header rail used by CRM section cards. */
+.crm-rail {
+  background: linear-gradient(135deg, var(--crm-ink), var(--crm-ink-soft) 60%, var(--crm-leaf));
+  color: #f2f7f4;
+}
+
+.crm-surface {
+  background: var(--crm-wash);
+  border-color: var(--crm-wash-line);
+}
+
+/* Pipeline stage chips — colour follows stage, never the data. */
+.crm-stage {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 999px;
+  padding: 0.125rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+  border: 1px solid var(--crm-wash-line);
+  background: var(--ob-surface);
+  color: var(--crm-bark);
+}
+
+.crm-stage-new {
+  background: color-mix(in srgb, var(--crm-lab) 14%, white);
+  border-color: color-mix(in srgb, var(--crm-lab) 34%, white);
+  color: var(--crm-lab-strong);
+}
+.crm-stage-progress {
+  background: color-mix(in srgb, var(--crm-leaf) 12%, white);
+  border-color: color-mix(in srgb, var(--crm-leaf) 30%, white);
+  color: var(--crm-leaf);
+}
+.crm-stage-won {
+  background: color-mix(in srgb, var(--crm-lab) 22%, white);
+  border-color: color-mix(in srgb, var(--crm-lab-strong) 40%, white);
+  color: var(--crm-lab-strong);
+}
+.crm-stage-lost {
+  background: color-mix(in srgb, var(--crm-rust) 9%, white);
+  border-color: color-mix(in srgb, var(--crm-rust) 26%, white);
+  color: var(--crm-rust);
+}
+
+/* Review sentiment and rating dots. */
+.crm-sentiment-positive {
+  color: var(--crm-lab-strong);
+}
+.crm-sentiment-neutral {
+  color: var(--crm-amber);
+}
+.crm-sentiment-negative {
+  color: var(--crm-rust);
+}
+
+.crm-dots {
+  display: inline-flex;
+  gap: 0.125rem;
+  vertical-align: middle;
+}
+
+.crm-dots i {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--crm-wash-line);
+}
+
+.crm-dots i[data-on="true"] {
+  background: var(--crm-lab);
+}
+
+/* A small key/value grid used across CRM detail cards. */
+.crm-kv {
+  display: block;
+}
+
+.crm-kv dt {
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--crm-bark);
+}
+
+.crm-kv dd {
+  margin: 0.125rem 0 0;
+  font-weight: 500;
+}
+
+
 .ob-tile.ob-pop {
   animation: ob-pop 0.42s cubic-bezier(0.22, 1, 0.36, 1);
 }

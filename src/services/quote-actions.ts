@@ -2,15 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { supabaseEnabled } from "@/lib/env";
 import { findDemoOrderByPublicToken } from "@/lib/demo/public-quote";
-import {
-  patchDemoOrderInStore,
-  readDemoOrderStore,
-} from "@/lib/demo/order-store";
-import { getDemoBrandPack } from "@/lib/demo/brands";
-import { updateDemoMutableBucket } from "@/lib/demo/mutable-store";
-import { appendDemoAudit } from "@/lib/demo/mutable-store";
-import { DEMO_BRAND_CODES, type DemoBrandCode } from "@/lib/workspace/constants";
+import { appendAudit, updateBrand } from "@/lib/csv/records";
 import type { OrderStatus } from "@/types/database";
 import { acceptQuoteByTokenLive } from "@/services/quotes";
 import {
@@ -18,16 +12,6 @@ import {
   rateLimitKeyFromHeaders,
 } from "@/lib/security/rate-limit";
 import { normalizePublicQuoteToken } from "@/lib/security/public-token";
-
-async function locateDemoOrderBrand(orderId: string): Promise<DemoBrandCode | null> {
-  for (const code of DEMO_BRAND_CODES) {
-    const pack = getDemoBrandPack(code);
-    if (pack.orders.some((o) => o.id === orderId)) return code;
-    const stored = await readDemoOrderStore(code);
-    if (stored.orders.some((o) => o.id === orderId)) return code;
-  }
-  return null;
-}
 
 export async function acceptPublicQuoteAction(token: string) {
   const headerList = await headers();
@@ -41,30 +25,30 @@ export async function acceptPublicQuoteAction(token: string) {
   }
 
   const normalized = normalizePublicQuoteToken(token) ?? token.trim();
-  const live = await acceptQuoteByTokenLive(normalized);
-  if (live.ok) {
+  // The Supabase RPC only exists to run when Supabase is on. Attempting it
+  // first unconditionally threw on a keyless deployment before the CSV lookup
+  // below ever ran, so a demo quote could not be accepted at all.
+  const live = supabaseEnabled()
+    ? await acceptQuoteByTokenLive(normalized)
+    : null;
+  if (live?.ok) {
     return { ok: true as const, orderNumber: live.orderNumber };
   }
 
+  /* A token is the whole capability here: whoever holds it may confirm that one
+     quotation. The brand is taken from the matched order row, never from the
+     request, so the write stays inside the tenant the quote belongs to — and a
+     visitor with no workspace cookie at all can still accept their quote. */
   const match = await findDemoOrderByPublicToken(normalized);
   if (match) {
-    const code = await locateDemoOrderBrand(match.order.id);
-    if (!code) {
+    const brandId = match.order.brand_id;
+    const patched = updateBrand("orders", brandId, match.order.id, {
+      status: "confirmed" as OrderStatus,
+    });
+    if (!patched) {
       return { ok: false as const, message: "Quote not found." };
     }
-    const patch = {
-      status: "confirmed" as OrderStatus,
-    };
-    await patchDemoOrderInStore(code, match.order.id, patch);
-    await updateDemoMutableBucket(code, (b) => ({
-      ...b,
-      orderPatches: {
-        ...b.orderPatches,
-        [match.order.id]: { ...b.orderPatches[match.order.id], ...patch },
-      },
-    }));
-    await appendDemoAudit(code, {
-      brand_id: match.order.brand_id,
+    appendAudit(brandId, {
       actor_email: null,
       action: "quote.accepted_public",
       entity_type: "order",
@@ -78,6 +62,6 @@ export async function acceptPublicQuoteAction(token: string) {
 
   return {
     ok: false as const,
-    message: live.message ?? "Quote not found or already processed.",
+    message: live?.message ?? "Quote not found or already processed.",
   };
 }

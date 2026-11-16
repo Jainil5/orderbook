@@ -1,0 +1,9 @@
+id,brand_id,name,contactName,phone,email,category,leadTimeDays,paymentTerms,notes,is_active,created_at
+sup-bc-roast,demo-brewery-cafe,Highland Roasters,Aditi Rao,+91 98200 11223,orders@highlandroasters.demo,Coffee,7,Net 15,Single-origin lots; roast dates every Tuesday.,true,2026-07-19T07:38:00.000Z
+sup-bc-dairy,demo-brewery-cafe,Valley Dairy Co-op,Shamim Khan,+91 98111 44556,,Dairy,2,Weekly,"Milk, cream and yogurt delivered before 7am.",true,2026-08-18T07:38:00.000Z
+sup-bc-produce,demo-brewery-cafe,Green Cart Produce,Meenal D'Souza,+91 99870 77889,buy@greencart.demo,Produce,3,Net 7,Avocado and seasonal fruit; substitute if a lot is short.,true,2026-09-17T07:38:00.000Z
+sup-bc-pack,demo-brewery-cafe,Kora Packaging,,+91 90040 22110,,Packaging,14,Prepaid,"Cups, lids and pastry boxes.",false,2026-04-30T07:38:00.000Z
+sup-cf-ply,demo-cubig-furniture,Sahyadri Ply & Timber,Rakesh Menon,+91 93250 88123,sales@sahyadriforest.demo,Timber & ply,10,Net 30,Banded ply boards and solid oak blanks.,true,2026-01-20T07:38:00.000Z
+sup-cf-hardware,demo-cubig-furniture,Aurora Fittings,Nisha Parekh,+91 98980 33221,,Hardware,6,Net 15,"Hinges, soft-close slides, chair bases.",true,2026-03-21T07:38:00.000Z
+sup-cf-polish,demo-cubig-furniture,Kalyan Finishes,,+91 90990 11778,orders@kalyanfinishes.demo,Polish & adhesives,4,Prepaid,"PU lacquer and hardeners, mixed to sample.",true,2026-06-19T07:38:00.000Z
+sup-cf-uphol,demo-cubig-furniture,Rajluxe Upholstery,Imran Sheikh,,,Upholstery,12,Net 30,Performance fabric by the metre; swatches on request.,false,2025-10-12T07:38:00.000Z

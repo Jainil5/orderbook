@@ -5,27 +5,23 @@ import { applySecurityHeaders } from "@/lib/security/headers";
 import { safeInternalPath } from "@/lib/security/input";
 import {
   DEMO_WORKSPACE_COOKIE,
-  DEFAULT_DEMO_BRAND_CODE,
   demoPathToAppPath,
-  isDemoWorkspaceCookieValue,
+  isDemoSessionTokenValue,
   isWorkspacePath,
+  parseDemoBrandCodeParam,
 } from "@/lib/workspace/constants";
-import { resolveDemoBrandCode } from "@/lib/demo/brands";
 
 const PROBE_PATH =
   /^\/(\.env|wp-admin|wp-login|xmlrpc|phpmyadmin|admin\.php|\.git)/i;
 
-function attachDemoCookie(
-  response: NextResponse,
-  brandCode = DEFAULT_DEMO_BRAND_CODE,
-) {
-  response.cookies.set(DEMO_WORKSPACE_COOKIE, brandCode, {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7,
-  });
-  return response;
+/**
+ * Middleware only recognises a demo session by its shape. The session itself is
+ * a row in `data/sessions.csv`, and reading a file is not something this layer
+ * can do — so a request with a token-shaped cookie continues to the layout,
+ * which resolves the row and sends it back here if the session is gone.
+ */
+function carriesDemoSession(request: NextRequest): boolean {
+  return isDemoSessionTokenValue(request.cookies.get(DEMO_WORKSPACE_COOKIE)?.value);
 }
 
 export async function updateSession(request: NextRequest) {
@@ -39,20 +35,25 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (path === "/demo" || path.startsWith("/demo/")) {
-    const brandParam = request.nextUrl.searchParams.get("brand");
-    const brandCode = resolveDemoBrandCode(brandParam ?? undefined);
+    /* A demo link cannot open a session from here: signing in writes a row, and
+       only the server layer can write it. Send the browser to the login screen
+       with the brand and the page it asked for; the screen turns that into the
+       one-click "explore" it always was. */
     const url = request.nextUrl.clone();
-    url.pathname = demoPathToAppPath(path);
-    url.search = request.nextUrl.search;
-    url.searchParams.delete("brand");
-    return applySecurityHeaders(
-      request,
-      attachDemoCookie(NextResponse.redirect(url), brandCode),
+    url.pathname = "/login";
+    url.search = "";
+    const brand = parseDemoBrandCodeParam(
+      request.nextUrl.searchParams.get("brand"),
     );
+    if (brand) url.searchParams.set("demo", brand);
+    const target = demoPathToAppPath(path);
+    if (target !== "/dashboard") {
+      url.searchParams.set("next", safeInternalPath(target));
+    }
+    return applySecurityHeaders(request, NextResponse.redirect(url));
   }
 
-  const demoCookieRaw = request.cookies.get(DEMO_WORKSPACE_COOKIE)?.value;
-  const demoCookie = isDemoWorkspaceCookieValue(demoCookieRaw);
+  const demoSession = carriesDemoSession(request);
 
   const isPublic =
     path === "/login" ||
@@ -63,7 +64,7 @@ export async function updateSession(request: NextRequest) {
   const env = getPublicEnv();
   if ("ok" in env) {
     if (
-      !demoCookie &&
+      !demoSession &&
       !isPublic &&
       !path.startsWith("/_next") &&
       (isWorkspacePath(path) || path.startsWith("/print"))
@@ -106,7 +107,7 @@ export async function updateSession(request: NextRequest) {
 
   if (
     !user &&
-    !demoCookie &&
+    !demoSession &&
     !isPublic &&
     !path.startsWith("/_next") &&
     (isWorkspacePath(path) || path.startsWith("/print"))
@@ -119,7 +120,7 @@ export async function updateSession(request: NextRequest) {
 
   if (
     !user &&
-    !demoCookie &&
+    !demoSession &&
     !isPublic &&
     !path.startsWith("/_next")
   ) {
@@ -134,6 +135,10 @@ export async function updateSession(request: NextRequest) {
     url.pathname = safeInternalPath(url.searchParams.get("next"));
     url.search = "";
     const res = NextResponse.redirect(url);
+    /* A real user does not need the demo token. Dropping the cookie is all
+       this layer can do — ending the row needs the CSV store, which is
+       server-only — so the row lives on until it expires. It is inert: nothing
+       reaches it without the token this browser just lost. */
     res.cookies.delete(DEMO_WORKSPACE_COOKIE);
     return applySecurityHeaders(request, res);
   }

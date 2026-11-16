@@ -84,6 +84,16 @@ export type CustomerUpsertInput = {
   phone?: string | null;
   notes?: string | null;
   price_tier?: "retail" | "wholesale" | null;
+  /* --- CRM profile fields (optional: the customers page sends none of them) */
+  dob?: string | null;
+  gender?: "male" | "female" | "other" | null;
+  address?: string | null;
+  source?: string | null;
+  tags?: string[] | null;
+  custom_fields?: Record<string, string> | null;
+  status?: "archived" | null;
+  marketing_consent?: "granted" | "declined" | null;
+  opted_out_at?: string | null;
 };
 
 export type Customer = {
@@ -94,6 +104,23 @@ export type Customer = {
   phone: string | null;
   notes?: string | null;
   price_tier?: "retail" | "wholesale" | null;
+  /* --- CRM fields (all optional; older rows simply omit them) --------- */
+  dob?: string | null;
+  gender?: "male" | "female" | "other" | null;
+  address?: string | null;
+  /** Acquisition origin: walk-in, referral, Instagram, campaign… */
+  source?: string | null;
+  tags?: string[] | null;
+  /** Business-defined extra fields: { [label]: value }. */
+  custom_fields?: Record<string, string> | null;
+  /** Explicit status; "archived" hides from directories. Otherwise the CRM
+   * derives active/inactive from purchase recency (see types/crm.ts). */
+  status?: "archived" | null;
+  /** Marketing consent is explicit: "granted" | "declined" | null (unknown).
+   * Campaigns only ever target "granted" unless the channel is in-store. */
+  marketing_consent?: "granted" | "declined" | null;
+  opted_out_at?: string | null;
+  created_at?: string | null;
 };
 
 export type OrderStatus =

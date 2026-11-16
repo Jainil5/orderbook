@@ -4,8 +4,8 @@
  * industry presets that decide which sections a business type enables.
  *
  * Section `key`s double as the module-visibility toggle keys stored in the
- * workspace prefs cookie (see `lib/workspace/manager-modules.ts`), so keys that
- * already exist in saved prefs (staff, services, appointments, visits,
+ * brand's `brand_settings` row (see `lib/workspace/manager-modules.ts`), so
+ * keys that already exist in saved prefs (staff, services, appointments, visits,
  * schedules, tasks) are reused rather than renamed.
  */
 

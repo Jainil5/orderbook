@@ -1,0 +1,4 @@
+id,brand_id,customer_id,lead_id,review_id,interaction_id,subject,description,severity,status,assigned_staff_id,resolution_notes,opened_at,resolved_at,created_at,updated_at
+bc-cp-1,demo-brewery-cafe,c2,,bc-rv-2,bc-ia-5,25-minute wait at peak hour (Sunday),Two-coffee order held up during the 10-12am rush.,medium,in_progress,bc-staff-3,,2026-11-08T13:30:00.000Z,,2026-11-08T13:30:00.000Z,2026-11-10T10:00:00.000Z
+bc-cp-2,demo-brewery-cafe,,,bc-rv-4,,Late and cold online delivery (Friday),Dispatch gap during Friday peak; rider rota since fixed.,high,resolved,bc-staff-4,Refunded; rota change live from Oct 20.,2026-10-18T07:00:00.000Z,2026-10-20T18:00:00.000Z,2026-10-18T07:00:00.000Z,2026-10-20T18:00:00.000Z
+cf-cp-1,demo-cubig-furniture,fc4,,cf-rv-3,cf-ia-5,Scuff on delivered side table,Minor scuff near leg; touch-up crew scheduled.,low,open,cf-staff-4,,2026-11-13T10:15:00.000Z,,2026-11-13T10:15:00.000Z,2026-11-13T10:15:00.000Z

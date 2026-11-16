@@ -1,0 +1,4 @@
+id,brand_id,name,description,durationMinutes,price,isActive
+bc-svc-1,demo-brewery-cafe,Catering Coffee Bar,Pop-up espresso bar for events,120,5000,true
+cf-svc-1,demo-cubig-furniture,Furniture Delivery,Doorstep delivery and placement,90,1500,true
+cf-svc-2,demo-cubig-furniture,Installation & Assembly,On-site assembly by technician,120,2500,true

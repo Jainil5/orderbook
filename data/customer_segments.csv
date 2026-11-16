@@ -1,0 +1,6 @@
+id,brand_id,name,description,kind,rules,manual_customer_ids,created_at,updated_at
+bc-sg-1,demo-brewery-cafe,VIP sippers,Total spend over ₹500.,dynamic,"{""minTotalSpend"":500}",[],2026-10-01T09:00:00.000Z,2026-10-01T09:00:00.000Z
+bc-sg-2,demo-brewery-cafe,Recently active,Purchased in the last 30 days.,dynamic,"{""lastPurchaseWithinDays"":30}",[],2026-10-01T09:05:00.000Z,2026-10-01T09:05:00.000Z
+bc-sg-3,demo-brewery-cafe,Cooling off,No purchase in 60+ days.,dynamic,"{""lastPurchaseOverDays"":60}",[],2026-10-01T09:10:00.000Z,2026-10-01T09:10:00.000Z
+cf-sg-1,demo-cubig-furniture,Big-ticket clients,"Lifetime spend over ₹1,00,000.",dynamic,"{""minTotalSpend"":100000}",[],2026-10-01T09:00:00.000Z,2026-10-01T09:00:00.000Z
+cf-sg-2,demo-cubig-furniture,Design Club members,Hand-picked for early access invites.,manual,{},"[""fc2"",""fc4""]",2026-10-01T09:05:00.000Z,2026-11-01T09:05:00.000Z

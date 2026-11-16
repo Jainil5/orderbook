@@ -6,14 +6,17 @@ import {
   resolveRange,
 } from "@/lib/analytics/date-range";
 import { computeMarginSnapshot } from "@/lib/analytics/margin";
+import { buildInsights } from "@/lib/analytics/insights";
 import { snapshotFromOrderRecords } from "@/lib/analytics/snapshot";
 import {
   getDemoOrderItems,
   listDemoOrders,
   listDemoPayments,
   listDemoProductsMerged,
+  listDemoRefunds,
   toDemoBrandCode,
 } from "@/lib/demo/data";
+import { expensesCollection } from "@/lib/business/registry";
 import {
   listOrderItemsForOrders,
   listOrders,
@@ -33,6 +36,7 @@ function tabFromSearchParam(
   | "products"
   | "payments"
   | "margin"
+  | "insights"
   | undefined {
   if (
     tab === "overview" ||
@@ -40,7 +44,8 @@ function tabFromSearchParam(
     tab === "mix" ||
     tab === "products" ||
     tab === "payments" ||
-    tab === "margin"
+    tab === "margin" ||
+    tab === "insights"
   ) {
     return tab;
   }
@@ -83,6 +88,10 @@ export default async function AnalyticsPage({
       orderItems,
       products,
     });
+    const [expenses, refunds] = await Promise.all([
+      expensesCollection.load(code),
+      listDemoRefunds(code),
+    ]);
 
     return (
       <Suspense fallback={null}>
@@ -100,6 +109,16 @@ export default async function AnalyticsPage({
           })}
           payments={payments}
           marginSnapshot={marginSnapshot}
+          insights={buildInsights({
+            orders: allOrders,
+            orderItems,
+            products,
+            payments,
+            refunds,
+            expenses,
+            range: { from, to },
+            currencyCode: ws.settings.currency_code,
+          })}
         />
       </Suspense>
     );
@@ -162,6 +181,18 @@ export default async function AnalyticsPage({
         payments={filteredPayments}
         paymentsNotice={paymentsRes.error}
         marginSnapshot={marginSnapshot}
+        insights={buildInsights({
+          orders: ordersRes.data,
+          orderItems: itemsRes.data,
+          products: productsRes.data,
+          payments: filteredPayments,
+          // Expenses and refunds have no Supabase reader yet, so those rules
+          // stay silent instead of guessing.
+          refunds: [],
+          expenses: [],
+          range: { from, to },
+          currencyCode: ws.settings.currency_code,
+        })}
       />
     </Suspense>
   );

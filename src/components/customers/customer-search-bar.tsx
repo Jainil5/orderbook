@@ -4,7 +4,19 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 
-export function CustomerSearchBar({ initialQuery = "" }: { initialQuery?: string }) {
+export function CustomerSearchBar({
+  initialQuery = "",
+  basePath = "/customers",
+  placeholder = "Search by name or phone…",
+  ariaLabel = "Search customers",
+}: {
+  initialQuery?: string;
+  /** Where the `q` param should live — the CRM directory uses its own route. */
+  basePath?: string;
+  /** Every CRM screen has its own words; the debounce + param logic does not change. */
+  placeholder?: string;
+  ariaLabel?: string;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [value, setValue] = useState(initialQuery);
@@ -26,18 +38,18 @@ export function CustomerSearchBar({ initialQuery = "" }: { initialQuery?: string
         params.delete("q");
       }
       const qs = params.toString();
-      router.replace(qs ? `/customers?${qs}` : "/customers");
+      router.replace(qs ? `${basePath}?${qs}` : basePath);
     }, 300);
     return () => window.clearTimeout(timer);
-  }, [value, router, searchParams]);
+  }, [value, router, searchParams, basePath]);
 
   return (
     <Input
       type="search"
       value={value}
       onChange={(e) => setValue(e.target.value)}
-      placeholder="Search by name or phone…"
-      aria-label="Search customers"
+      placeholder={placeholder}
+      aria-label={ariaLabel}
       className="max-w-md"
     />
   );

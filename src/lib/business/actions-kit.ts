@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { loadLiveWorkspace } from "@/lib/auth/actions";
 import { getDemoBrandPack } from "@/lib/demo/brands";
-import { appendDemoAudit } from "@/lib/demo/mutable-store";
+import { appendAudit } from "@/lib/csv/records";
 import { canEditBrandSettings } from "@/lib/security/authorization";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
 
@@ -27,17 +27,19 @@ export async function guardBusinessOps(): Promise<BusinessGuard> {
     return { ok: false, message: LIVE_UNAVAILABLE };
   }
 
-  const { cookies } = await import("next/headers");
-  const { DEMO_WORKSPACE_COOKIE, parseDemoBrandCodeFromCookie } = await import(
-    "@/lib/workspace/constants"
+  const { readDemoSessionBrandOrDefault } = await import(
+    "@/lib/workspace/demo-session"
   );
-  const cookieStore = await cookies();
-  const code =
-    parseDemoBrandCodeFromCookie(cookieStore.get(DEMO_WORKSPACE_COOKIE)?.value) ??
-    "BR-1";
+  const code = await readDemoSessionBrandOrDefault();
   return { ok: true, code, brandId: getDemoBrandPack(code).brand.id };
 }
 
+/**
+ * Append to `audit_log.csv`. Stays `async` although the store write is
+ * synchronous, because every caller is a server action that awaits its steps.
+ * The cookie bucket capped the trail at 200 entries; the file keeps them all
+ * and `listAudit` returns newest first.
+ */
 export async function auditBusinessOps(
   guard: { code: DemoBrandCode; brandId: string },
   action: string,
@@ -45,8 +47,7 @@ export async function auditBusinessOps(
   entityId: string,
   detail: string,
 ): Promise<void> {
-  await appendDemoAudit(guard.code, {
-    brand_id: guard.brandId,
+  appendAudit(guard.brandId, {
     actor_email: null,
     action,
     entity_type: entityType,

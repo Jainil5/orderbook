@@ -1,0 +1,29 @@
+id,brand_id,title,category,amount,method,incurredOn,recurring,supplierId,notes,created_at
+bc-exp-1,demo-brewery-cafe,Coffee beans — 10kg lot,raw_materials,8400,Cash,2026-11-14,none,sup-bc-roast,Single-origin lot for the tasting flight,2026-11-14T07:38:00.000Z
+bc-exp-2,demo-brewery-cafe,Oat and dairy milk restock,raw_materials,3200,UPI,2026-11-12,none,sup-bc-dairy,,2026-11-12T07:38:00.000Z
+bc-exp-3,demo-brewery-cafe,Fresh produce and milk run,raw_materials,2400,Cash,2026-11-10,weekly,sup-bc-produce,Saturday market — kitchen staples,2026-11-10T07:38:00.000Z
+bc-exp-4,demo-brewery-cafe,Fresh produce and milk run,raw_materials,2400,Cash,2026-11-03,weekly,sup-bc-produce,,2026-11-03T07:38:00.000Z
+bc-exp-5,demo-brewery-cafe,Outlet rent — Sector 18,rent,45000,Bank transfer,2026-11-07,monthly,,Lease due on the 5th,2026-11-07T07:38:00.000Z
+bc-exp-6,demo-brewery-cafe,Outlet rent — Sector 18,rent,45000,Bank transfer,2026-10-07,monthly,,,2026-10-07T07:38:00.000Z
+bc-exp-7,demo-brewery-cafe,Floor staff wages,salaries,62000,Bank transfer,2026-11-09,monthly,,Four floor staff plus barista,2026-11-09T07:38:00.000Z
+bc-exp-8,demo-brewery-cafe,Floor staff wages,salaries,62000,Bank transfer,2026-10-09,monthly,,,2026-10-09T07:38:00.000Z
+bc-exp-9,demo-brewery-cafe,Electricity bill,utilities,6200,UPI,2026-11-01,none,,,2026-11-01T07:38:00.000Z
+bc-exp-10,demo-brewery-cafe,Cups and lids stock,packaging,2600,UPI,2026-11-05,none,sup-bc-pack,"Takeaway packaging, 5000 units",2026-11-05T07:38:00.000Z
+bc-exp-11,demo-brewery-cafe,Espresso machine service,maintenance,4800,Cash,2026-10-27,none,,Quarterly descale and gasket replacement,2026-10-27T07:38:00.000Z
+bc-exp-12,demo-brewery-cafe,Instagram and local print promo,marketing,5500,UPI,2026-10-23,none,,Brunch menu launch,2026-10-23T07:38:00.000Z
+bc-exp-13,demo-brewery-cafe,Delivery partner settlement,delivery,3400,UPI,2026-10-19,none,,,2026-10-19T07:38:00.000Z
+bc-exp-14,demo-brewery-cafe,POS and billing subscription,software,2500,Card,2026-11-11,monthly,,,2026-11-11T07:38:00.000Z
+cf-exp-1,demo-cubig-furniture,Workshop rent,rent,62000,Bank transfer,2026-11-06,monthly,,Uttan workshop shed,2026-11-06T07:38:00.000Z
+cf-exp-2,demo-cubig-furniture,Workshop rent,rent,62000,Bank transfer,2026-10-07,monthly,,,2026-10-07T07:38:00.000Z
+cf-exp-3,demo-cubig-furniture,Carpenter and polisher wages,salaries,94000,Bank transfer,2026-11-08,monthly,,Six-person workshop crew,2026-11-08T07:38:00.000Z
+cf-exp-4,demo-cubig-furniture,Carpenter and polisher wages,salaries,94000,Bank transfer,2026-10-09,monthly,,,2026-10-09T07:38:00.000Z
+cf-exp-5,demo-cubig-furniture,Workshop electricity and water,utilities,9800,UPI,2026-11-10,monthly,,,2026-11-10T07:38:00.000Z
+cf-exp-6,demo-cubig-furniture,Estimating and rendering subscription,software,3400,Card,2026-10-11,monthly,,Used for the Priya Homes fit-out visuals,2026-10-11T07:38:00.000Z
+cf-exp-7,demo-cubig-furniture,Delivery fuel and tolls,delivery,2600,Cash,2026-11-14,weekly,,,2026-11-14T07:38:00.000Z
+cf-exp-8,demo-cubig-furniture,Delivery fuel and tolls,delivery,2600,Cash,2026-11-07,weekly,,,2026-11-07T07:38:00.000Z
+cf-exp-9,demo-cubig-furniture,Teak and plywood lot,raw_materials,84000,Bank transfer,2026-11-12,none,sup-cf-ply,Stock for the Oslo dining series,2026-11-12T07:38:00.000Z
+cf-exp-10,demo-cubig-furniture,Hardware and fittings,raw_materials,12500,Cash,2026-11-13,none,sup-cf-hardware,"Hinges, channels and handles",2026-11-13T07:38:00.000Z
+cf-exp-11,demo-cubig-furniture,Foam and upholstery fabric,raw_materials,18600,UPI,2026-11-04,none,sup-cf-uphol,,2026-11-04T07:38:00.000Z
+cf-exp-12,demo-cubig-furniture,Packaging and corner guards,packaging,3900,UPI,2026-10-31,none,,,2026-10-31T07:38:00.000Z
+cf-exp-13,demo-cubig-furniture,Showroom campaign,marketing,12500,UPI,2026-10-23,none,,Festive sofa promotion,2026-10-23T07:38:00.000Z
+cf-exp-14,demo-cubig-furniture,Table saw and edge bander service,maintenance,7400,Card,2026-10-27,none,,,2026-10-27T07:38:00.000Z

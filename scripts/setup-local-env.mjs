@@ -7,10 +7,15 @@ const example = resolve(root, ".env.example");
 const local = resolve(root, ".env.local");
 
 if (existsSync(local)) {
-  console.log(".env.local already exists — edit it with your Supabase keys.");
+  console.log(".env.local already exists — leave it empty to keep running on data/*.csv.");
   process.exit(0);
 }
 
 copyFileSync(example, local);
 console.log("Created .env.local from .env.example");
-console.log("Edit .env.local with your publishable key and BRAND_AUTH_EMAIL_MAP, then run npm run dev");
+console.log(
+  [
+    "Nothing else is needed for the demo: the app reads and writes data/*.csv.",
+    "Add Supabase keys and set OB_USE_SUPABASE=true only when you want live data.",
+  ].join("\n"),
+);

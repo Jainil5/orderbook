@@ -1,0 +1,5 @@
+id,brand_id,order_id,amount,method,status,created_at,split_label,notes
+pay1,demo-brewery-cafe,o1,642.6,UPI,paid,2026-11-16T02:38:27.620Z,,
+pay2,demo-brewery-cafe,o2,472.5,Card,paid,2026-11-15T03:38:27.620Z,,
+fpay1,demo-cubig-furniture,fo3,316976,Bank transfer,paid,2026-11-13T09:38:27.622Z,,
+fpay2,demo-cubig-furniture,fo4,40000,UPI,partial,2026-11-11T09:38:27.622Z,,

@@ -1,0 +1,4 @@
+id,brand_id,customer_id,plan,status,started_at,ends_at,auto_renew,benefits,price,created_at,updated_at
+bc-ms-1,demo-brewery-cafe,c2,Filter Coffee Club,active,2026-08-01,2027-08-01,true,"[""10% off Mondays"",""Free filter on birthday"",""Early menu access""]",499,2026-08-01T10:00:00.000Z,2026-08-01T10:00:00.000Z
+cf-ms-1,demo-cubig-furniture,fc2,Design Club,active,2026-07-11,2027-07-11,true,"[""Free 3D room layout"",""Priority delivery slots"",""10% off refinishing""]",2499,2026-07-11T10:00:00.000Z,2026-07-11T10:00:00.000Z
+cf-ms-2,demo-cubig-furniture,fc4,Design Club,expired,2025-10-02,2026-10-02,false,"[""Free 3D room layout"",""Priority delivery slots""]",2499,2025-10-02T10:00:00.000Z,2026-10-02T10:00:00.000Z

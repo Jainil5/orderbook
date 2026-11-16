@@ -1,0 +1,7 @@
+id,brand_id,order_number,status,payment_status,customer_id,customer_name_snapshot,subtotal,discount_total,tax_total,fees_total,grand_total,notes,created_at,table_tag,delivery_notes,deposit_percent,amount_paid,offer_code_snapshot,public_token,parent_order_id,order_kind
+o1,demo-brewery-cafe,BC-1042,completed,paid,c2,Ananya Mehta,680,68,30.6,0,642.6,,2026-11-16T02:38:27.620Z,,,,,,,,
+o2,demo-brewery-cafe,BC-1041,completed,paid,,Walk-in Guest,450,0,22.5,0,472.5,Table 4,2026-11-15T03:38:27.620Z,,,,,,,,
+fo1,demo-cubig-furniture,CF-Q-1046,draft,pending,fc2,Priya Homes Interiors,116700,0,21006,0,137706,Quotation — pending client approval · delivery 3 weeks,2026-11-16T04:38:27.622Z,,,,,,,,
+fo2,demo-cubig-furniture,CF-Q-1045,confirmed,pending,fc4,Arjun & Meera Shah,77220,6480,13899.6,0,91119.6,Quote sent — bedroom package,2026-11-15T01:38:27.622Z,,,,,,,,
+fo3,demo-cubig-furniture,CF-1044,completed,paid,fc3,Northstar Coworking,268200,0,48276,500,316976,Bill · 12 chairs + 6 desks · installation included,2026-11-13T07:38:27.622Z,,,,,,,,
+fo4,demo-cubig-furniture,CF-1043,completed,partial,fc2,Priya Homes Interiors,68900,0,12402,0,81302,Advance received — balance on delivery,2026-11-11T07:38:27.622Z,,,,,,,,

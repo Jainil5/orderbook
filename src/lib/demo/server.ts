@@ -1,28 +1,24 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import {
-  appendDemoAudit,
-  readDemoMutableBucket,
-  updateDemoMutableBucket,
-} from "@/lib/demo/mutable-store";
-import {
-  mergeDemoCustomers,
-  mergeDemoOffers,
-} from "@/lib/demo/merge-entities";
 import { getDemoBrandPack, resolveDemoBrandCode } from "@/lib/demo/brands";
 import {
-  patchDemoOrderInStore,
-  readDemoOrderStore,
-} from "@/lib/demo/order-store";
+  appendAudit,
+  findBrand,
+  listBrand,
+  saveBrand,
+  updateBrand,
+} from "@/lib/csv/records";
 import { buildOrderRecord } from "@/lib/orders/build-order-record";
-import type { DemoBrandCode } from "@/lib/workspace/constants";
 import {
-  DEMO_WORKSPACE_COOKIE,
-  parseDemoBrandCodeFromCookie,
-} from "@/lib/workspace/constants";
-import { cookies } from "next/headers";
+  crmFieldsFromInput,
+  mergeCustomerCrmFields,
+  withConsentStamped,
+} from "@/lib/crm/customer-fields";
+import type { DemoBrandCode } from "@/lib/workspace/constants";
+import { readDemoSessionBrand } from "@/lib/workspace/demo-session";
 import type {
+  AuditLogEntry,
   CreateOrderInput,
   CreateOrderResult,
   Customer,
@@ -31,17 +27,35 @@ import type {
   OfferUpsertInput,
   Order,
   OrderStatus,
+  Payment,
   PaymentStatus,
   RecordPaymentInput,
   RecordRefundInput,
   StockAdjustmentInput,
 } from "@/types/database";
-import { appendDemoOrderRecord } from "@/lib/demo/order-store";
+
+/**
+ * Every write the demo workspaces can make, against `data/*.csv`.
+ *
+ * These functions used to keep user edits in an httpOnly cookie (the "mutable
+ * bucket") layered on top of the fixture data, which meant the demo's real
+ * state lived in one browser and nowhere else: invisible to a second tab on a
+ * different device, gone when the cookie was cleared, and impossible to inspect
+ * or hand-edit. The CSV layer is now the single store, so a write here is the
+ * same row a live workspace would eventually keep in its database, and
+ * `getDemoBrandPack` reads it straight back.
+ *
+ * Rules this file holds to:
+ * - the brand comes from the signed-in session row, never from an argument;
+ * - rows are written through `src/lib/csv/records.ts`, which stamps `brand_id`
+ *   and refuses another brand's id;
+ * - nothing here throws at a caller — every failure is `{ ok: false, message }`.
+ */
 
 async function activeDemoBrandCode(): Promise<DemoBrandCode> {
-  const cookieStore = await cookies();
-  const raw = cookieStore.get(DEMO_WORKSPACE_COOKIE)?.value;
-  return parseDemoBrandCodeFromCookie(raw) ?? resolveDemoBrandCode(null);
+  /* The session row decides. The fallback is for a request with no session at
+     all — a public quote link — where the brand only scopes a lookup. */
+  return (await readDemoSessionBrand()) ?? resolveDemoBrandCode(null);
 }
 
 function revalidateAll() {
@@ -56,26 +70,26 @@ function revalidateAll() {
   revalidatePath("/kitchen");
 }
 
-export async function demoWorkspaceMeta() {
-  const code = await activeDemoBrandCode();
-  const pack = getDemoBrandPack(code);
-  return {
-    brand: pack.brand,
-    settings: pack.settings,
-    demoBrandCode: code,
-  };
+function demoAudit(
+  brandId: string,
+  entry: Omit<
+    AuditLogEntry,
+    "id" | "created_at" | "brand_id" | "actor_email"
+  >,
+) {
+  appendAudit(brandId, { ...entry, actor_email: null });
 }
 
-async function demoCustomers(code: DemoBrandCode): Promise<Customer[]> {
-  const pack = getDemoBrandPack(code);
-  const bucket = await readDemoMutableBucket(code);
-  return mergeDemoCustomers(pack.customers, bucket);
+async function demoCustomers(brandId: string): Promise<Customer[]> {
+  return listBrand<Customer>("customers", brandId).sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
 }
 
-async function demoOffers(code: DemoBrandCode): Promise<Offer[]> {
-  const pack = getDemoBrandPack(code);
-  const bucket = await readDemoMutableBucket(code);
-  return mergeDemoOffers(pack.offers, bucket);
+async function demoOffers(brandId: string): Promise<Offer[]> {
+  return listBrand<Offer>("offers", brandId).sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
 }
 
 export async function submitDemoOrder(
@@ -83,13 +97,10 @@ export async function submitDemoOrder(
 ): Promise<CreateOrderResult> {
   const code = await activeDemoBrandCode();
   const pack = getDemoBrandPack(code);
-  const bucket = await readDemoMutableBucket(code);
-  const products = pack.products.map((p) => ({
-    ...p,
-    ...(bucket.productOverrides[p.id] ?? {}),
-  }));
+  const brandId = pack.brand.id;
+  const products = pack.products;
 
-  let customers = await demoCustomers(code);
+  let customers = await demoCustomers(brandId);
   let customerId = input.customerId;
 
   if (
@@ -97,19 +108,15 @@ export async function submitDemoOrder(
     input.saveNewCustomer &&
     (input.walkInName?.trim() || input.customerPhone)
   ) {
-    const newCustomer: Customer = {
+    const newCustomer = saveBrand<Customer>("customers", brandId, {
       id: `demo-cust-${Date.now()}`,
-      brand_id: pack.brand.id,
+      brand_id: brandId,
       name: input.walkInName?.trim() || "Walk-in customer",
       email: null,
       phone: input.customerPhone ?? null,
       notes: null,
-    };
-    await updateDemoMutableBucket(code, (b) => ({
-      ...b,
-      customers: [newCustomer, ...b.customers],
-    }));
-    customers = await demoCustomers(code);
+    });
+    customers = await demoCustomers(brandId);
     customerId = newCustomer.id;
   }
 
@@ -120,10 +127,10 @@ export async function submitDemoOrder(
     : pack.orderNumberPrefix;
   const orderId = `demo-order-${Date.now()}`;
   const orderNumber = `${prefix}-${suffix}`;
-  const offers = await demoOffers(code);
+  const offers = await demoOffers(brandId);
 
   const built = buildOrderRecord({
-    brandId: pack.brand.id,
+    brandId,
     orderId,
     orderNumber,
     products,
@@ -137,60 +144,39 @@ export async function submitDemoOrder(
     return { ok: false, code: "VALIDATION", message: built.message };
   }
 
+  /* Stock moves once per product, whatever the line layout: summing the
+     quantities first means two lines of the same product cannot each deduct
+     from the pre-order figure. */
+  const soldByProduct = new Map<string, number>();
   for (const line of built.record.items) {
-    const productId = line.product_id;
-    if (!productId) continue;
-    const product = products.find((p) => p.id === productId);
-    if (product?.stock_qty == null) continue;
-    const nextQty = Math.max(0, (product.stock_qty ?? 0) - line.quantity);
-    await updateDemoMutableBucket(code, (b) => ({
-      ...b,
-      productOverrides: {
-        ...b.productOverrides,
-        [productId]: {
-          ...b.productOverrides[productId],
-          stock_qty: nextQty,
-        },
-      },
-    }));
+    if (!line.product_id) continue;
+    soldByProduct.set(
+      line.product_id,
+      (soldByProduct.get(line.product_id) ?? 0) + line.quantity,
+    );
   }
-
-  if (built.record.appliedOffer) {
-    const offerId = built.record.appliedOffer.id;
-    await updateDemoMutableBucket(code, (b) => {
-      const inBucket = b.offers.find((o) => o.id === offerId);
-      if (inBucket) {
-        return {
-          ...b,
-          offers: b.offers.map((o) =>
-            o.id === offerId
-              ? { ...o, redemption_count: o.redemption_count + 1 }
-              : o,
-          ),
-        };
-      }
-      const base = pack.offers.find((o) => o.id === offerId);
-      if (base) {
-        return {
-          ...b,
-          offers: [
-            { ...base, redemption_count: base.redemption_count + 1 },
-            ...b.offers,
-          ],
-        };
-      }
-      return b;
+  for (const [productId, quantity] of soldByProduct) {
+    const product = products.find((p) => p.id === productId);
+    if (!product || product.stock_qty == null) continue;
+    updateBrand("products", brandId, productId, {
+      stock_qty: Math.max(0, (product.stock_qty ?? 0) - quantity),
     });
   }
 
-  await appendDemoOrderRecord(
-    code,
-    built.record.order,
-    built.record.items,
-  );
-  await appendDemoAudit(code, {
-    brand_id: pack.brand.id,
-    actor_email: null,
+  if (built.record.appliedOffer) {
+    const offer = offers.find((o) => o.id === built.record.appliedOffer!.id);
+    if (offer) {
+      updateBrand("offers", brandId, offer.id, {
+        redemption_count: offer.redemption_count + 1,
+      });
+    }
+  }
+
+  saveBrand<Order>("orders", brandId, built.record.order);
+  for (const item of built.record.items) {
+    saveBrand("order_items", brandId, item);
+  }
+  demoAudit(brandId, {
     action: "order.created",
     entity_type: "order",
     entity_id: built.record.order.id,
@@ -207,25 +193,22 @@ export async function submitDemoOrder(
 
 export async function saveDemoCustomer(input: CustomerUpsertInput) {
   const code = await activeDemoBrandCode();
-  const pack = getDemoBrandPack(code);
+  const brandId = getDemoBrandPack(code).brand.id;
   const name = input.name.trim();
   if (!name) return { ok: false as const, message: "Name is required." };
-  const customer: Customer = {
+  const now = new Date().toISOString();
+  const customer = saveBrand<Customer>("customers", brandId, {
     id: `demo-cust-${Date.now()}`,
-    brand_id: pack.brand.id,
+    brand_id: brandId,
     name,
     email: input.email?.trim() || null,
     phone: input.phone?.trim() || null,
     notes: input.notes?.trim() || null,
     price_tier: input.price_tier === "wholesale" ? "wholesale" : "retail",
-  };
-  await updateDemoMutableBucket(code, (b) => ({
-    ...b,
-    customers: [customer, ...b.customers],
-  }));
-  await appendDemoAudit(code, {
-    brand_id: pack.brand.id,
-    actor_email: null,
+    created_at: now,
+    ...withConsentStamped(crmFieldsFromInput(input), now),
+  });
+  demoAudit(brandId, {
     action: "customer.created",
     entity_type: "customer",
     entity_id: customer.id,
@@ -240,23 +223,24 @@ export async function updateDemoCustomer(
   input: CustomerUpsertInput,
 ) {
   const code = await activeDemoBrandCode();
-  const customers = await demoCustomers(code);
-  const existing = customers.find((c) => c.id === customerId);
+  const brandId = getDemoBrandPack(code).brand.id;
+  const existing = findBrand<Customer>("customers", brandId, customerId);
   if (!existing) return { ok: false as const, message: "Customer not found." };
-  const updated: Customer = {
-    ...existing,
+  const updated: Customer = mergeCustomerCrmFields(existing, {
     name: input.name.trim() || existing.name,
-    email: input.email?.trim() || null,
-    phone: input.phone?.trim() || null,
-    notes: input.notes?.trim() || null,
-  };
-  await updateDemoMutableBucket(code, (b) => ({
-    ...b,
-    customers: [
-      updated,
-      ...b.customers.filter((c) => c.id !== customerId),
-    ],
-  }));
+    // undefined = this form does not manage the field → keep the stored value.
+    email: input.email === undefined ? undefined : input.email?.trim() || null,
+    phone: input.phone === undefined ? undefined : input.phone?.trim() || null,
+    notes: input.notes === undefined ? undefined : input.notes?.trim() || null,
+    price_tier:
+      input.price_tier === undefined
+        ? undefined
+        : input.price_tier === "wholesale"
+          ? "wholesale"
+          : "retail",
+    ...withConsentStamped(crmFieldsFromInput(input), new Date().toISOString()),
+  });
+  updateBrand("customers", brandId, customerId, updated as unknown as Record<string, unknown>);
   revalidatePath("/customers");
   revalidatePath(`/customers/${customerId}`);
   return { ok: true as const, customer: updated };
@@ -264,10 +248,10 @@ export async function updateDemoCustomer(
 
 export async function saveDemoOffer(input: OfferUpsertInput) {
   const code = await activeDemoBrandCode();
-  const pack = getDemoBrandPack(code);
-  const offer: Offer = {
+  const brandId = getDemoBrandPack(code).brand.id;
+  const offer = saveBrand<Offer>("offers", brandId, {
     id: `demo-offer-${Date.now()}`,
-    brand_id: pack.brand.id,
+    brand_id: brandId,
     name: input.name.trim(),
     code: input.code.trim().toUpperCase(),
     discount_type: input.discount_type,
@@ -281,11 +265,7 @@ export async function saveDemoOffer(input: OfferUpsertInput) {
     is_active: input.is_active !== false,
     redemption_count: 0,
     usage_limit: input.usage_limit ?? null,
-  };
-  await updateDemoMutableBucket(code, (b) => ({
-    ...b,
-    offers: [offer, ...b.offers],
-  }));
+  });
   revalidatePath("/offers");
   return { ok: true as const, offer };
 }
@@ -295,17 +275,11 @@ export async function updateDemoOrderStatus(
   status: OrderStatus,
 ) {
   const code = await activeDemoBrandCode();
-  const pack = getDemoBrandPack(code);
-  const patched = await patchDemoOrderInStore(code, orderId, { status });
-  if (!patched) {
-    await updateDemoMutableBucket(code, (b) => ({
-      ...b,
-      orderPatches: { ...b.orderPatches, [orderId]: { status } },
-    }));
+  const brandId = getDemoBrandPack(code).brand.id;
+  if (!updateBrand("orders", brandId, orderId, { status })) {
+    return { ok: false as const, message: "Order not found." };
   }
-  await appendDemoAudit(code, {
-    brand_id: pack.brand.id,
-    actor_email: null,
+  demoAudit(brandId, {
     action: "order.status",
     entity_type: "order",
     entity_id: orderId,
@@ -317,17 +291,15 @@ export async function updateDemoOrderStatus(
 
 export async function recordDemoPayment(input: RecordPaymentInput) {
   const code = await activeDemoBrandCode();
-  const pack = getDemoBrandPack(code);
-  const stored = await readDemoOrderStore(code);
-  const baseOrders = [...pack.orders, ...stored.orders];
-  const order = baseOrders.find((o) => o.id === input.orderId);
+  const brandId = getDemoBrandPack(code).brand.id;
+  const order = findBrand<Order>("orders", brandId, input.orderId);
   if (!order) return { ok: false as const, message: "Order not found." };
   const amount = Math.max(0, input.amount);
   if (amount <= 0) return { ok: false as const, message: "Enter an amount." };
 
-  const payment = {
+  saveBrand<Payment>("payments", brandId, {
     id: `demo-pay-${Date.now()}`,
-    brand_id: pack.brand.id,
+    brand_id: brandId,
     order_id: order.id,
     amount,
     method: input.method,
@@ -335,31 +307,17 @@ export async function recordDemoPayment(input: RecordPaymentInput) {
     created_at: new Date().toISOString(),
     split_label: input.splitLabel?.trim().slice(0, 80) || null,
     notes: input.notes?.trim().slice(0, 500) || null,
-  };
+  });
 
   const paid = roundMoney((order.amount_paid ?? 0) + amount);
   const payment_status: PaymentStatus =
     paid >= order.grand_total ? "paid" : paid > 0 ? "partial" : "pending";
+  updateBrand("orders", brandId, order.id, {
+    amount_paid: paid,
+    payment_status,
+  });
 
-  const patch = { amount_paid: paid, payment_status };
-  const patched = await patchDemoOrderInStore(code, order.id, patch);
-  if (!patched) {
-    await updateDemoMutableBucket(code, (b) => ({
-      ...b,
-      orderPatches: {
-        ...b.orderPatches,
-        [order.id]: { ...b.orderPatches[order.id], ...patch },
-      },
-    }));
-  }
-
-  await updateDemoMutableBucket(code, (b) => ({
-    ...b,
-    payments: [payment, ...b.payments],
-  }));
-  await appendDemoAudit(code, {
-    brand_id: pack.brand.id,
-    actor_email: null,
+  demoAudit(brandId, {
     action: "payment.recorded",
     entity_type: "order",
     entity_id: order.id,
@@ -375,12 +333,11 @@ function roundMoney(amount: number) {
 
 export async function updateDemoOrderNotes(orderId: string, notes: string) {
   const code = await activeDemoBrandCode();
+  const brandId = getDemoBrandPack(code).brand.id;
   const patch = { notes: notes.trim().slice(0, 2000) || null };
-  await patchDemoOrderInStore(code, orderId, patch);
-  await updateDemoMutableBucket(code, (b) => ({
-    ...b,
-    orderPatches: { ...b.orderPatches, [orderId]: { ...b.orderPatches[orderId], ...patch } },
-  }));
+  if (!updateBrand("orders", brandId, orderId, patch)) {
+    return { ok: false as const, message: "Order not found." };
+  }
   revalidateAll();
   return { ok: true as const };
 }
@@ -388,9 +345,8 @@ export async function updateDemoOrderNotes(orderId: string, notes: string) {
 export async function createDemoCreditNote(sourceOrderId: string) {
   const code = await activeDemoBrandCode();
   const pack = getDemoBrandPack(code);
-  const stored = await readDemoOrderStore(code);
-  const orders = [...pack.orders, ...stored.orders];
-  const source = orders.find((o) => o.id === sourceOrderId);
+  const brandId = pack.brand.id;
+  const source = findBrand<Order>("orders", brandId, sourceOrderId);
   if (!source) return { ok: false as const, message: "Order not found." };
   if (source.status === "draft") {
     return { ok: false as const, message: "Confirm the quote before issuing a credit note." };
@@ -414,56 +370,56 @@ export async function createDemoCreditNote(sourceOrderId: string) {
     amount_paid: 0,
     public_token: null,
   };
-  await appendDemoOrderRecord(code, creditOrder, []);
-  await patchDemoOrderInStore(code, sourceOrderId, {
+  saveBrand<Order>("orders", brandId, creditOrder);
+  updateBrand("orders", brandId, sourceOrderId, {
     status: "refunded",
     payment_status: "refunded",
   });
-  await updateDemoMutableBucket(code, (b) => ({
-    ...b,
-    orderPatches: {
-      ...b.orderPatches,
-      [sourceOrderId]: { status: "refunded", payment_status: "refunded" },
-    },
-  }));
+  demoAudit(brandId, {
+    action: "order.credit_note",
+    entity_type: "order",
+    entity_id: creditId,
+    detail: creditNumber,
+  });
   revalidateAll();
   return { ok: true as const, creditOrderId: creditId, orderNumber: creditNumber };
 }
 
 export async function recordDemoRefund(input: RecordRefundInput) {
   const code = await activeDemoBrandCode();
-  const pack = getDemoBrandPack(code);
-  const stored = await readDemoOrderStore(code);
-  const order = [...pack.orders, ...stored.orders].find((o) => o.id === input.orderId);
+  const brandId = getDemoBrandPack(code).brand.id;
+  const order = findBrand<Order>("orders", brandId, input.orderId);
   if (!order) return { ok: false as const, message: "Order not found." };
-  const refund = {
+  const now = new Date().toISOString();
+  saveBrand("refunds", brandId, {
     id: `demo-ref-${Date.now()}`,
-    brand_id: pack.brand.id,
+    brand_id: brandId,
     order_id: input.orderId,
     payment_id: input.paymentId ?? null,
     amount: input.amount,
     reason: input.reason.trim().slice(0, 500) || null,
-    created_at: new Date().toISOString(),
-  };
-  await updateDemoMutableBucket(code, (b) => ({
-    ...b,
-    refunds: [refund, ...b.refunds],
-    payments: [
-      {
-        id: `demo-refpay-${Date.now()}`,
-        brand_id: pack.brand.id,
-        order_id: input.orderId,
-        amount: -input.amount,
-        method: "Refund",
-        status: "refunded",
-        created_at: new Date().toISOString(),
-      },
-      ...b.payments,
-    ],
-  }));
-  await patchDemoOrderInStore(code, input.orderId, {
+    created_at: now,
+  });
+  /* The refund shows up in the money ledger as a negative payment, which is how
+     the payments screen and the analytics totals have always read it. */
+  saveBrand<Payment>("payments", brandId, {
+    id: `demo-refpay-${Date.now()}`,
+    brand_id: brandId,
+    order_id: input.orderId,
+    amount: -input.amount,
+    method: "Refund",
+    status: "refunded",
+    created_at: now,
+  });
+  updateBrand("orders", brandId, input.orderId, {
     status: "refunded",
     payment_status: "refunded",
+  });
+  demoAudit(brandId, {
+    action: "order.refunded",
+    entity_type: "order",
+    entity_id: input.orderId,
+    detail: String(input.amount),
   });
   revalidateAll();
   return { ok: true as const };
@@ -471,30 +427,23 @@ export async function recordDemoRefund(input: RecordRefundInput) {
 
 export async function recordDemoStockAdjustment(input: StockAdjustmentInput) {
   const code = await activeDemoBrandCode();
-  const pack = getDemoBrandPack(code);
-  const product = pack.products.find((p) => p.id === input.productId);
+  const brandId = getDemoBrandPack(code).brand.id;
+  const product = findBrand<{ id: string; stock_qty: number | null }>(
+    "products",
+    brandId,
+    input.productId,
+  );
   if (!product) return { ok: false as const, message: "Product not found." };
-  const bucket = await readDemoMutableBucket(code);
-  const override = bucket.productOverrides[input.productId] ?? {};
-  const current =
-    override.stock_qty ?? product.stock_qty ?? 0;
-  const next = current + input.deltaQty;
-  const entry = {
+  const next = (product.stock_qty ?? 0) + input.deltaQty;
+  saveBrand("stock_adjustments", brandId, {
     id: `demo-adj-${Date.now()}`,
-    brand_id: pack.brand.id,
+    brand_id: brandId,
     product_id: input.productId,
     delta_qty: input.deltaQty,
     reason: input.reason.trim().slice(0, 200),
     created_at: new Date().toISOString(),
-  };
-  await updateDemoMutableBucket(code, (b) => ({
-    ...b,
-    stockAdjustments: [entry, ...b.stockAdjustments],
-    productOverrides: {
-      ...b.productOverrides,
-      [input.productId]: { ...b.productOverrides[input.productId], stock_qty: next },
-    },
-  }));
+  });
+  updateBrand("products", brandId, input.productId, { stock_qty: next });
   revalidatePath("/products");
   revalidatePath("/billing");
   return { ok: true as const, stockQty: next };
@@ -502,23 +451,17 @@ export async function recordDemoStockAdjustment(input: StockAdjustmentInput) {
 
 export async function acceptDemoQuote(publicToken: string) {
   const code = await activeDemoBrandCode();
-  const pack = getDemoBrandPack(code);
-  const stored = await readDemoOrderStore(code);
-  const orders = [...pack.orders, ...stored.orders];
-  const order = orders.find((o) => o.public_token === publicToken);
+  const brandId = getDemoBrandPack(code).brand.id;
+  const order = listBrand<Order>("orders", brandId).find(
+    (o) => o.public_token === publicToken,
+  );
   if (!order) return { ok: false as const, message: "Quote not found." };
   const patch = {
     status: "confirmed" as OrderStatus,
     payment_status: "pending" as PaymentStatus,
   };
-  await patchDemoOrderInStore(code, order.id, patch);
-  await updateDemoMutableBucket(code, (b) => ({
-    ...b,
-    orderPatches: { ...b.orderPatches, [order.id]: { ...b.orderPatches[order.id], ...patch } },
-  }));
-  await appendDemoAudit(code, {
-    brand_id: pack.brand.id,
-    actor_email: null,
+  updateBrand("orders", brandId, order.id, patch);
+  demoAudit(brandId, {
     action: "quote.accepted",
     entity_type: "order",
     entity_id: order.id,

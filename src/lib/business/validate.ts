@@ -1,7 +1,7 @@
 import { getDemoBrandPack } from "@/lib/demo/brands";
-import { mergeDemoCustomers } from "@/lib/demo/merge-entities";
-import { readDemoMutableBucket } from "@/lib/demo/mutable-store";
 import { listDemoStaff } from "@/lib/demo/staff-data";
+import { listBrand } from "@/lib/csv/records";
+import type { Supplier } from "@/types/business";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
 
 /**
@@ -113,14 +113,15 @@ export type KnownRefs = {
 
 /** Everything a Manager action may reference for this brand. */
 export async function knownRefs(code: DemoBrandCode): Promise<KnownRefs> {
+  /* The pack arrays ARE the CSV rows, so these ids cover everything the app has
+     ever saved for this brand — no second override layer to remember. */
   const pack = getDemoBrandPack(code);
-  const bucket = await readDemoMutableBucket(code);
   const staff = await listDemoStaff(code);
   return {
-    customerIds: mergeDemoCustomers(pack.customers, bucket).map((c) => c.id),
+    customerIds: pack.customers.map((c) => c.id),
     staffIds: staff.map((s) => s.id),
     productIds: pack.products.map((p) => p.id),
     serviceIds: pack.services.map((s) => s.id),
-    supplierIds: bucket.suppliers.map((s) => s.id),
+    supplierIds: listBrand<Supplier>("suppliers", pack.brand.id).map((s) => s.id),
   };
 }

@@ -1,14 +1,6 @@
 import { getDemoBrandPack, resolveDemoBrandCode } from "@/lib/demo/brands";
-import { readDemoMutableBucket } from "@/lib/demo/mutable-store";
-import {
-  applyOrderPatches,
-  mergeDemoCustomers,
-  mergeDemoOffers,
-  mergeDemoPayments,
-  mergeDemoProducts,
-  listDemoAudit,
-} from "@/lib/demo/merge-entities";
-import { readDemoOrderStore } from "@/lib/demo/order-store";
+import { csvBrandId, csvStockAdjustmentRows } from "@/lib/csv/source";
+import { listAudit, listBrand } from "@/lib/csv/records";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
 import type {
   Customer,
@@ -17,8 +9,19 @@ import type {
   OrderItem,
   Payment,
   Product,
+  Refund,
   StockAdjustment,
 } from "@/types/database";
+
+/**
+ * The demo read side, and after the CSV move it is a thin one.
+ *
+ * `getDemoBrandPack` already returns the record arrays of `data/*.csv`, so
+ * every collection here is the file content plus the filters the screen asked
+ * for. There is deliberately no second layer: in-app edits are written back to
+ * these same tables by `src/lib/demo/server.ts`, which is what makes an edit
+ * visible in another browser, survive a restart, and be reviewable as text.
+ */
 
 function packFor(code: DemoBrandCode) {
   return getDemoBrandPack(code);
@@ -28,24 +31,18 @@ function resolveCode(brandCode?: DemoBrandCode): DemoBrandCode {
   return brandCode ?? "BR-1";
 }
 
-async function mergedOrderData(brandCode?: DemoBrandCode) {
-  const code = resolveCode(brandCode);
-  const pack = packFor(code);
-  const bucket = await readDemoMutableBucket(code);
-  const stored = await readDemoOrderStore(code);
-  const orderById = new Map<string, Order>();
-  for (const order of pack.orders) orderById.set(order.id, order);
-  for (const order of stored.orders) orderById.set(order.id, order);
-  let orders = Array.from(orderById.values());
-  orders = applyOrderPatches(orders, bucket);
-  orders.sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+function byNewest(a: { created_at: string | null }, b: { created_at: string | null }) {
+  return (
+    new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime()
   );
-  const itemById = new Map<string, OrderItem>();
-  for (const item of pack.orderItems) itemById.set(item.id, item);
-  for (const item of stored.orderItems) itemById.set(item.id, item);
-  const orderItems = Array.from(itemById.values());
-  return { code, orders, orderItems, bucket };
+}
+
+function mergedOrderData(brandCode?: DemoBrandCode) {
+  const pack = packFor(resolveCode(brandCode));
+  return {
+    orders: [...pack.orders].sort(byNewest),
+    orderItems: pack.orderItems,
+  };
 }
 
 export function listDemoProducts(
@@ -77,6 +74,10 @@ export function listDemoProducts(
   return rows;
 }
 
+/**
+ * Same rows as `listDemoProducts` — the name is historical, from when this was
+ * the only function that layered in-app product edits over the fixtures.
+ */
 export async function listDemoProductsMerged(
   filters?: {
     search?: string;
@@ -85,27 +86,7 @@ export async function listDemoProductsMerged(
   },
   brandCode?: DemoBrandCode,
 ): Promise<Product[]> {
-  const code = resolveCode(brandCode);
-  const pack = packFor(code);
-  const bucket = await readDemoMutableBucket(code);
-  let rows = mergeDemoProducts(pack.products, bucket);
-  if (filters?.activeOnly !== false) {
-    rows = rows.filter((p) => p.is_active);
-  }
-  if (filters?.category && filters.category !== "all") {
-    rows = rows.filter(
-      (p) => (p.category ?? "Uncategorized") === filters.category,
-    );
-  }
-  if (filters?.search) {
-    const q = filters.search.toLowerCase();
-    rows = rows.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        (p.sku?.toLowerCase().includes(q) ?? false),
-    );
-  }
-  return rows;
+  return listDemoProducts(filters, brandCode);
 }
 
 export function demoProductCategories(brandCode?: DemoBrandCode): string[] {
@@ -125,8 +106,8 @@ export async function listDemoOrders(
   },
   brandCode?: DemoBrandCode,
 ): Promise<Order[]> {
-  const { orders } = await mergedOrderData(brandCode);
-  let rows = [...orders];
+  const { orders } = mergedOrderData(brandCode);
+  let rows = orders;
   if (filters?.search) {
     const q = filters.search.toLowerCase();
     rows = rows.filter(
@@ -141,48 +122,36 @@ export async function listDemoOrders(
   if (filters?.paymentStatus && filters.paymentStatus !== "all") {
     rows = rows.filter((o) => o.payment_status === filters.paymentStatus);
   }
-  return rows.sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-  );
+  return rows;
 }
 
 export async function getDemoOrder(
   id: string,
   brandCode?: DemoBrandCode,
 ): Promise<Order | undefined> {
-  const { orders } = await mergedOrderData(brandCode);
-  return orders.find((o) => o.id === id);
+  return mergedOrderData(brandCode).orders.find((o) => o.id === id);
 }
 
 export async function getDemoOrderItems(
   orderId: string,
   brandCode?: DemoBrandCode,
 ): Promise<OrderItem[]> {
-  const { orderItems } = await mergedOrderData(brandCode);
-  return orderItems.filter((i) => i.order_id === orderId);
+  return mergedOrderData(brandCode).orderItems.filter((i) => i.order_id === orderId);
 }
 
 export async function listDemoOrdersForCustomer(
   customerId: string,
   brandCode?: DemoBrandCode,
 ): Promise<Order[]> {
-  const { orders } = await mergedOrderData(brandCode);
-  return orders
-    .filter((o) => o.customer_id === customerId)
-    .sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-    );
+  return mergedOrderData(brandCode).orders.filter((o) => o.customer_id === customerId);
 }
 
 export async function listDemoCustomers(
   search?: string,
   brandCode?: DemoBrandCode,
 ): Promise<Customer[]> {
-  const code = resolveCode(brandCode);
-  const pack = packFor(code);
-  const bucket = await readDemoMutableBucket(code);
-  let rows = mergeDemoCustomers(pack.customers, bucket);
+  const pack = packFor(resolveCode(brandCode));
+  let rows = [...pack.customers].sort((a, b) => a.name.localeCompare(b.name));
   if (search) {
     const q = search.toLowerCase();
     const digits = search.replace(/\D/g, "");
@@ -209,32 +178,36 @@ export async function getDemoCustomer(
 export async function listDemoOrderItemsForOrders(
   brandCode?: DemoBrandCode,
 ): Promise<OrderItem[]> {
-  const { orderItems } = await mergedOrderData(brandCode);
-  return orderItems;
+  return mergedOrderData(brandCode).orderItems;
 }
 
 export async function listDemoOffers(
   brandCode?: DemoBrandCode,
 ): Promise<Offer[]> {
-  const code = resolveCode(brandCode);
-  const pack = packFor(code);
-  const bucket = await readDemoMutableBucket(code);
-  return mergeDemoOffers(pack.offers, bucket);
+  const pack = packFor(resolveCode(brandCode));
+  return [...pack.offers].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export async function listDemoPayments(
   brandCode?: DemoBrandCode,
 ): Promise<Payment[]> {
-  const code = resolveCode(brandCode);
-  const pack = packFor(code);
-  const bucket = await readDemoMutableBucket(code);
-  return mergeDemoPayments(pack.payments, bucket);
+  const pack = packFor(resolveCode(brandCode));
+  return [...pack.payments].sort(byNewest);
+}
+
+/**
+ * Refunds the brand has recorded. `recordDemoRefund` in `src/lib/demo/server.ts`
+ * writes these rows, so the refunds screen, the finance overview and analytics
+ * all read back exactly what was saved.
+ */
+export async function listDemoRefunds(
+  brandCode?: DemoBrandCode,
+): Promise<Refund[]> {
+  return listBrand<Refund>("refunds", csvBrandId(resolveCode(brandCode))).sort(byNewest);
 }
 
 export async function listDemoAuditLog(brandCode?: DemoBrandCode) {
-  const code = resolveCode(brandCode);
-  const bucket = await readDemoMutableBucket(code);
-  return listDemoAudit(bucket);
+  return listAudit(csvBrandId(resolveCode(brandCode)));
 }
 
 export function getDemoAnalytics(brandCode?: DemoBrandCode) {
@@ -244,9 +217,7 @@ export function getDemoAnalytics(brandCode?: DemoBrandCode) {
 export async function listDemoStockAdjustments(
   brandCode?: DemoBrandCode,
 ): Promise<StockAdjustment[]> {
-  const code = resolveCode(brandCode);
-  const bucket = await readDemoMutableBucket(code);
-  return bucket.stockAdjustments;
+  return csvStockAdjustmentRows<StockAdjustment>(csvBrandId(resolveCode(brandCode)));
 }
 
 export function toDemoBrandCode(brandCode: string): DemoBrandCode {

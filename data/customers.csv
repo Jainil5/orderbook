@@ -1,0 +1,8 @@
+id,brand_id,name,email,phone,notes,price_tier,dob,gender,address,source,tags,custom_fields,status,marketing_consent,opted_out_at,created_at
+c1,demo-brewery-cafe,Walk-in Guest,,,,,,,,,,,,granted,,
+c2,demo-brewery-cafe,Ananya Mehta,ananya@example.com,+91 90000 11111,,,,,,,,,,granted,,
+c3,demo-brewery-cafe,Rohan Kapoor,rohan@example.com,+91 90000 22222,,,,,,,,,,granted,2026-11-02T10:00:00.000Z,
+fc1,demo-cubig-furniture,Walk-in / Showroom,,,,,,,,,,,,,,
+fc2,demo-cubig-furniture,Priya Homes Interiors,projects@priyahomes.in,+91 98100 33445,,,,,,,,,,granted,,
+fc3,demo-cubig-furniture,Northstar Coworking,facilities@northstar.io,+91 98765 12000,,,,,,,,,,declined,,
+fc4,demo-cubig-furniture,Arjun & Meera Shah,arjun.shah@gmail.com,+91 99887 66554,,,,,,,,,,granted,,

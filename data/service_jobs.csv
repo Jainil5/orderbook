@@ -1,0 +1,4 @@
+id,brand_id,serviceId,customerId,staffIds,status,scheduledAt,notes
+bc-job-1,demo-brewery-cafe,bc-svc-1,c2,"[""bc-staff-1"",""bc-staff-2""]",scheduled,2026-11-18T07:38:27.620Z,Corporate tasting for 20 guests
+cf-job-1,demo-cubig-furniture,cf-svc-2,fc2,"[""cf-staff-2""]",in_progress,2026-11-16T06:38:27.622Z,"Luna sofa + wardrobe, 3rd floor"
+cf-job-2,demo-cubig-furniture,cf-svc-1,fc4,[],requested,,Oslo dining table delivery

@@ -11,8 +11,10 @@ import { SegmentedControl } from "@/components/ui/segmented-control";
 import { StatCard } from "@/components/ui/stat-card";
 import { Tabs } from "@/components/ui/tabs";
 import { CHART_COLORS } from "@/components/analytics/charts";
+import { InsightsPanel } from "@/components/analytics/insights-panel";
 import { formatMoney } from "@/lib/format";
 import type { AnalyticsSnapshot, Slice, TrendPoint } from "@/lib/analytics/snapshot";
+import type { Insight } from "@/lib/analytics/insights";
 import type { MarginSnapshot } from "@/lib/analytics/margin";
 import type { RangePreset } from "@/lib/analytics/date-range";
 import type { Payment } from "@/types/database";
@@ -62,6 +64,7 @@ const TABS = [
   { id: "products", label: "Products" },
   { id: "payments", label: "Payments" },
   { id: "margin", label: "Margin & COGS" },
+  { id: "insights", label: "Insights" },
 ] as const;
 
 const DAY_PARTS = [
@@ -94,6 +97,7 @@ type Metric = "revenue" | "orders";
 function tabFromParam(value: string | null): TabId | null {
   if (value === "overview" || value === "trends" || value === "mix") return value;
   if (value === "products" || value === "payments" || value === "margin") return value;
+  if (value === "insights") return value;
   return null;
 }
 
@@ -196,6 +200,7 @@ export function AnalyticsStudio({
   rangeTo,
   rangePreset,
   marginSnapshot,
+  insights = [],
 }: {
   snapshot: AnalyticsSnapshot;
   notice?: string;
@@ -207,6 +212,7 @@ export function AnalyticsStudio({
   rangeTo?: string;
   rangePreset?: RangePreset | null;
   marginSnapshot?: MarginSnapshot;
+  insights?: Insight[];
 }) {
   const searchParams = useSearchParams();
   const tabFromUrl = tabFromParam(searchParams.get("tab"));
@@ -729,6 +735,12 @@ export function AnalyticsStudio({
           ) : null}
         </div>
       )}
+
+      {tab === "insights" ? (
+        <div className="mt-4">
+          <InsightsPanel insights={insights} />
+        </div>
+      ) : null}
     </PageShell>
   );
 }

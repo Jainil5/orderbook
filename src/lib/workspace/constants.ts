@@ -1,25 +1,41 @@
 import type { IndustryId } from "@/lib/workspace/managers";
 
+/**
+ * Carries a demo session. Its value is a random token, not a brand code: the
+ * brand — and whether the session exists at all — lives in the matching row in
+ * `data/sessions.csv`, so clearing browser data no longer deletes a record of
+ * who was signed in, and deleting the row is what signs someone out.
+ * See `src/lib/csv/session-store.ts` and `src/lib/workspace/demo-session.ts`.
+ */
 export const DEMO_WORKSPACE_COOKIE = "ob_demo_workspace";
 export const DEMO_BRAND_CODES = ["BR-1", "BR-2"] as const;
 export type DemoBrandCode = (typeof DEMO_BRAND_CODES)[number];
 
 export const DEFAULT_DEMO_BRAND_CODE: DemoBrandCode = "BR-1";
 
-export function parseDemoBrandCodeFromCookie(
-  value: string | undefined,
+/** base64url of 24 random bytes — exactly what `createDemoSession` issues. */
+const DEMO_SESSION_TOKEN = /^[A-Za-z0-9_-]{32}$/;
+
+/**
+ * Middleware only checks the shape, because it cannot read a file: a cookie
+ * that looks like a token gets as far as the layout, and the layout's session
+ * lookup is what actually decides whether anyone is signed in.
+ */
+export function isDemoSessionTokenValue(
+  value: string | null | undefined,
+): boolean {
+  return typeof value === "string" && DEMO_SESSION_TOKEN.test(value.trim());
+}
+
+/** `?demo=BR-2` on the login screen, and nothing else. */
+export function parseDemoBrandCodeParam(
+  value: string | null | undefined,
 ): DemoBrandCode | null {
   if (!value) return null;
   const normalized = value.trim().toUpperCase();
-  if (normalized === "1") return "BR-1";
-  if ((DEMO_BRAND_CODES as readonly string[]).includes(normalized)) {
-    return normalized as DemoBrandCode;
-  }
-  return null;
-}
-
-export function isDemoWorkspaceCookieValue(value: string | undefined): boolean {
-  return parseDemoBrandCodeFromCookie(value) !== null;
+  return (DEMO_BRAND_CODES as readonly string[]).includes(normalized)
+    ? (normalized as DemoBrandCode)
+    : null;
 }
 
 export const WORKSPACE_ROUTE_PREFIXES = [

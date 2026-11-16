@@ -16,7 +16,7 @@ OrderBook follows a sound baseline: Supabase Auth for live mode, publishable (an
 |--------|----------------|
 | **Public** | `/`, `/login`, `/quote/[token]`, static assets |
 | **Authenticated** | Workspace routes under `(workspace)/`, server actions, `/print/order/[id]` |
-| **Demo** | HTTP-only `orderbook_demo` cookie → full workspace without Supabase user |
+| **Demo** | `ob_demo_workspace` token cookie → must match a live row in `data/sessions.csv` → full workspace without a Supabase user |
 | **Backend** | Supabase PostgREST + RPCs (`create_order`, `accept_quote_by_token`, `analytics_orders_snapshot`) |
 | **Secrets** | `BRAND_AUTH_EMAIL_MAP` (server), `NEXT_PUBLIC_*` Supabase URL + publishable key |
 

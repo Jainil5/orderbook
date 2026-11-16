@@ -1,0 +1,4 @@
+id,brand_id,customerId,staffId,purpose,status,checkInAt,checkOutAt,report
+bc-visit-1,demo-brewery-cafe,c3,bc-staff-1,Supplier meeting — next roast lot,planned,,,
+cf-visit-1,demo-cubig-furniture,fc2,cf-staff-2,Site measurement — living room,completed,2026-11-14T07:38:27.622Z,2026-11-14T08:38:27.622Z,Room 4.2m x 5.1m. Sofa fits along east wall; lift access confirmed.
+cf-visit-2,demo-cubig-furniture,fc4,cf-staff-3,Delivery site check,planned,,,

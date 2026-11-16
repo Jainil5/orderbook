@@ -19,8 +19,9 @@
 -- No data is deleted. Every statement is additive or a policy swap.
 --
 -- DEMO SAFETY: /demo and the Brewery Cafe / Cubig Furniture flows do not
--- read Supabase — demo data comes from src/lib/demo/fixtures.ts plus an
--- httpOnly cookie store. Enabling RLS cannot break either demo.
+-- read Supabase — demo data comes from data/*.csv (seeded from the fixture
+-- packs in src/lib/demo/brands/packs) and sign-in from data/sessions.csv.
+-- Enabling RLS cannot break either demo.
 
 
 -- ---------------------------------------------------------------------------

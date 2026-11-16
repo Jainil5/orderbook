@@ -7,7 +7,7 @@
 | Session refresh via SSR middleware | PASS | `@supabase/ssr` |
 | Login rate limiting | PASS | In-memory; see rate limit note |
 | Generic login errors (no enumeration) | PASS | |
-| Demo workspace cookie | NEEDS REVIEW | Full access without auth |
+| Demo workspace session | BY DESIGN | Demo brands only (BR-1/BR-2), no live data. Login is a row in `data/sessions.csv` keyed by a random 32-char token; only its SHA-256 is stored, rows expire after 30 days and sign-out deletes the row. Writes land in the CSVs, so a public deployment should not leave demo entry open if anonymous writes matter. |
 | **Authorization** | | |
 | Server actions require live session | PASS | |
 | Brand scoping in queries | PASS | App layer |
@@ -25,7 +25,7 @@
 | Input validation on orders | PASS | `validateCreateOrderInput` |
 | Input validation on products | PASS | |
 | IDOR protection | NEEDS REVIEW | Depends on RLS |
-| CSRF on server actions | PASS | Next.js Server Actions origin check |
+| CSRF on server actions | PASS | Next.js Server Actions origin check; `OB_ACTION_ALLOWED_ORIGINS` only adds the listed public origins (proxy/preview deployments) and stays unset otherwise |
 | Open redirect protection | PASS | `safeInternalPath` |
 | **Input validation** | PASS | ILIKE escape, phone, URLs HTTPS |
 | **Secrets** | | |

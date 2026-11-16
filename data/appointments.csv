@@ -1,0 +1,3 @@
+id,brand_id,title,customerId,staffIds,startsAt,endsAt,location,serviceId,status,notes
+bc-apt-1,demo-brewery-cafe,Coffee tasting — Ananya,c2,"[""bc-staff-1""]",2026-11-16T16:00:00.000Z,2026-11-16T17:00:00.000Z,Cafe counter,,scheduled,Single-origin flight
+cf-apt-1,demo-cubig-furniture,Showroom walkthrough — Priya Homes,fc2,"[""cf-staff-4""]",2026-11-17T07:38:27.622Z,2026-11-17T08:38:27.622Z,Cubig showroom,,scheduled,Office fit-out shortlist

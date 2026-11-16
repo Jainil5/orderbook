@@ -1,0 +1,4 @@
+id,brand_id,customer_id,points_balance,lifetime_points,tier,last_activity_at,created_at,updated_at
+bc-loy-1,demo-brewery-cafe,c2,110,210,Silver,2026-11-10T09:20:00.000Z,2026-08-01T10:00:00.000Z,2026-11-10T09:20:00.000Z
+cf-loy-1,demo-cubig-furniture,fc2,1690,2190,Silver,2026-11-05T11:00:00.000Z,2026-07-11T10:00:00.000Z,2026-11-05T11:00:00.000Z
+cf-loy-2,demo-cubig-furniture,fc4,911,911,Bronze,2026-10-28T15:00:00.000Z,2026-10-28T15:00:00.000Z,2026-10-28T15:00:00.000Z

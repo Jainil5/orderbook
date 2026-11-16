@@ -14,19 +14,21 @@ import { getIndustryPreset, isIndustryId } from "@/lib/workspace/managers";
 import { normalizeBrandWebsiteUrl } from "@/lib/security/input";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { canEditBrandSettings } from "@/lib/security/authorization";
+import {
+  DEFAULT_DEMO_BRAND_CODE,
+  type DemoBrandCode,
+} from "@/lib/workspace/constants";
 
-/** Brand code for the active workspace: live session, else the demo cookie. */
-async function activeBrandCode(): Promise<string> {
-  const { cookies } = await import("next/headers");
-  const { DEMO_WORKSPACE_COOKIE, parseDemoBrandCodeFromCookie } = await import(
-    "@/lib/workspace/constants"
+/**
+ * Brand code for the active demo workspace, from its session row. Every
+ * setting below is keyed by brand, so an unknown session has no brand to write
+ * to and falls back to the first demo workspace, the same way the screens do.
+ */
+async function activeBrandCode(): Promise<DemoBrandCode> {
+  const { readDemoSessionBrand } = await import(
+    "@/lib/workspace/demo-session"
   );
-  const cookieStore = await cookies();
-  return (
-    parseDemoBrandCodeFromCookie(
-      cookieStore.get(DEMO_WORKSPACE_COOKIE)?.value,
-    ) ?? "BR-1"
-  );
+  return (await readDemoSessionBrand()) ?? DEFAULT_DEMO_BRAND_CODE;
 }
 
 export async function setQuotationBuilderEnabled(enabled: boolean) {
@@ -50,15 +52,7 @@ export async function setQuotationBuilderEnabled(enabled: boolean) {
     return { ok: true as const };
   }
 
-  const { cookies } = await import("next/headers");
-  const { DEMO_WORKSPACE_COOKIE, parseDemoBrandCodeFromCookie } = await import(
-    "@/lib/workspace/constants"
-  );
-  const cookieStore = await cookies();
-  const code =
-    parseDemoBrandCodeFromCookie(
-      cookieStore.get(DEMO_WORKSPACE_COOKIE)?.value,
-    ) ?? "BR-1";
+  const code = await activeBrandCode();
   await writeQuotationBuilderPref(code, enabled);
   revalidatePath("/settings");
   revalidatePath("/billing");
@@ -95,15 +89,7 @@ export async function setBrandWebsiteUrl(raw: string) {
     return { ok: true as const, url: normalized };
   }
 
-  const { cookies } = await import("next/headers");
-  const { DEMO_WORKSPACE_COOKIE, parseDemoBrandCodeFromCookie } = await import(
-    "@/lib/workspace/constants"
-  );
-  const cookieStore = await cookies();
-  const code =
-    parseDemoBrandCodeFromCookie(
-      cookieStore.get(DEMO_WORKSPACE_COOKIE)?.value,
-    ) ?? "BR-1";
+  const code = await activeBrandCode();
   await writeBrandWebsitePref(code, normalized);
   revalidatePath("/settings");
   revalidatePath("/dashboard");
@@ -146,15 +132,7 @@ export async function setReceiptSettings(input: {
   }
 
   const { writeReceiptSettingsPref } = await import("@/lib/workspace/prefs");
-  const { cookies } = await import("next/headers");
-  const { DEMO_WORKSPACE_COOKIE, parseDemoBrandCodeFromCookie } = await import(
-    "@/lib/workspace/constants"
-  );
-  const cookieStore = await cookies();
-  const code =
-    parseDemoBrandCodeFromCookie(
-      cookieStore.get(DEMO_WORKSPACE_COOKIE)?.value,
-    ) ?? "BR-1";
+  const code = await activeBrandCode();
   await writeReceiptSettingsPref(code, {
     receiptHeader: header,
     receiptFooter: footer || null,

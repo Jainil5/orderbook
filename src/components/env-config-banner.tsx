@@ -1,6 +1,11 @@
-import { getPublicEnv } from "@/lib/env";
+import { getPublicEnv, supabaseRequested } from "@/lib/env";
 
 export function EnvConfigBanner() {
+  /* A CSV-only deployment has no Supabase keys by design, so there is nothing
+     to configure and no reason to warn about it. Only complain when this
+     deployment asked for Supabase (`OB_USE_SUPABASE="true"`) and the keys to go
+     with it are missing — that is the case where live mode silently fails. */
+  if (!supabaseRequested()) return null;
   const env = getPublicEnv();
   if (!("ok" in env)) return null;
 

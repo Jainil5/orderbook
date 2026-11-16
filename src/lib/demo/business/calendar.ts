@@ -95,6 +95,6 @@ export function demoExternalEvents(brandCode: DemoBrandCode): ExternalEvent[] {
 }
 
 /** Outbound actions wait here until a user confirms them; nothing is sent automatically. */
-export function demoSyncActions(_brandCode: DemoBrandCode): PendingSyncAction[] {
+export function demoSyncActions(): PendingSyncAction[] {
   return [];
 }

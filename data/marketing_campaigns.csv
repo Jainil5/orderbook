@@ -1,0 +1,4 @@
+id,brand_id,name,description,type,channel,segment_id,offer_id,status,start_date,end_date,consent_only,targeted_count,marked_sent_count,response_count,redemption_count,revenue_attributed,created_at,updated_at
+bc-camp-1,demo-brewery-cafe,Diwali coffee-box offer,15% off gift boxes with code DIWALI15.,offer,whatsapp,bc-sg-1,,completed,2026-10-20,2026-11-05,true,2,2,1,1,642.6,2026-10-18T10:00:00.000Z,2026-11-06T09:00:00.000Z
+bc-camp-2,demo-brewery-cafe,Win-back: it's been a while,Free filter coffee voucher for 60-day-lapsed regulars.,winback,whatsapp,bc-sg-3,,active,2026-11-10,2026-12-10,true,1,1,0,0,0,2026-11-09T12:00:00.000Z,2026-11-11T09:30:00.000Z
+cf-camp-1,demo-cubig-furniture,Showroom furniture event,Preview night for new teak collection; Design Club invites.,announcement,in_store,cf-sg-2,,active,2026-11-14,2026-11-30,false,2,0,1,0,0,2026-11-12T10:00:00.000Z,2026-11-15T10:00:00.000Z

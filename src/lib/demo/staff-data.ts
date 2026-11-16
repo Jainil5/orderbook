@@ -1,14 +1,15 @@
 import { getDemoBrandPack } from "@/lib/demo/brands";
-import { readDemoMutableBucket } from "@/lib/demo/mutable-store";
-import { mergeStaff } from "@/lib/manager/staff";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
 import type { StaffMember } from "@/types/manager";
 
+/**
+ * The brand's roster, straight from `staff.csv` — the pack's `staff` array is
+ * the file. Rosters are shown alphabetically, which is the order the old bucket
+ * merge applied, so the sort stays here now that there is no merge.
+ */
 export async function listDemoStaff(
   brandCode?: DemoBrandCode,
 ): Promise<StaffMember[]> {
-  const code = brandCode ?? "BR-1";
-  const pack = getDemoBrandPack(code);
-  const bucket = await readDemoMutableBucket(code);
-  return mergeStaff(pack.staff, bucket.staff ?? [], bucket.staffOverrides ?? {});
+  const pack = getDemoBrandPack(brandCode ?? "BR-1");
+  return [...pack.staff].sort((a, b) => a.name.localeCompare(b.name));
 }

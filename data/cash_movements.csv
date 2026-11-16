@@ -1,0 +1,16 @@
+id,brand_id,date,direction,amount,reason,method,source,refId
+bc-mv-1,demo-brewery-cafe,2026-11-16,in,2000,Weekend float topped up from the safe,Cash,manual,
+bc-mv-2,demo-brewery-cafe,2026-11-16,out,900,Daily wage advance — kitchen helper,Cash,manual,
+bc-mv-3,demo-brewery-cafe,2026-11-15,in,1500,Loose change arranged from the bank,Cash,manual,
+bc-mv-4,demo-brewery-cafe,2026-11-14,out,250,Courier for roastery samples,Cash,manual,
+bc-mv-5,demo-brewery-cafe,2026-11-12,out,400,Milk shortage bought retail mid-service,Cash,manual,
+bc-mv-6,demo-brewery-cafe,2026-11-08,out,1200,Plumber paid cash for the restroom tap,Cash,manual,
+bc-mv-7,demo-brewery-cafe,2026-11-14,out,8400,Coffee beans — 10kg lot,Cash,expense,bc-exp-1
+bc-mv-8,demo-brewery-cafe,2026-10-27,out,4800,Espresso machine service,Cash,expense,bc-exp-11
+cf-mv-1,demo-cubig-furniture,2026-11-16,in,3500,Cash deposit on a phone-order wardrobe,Cash,manual,
+cf-mv-2,demo-cubig-furniture,2026-11-16,out,2200,Loading labour paid cash at site,Cash,manual,
+cf-mv-3,demo-cubig-furniture,2026-11-15,in,5000,Float arranged for delivery-day collections,Cash,manual,
+cf-mv-4,demo-cubig-furniture,2026-11-14,out,800,Cab for the site measurement visit,Cash,manual,
+cf-mv-5,demo-cubig-furniture,2026-11-13,out,1500,Advance to polisher for the Shah wardrobe,Cash,manual,
+cf-mv-6,demo-cubig-furniture,2026-11-13,out,12500,Hardware and fittings,Cash,expense,cf-exp-10
+cf-mv-7,demo-cubig-furniture,2026-11-14,out,2600,Delivery fuel and tolls,Cash,expense,cf-exp-7

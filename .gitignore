@@ -81,3 +81,7 @@ scratch/
 .cursor/
 .worktrees/
 .superpowers/
+
+# CSV data layer: generated on first read and meant to stay in the
+# repo, so deploys (and Railway's ephemeral filesystem) start with data.
+!/data/

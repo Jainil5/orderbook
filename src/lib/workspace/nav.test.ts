@@ -95,10 +95,28 @@ describe("buildWorkspaceNavItems", () => {
     expect(manager?.children).toHaveLength(4);
   });
 
-  it("flat items have no children", () => {
+  it("only Manager and Customers have children", () => {
     const items = buildWorkspaceNavItems(false, profile);
     expect(
-      items.filter((i) => i.href !== "/manager").every((i) => !i.children),
+      items.filter((i) => i.href !== "/manager" && i.href !== "/customers").every(
+        (i) => !i.children,
+      ),
     ).toBe(true);
+  });
+
+  it("nests the CRM sections under Customers", () => {
+    const customers = buildWorkspaceNavItems(false, profile).find(
+      (i) => i.href === "/customers",
+    );
+    // `/customers` is the overview and is the parent link itself.
+    expect(customers?.children?.map((c) => c.href)).toEqual([
+      "/customers/directory",
+      "/customers/leads",
+      "/customers/interactions",
+      "/customers/reviews",
+      "/customers/segments",
+      "/customers/campaigns",
+      "/customers/loyalty",
+    ]);
   });
 });

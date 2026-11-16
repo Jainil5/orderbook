@@ -1,0 +1,3 @@
+id,brand_id,receipt_header,receipt_footer,contact_email,contact_phone,quotation_builder_enabled,brand_website_url,industry,hidden_manager_modules,integrations,ai_automations,ai_proposals,updated_at
+demo-brewery-cafe,demo-brewery-cafe,Brewery Cafe,Thank you for visiting!,hello@brewery-cafe.demo,+91 98765 43210,false,https://brewery-cafe.demo/menu,,,,,,
+demo-cubig-furniture,demo-cubig-furniture,Cubig Furniture,Cubig Furniture · Surat · Modular office & home furniture · cubigfurniture.com,info@cubigfurniture.com,+91 93139 50917,true,https://cubigfurniture.com/,,,,,,

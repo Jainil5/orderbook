@@ -1,0 +1,9 @@
+id,brand_id,staffId,startsOn,endsOn,kind,status,reason,createdAt
+bc-leave-1,demo-brewery-cafe,bc-staff-1,2026-11-19,2026-11-21,casual,pending,Family function out of town,2026-11-13T07:38:00.000Z
+bc-leave-2,demo-brewery-cafe,bc-staff-2,2026-11-10,2026-11-11,sick,approved,Fever and rest,2026-11-08T07:38:00.000Z
+bc-leave-3,demo-brewery-cafe,bc-staff-3,2026-11-24,2026-11-28,earned,pending,Holiday with sister,2026-11-15T07:38:00.000Z
+bc-leave-4,demo-brewery-cafe,bc-staff-4,2026-11-07,2026-11-07,unpaid,rejected,Personal trip during peak week,2026-11-04T07:38:00.000Z
+cf-leave-1,demo-cubig-furniture,cf-staff-2,2026-11-18,2026-11-19,casual,pending,College reunion,2026-11-14T07:38:00.000Z
+cf-leave-2,demo-cubig-furniture,cf-staff-1,2026-11-13,2026-11-15,earned,approved,Short family trip,2026-11-09T07:38:00.000Z
+cf-leave-3,demo-cubig-furniture,cf-staff-3,2026-11-08,2026-11-09,sick,approved,"Back pain, doctor advised rest",2026-11-07T07:38:00.000Z
+cf-leave-4,demo-cubig-furniture,cf-staff-4,2026-11-22,2026-11-23,earned,pending,Wedding in hometown,2026-11-15T07:38:00.000Z

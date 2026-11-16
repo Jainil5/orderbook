@@ -8,6 +8,7 @@ import { loadDemoOperations } from "@/lib/demo/operations-data";
 import { loadBusinessData } from "@/lib/business/registry";
 import { staffAvailabilitySummary } from "@/lib/manager/staff";
 import { isOnShift } from "@/lib/manager/schedules";
+import { recentDays, summarizeAttendance, todayDay } from "@/lib/manager/workforce";
 import { loadWorkspaceSession } from "@/lib/workspace/session";
 
 export default async function StaffManagerPage() {
@@ -36,7 +37,15 @@ export default async function StaffManagerPage() {
   ]);
   const summary = staffAvailabilitySummary(staff);
   const now = new Date();
-  const openTasks = ops.tasks.filter((t) => t.status !== "done");
+  const assignedOpen = ops.tasks.filter(
+    (task) => task.assigneeStaffId !== null && task.status !== "done",
+  );
+  const week = recentDays(todayDay(), 7);
+  const attendance = summarizeAttendance(business.attendance, {
+    from: week[0],
+    to: week[week.length - 1],
+  });
+  const pendingLeave = business.leave.filter((l) => l.status === "pending").length;
 
   return (
     <PageShell title="Staff Manager">
@@ -57,14 +66,20 @@ export default async function StaffManagerPage() {
           },
           {
             label: "Assigned tasks",
-            value: String(openTasks.length),
-            hint: "Open across the team",
+            value: String(assignedOpen.length),
+            hint: "Open work given to employees",
             href: "/manager/staff/performance",
           },
           {
             label: "Leave requests",
-            value: String(business.leave.filter((l) => l.status === "pending").length),
+            value: String(pendingLeave),
             hint: "Awaiting a decision",
+            href: "/manager/staff/attendance",
+          },
+          {
+            label: "Attendance (7 days)",
+            value: attendance.days ? `${attendance.rate.toFixed(0)}%` : "No records",
+            hint: `${attendance.expected} days expected · ${attendance.absent} absent`,
             href: "/manager/staff/attendance",
           },
         ]}

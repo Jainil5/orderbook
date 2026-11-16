@@ -2,7 +2,8 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { clearDemoWorkspaceCookie } from "@/lib/auth/demo";
+import { clearDemoSession } from "@/lib/workspace/demo-session";
+import { supabaseEnabled } from "@/lib/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   consumeRateLimit,
@@ -64,6 +65,17 @@ export async function loginWithBrandCode(
     };
   }
 
+  // With no Supabase env this deployment runs on CSV data: password sign-in
+  // is not available, and the workspace is entered through /demo instead.
+  // (`"ok" in` is how this codebase detects the error variant of PublicEnv.)
+  if (!supabaseEnabled()) {
+    return {
+      ok: false,
+      error:
+        "Password sign-in needs Supabase configured. This deployment runs on CSV data — open a demo workspace instead.",
+    };
+  }
+
   const email = resolveAuthEmailFromBrandCode(brandCode);
   if (!email) {
     if (process.env.NODE_ENV === "development") {
@@ -98,14 +110,19 @@ export async function loginWithBrandCode(
     };
   }
 
-  await clearDemoWorkspaceCookie();
+  await clearDemoSession();
   redirect("/dashboard");
 }
 
 export async function logoutAction() {
+  if (!supabaseEnabled()) {
+    // CSV deployment: no Supabase session to clear, just leave the workspace.
+    await clearDemoSession();
+    redirect("/login");
+  }
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
-  await clearDemoWorkspaceCookie();
+  await clearDemoSession();
   redirect("/login");
 }
 
@@ -129,6 +146,10 @@ export async function loadActiveMembership(supabase: Awaited<
 }
 
 export async function loadLiveWorkspace() {
+  // CSV deployments have no Supabase env: there is no live workspace, and
+  // this must say so calmly instead of throwing inside every page render.
+  if (!supabaseEnabled()) return null;
+
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },

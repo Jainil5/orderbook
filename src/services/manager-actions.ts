@@ -2,10 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { getDemoBrandPack } from "@/lib/demo/brands";
-import { appendDemoAudit, updateDemoMutableBucket } from "@/lib/demo/mutable-store";
+import { appendAudit, newRecordId, saveBrand, updateBrand } from "@/lib/csv/records";
 import { validateStaffInput, type StaffInput } from "@/lib/manager/staff";
 import { loadLiveWorkspace } from "@/lib/auth/actions";
 import { canEditBrandSettings } from "@/lib/security/authorization";
+import { readDemoSessionBrand } from "@/lib/workspace/demo-session";
+import {
+  DEFAULT_DEMO_BRAND_CODE,
+  type DemoBrandCode,
+} from "@/lib/workspace/constants";
 import type { StaffAvailability, StaffMember } from "@/types/manager";
 
 const LIVE_UNAVAILABLE = {
@@ -13,16 +18,8 @@ const LIVE_UNAVAILABLE = {
   message: "Staff management is not connected to live workspaces yet.",
 };
 
-async function resolveDemoBrandCode() {
-  const { cookies } = await import("next/headers");
-  const { DEMO_WORKSPACE_COOKIE, parseDemoBrandCodeFromCookie } = await import(
-    "@/lib/workspace/constants"
-  );
-  const cookieStore = await cookies();
-  return (
-    parseDemoBrandCodeFromCookie(cookieStore.get(DEMO_WORKSPACE_COOKIE)?.value) ??
-    "BR-1"
-  );
+async function resolveDemoBrandCode(): Promise<DemoBrandCode> {
+  return (await readDemoSessionBrand()) ?? DEFAULT_DEMO_BRAND_CODE;
 }
 
 function revalidateManager() {
@@ -41,21 +38,17 @@ export async function createStaffAction(input: StaffInput) {
   const parsed = validateStaffInput(input);
   if (!parsed.ok) return parsed;
   const code = await resolveDemoBrandCode();
-  const pack = getDemoBrandPack(code);
+  const brandId = getDemoBrandPack(code).brand.id;
   const member: StaffMember = {
-    id: `staff-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    brand_id: pack.brand.id,
+    id: newRecordId("staff"),
+    brand_id: brandId,
     ...parsed.value,
     status: "active",
     availability: "available",
     created_at: new Date().toISOString(),
   };
-  await updateDemoMutableBucket(code, (bucket) => ({
-    ...bucket,
-    staff: [...(bucket.staff ?? []), member],
-  }));
-  await appendDemoAudit(code, {
-    brand_id: pack.brand.id,
+  saveBrand("staff", brandId, member);
+  appendAudit(brandId, {
     actor_email: null,
     action: "staff.created",
     entity_type: "staff",
@@ -77,13 +70,9 @@ export async function updateStaffAction(id: string, input: StaffInput) {
   const parsed = validateStaffInput(input);
   if (!parsed.ok) return parsed;
   const code = await resolveDemoBrandCode();
-  await updateDemoMutableBucket(code, (bucket) => ({
-    ...bucket,
-    staffOverrides: {
-      ...(bucket.staffOverrides ?? {}),
-      [id]: { ...(bucket.staffOverrides ?? {})[id], ...parsed.value },
-    },
-  }));
+  if (!updateBrand("staff", getDemoBrandPack(code).brand.id, id, parsed.value)) {
+    return { ok: false as const, message: "Staff member not found." };
+  }
   revalidateManager();
   return { ok: true as const };
 }
@@ -103,13 +92,9 @@ export async function setStaffAvailabilityAction(
     return LIVE_UNAVAILABLE;
   }
   const code = await resolveDemoBrandCode();
-  await updateDemoMutableBucket(code, (bucket) => ({
-    ...bucket,
-    staffOverrides: {
-      ...(bucket.staffOverrides ?? {}),
-      [id]: { ...(bucket.staffOverrides ?? {})[id], availability },
-    },
-  }));
+  if (!updateBrand("staff", getDemoBrandPack(code).brand.id, id, { availability })) {
+    return { ok: false as const, message: "Staff member not found." };
+  }
   revalidateManager();
   return { ok: true as const };
 }
@@ -126,13 +111,9 @@ export async function setStaffStatusAction(id: string, status: "active" | "inact
     return LIVE_UNAVAILABLE;
   }
   const code = await resolveDemoBrandCode();
-  await updateDemoMutableBucket(code, (bucket) => ({
-    ...bucket,
-    staffOverrides: {
-      ...(bucket.staffOverrides ?? {}),
-      [id]: { ...(bucket.staffOverrides ?? {})[id], status },
-    },
-  }));
+  if (!updateBrand("staff", getDemoBrandPack(code).brand.id, id, { status })) {
+    return { ok: false as const, message: "Staff member not found." };
+  }
   revalidateManager();
   return { ok: true as const };
 }

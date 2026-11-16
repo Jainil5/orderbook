@@ -1,4 +1,5 @@
 import type { WorkspaceProfile } from "@/lib/workspace/constants";
+import { crmNavChildren } from "@/lib/workspace/crm-nav";
 import { visibleManagers } from "@/lib/workspace/managers";
 import type { ManagerModuleKey } from "@/lib/workspace/manager-modules";
 
@@ -74,7 +75,13 @@ export function buildWorkspaceNavItems(
         label: m.shortLabel,
       })),
     },
-    { href: "/customers", label: "Customers", iconKey: "Customers" },
+    {
+      href: "/customers",
+      label: "Customers",
+      iconKey: "Customers",
+      // The CRM lives here: overview plus one route per section.
+      children: crmNavChildren(),
+    },
     { href: "/analytics", label: "Analytics", iconKey: "Analytics" },
     { href: "/ai", label: "OrderBook AI", iconKey: "AI" },
     { href: "/settings", label: "Settings", iconKey: "Settings" },

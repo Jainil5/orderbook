@@ -1,0 +1,8 @@
+id,brand_id,account_id,customer_id,kind,points,balance_after,reason,order_id,expires_at,created_at
+bc-ltx-1,demo-brewery-cafe,bc-loy-1,c2,earn,160,160,Order BC-1042,o1,,2026-10-31T10:30:00.000Z
+bc-ltx-2,demo-brewery-cafe,bc-loy-1,c2,bonus,50,210,Diwali bonus — first redeeming customer,,,2026-11-01T10:00:00.000Z
+bc-ltx-3,demo-brewery-cafe,bc-loy-1,c2,redeem,-100,110,₹50 off Monday bill,,,2026-11-10T09:20:00.000Z
+cf-ltx-1,demo-cubig-furniture,cf-loy-1,fc2,earn,1377,1377,Order CF-Q-1046,fo1,,2026-10-18T11:30:00.000Z
+cf-ltx-2,demo-cubig-furniture,cf-loy-1,fc2,earn,813,2190,Order CF-Q-1045,fo4,,2026-10-26T16:00:00.000Z
+cf-ltx-3,demo-cubig-furniture,cf-loy-1,fc2,redeem,-500,1690,₹500 off cushion set,,,2026-11-05T11:00:00.000Z
+cf-ltx-4,demo-cubig-furniture,cf-loy-2,fc4,earn,911,911,Order CF-1044,fo2,,2026-10-28T15:00:00.000Z

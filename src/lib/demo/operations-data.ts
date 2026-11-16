@@ -1,6 +1,4 @@
 import { getDemoBrandPack } from "@/lib/demo/brands";
-import { readDemoMutableBucket, type DemoMutableBucket } from "@/lib/demo/mutable-store";
-import { mergeOpsEntities } from "@/lib/manager/ops-shared";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
 import type { Appointment, FieldVisit, Service, ServiceJob, Shift, Task } from "@/types/operations";
 
@@ -13,20 +11,30 @@ export type DemoOperations = {
   visits: FieldVisit[];
 };
 
-export function mergeOperations(pack: ReturnType<typeof getDemoBrandPack>, bucket: DemoMutableBucket): DemoOperations {
+/**
+ * The six operations tables for a brand.
+ *
+ * A pack's record arrays are read from `data/*.csv` (see
+ * `src/lib/csv/source.ts::csvPackFor`), so this is only a projection: an add,
+ * edit or delete has already landed in the file by the time it shows up here.
+ * It used to merge the demo mutable bucket's additions and tombstone overrides
+ * over fixtures — that second layer is gone, and with it the ordering rule the
+ * merge imposed: rows come back in file order, which is fixture order with
+ * app-saved rows appended.
+ */
+export function operationsFromPack(pack: ReturnType<typeof getDemoBrandPack>): DemoOperations {
   return {
-    services: mergeOpsEntities(pack.services, bucket.services ?? [], bucket.serviceOverrides ?? {}),
-    serviceJobs: mergeOpsEntities(pack.serviceJobs, bucket.serviceJobs ?? [], bucket.serviceJobOverrides ?? {}),
-    appointments: mergeOpsEntities(pack.appointments, bucket.appointments ?? [], bucket.appointmentOverrides ?? {}),
-    tasks: mergeOpsEntities(pack.tasks, bucket.tasks ?? [], bucket.taskOverrides ?? {}),
-    shifts: mergeOpsEntities(pack.shifts, bucket.shifts ?? [], bucket.shiftOverrides ?? {}),
-    visits: mergeOpsEntities(pack.visits, bucket.visits ?? [], bucket.visitOverrides ?? {}),
+    services: pack.services,
+    serviceJobs: pack.serviceJobs,
+    appointments: pack.appointments,
+    tasks: pack.tasks,
+    shifts: pack.shifts,
+    visits: pack.visits,
   };
 }
 
 export async function loadDemoOperations(brandCode?: DemoBrandCode): Promise<DemoOperations> {
-  const code = brandCode ?? "BR-1";
-  return mergeOperations(getDemoBrandPack(code), await readDemoMutableBucket(code));
+  return operationsFromPack(getDemoBrandPack(brandCode ?? "BR-1"));
 }
 
 export async function listDemoServices(brandCode?: DemoBrandCode): Promise<Service[]> {

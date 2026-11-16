@@ -1,10 +1,8 @@
-import { cookies } from "next/headers";
 import { loadLiveWorkspace } from "@/lib/auth/actions";
-import { demoWorkspaceMeta } from "@/lib/demo/server";
+import { getDemoBrandPack } from "@/lib/demo/brands";
+import { readDemoSessionBrand } from "@/lib/workspace/demo-session";
 import {
-  DEMO_WORKSPACE_COOKIE,
   getWorkspaceProfile,
-  parseDemoBrandCodeFromCookie,
   type WorkspaceProfile,
 } from "@/lib/workspace/constants";
 import {
@@ -79,13 +77,14 @@ export type WorkspaceSession =
       hiddenManagerModules: ManagerModuleKey[];
     };
 
-export async function isDemoWorkspaceCookieSet(): Promise<boolean> {
-  const cookieStore = await cookies();
-  return parseDemoBrandCodeFromCookie(
-    cookieStore.get(DEMO_WORKSPACE_COOKIE)?.value,
-  ) !== null;
-}
-
+/**
+ * The workspace a request is in.
+ *
+ * A live Supabase session wins when there is one; otherwise the demo workspace
+ * comes from `data/sessions.csv` — the row the login screen wrote. No row means
+ * no workspace, and every workspace route sends the browser to the login
+ * screen, which is exactly what it did when the cookie was the only record.
+ */
 export async function loadWorkspaceSession(): Promise<WorkspaceSession | null> {
   const live = await loadLiveWorkspace();
   if (live) {
@@ -106,20 +105,21 @@ export async function loadWorkspaceSession(): Promise<WorkspaceSession | null> {
     };
   }
 
-  if (await isDemoWorkspaceCookieSet()) {
-    const meta = await demoWorkspaceMeta();
-    const settings = await mergeBrandSettings(meta.settings, meta.brand.code);
+  const demoBrandCode = await readDemoSessionBrand();
+  if (demoBrandCode) {
+    const pack = getDemoBrandPack(demoBrandCode);
+    const settings = await mergeBrandSettings(pack.settings, pack.brand.code);
     const hiddenManagerModules =
-      (await readManagerModulesPref(meta.brand.code)) ?? [];
-    const profile = getWorkspaceProfile(meta.brand.code);
+      (await readManagerModulesPref(pack.brand.code)) ?? [];
+    const profile = getWorkspaceProfile(pack.brand.code);
     return {
       mode: "demo",
-      brand: meta.brand,
+      brand: pack.brand,
       settings,
       userEmail: null,
       role: "owner",
       profile,
-      industry: await resolveIndustry(meta.brand.code, profile.industry),
+      industry: await resolveIndustry(pack.brand.code, profile.industry),
       hiddenManagerModules,
     };
   }

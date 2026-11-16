@@ -1,0 +1,9 @@
+id,brand_id,date,openingBalance,countedBalance,closedAt,staffId,note
+bc-sn-1,demo-brewery-cafe,2026-11-16,3000,,,bc-staff-1,Morning float counted before opening
+bc-sn-2,demo-brewery-cafe,2026-11-15,3000,3150,2026-11-15T21:30:00.000Z,bc-staff-2,
+bc-sn-3,demo-brewery-cafe,2026-11-14,2500,2380,2026-11-14T21:45:00.000Z,bc-staff-1,Short — coin float handed to the kitchen
+bc-sn-4,demo-brewery-cafe,2026-11-11,2500,2620,2026-11-11T21:15:00.000Z,bc-staff-3,
+cf-sn-1,demo-cubig-furniture,2026-11-16,5000,,,cf-staff-2,Showroom drawer opened with delivery-day float
+cf-sn-2,demo-cubig-furniture,2026-11-15,4000,3900,2026-11-15T20:30:00.000Z,cf-staff-1,Coins short by 100 — change given at the counter
+cf-sn-3,demo-cubig-furniture,2026-11-14,4000,4250,2026-11-14T20:15:00.000Z,cf-staff-2,
+cf-sn-4,demo-cubig-furniture,2026-11-12,5000,4940,2026-11-12T20:00:00.000Z,cf-staff-4,Fuel paid from the drawer for two deliveries

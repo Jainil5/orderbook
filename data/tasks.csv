@@ -1,0 +1,5 @@
+id,brand_id,title,description,assigneeStaffId,customerId,priority,dueAt,status
+bc-task-1,demo-brewery-cafe,Restock oat milk,Check fridge count before evening rush,bc-staff-3,,high,2026-11-15T07:38:27.620Z,open
+bc-task-2,demo-brewery-cafe,Deep clean espresso machine,,bc-staff-2,,medium,2026-11-17T07:38:27.620Z,open
+cf-task-1,demo-cubig-furniture,Send sofa care guide to Priya Homes,,cf-staff-4,fc2,medium,2026-11-17T07:38:27.622Z,open
+cf-task-2,demo-cubig-furniture,Confirm lift booking for Shah delivery,"Tower B, service lift",cf-staff-1,fc4,high,2026-11-15T07:38:27.622Z,open

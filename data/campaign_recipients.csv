@@ -1,0 +1,6 @@
+id,brand_id,campaign_id,customer_id,lead_id,status,marked_sent_at,responded_at,redeemed_at,order_id,note,created_at,updated_at
+bc-rec-1,demo-brewery-cafe,bc-camp-1,c2,,redeemed,2026-10-21T10:00:00.000Z,2026-10-28T12:00:00.000Z,2026-10-31T10:30:00.000Z,o1,Used DIWALI15 on order BC-1042.,2026-10-20T09:00:00.000Z,2026-10-31T10:30:00.000Z
+bc-rec-2,demo-brewery-cafe,bc-camp-1,c3,,opted_out,,,,,Marketing consent declined — excluded before send.,2026-10-20T09:00:00.000Z,2026-10-21T09:00:00.000Z
+bc-rec-3,demo-brewery-cafe,bc-camp-2,c1,,marked_sent,2026-11-11T09:30:00.000Z,,,,,2026-11-10T09:00:00.000Z,2026-11-11T09:30:00.000Z
+cf-rec-1,demo-cubig-furniture,cf-camp-1,fc2,,responded,,2026-11-15T10:00:00.000Z,,,RSVP yes for two.,2026-11-12T10:00:00.000Z,2026-11-15T10:00:00.000Z
+cf-rec-2,demo-cubig-furniture,cf-camp-1,fc4,,selected,,,,,,2026-11-12T10:00:00.000Z,2026-11-12T10:00:00.000Z
