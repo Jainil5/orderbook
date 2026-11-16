@@ -30,6 +30,7 @@ import { useState, useEffect } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { FlowField } from "@/components/effects/flow-field";
 import { CommandPalette } from "@/components/workspace/command-palette";
+import { LogoMark } from "@/components/brand/logo-mark";
 import { Wordmark } from "@/components/brand/wordmark";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
@@ -52,6 +53,7 @@ const COLLAPSE_STORAGE_KEY = "ob-sidebar-collapsed";
 export function AppShell({
   mode,
   brandName,
+  brandCode,
   userEmail,
   profile,
   children,
@@ -60,6 +62,7 @@ export function AppShell({
 }: {
   mode: WorkspaceMode;
   brandName: string;
+  brandCode: string;
   userEmail?: string | null;
   profile: WorkspaceProfile;
   pageTitle: string;
@@ -68,13 +71,8 @@ export function AppShell({
 }) {
   const pathname = usePathname();
   const ws = useWorkspace();
-  const quotationBuilderEnabled = Boolean(ws.settings.quotation_builder_enabled);
-  // The logo opens the maker: the quotation builder when the brand splits
-  // quotes from bills, otherwise the single bill screen.
-  const builderHref = quotationBuilderEnabled ? "/quotation" : "/billing";
-  const builderLabel = quotationBuilderEnabled ? "quotation builder" : "bill maker";
   const navItems = buildWorkspaceNavItems(
-    quotationBuilderEnabled,
+    Boolean(ws.settings.quotation_builder_enabled),
     profile,
     ws.hiddenManagerModules,
   );
@@ -128,24 +126,25 @@ export function AppShell({
         WebkitBackdropFilter: "blur(18px) saturate(150%)",
       }}
     >
-      {/* The wordmark is the whole logo now, and it needs the expanded width —
-          so the collapsed rail shows no brand block rather than half a word. */}
-      {!collapsed ? (
-        <div className="border-b border-[var(--ob-sidebar-line)] px-4 py-4">
-          <Link
-            href={builderHref}
-            onClick={() => setMobileOpen(false)}
-            aria-label={`OrderBook — open the ${builderLabel}`}
-            className="ob-press block min-w-0"
-          >
-            <Wordmark
-              className="font-display block font-extrabold"
-              size={19}
-            />
-            <p className="mt-1 truncate text-sm font-semibold">{brandName}</p>
-          </Link>
-        </div>
-      ) : null}
+      <div className="border-b border-[var(--ob-sidebar-line)] px-4 py-4">
+        {!collapsed ? (
+          <div className="flex items-center gap-3">
+            <LogoMark size={36} />
+            <div className="min-w-0">
+              <Wordmark
+                className="font-display block font-extrabold"
+                size={19}
+              />
+              <p className="mt-0.5 truncate text-sm font-semibold">
+                {brandName}
+              </p>
+              <p className="ob-label-quiet mt-0.5">{brandCode}</p>
+            </div>
+          </div>
+        ) : (
+          <LogoMark size={36} />
+        )}
+      </div>
       <nav className="flex-1 space-y-1 overflow-y-auto p-2">
         {navItems.map((item) => {
           const href = item.href;
@@ -322,7 +321,7 @@ export function AppShell({
                   {pageTitle}
                 </h1>
                 <p className="hidden truncate text-sm text-[var(--ob-text-muted)] sm:block">
-                  {brandName}
+                  {brandName} · {brandCode}
                 </p>
               </div>
             </div>

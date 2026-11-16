@@ -147,7 +147,7 @@ export function DashboardHome({
             <div>
               <h2 className="text-sm font-semibold">Sales trend</h2>
               <p className="text-xs text-[var(--ob-text-muted)]">
-                {bestDay ? `Strongest point: ${bestDay.date}` : "Revenue in this range"}
+                {bestDay ? `Strongest point: ${bestDay.date}` : "Revenue over the sample"}
               </p>
             </div>
             <Link href="/analytics" className="text-xs font-medium text-[var(--ob-primary)]">

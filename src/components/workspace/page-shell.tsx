@@ -23,6 +23,7 @@ export function PageShell({
     <AppShell
       mode={ws.mode}
       brandName={ws.brand.name}
+      brandCode={ws.brand.code}
       userEmail={null}
       profile={ws.profile}
       pageTitle={title}

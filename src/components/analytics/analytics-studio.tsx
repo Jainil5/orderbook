@@ -353,7 +353,7 @@ export function AnalyticsStudio({
       hint={
         delta === null
           ? undefined
-          : `${delta >= 0 ? "Up" : "Down"} ${Math.abs(delta).toFixed(0)}% vs earlier`
+          : `${delta >= 0 ? "Up" : "Down"} ${Math.abs(delta).toFixed(0)}% later in the sample`
       }
       tone={delta === null ? "neutral" : delta >= 0 ? "up" : "down"}
     />,
@@ -361,7 +361,7 @@ export function AnalyticsStudio({
       key="orders"
       label="Orders"
       value={snapshot.orderCount.toString()}
-      hint="In this range"
+      hint="In this sample"
       numericValue={snapshot.orderCount}
       spark={trend.map((point) => point.orders)}
     />,
@@ -395,7 +395,7 @@ export function AnalyticsStudio({
           <h2 className="font-display text-base font-semibold">Sales trend</h2>
           <p className="text-xs text-[var(--ob-text-muted)]">
             {dayPart === "week"
-              ? "All time"
+              ? "Entire sample"
               : dayPart === "weekdays"
                 ? "Monday to Friday"
                 : "Saturday and Sunday"}
@@ -733,7 +733,7 @@ export function AnalyticsStudio({
       value={money(bestDay.revenue)}
       numericValue={bestDay.revenue}
       format={{ kind: "currency", currency }}
-      hint={bestDay.date}
+      hint={`${bestDay.date} in the sample`}
     />
   ) : null;
 
@@ -741,7 +741,7 @@ export function AnalyticsStudio({
     <StatCard
       label="Momentum"
       value={delta === null ? "—" : `${delta >= 0 ? "+" : ""}${delta.toFixed(0)}%`}
-      hint="Later vs earlier"
+      hint="Later vs earlier in the sample"
       tone={delta === null ? "neutral" : delta >= 0 ? "up" : "down"}
     />
   );
@@ -754,7 +754,7 @@ export function AnalyticsStudio({
             key="top-product"
             label="Top product"
             value={topProduct.name}
-            hint={`${topProduct.qty} sold`}
+            hint={`${topProduct.qty} sold in this sample`}
           />,
         ]
       : []),
@@ -765,7 +765,7 @@ export function AnalyticsStudio({
             label="Open orders"
             value={String(openOrders)}
             numericValue={openOrders}
-            hint="Not yet completed"
+            hint="Not completed in this sample"
           />,
         ]
       : []),
