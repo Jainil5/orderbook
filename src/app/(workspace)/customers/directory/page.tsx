@@ -134,7 +134,7 @@ export default async function CustomerDirectoryPage({
           loyaltyTiers={workspace.loyaltyRules?.tiers.map((t) => ({ id: t.id, name: t.name })) ?? []}
           total={page.total}
         />
-        {canAddWorkspaceRecords(ws) ? (
+        {canAddWorkspaceRecords() ? (
           <Card className="p-4">
             <h2 className="font-semibold">Add customer</h2>
             <p className="mt-1 text-xs text-[var(--ob-text-muted)]">

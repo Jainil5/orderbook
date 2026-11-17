@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   cacheComponents: false,
   partialPrefetching: false,
+  // The preview gateway serves this app under *.preview.qoderwork.com; without
+  // an entry, dev-only assets (JS/CSS/HMR) are blocked cross-origin and the
+  // page renders without its client bundle. Dev-only: ignored in production.
+  allowedDevOrigins: ["**.preview.qoderwork.com"],
   turbopack: {
     root: resolve(import.meta.dirname),
     rules: {
@@ -20,6 +24,11 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
       bodySizeLimit: "1mb",
+      // The preview gateway forwards its internal host, so the browser's
+      // Origin (*.preview.qoderwork.com) fails the Server Actions CSRF host
+      // check and every action rejects with "Invalid Server Actions request".
+      // Whitelist the browser-visible host, per the Next.js proxy guidance.
+      allowedOrigins: ["**.preview.qoderwork.com"],
     },
   },
   async headers() {

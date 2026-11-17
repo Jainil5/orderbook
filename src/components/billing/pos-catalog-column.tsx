@@ -13,6 +13,13 @@ import { groupProductsByCategory } from "@/lib/products/catalog-groups";
    here rather than inside one of them. */
 export const posColumnHeight = "lg:h-[calc(100dvh-7.125rem)]";
 
+/* Square tiles: columns pack the full width and the card itself carries the
+   aspect ratio, so rows never stretch to fill the panel. The 45% arm keeps two
+   columns alive on a phone, where 168px would not fit twice. */
+const tileGridStyle = {
+  gridTemplateColumns: "repeat(auto-fill, minmax(min(168px, 45%), 1fr))",
+} as const;
+
 export function PosCatalogColumn({
   searchPlaceholder,
   search,
@@ -32,6 +39,7 @@ export function PosCatalogColumn({
   products: Product[];
   renderTile: (product: Product) => ReactNode;
 }) {
+  const groups = groupProductsByCategory(products);
   return (
     <section
       className={cn("flex min-w-0 flex-1 flex-col lg:w-[68%] xl:w-[72%]", posColumnHeight)}
@@ -63,21 +71,27 @@ export function PosCatalogColumn({
         </div>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-        {/* auto-fill packs the full width with no empty cells; the 1fr floor
-            lets rows stretch to the panel when the catalog is short, so the
-            section is used rather than leaving blank space below. The 45% arm
-            keeps two columns alive on a phone, where 170px would not fit twice. */}
-        <div
-          className="ob-stagger grid min-h-full gap-2"
-          style={{
-            gridTemplateColumns: "repeat(auto-fill, minmax(min(170px, 45%), 1fr))",
-            gridAutoRows: "minmax(210px, 1fr)",
-          }}
-        >
-          {groupProductsByCategory(products)
-            .flatMap((group) => group.products)
-            .map((product) => renderTile(product))}
-        </div>
+        {groups.map((group) => (
+          <section key={group.category} aria-label={group.category}>
+            {/* Sticky so the active category stays visible while its square
+                cards scroll past underneath. -mx-1/px-1 lets the wash run the
+                full column width without clipping against the scroll gutter. */}
+            <div className="sticky top-0 z-10 -mx-1 flex items-baseline gap-2 bg-[var(--ob-glass-strong)] px-1 py-2 backdrop-blur-sm">
+              <h3 className="text-[13px] font-semibold uppercase tracking-wide">
+                {group.category}
+              </h3>
+              <span className="text-xs text-[var(--ob-text-muted)]">
+                {group.products.length}
+              </span>
+            </div>
+            <div
+              className="ob-stagger grid gap-2 pb-4"
+              style={tileGridStyle}
+            >
+              {group.products.map((product) => renderTile(product))}
+            </div>
+          </section>
+        ))}
       </div>
     </section>
   );

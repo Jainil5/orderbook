@@ -30,7 +30,7 @@ export default async function TasksPage() {
         customers={customers.map((c) => ({ id: c.id, name: c.name }))}
         canEdit
 
-        canAdd={canAddWorkspaceRecords(ws)}
+        canAdd={canAddWorkspaceRecords()}
       />
     </PageShell>
   );

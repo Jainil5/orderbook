@@ -31,7 +31,7 @@ export default async function AppointmentsPage() {
         services={ops.services.filter((s) => s.isActive).map((s) => ({ id: s.id, name: s.name }))}
         canEdit
 
-        canAdd={canAddWorkspaceRecords(ws)}
+        canAdd={canAddWorkspaceRecords()}
       />
     </PageShell>
   );

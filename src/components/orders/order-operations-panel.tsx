@@ -20,7 +20,6 @@ import {
   isPendingOrder,
 } from "@/lib/orders/order-rules";
 import { canAddWorkspaceRecords } from "@/lib/workspace/settings-access";
-import { useWorkspace } from "@/components/workspace/workspace-provider";
 
 const STATUS_ACTIONS: { status: OrderStatus; label: string }[] = [
   { status: "pending", label: "Pending" },
@@ -39,7 +38,7 @@ export function OrderOperationsPanel({
   publicQuoteUrl?: string | null;
 }) {
   const router = useRouter();
-  const canAdd = canAddWorkspaceRecords(useWorkspace());
+  const canAdd = canAddWorkspaceRecords();
   const [amount, setAmount] = useState("");
   const [splitLabel, setSplitLabel] = useState("");
   const [method, setMethod] = useState("UPI");

@@ -1,20 +1,23 @@
 /**
- * This build is a showcase: the seeded CSV packs are the whole dataset, so the
- * workspace never creates transactional rows. Caps double as the contract the
- * packs are built against, and as the ceiling for anything written to the demo
- * cookies.
+ * This build is a showcase: the seeded CSV packs are the base dataset, so
+ * transactional rows are not written to any database. Records created in the
+ * workspace land in the per-browser mutable cookie store instead, and the caps
+ * below bound how much each browser can layer on top of the seeds. Caps double
+ * as the contract the packs are built against.
  *
- * The CRM is the one documented exception — relationship records (interactions,
- * reviews, complaints, segments, campaigns, loyalty entries) are created in the
- * browser and stored in the per-brand mutable cookie. Orders, products,
- * customers-as-billed and payments still refuse adds.
+ * Creating is allowed everywhere; only the collection caps say no, with a
+ * message that explains how to reset. Orders, quotations and credit notes share
+ * one combined cap and the oldest browser-created document is recycled to make
+ * room, so the seeded history the showcase stats are asserted against is never
+ * dropped.
  */
 export const DEMO_LIMITS = {
-  /** orders, quotations and credit notes combined */
+  /** browser-created orders, quotations and credit notes combined */
   orders: 30,
   products: 15,
   customers: 10,
   payments: 30,
+  offers: 15,
   /** CRM collections: seeded rows plus whatever one browser session layers on. */
   interactions: 80,
   reviews: 40,
@@ -23,15 +26,31 @@ export const DEMO_LIMITS = {
   campaigns: 30,
   loyaltyLedger: 120,
   memberships: 40,
+  /** Manager modules. */
+  staff: 15,
+  services: 15,
+  serviceJobs: 30,
+  appointments: 40,
+  tasks: 40,
+  shifts: 60,
+  visits: 40,
+  leads: 40,
+  /** Ledger-ish logs: trimmed silently, never a hard stop. */
+  stockAdjustments: 40,
+  refunds: 30,
 } as const;
 
-export const DEMO_READ_ONLY_MESSAGE =
-  "Demo data is read-only — this showcase ships a fixed dataset, so records cannot be added.";
+export const DEMO_LIMIT_MESSAGE =
+  "The demo keeps a bounded dataset per browser, and this collection is full. Exit the workspace and re-enter the demo to reset it.";
+
+export function limitMessage(what: string) {
+  return `${what} — ${DEMO_LIMIT_MESSAGE}`;
+}
 
 export function readOnlyError() {
-  return { ok: false as const, error: DEMO_READ_ONLY_MESSAGE };
+  return { ok: false as const, error: DEMO_LIMIT_MESSAGE };
 }
 
 export function readOnlyMessage() {
-  return { ok: false as const, message: DEMO_READ_ONLY_MESSAGE };
+  return { ok: false as const, message: DEMO_LIMIT_MESSAGE };
 }

@@ -39,14 +39,18 @@ function onPointerRest(event: PointerEvent<HTMLDivElement>) {
   el.style.removeProperty("--ob-tilt-scale");
 }
 
-/** Desktop/tablet POS catalog tile. */
+/**
+ * Desktop/tablet POS catalog tile. Square by construction: the footer owns a
+ * fixed two-line height and the photo absorbs whatever is left, so the aspect
+ * ratio never depends on the copy inside the card. Category context comes from
+ * the section header above, not the tile.
+ */
 export function PosProductTileWithButton({
   product,
   currencyCode,
   inCartQty,
   flashing,
   addLabel,
-  addAnotherLabel,
   stockLabel,
   lowStock,
   onAdd,
@@ -57,7 +61,6 @@ export function PosProductTileWithButton({
   inCartQty: number;
   flashing: boolean;
   addLabel: string;
-  addAnotherLabel: string;
   stockLabel?: string | null;
   lowStock?: boolean;
   onAdd: () => void;
@@ -66,7 +69,7 @@ export function PosProductTileWithButton({
   return (
     <div
       className={cn(
-        "ob-card ob-tile ob-tilt flex h-full flex-col overflow-hidden p-0",
+        "ob-card ob-tile ob-tilt flex aspect-square flex-col overflow-hidden p-0",
         flashing && "ob-pop ring-2 ring-[var(--ob-accent)] ring-offset-2",
         inCartQty > 0 && "border-[var(--ob-primary)]",
         product.unavailable && "opacity-50",
@@ -75,9 +78,7 @@ export function PosProductTileWithButton({
       onPointerLeave={onPointerRest}
       onPointerCancel={onPointerRest}
     >
-      {/* The image is out of flow so a tall merchant photo cannot set the tile's
-          intrinsic height — that would make every grid row max-content sized. */}
-      <div className="relative min-h-[84px] flex-1">
+      <div className="relative min-h-0 flex-1">
         <button
           type="button"
           onClick={onPeek}
@@ -100,53 +101,46 @@ export function PosProductTileWithButton({
           type="button"
           onClick={onPeek}
           aria-label={`Show full details of ${product.name}`}
-          className="absolute left-1.5 top-1.5 flex h-11 w-11 items-center justify-center rounded-full border border-[var(--ob-border)] bg-[var(--ob-surface)]/90 text-[var(--ob-text-muted)] transition hover:bg-[var(--ob-surface)]"
+          className="absolute left-1.5 top-1.5 flex h-9 w-9 items-center justify-center rounded-full border border-[var(--ob-border)] bg-[var(--ob-surface)]/90 text-[var(--ob-text-muted)] transition hover:bg-[var(--ob-surface)]"
         >
-          <Info className="h-4 w-4" aria-hidden />
+          <Info className="h-3.5 w-3.5" aria-hidden />
         </button>
-      </div>
-      {/* Both optional lines are always occupied: a ragged text block would
-          push the flex-1 image to a different height in every tile. */}
-      <div className="flex shrink-0 flex-col gap-1 p-2">
-        <p className="ob-label-quiet truncate">{product.category?.trim() || "\u00a0"}</p>
-        <p className="line-clamp-1 text-sm font-semibold leading-tight">
-          {product.name}
-        </p>
-        <p className="line-clamp-1 text-xs leading-snug text-[var(--ob-text-muted)]">
-          {product.description?.trim() || "\u00a0"}
-        </p>
-        {/* Sale items wrap price + strike-through + badge onto two lines in a
-            narrow column, so every tile reserves the same two lines. */}
-        <div className="flex min-h-14 flex-wrap items-center gap-1.5">
-          <ProductPrice product={product} currencyCode={currencyCode} size="sm" />
-          {stockLabel ? (
-            <Badge tone={lowStock ? "warning" : "neutral"} className="text-[10px]">
-              {stockLabel}
-            </Badge>
-          ) : null}
+        {stockLabel ? (
           <Badge
-            tone={product.unavailable ? "danger" : "success"}
-            className="text-[10px]"
+            tone={lowStock ? "warning" : "neutral"}
+            className="absolute bottom-1.5 left-1.5 text-[10px]"
           >
-            {product.unavailable ? "NA" : "A"}
+            {stockLabel}
           </Badge>
+        ) : null}
+        {product.unavailable ? (
+          <span className="absolute inset-x-2 top-1/2 -translate-y-1/2 rounded-full border border-[var(--ob-line)] bg-[var(--ob-surface)]/95 py-1 text-center text-[11px] font-semibold text-[var(--ob-text-muted)]">
+            Unavailable
+          </span>
+        ) : null}
+      </div>
+      <div className="flex shrink-0 items-center gap-2 border-t border-[var(--ob-border)] p-2">
+        <div className="min-w-0 flex-1">
+          <p className="line-clamp-1 text-[13px] font-semibold leading-tight">
+            {product.name}
+          </p>
+          <div className="mt-0.5 flex min-h-4 items-center gap-1.5">
+            <ProductPrice product={product} currencyCode={currencyCode} size="sm" />
+          </div>
         </div>
         {product.unavailable ? (
-          <p
-            aria-disabled
-            className="mt-auto flex min-h-11 items-center justify-center rounded-full border border-[var(--ob-line)] bg-[var(--ob-tint-wash)] py-2 text-[13px] font-semibold text-[var(--ob-text-muted)]"
-          >
-            Unavailable
-          </p>
+          <Badge tone="danger" className="shrink-0 text-[10px]">
+            NA
+          </Badge>
         ) : (
           <Button
             type="button"
             variant={inCartQty > 0 ? "secondary" : "primary"}
-            className="mt-auto min-h-11 w-full py-2 text-xs"
+            className="h-9 w-9 shrink-0 p-0"
             onClick={onAdd}
+            aria-label={`${addLabel}: ${product.name}`}
           >
-            <Plus className="h-3.5 w-3.5" aria-hidden />
-            {inCartQty > 0 ? addAnotherLabel : addLabel}
+            <Plus className="h-4 w-4" aria-hidden />
           </Button>
         )}
       </div>

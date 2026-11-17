@@ -5,16 +5,11 @@ export function canEditWorkspaceFeatures(ws: WorkspaceSession): boolean {
 }
 
 /**
- * The demo workspace is a showcase of a fixed dataset, so nothing can be added:
- * every "Add / New" control is hidden and the matching server actions reject.
- * Editing and status changes still work — they only reshape rows that already exist.
- *
- * The CRM is the documented exception. A fixed dataset cannot show what a CRM
- * looks like after a week of use, so interactions, reviews, complaints,
- * segments, campaigns, loyalty entries and enquiry conversions are creatable —
- * and they land in the per-browser mutable store, never in the seeded CSVs the
- * showcase stats are asserted against.
+ * Adds are allowed in every mode. The demo workspace stores them in the
+ * per-browser mutable cookie store (capped per collection — see
+ * `DEMO_LIMITS`), so the seeded CSV packs stay untouched while visitors can
+ * ring up bills, save quotations and create records end to end.
  */
-export function canAddWorkspaceRecords(ws: WorkspaceSession): boolean {
-  return ws.mode !== "demo";
+export function canAddWorkspaceRecords(): boolean {
+  return true;
 }

@@ -7,7 +7,6 @@ import {
 import { BillingWorkspace } from "@/components/billing/billing-workspace";
 import { PageShell } from "@/components/workspace/page-shell";
 import { loadWorkspaceSession } from "@/lib/workspace/session";
-import { canAddWorkspaceRecords } from "@/lib/workspace/settings-access";
 import { redirect } from "next/navigation";
 
 export default async function QuotationPage() {
@@ -47,7 +46,6 @@ export default async function QuotationPage() {
         }}
         receiptHeader={ws.settings.receipt_header ?? ws.brand.name}
         receiptFooter={ws.settings.receipt_footer ?? null}
-        canSaveBill={canAddWorkspaceRecords(ws)}
       />
     </PageShell>
   );

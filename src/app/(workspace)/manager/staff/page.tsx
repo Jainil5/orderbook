@@ -20,7 +20,7 @@ export default async function StaffPage() {
       <StaffManager
         staff={staff}
         canEdit
-        canAdd={canAddWorkspaceRecords(ws)}
+        canAdd={canAddWorkspaceRecords()}
       />
     </PageShell>
   );

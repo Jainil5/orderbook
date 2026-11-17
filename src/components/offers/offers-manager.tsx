@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { saveOfferAction } from "@/services/operations-actions";
 import { canAddWorkspaceRecords } from "@/lib/workspace/settings-access";
-import { useWorkspace } from "@/components/workspace/workspace-provider";
 
 export function OffersManager({
   initialOffers,
@@ -17,9 +16,8 @@ export function OffersManager({
   initialOffers: Offer[];
   loadError?: string;
 }) {
-  const ws = useWorkspace();
   const router = useRouter();
-  const canAdd = canAddWorkspaceRecords(ws);
+  const canAdd = canAddWorkspaceRecords();
   const [offers] = useState(initialOffers);
   const [name, setName] = useState("");
   const [code, setCode] = useState("");

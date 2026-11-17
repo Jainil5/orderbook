@@ -7,6 +7,10 @@ import { readChunkedCookie, writeChunkedCookie } from "./chunked-cookie";
 export const DEMO_ORDERS_COOKIE = "ob_demo_orders_v1";
 const MAX_STORED_ORDERS_PER_BRAND = DEMO_LIMITS.orders;
 
+/** Browser-created documents carry this id prefix, so cap eviction can
+ *  recycle the oldest of them instead of a seeded showcase order. */
+const CREATED_ORDER_PREFIX = "demo-order-";
+
 type BrandBucket = { orders: Order[]; orderItems: OrderItem[] };
 type DemoOrderStore = Partial<Record<DemoBrandCode, BrandBucket>>;
 
@@ -35,7 +39,21 @@ export async function appendDemoOrderRecord(
   const cookieStore = await cookies();
   const store = parseStore(readChunkedCookie(cookieStore, DEMO_ORDERS_COOKIE));
   const bucket = store[brandCode] ?? { orders: [], orderItems: [] };
-  const orders = [order, ...bucket.orders].slice(0, MAX_STORED_ORDERS_PER_BRAND);
+  // Newest first. When the combined cap is hit, recycle the oldest
+  // browser-created document; never a seeded one.
+  const orders = [order, ...bucket.orders];
+  if (orders.length > MAX_STORED_ORDERS_PER_BRAND) {
+    let dropIdx = orders.length - 1;
+    for (let i = orders.length - 1; i >= 0; i -= 1) {
+      if (orders[i].id.startsWith(CREATED_ORDER_PREFIX)) {
+        dropIdx = i;
+        break;
+      }
+    }
+    const droppedId = orders[dropIdx].id;
+    orders.splice(dropIdx, 1);
+    bucket.orderItems = bucket.orderItems.filter((i) => i.order_id !== droppedId);
+  }
   const keptIds = new Set(orders.map((o) => o.id));
   const orderItems = [
     ...items,

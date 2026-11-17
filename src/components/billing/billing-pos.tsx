@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Customer, OrderDiscountInput, Offer, Product, BrandRole } from "@/types/database";
 import { formatMoney } from "@/lib/format";
-import { DEMO_READ_ONLY_MESSAGE } from "@/lib/demo/read-only";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -88,7 +87,6 @@ export function BillingPos({
   offers = [],
   userRole = "owner",
   blockOversell = false,
-  canSaveBill = true,
   onSubmitOrder,
 }: {
   products: Product[];
@@ -106,7 +104,6 @@ export function BillingPos({
   offers?: Offer[];
   userRole?: BrandRole;
   blockOversell?: boolean;
-  canSaveBill?: boolean;
   onSubmitOrder: (payload: {
     lines: {
       productId: string;
@@ -689,9 +686,7 @@ export function BillingPos({
           >
             {matchedCustomer
               ? `Existing customer: ${matchedCustomer.name}`
-              : canSaveBill
-                ? "The customer is matched or created automatically."
-                : "Enter a mobile to match a saved customer."}
+              : "The customer is matched or created automatically."}
           </span>
         </label>
         <label className="block">
@@ -1063,20 +1058,14 @@ export function BillingPos({
             {feedback}
           </p>
         ) : null}
-        {canSaveBill ? (
-          <Button
-            className="ob-touch-target w-full"
-            onClick={() => handleSubmit()}
-            loading={submitting}
-            disabled={!cart.length}
-          >
-            {confirmLabel}
-          </Button>
-        ) : (
-          <p className="rounded-[var(--ob-radius-md)] border border-dashed border-[var(--ob-border)] p-3 text-xs text-[var(--ob-text-muted)]">
-            {DEMO_READ_ONLY_MESSAGE}
-          </p>
-        )}
+        <Button
+          className="ob-touch-target w-full"
+          onClick={() => handleSubmit()}
+          loading={submitting}
+          disabled={!cart.length}
+        >
+          {confirmLabel}
+        </Button>
         {lastSavedDocument ? (
           <OrderDocumentActions
             document={lastSavedDocument}
@@ -1102,7 +1091,6 @@ export function BillingPos({
         inCartQty={inCart}
         flashing={flashing}
         addLabel={copy.addButton}
-        addAnotherLabel={copy.addAnotherButton}
         stockLabel={stockLabel}
         lowStock={isLowStock(product)}
         onAdd={() => tryAddProduct(product)}

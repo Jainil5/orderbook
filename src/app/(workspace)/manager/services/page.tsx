@@ -31,7 +31,7 @@ export default async function ServicesPage() {
         staff={staff.filter((s) => s.status === "active").map((s) => ({ id: s.id, name: s.name }))}
         canEdit
 
-        canAdd={canAddWorkspaceRecords(ws)}
+        canAdd={canAddWorkspaceRecords()}
       />
     </PageShell>
   );
