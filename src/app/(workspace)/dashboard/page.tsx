@@ -3,7 +3,7 @@ import { DashboardHome } from "@/components/dashboard/dashboard-home";
 import { orderInCalendarRange, resolveRange } from "@/lib/analytics/date-range";
 import { snapshotFromOrderRecords } from "@/lib/analytics/snapshot";
 import {
-  getDemoOrderItems,
+  listDemoOrderItemsForOrders,
   listDemoOrders,
   listDemoPayments,
   listDemoProductsMerged,
@@ -37,11 +37,16 @@ export default async function DashboardPage({
   // Only completed bills earn; pending/draft/cancelled stay out of the trend
   // and the collection widget, while open balances below still surface them.
   const orders = revenueOrders(rangedOrders);
-  const [itemGroups, products, payments] = await Promise.all([
-    Promise.all(orders.map((o) => getDemoOrderItems(o.id, code))),
+  // One merge pass over the item table, then filter by order. Reading per order
+  // re-ran the whole demo-store merge — and the cookie parse inside it — once
+  // per bill on this page.
+  const ranged = new Set(orders.map((o) => o.id));
+  const [allItems, products, payments] = await Promise.all([
+    listDemoOrderItemsForOrders(code),
     listDemoProductsMerged({}, code),
     listDemoPayments(code),
   ]);
+  const orderItems = allItems.filter((i) => ranged.has(i.order_id));
   const openOrders = allOrders
     .filter((o) => isOpenQuote(o) || isOpenReceivable(o))
     .slice(0, 20);
@@ -51,7 +56,7 @@ export default async function DashboardPage({
       <DashboardHome
         snapshot={snapshotFromOrderRecords({
           orders,
-          items: itemGroups.flat(),
+          items: orderItems,
           products,
           payments,
           currencyCode: ws.settings.currency_code,

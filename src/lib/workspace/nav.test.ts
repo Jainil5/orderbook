@@ -15,6 +15,7 @@ describe("buildWorkspaceNavItems", () => {
       "/products",
       "/manager",
       "/analytics",
+      "/insights",
       "/customers",
       "/settings",
     ]);
@@ -29,6 +30,16 @@ describe("buildWorkspaceNavItems", () => {
       "/orders",
     ]);
     expect(items.find((i) => i.href === "/orders")?.label).toBe("Quotes & bills");
+  });
+
+  it("gives AI Insights its own top-level slot, not an Analytics child", () => {
+    const items = buildWorkspaceNavItems(false, profile);
+    const insights = items.find((i) => i.href === "/insights");
+    expect(insights?.label).toBe("AI Insights");
+    expect(insights?.iconKey).toBe("Insights");
+    expect(insights?.children).toBeUndefined();
+    const analytics = items.find((i) => i.href === "/analytics");
+    expect(analytics?.children).toBeUndefined();
   });
 
   it("adds Manager with all seven children by default", () => {

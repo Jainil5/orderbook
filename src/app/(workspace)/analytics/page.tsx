@@ -5,7 +5,7 @@ import { computeMarginSnapshot } from "@/lib/analytics/margin";
 import { snapshotFromOrderRecords } from "@/lib/analytics/snapshot";
 import { revenueOrders } from "@/lib/orders/order-rules";
 import {
-  getDemoOrderItems,
+  listDemoOrderItemsForOrders,
   listDemoOrders,
   listDemoPayments,
   listDemoProductsMerged,
@@ -55,18 +55,20 @@ export default async function AnalyticsPage({
   const orders = allOrders.filter((o) =>
     orderInCalendarRange(o.created_at, from, to),
   );
-  const payments = (await listDemoPayments(code)).filter((p) => {
+  const allPayments = await listDemoPayments(code);
+  const payments = allPayments.filter((p) => {
     const order = allOrders.find((o) => o.id === p.order_id);
     return order
       ? orderInCalendarRange(order.created_at, from, to)
       : true;
   });
   const products = await listDemoProductsMerged({}, code);
-  const orderIds = orders.map((o) => o.id);
-  const itemGroups = await Promise.all(
-    orderIds.map((id) => getDemoOrderItems(id, code)),
+  // One merge pass over the item table, then filter by order: the per-order
+  // reader re-ran the whole demo-store merge for every bill in the range.
+  const ranged = new Set(orders.map((o) => o.id));
+  const orderItems = (await listDemoOrderItemsForOrders(code)).filter((i) =>
+    ranged.has(i.order_id),
   );
-  const orderItems = itemGroups.flat();
   // Only completed bills earn — trend, mix, margin and collection all read
   // from this revenue set while the receivables list stays all-status.
   const revenue = revenueOrders(orders);

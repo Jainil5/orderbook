@@ -1023,10 +1023,12 @@ export function AnalyticsStudio({
 }
 
 /**
- * Tabs keep every panel mounted for instant switches. `display: none` would
- * make recharts measure 0x0 (console warnings + wasted layout work), so
- * inactive panels are invisible absolute overlays instead: they keep a real
- * layout box but stay out of the flow, the paint, and the a11y tree.
+ * Panels mount the first time their tab is opened and stay mounted afterwards.
+ * Mounting every chart grid up front cost a full page of Recharts work before
+ * the overview was even visible; unmounting on switch would throw away the
+ * payments table's own state. So: lazy in, sticky after. Hidden panels use
+ * `visibility: hidden` rather than `display: none` — Recharts needs a real
+ * layout box, and 0x0 means console warnings plus wasted measure passes.
  */
 function TabPanel({
   active,
@@ -1037,6 +1039,9 @@ function TabPanel({
   className?: string;
   children: ReactNode;
 }) {
+  const [visited, setVisited] = useState(active);
+  if (active && !visited) setVisited(true);
+  if (!visited) return null;
   if (active) return <div className={className}>{children}</div>;
   return (
     <div

@@ -17,6 +17,7 @@ const LINKS = [
   { href: "/kitchen", label: "Kitchen board" },
   { href: "/customers", label: "CRM overview" },
   { href: "/analytics", label: "Analytics" },
+  { href: "/insights", label: "AI Insights" },
   { href: "/settings", label: "Settings" },
 ];
 

@@ -108,7 +108,9 @@ Three things the CRM deliberately does **not** pretend to do:
 - **It does not estimate.** No number on any CRM screen comes from a model.
   Review sentiment is a fixed lexicon score (`src/lib/crm/reviews.ts`), so the
   same text always gets the same answer — which is also what makes it something
-  an AI feature can later be measured against.
+  an AI feature can later be measured against. The **AI Insights** tab below is
+  the first of those features, and it holds the same line: it writes sentences
+  over computed figures, never over invented ones.
 
 ### Product customizations (modifiers)
 
@@ -213,6 +215,40 @@ inside the click and then pointed at the finished file, because waiting for the
 photos first would cost the click its user activation. If pop-ups are blocked the
 file goes to downloads and the button says so. Names match the PDF:
 `Bill-BC-1061.html`, `Quotation-CF-4491.html`.
+
+### AI Insights
+
+**AI Insights** (`/insights`) is a workspace tab in its own right, next to
+Analytics. Four summary cards sit in a 2×2 grid at the top — *Last month
+summary*, *Last 1 week summary*, *Reviews summary*, *Key points* — and nine
+narrower briefs stay as buttons underneath: *Today's report*, *Most sold
+items*, *Slow movers*, *Week vs week*, *Win-back list*, *Margin leaks*,
+*Stock-out risk*, *Bundle ideas*, *Peak hours*. A free-text box routes a
+question onto whichever brief it can actually answer ("what will we run out
+of?" opens Stock-out risk), and every card states the window it will read before
+anything is generated.
+
+Each brief returns a headline, up to four computed metrics, the findings, and
+what to do about it, and the whole thing copies out as plain text. The maths is
+one pure module — `src/lib/ai/insights.ts`, no cookies and no CSV reads, like
+`src/lib/inventory/stock.ts` — fed by the rows the page already has: Billing's
+orders and line items, the CRM's customers and review inbox, and Inventory's
+shelf positions. Windows are fixed inside each brief — the previous **calendar**
+month for the monthly read, rolling 7 / 30 / 90-day slices everywhere else — so
+the range picker on Analytics does not silently change what a report claims.
+
+**Nothing here is model-generated yet.** Every number in a sentence is summed
+from the dataset, so a brief agrees with the screen it came from, and an empty
+window produces a written empty state rather than a plausible-sounding zero —
+`src/lib/ai/insights-pack.test.ts` runs all thirteen briefs against both shipped
+demo packs and fails on `NaN`, on a placeholder, or on "1 bills".
+
+`src/lib/ai/request-insight.ts` is the **single seam** the Python service
+replaces: today it awaits the local composer behind a short delay so the panel
+already carries pending, success and failure states; swapping that body for a
+`POST /api/ai/insights` forwarding `{ brand, kind, question, data }` needs no
+change to the panel, the briefs' result shape, or their tests. Until it is
+swapped, the tab labels itself "Drafted locally — no model wired yet".
 
 ### Full sample data (recovery copy)
 

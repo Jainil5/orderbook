@@ -14,6 +14,7 @@ import {
   ShoppingBag,
   Package,
   LineChart,
+  Sparkles,
   Users,
   Settings,
   PanelLeftClose,
@@ -27,7 +28,6 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { FlowField } from "@/components/effects/flow-field";
 import { CommandPalette } from "@/components/workspace/command-palette";
 import { LogoMark } from "@/components/brand/logo-mark";
 import { Wordmark } from "@/components/brand/wordmark";
@@ -42,6 +42,7 @@ const icons = {
   Products: Package,
   Manager: ClipboardList,
   Analytics: LineChart,
+  Insights: Sparkles,
   Customers: Users,
   Settings: Settings,
 } as const;
@@ -285,7 +286,6 @@ export function AppShell({
   return (
     <div className="ob-workspace ob-ambient flex min-h-screen">
       <CommandPalette />
-      <FlowField />
       <div className="relative z-[1] hidden md:flex">{sidebar}</div>
       {mobileOpen ? (
         <div className="fixed inset-0 z-40 md:hidden" id="mobile-nav-drawer">

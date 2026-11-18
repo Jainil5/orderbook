@@ -82,6 +82,7 @@ function revalidateAll() {
   revalidatePath("/orders");
   revalidatePath("/dashboard");
   revalidatePath("/analytics");
+  revalidatePath("/insights");
   revalidatePath("/customers");
   revalidatePath("/billing");
   revalidatePath("/manager/payments");

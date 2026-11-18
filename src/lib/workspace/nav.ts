@@ -14,6 +14,7 @@ export type WorkspaceNavIconKey =
   | "Products"
   | "Manager"
   | "Analytics"
+  | "Insights"
   | "Customers"
   | "Settings";
 
@@ -83,6 +84,7 @@ export function buildWorkspaceNavItems(
       ),
     },
     { href: "/analytics", label: "Analytics", iconKey: "Analytics" },
+    { href: "/insights", label: "AI Insights", iconKey: "Insights" },
     {
       href: "/customers",
       label: "Customers",

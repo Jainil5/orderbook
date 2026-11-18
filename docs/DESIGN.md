@@ -27,9 +27,10 @@ data are OrderBook's.
 - **Everything floats on glass.** Cards, sticky bars, drawers and popovers use
   one translucent recipe with a 1px inset top-edge light — that single line is
   what stops them looking flat against the field.
-- **The background is a live field, not a texture.** A curl-noise flow field
-  (`.ob-flow`) drifts behind the whole app, bends toward the pointer and retints
-  from the live theme tokens.
+- **The background stays still.** One fixed ambient glow (`.ob-ambient::before`)
+  sits behind the app and retints from the live theme tokens. The curl-noise flow
+  field that used to drift behind every route is gone — a 620-stroke canvas
+  repainting each frame cost more smoothness than it gave back in atmosphere.
 - Desktop-first workspace, responsive tablet/mobile, and motion that defers to
   `prefers-reduced-motion` in both CSS and JS.
 
@@ -113,7 +114,7 @@ is a pill containing pill children.
 ### Motion
 
 `@keyframes`: `ob-glare`, `ob-fade-in`, `ob-rise`, `ob-slide-in`, `ob-scrim`,
-`ob-flip-in`, `ob-sheen`, `ob-pop`, `ob-drop`, `ob-ripple`, `ob-wave`,
+`ob-flip-in`, `ob-pop`, `ob-drop`, `ob-ripple`, `ob-wave`,
 `ob-crest`, `ob-fwave`, `ob-grow-bar`, `ob-caret`.
 
 **A — Glare sweep.** `.ob-glare` / `.ob-glare-top`: a blurred light band
@@ -145,21 +146,18 @@ flashing white.
 character in, 1900ms hold, 26ms per character out, 220ms between words, with a 3px
 leaf caret and a reserved `min-height` so the heading never jumps.
 
-`@media (prefers-reduced-motion: reduce)` kills all animation and transitions,
-zeroes the hover transforms, and the JS side (`useReducedMotion`, the flow-field
-canvas) renders static instead.
+`@media (prefers-reduced-motion: reduce)` kills all animation and transitions
+and zeroes the hover transforms; the JS side (`useReducedMotion`) renders static
+instead.
 
-### Flow field
+### Background field
 
-`src/components/effects/flow-field.tsx` draws 620 curl-noise streaks on a
-`fixed inset-0 -z-10` canvas. It reads `--ob-leaf`, `--ob-sand`, `--ob-bg` and the
-three intensity tokens through `getComputedStyle`, re-reads them every 90 frames
-and on `data-theme` mutation, so it retints live rather than baking the dark
-palette.
-
-`--ob-flow-leaf` / `--ob-flow-sand` / `--ob-flow-fade` are the per-theme
-intensities. Dark runs `0.15 / 0.12 / 0.07`; light drops to `0.06 / 0.05 / 0.11`
-because the same strokes read as fur on paper.
+`.ob-workspace` paints the flat `--ob-bg` tone and `.ob-ambient::before` adds one
+fixed 28rem radial glow in the bottom-right, driven by `--ob-glow` so it follows
+the theme. Nothing else moves behind the app: the flow-field canvas and its
+`--ob-flow-leaf` / `--ob-flow-sand` / `--ob-flow-fade` intensity tokens were
+removed because the per-frame full-viewport repaint made scrolling and typing
+feel heavy.
 
 ### Data viz
 

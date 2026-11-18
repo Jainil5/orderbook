@@ -6,7 +6,6 @@ import { motion, useReducedMotion } from "motion/react";
 import { ArrowRight } from "lucide-react";
 import { LogoMark } from "@/components/brand/logo-mark";
 import { Wordmark } from "@/components/brand/wordmark";
-import { FlowField } from "@/components/effects/flow-field";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -159,8 +158,6 @@ export function Landing({ summaries }: { summaries: DemoBrandSummary[] }) {
 
   return (
     <div className="ob-workspace relative min-h-[100dvh] overflow-x-hidden">
-      <FlowField />
-
       <header className="ob-glass-bar sticky top-0 z-40 border-b border-[var(--ob-border)]">
         <div className="mx-auto flex h-[72px] max-w-6xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-3">
