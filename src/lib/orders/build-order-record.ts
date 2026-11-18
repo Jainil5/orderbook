@@ -16,7 +16,10 @@ import {
   findActiveOffer,
 } from "@/lib/pricing/offers";
 import { customerPriceTier, listUnitPrice } from "@/lib/pricing/unit-price";
-import { parseProductModifiers } from "@/lib/products/modifiers";
+import {
+  modifierLabels,
+  modifierPriceDelta,
+} from "@/lib/products/modifiers";
 import { validateCreateOrderInput } from "@/lib/security/validate-order";
 import { localDayKey } from "@/lib/manager/time";
 
@@ -67,21 +70,15 @@ function buildPricedLines(params: {
       };
     }
 
-    const modifiers = parseProductModifiers(product);
-    const selected = modifiers.filter((m) =>
-      line.modifierIds?.includes(m.id),
-    );
-    const modifierExtra = selected.reduce((sum, m) => sum + m.price, 0);
-    const unitList = listUnitPrice(product, tier) + modifierExtra;
+    const modifierExtra = modifierPriceDelta(product, line.modifierIds);
+    const unitList = Math.max(0, listUnitPrice(product, tier) + modifierExtra);
     const pricedProduct: Product = { ...product, price: unitList };
 
     lines.push({
       product,
       pricedProduct,
       quantity: line.quantity,
-      modifierLabels: selected.length
-        ? selected.map((m) => m.name).join(", ")
-        : null,
+      modifierLabels: modifierLabels(product, line.modifierIds),
     });
   }
   return { ok: true, lines };

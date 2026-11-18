@@ -2,12 +2,15 @@ import type {
   Brand,
   BrandSettings,
   Customer,
+  InventoryItem,
+  InventoryStorage,
   Offer,
   Order,
   OrderItem,
   Payment,
   Product,
-  ProductModifier,
+  ProductIngredient,
+  ProductModifiersJson,
 } from "@/types/database";
 import type { StaffMember } from "@/types/manager";
 import type {
@@ -79,7 +82,7 @@ export function mapProduct(r: CsvRow, source: string): Product {
     stock_qty: num(r.stock_qty, "stock_qty", source),
     low_stock_threshold: num(r.low_stock_threshold, "low_stock_threshold", source),
     wholesale_price: num(r.wholesale_price, "wholesale_price", source),
-    modifiers_json: json<ProductModifier[]>(r.modifiers_json),
+    modifiers_json: json<ProductModifiersJson>(r.modifiers_json),
     unavailable: r.unavailable === "" ? undefined : bool(r.unavailable),
   };
 }
@@ -316,5 +319,55 @@ export function mapLead(r: CsvRow, source: string): Lead {
     created_at: reqStr(r.created_at, "created_at", source),
     converted_customer_id: str(r.converted_customer_id),
     converted_at: str(r.converted_at),
+  };
+}
+const INVENTORY_STORAGE = [
+  "ambient",
+  "dry",
+  "refrigerated",
+  "frozen",
+  "flammable",
+] as const;
+
+/**
+ * Kitchen/workshop stock row. `units_per_pack` is what makes the pack useful:
+ * "1 pack = 18 slices", "1 jar ≈ 60 glasses". A zero or negative pack size is
+ * a data bug, not a valid state, so it fails loudly at load time.
+ */
+export function mapInventoryItem(r: CsvRow, source: string): InventoryItem {
+  const unitsPerPack = reqNum(r.units_per_pack, "units_per_pack", source);
+  if (!(unitsPerPack > 0)) {
+    throw new Error(`${source}: units_per_pack must be greater than 0`);
+  }
+  const storage = (r.storage ?? "").trim();
+  return {
+    id: reqStr(r.id, "id", source),
+    brand_id: reqStr(r.brand_id, "brand_id", source),
+    name: reqStr(r.name, "name", source),
+    category: str(r.category),
+    unit: reqStr(r.unit, "unit", source),
+    units_per_pack: unitsPerPack,
+    cost_per_pack: reqNum(r.cost_per_pack, "cost_per_pack", source),
+    stock_packs: reqNum(r.stock_packs, "stock_packs", source),
+    low_stock_packs: num(r.low_stock_packs, "low_stock_packs", source) ?? 0,
+    storage: (INVENTORY_STORAGE as readonly string[]).includes(storage)
+      ? (storage as InventoryStorage)
+      : null,
+    note: str(r.note),
+  };
+}
+
+/** One recipe / bill-of-materials line: units consumed per sold unit. */
+export function mapProductIngredient(
+  r: CsvRow,
+  source: string,
+): ProductIngredient {
+  return {
+    id: reqStr(r.id, "id", source),
+    brand_id: reqStr(r.brand_id, "brand_id", source),
+    product_id: reqStr(r.product_id, "product_id", source),
+    item_id: reqStr(r.item_id, "item_id", source),
+    qty_per_sale: reqNum(r.qty_per_sale, "qty_per_sale", source),
+    note: str(r.note),
   };
 }

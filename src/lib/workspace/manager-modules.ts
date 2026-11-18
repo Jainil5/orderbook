@@ -23,6 +23,7 @@ export const MANAGER_MODULES = [
   { key: "visits", label: "Visits & Field Ops", href: "/manager/visits", projectOnly: false },
   { key: "schedules", label: "Schedules", href: "/manager/schedules", projectOnly: false },
   { key: "tasks", label: "Tasks & Activities", href: "/manager/tasks", projectOnly: false },
+  { key: "payments", label: "Payments", href: "/manager/payments", projectOnly: false },
 ] as const;
 
 export type ManagerModule = (typeof MANAGER_MODULES)[number];

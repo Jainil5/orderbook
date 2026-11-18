@@ -5,7 +5,9 @@ import { rebasePackDates } from "./rebase";
 import {
   mapBrand,
   mapBrandSettings,
+  mapInventoryItem,
   mapProduct,
+  mapProductIngredient,
   mapCustomer,
   mapOrder,
   mapOrderItem,
@@ -34,6 +36,8 @@ import {
 import b1Brand from "../../../../data/demo/BR-1/brand.csv";
 import b1Settings from "../../../../data/demo/BR-1/brand_settings.csv";
 import b1Products from "../../../../data/demo/BR-1/products.csv";
+import b1Inventory from "../../../../data/demo/BR-1/inventory.csv";
+import b1Recipes from "../../../../data/demo/BR-1/recipes.csv";
 import b1Customers from "../../../../data/demo/BR-1/customers.csv";
 import b1Orders from "../../../../data/demo/BR-1/orders.csv";
 import b1Items from "../../../../data/demo/BR-1/order_items.csv";
@@ -59,6 +63,7 @@ import b1Memberships from "../../../../data/demo/BR-1/memberships.csv";
 import b2Brand from "../../../../data/demo/BR-2/brand.csv";
 import b2Settings from "../../../../data/demo/BR-2/brand_settings.csv";
 import b2Products from "../../../../data/demo/BR-2/products.csv";
+import b2Inventory from "../../../../data/demo/BR-2/inventory.csv";
 import b2Customers from "../../../../data/demo/BR-2/customers.csv";
 import b2Orders from "../../../../data/demo/BR-2/orders.csv";
 import b2Items from "../../../../data/demo/BR-2/order_items.csv";
@@ -85,6 +90,9 @@ type BrandCsvFiles = {
   brand: string;
   settings: string;
   products: string;
+  inventory: string;
+  /** Empty string means the pack ships no recipes at all. */
+  recipes: string;
   customers: string;
   orders: string;
   items: string;
@@ -111,6 +119,7 @@ type BrandCsvFiles = {
 const FILES: Record<DemoBrandCode, BrandCsvFiles> = {
   "BR-1": {
     brand: b1Brand, settings: b1Settings, products: b1Products, customers: b1Customers,
+    inventory: b1Inventory, recipes: b1Recipes,
     orders: b1Orders, items: b1Items, payments: b1Payments, offers: b1Offers,
     staff: b1Staff, services: b1Services, jobs: b1Jobs, appointments: b1Appointments,
     visits: b1Visits, shifts: b1Shifts, tasks: b1Tasks, leads: b1Leads,
@@ -120,6 +129,7 @@ const FILES: Record<DemoBrandCode, BrandCsvFiles> = {
   },
   "BR-2": {
     brand: b2Brand, settings: b2Settings, products: b2Products, customers: b2Customers,
+    inventory: b2Inventory, recipes: "",
     orders: b2Orders, items: b2Items, payments: b2Payments, offers: b2Offers,
     staff: b2Staff, services: b2Services, jobs: b2Jobs, appointments: b2Appointments,
     visits: b2Visits, shifts: b2Shifts, tasks: b2Tasks, leads: b2Leads,
@@ -143,6 +153,14 @@ export function loadDemoBrandPack(code: DemoBrandCode): DemoBrandPack {
     orderNumberPrefix,
     settings: mapBrandSettings(rows(f.settings, "brand_settings.csv")[0], src("brand_settings.csv")),
     products: rows(f.products, "products.csv").map((r) => mapProduct(r, src("products.csv"))),
+    inventory: rows(f.inventory, "inventory.csv").map((r) =>
+      mapInventoryItem(r, src("inventory.csv")),
+    ),
+    // A brand that issues materials per job ships no recipe file; the empty
+    // pack list is what makes its usage report read as "nothing derived".
+    ingredients: f.recipes
+      ? rows(f.recipes, "recipes.csv").map((r) => mapProductIngredient(r, src("recipes.csv")))
+      : [],
     customers: rows(f.customers, "customers.csv").map((r) => mapCustomer(r, src("customers.csv"))),
     orders: rows(f.orders, "orders.csv").map((r) => mapOrder(r, src("orders.csv"))),
     orderItems: rows(f.items, "order_items.csv").map((r) => mapOrderItem(r, src("order_items.csv"))),

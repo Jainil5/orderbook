@@ -45,10 +45,13 @@ function resolveOrderLineImageUrl(
   return catalog?.image_url ?? null;
 }
 
-export function billDocumentFilename(doc: BillDocument): string {
+export function billDocumentFilename(
+  doc: BillDocument,
+  extension: "pdf" | "html" = "pdf",
+): string {
   const prefix = doc.kind === "quotation" ? "Quotation" : "Bill";
   const safe = doc.orderNumber.replace(/[^\w-]+/g, "-");
-  return `${prefix}-${safe}.pdf`;
+  return `${prefix}-${safe}.${extension}`;
 }
 
 export function inferDocumentKind(

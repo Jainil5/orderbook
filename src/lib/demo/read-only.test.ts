@@ -41,6 +41,7 @@ import {
   listDemoProductsMerged,
 } from "./data";
 import { DEMO_LIMITS } from "./read-only";
+import { modifierPriceDelta, parseProductModifiers } from "@/lib/products/modifiers";
 import {
   readDemoMutableBucket,
   updateDemoMutableBucket,
@@ -66,9 +67,12 @@ describe("demo record creation", () => {
     });
 
     expect(res.ok).toBe(true);
+    if (!res.ok) throw new Error(res.message);
     const orders = await listDemoOrders(undefined, "BR-1");
     expect(orders).toHaveLength(pack.orders.length + 1);
-    const created = orders[0];
+    // Found by id, not by position: rebased seeded orders can be dated later
+    // in the day than the one just created, so the list head is not the new bill.
+    const created = orders.find((o) => o.id === res.orderId)!;
     expect(created.order_number).toMatch(/^BC-\d+$/);
     expect(created.payment_status).toBe("paid");
     expect(await listDemoPayments("BR-1")).toHaveLength(pack.payments.length + 1);
@@ -94,7 +98,10 @@ describe("demo record creation", () => {
     });
 
     expect(res.ok).toBe(true);
-    const created = (await listDemoOrders(undefined, "BR-1"))[0];
+    if (!res.ok) throw new Error(res.message);
+    const created = (await listDemoOrders(undefined, "BR-1")).find(
+      (o) => o.id === res.orderId,
+    )!;
     expect(created.status).toBe("draft");
     expect(created.public_token).toBeTruthy();
     expect(created.amount_paid).toBe(0);
@@ -214,8 +221,42 @@ describe("demo record creation", () => {
       paymentStatus: "pending",
     });
     expect(res.ok).toBe(true);
-    const created = (await listDemoOrders(undefined, "BR-1"))[0];
+    if (!res.ok) throw new Error(res.message);
+    const created = (await listDemoOrders(undefined, "BR-1")).find(
+      (o) => o.id === res.orderId,
+    )!;
     expect(created.customer_id).toBeNull();
     expect(created.customer_name_snapshot).toBe("Overflow Guest");
+  });
+
+  it("persists modifier groups when a demo product is edited", async () => {
+    const base = pack.products.find((p) => p.id === "p1")!;
+    const saved = await saveDemoProduct("p1", {
+      ...base,
+      modifiers_json: [
+        {
+          id: "size",
+          name: "Size",
+          type: "single",
+          required: true,
+          options: [
+            { id: "sm", name: "Small", price: -30 },
+            { id: "md", name: "Medium", price: 0, default: true },
+          ],
+        },
+      ],
+    });
+    expect(saved.ok).toBe(true);
+    if (!saved.ok) return;
+    const merged = (
+      await listDemoProductsMerged(undefined, "BR-1")
+    ).find((p) => p.id === "p1")!;
+    expect(
+      parseProductModifiers(merged).map((g) => [g.id, g.type, g.required]),
+    ).toEqual([["size", "single", true]]);
+    expect(modifierPriceDelta(merged, ["sm"])).toBe(-30);
+    // The shipped pack stays untouched — overrides live in the cookie bucket.
+    expect(parseProductModifiers(base)[0].id).toBe("size");
+    expect(parseProductModifiers(base)[0].options).toHaveLength(3);
   });
 });

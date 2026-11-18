@@ -27,7 +27,7 @@ const DEMO_ROWS: DemoRow[] = [
     kind: "warning",
     title: "Payment overdue",
     message: "Invoice #INV-2077 · ₹12,400 is 3 days past due.",
-    href: "/payments",
+    href: "/manager/payments",
     minutesAgo: 18,
   },
   {

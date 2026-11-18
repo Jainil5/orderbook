@@ -3,9 +3,10 @@
 import { useState } from "react";
 import type { BillDocument } from "@/lib/documents/types";
 import { downloadBillPdf } from "@/lib/documents/download-bill-pdf";
+import { openBillHtml } from "@/lib/documents/open-bill-html";
 import { openWhatsAppWithBill } from "@/lib/messaging/whatsapp";
 import { Button } from "@/components/ui/button";
-import { Download, MessageCircle } from "lucide-react";
+import { Download, ExternalLink, MessageCircle } from "lucide-react";
 
 export function OrderDocumentActions({
   document,
@@ -17,6 +18,8 @@ export function OrderDocumentActions({
   compact?: boolean;
 }) {
   const [pdfBusy, setPdfBusy] = useState(false);
+  const [htmlBusy, setHtmlBusy] = useState(false);
+  const [htmlHint, setHtmlHint] = useState<string | null>(null);
   const [waHint, setWaHint] = useState<string | null>(null);
 
   const customerName = document.customerName?.trim() ?? "";
@@ -24,6 +27,22 @@ export function OrderDocumentActions({
 
   const pdfLabel =
     document.kind === "quotation" ? "Download quotation PDF" : "Save bill PDF";
+
+  async function onOpenHtml() {
+    setHtmlBusy(true);
+    setHtmlHint(null);
+    const result = await openBillHtml(document);
+    setHtmlBusy(false);
+    if (!result.ok) {
+      setHtmlHint(result.error);
+      return;
+    }
+    if (result.where === "download") {
+      setHtmlHint(
+        "Pop-ups are blocked, so the HTML copy was saved to your downloads.",
+      );
+    }
+  }
 
   async function onDownloadPdf() {
     setPdfBusy(true);
@@ -75,10 +94,20 @@ export function OrderDocumentActions({
         </p>
       ) : null}
       <p className="text-xs text-[var(--ob-text-muted)]">
-        Optional: send on WhatsApp or save a PDF. The order is already stored in
-        Orders.
+        Optional: open the document in a browser, send it on WhatsApp, or save a
+        PDF. The order is already stored in Orders.
       </p>
       <div className="flex flex-col gap-2 sm:flex-row">
+        <Button
+          type="button"
+          variant="secondary"
+          className="flex-1"
+          loading={htmlBusy}
+          onClick={onOpenHtml}
+        >
+          <ExternalLink className="h-4 w-4" aria-hidden />
+          Open in browser
+        </Button>
         <Button
           type="button"
           variant="secondary"
@@ -98,6 +127,11 @@ export function OrderDocumentActions({
           {pdfLabel}
         </Button>
       </div>
+      {htmlHint ? (
+        <p className="text-xs text-[var(--ob-warning)]" role="status">
+          {htmlHint}
+        </p>
+      ) : null}
       {waHint ? (
         <p className="text-xs text-[var(--ob-warning)]" role="status">
           {waHint}

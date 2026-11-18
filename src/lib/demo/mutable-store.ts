@@ -4,10 +4,13 @@ import { readChunkedCookie, writeChunkedCookie } from "./chunked-cookie";
 import type {
   AuditLogEntry,
   Customer,
+  InventoryAdjustment,
+  InventoryItem,
   Offer,
   Order,
   Payment,
   Product,
+  ProductIngredient,
   Refund,
   StockAdjustment,
 } from "@/types/database";
@@ -39,6 +42,17 @@ export type DemoMutableBucket = {
   auditLog: AuditLogEntry[];
   stockAdjustments: StockAdjustment[];
   refunds: Refund[];
+  /** Kitchen/workshop stock created in the demo workspace (beyond the pack). */
+  inventory: InventoryItem[];
+  inventoryOverrides: Record<string, Partial<InventoryItem> & { deleted?: boolean }>;
+  /** Purchases, wastage and stock counts — the trail behind `stock_packs`. */
+  inventoryLedger: InventoryAdjustment[];
+  /**
+   * Recipe edits keyed by product id. A present key replaces every pack row
+   * for that product (an empty array means "cleared"), which keeps the
+   * ingredient list of one product in one place instead of row-by-row.
+   */
+  recipeOverrides: Record<string, ProductIngredient[]>;
   staff: StaffMember[];
   staffOverrides: Record<string, Partial<StaffMember>>;
   services: Service[];
@@ -89,6 +103,10 @@ export function emptyBucket(): DemoMutableBucket {
     auditLog: [],
     stockAdjustments: [],
     refunds: [],
+    inventory: [],
+    inventoryOverrides: {},
+    inventoryLedger: [],
+    recipeOverrides: {},
     staff: [],
     staffOverrides: {},
     services: [],

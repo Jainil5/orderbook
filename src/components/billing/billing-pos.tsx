@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Customer, OrderDiscountInput, Offer, Product, BrandRole } from "@/types/database";
-import { formatMoney } from "@/lib/format";
+import { formatModifierDelta, formatMoney } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -38,7 +38,11 @@ import {
   stockAvailable,
 } from "@/lib/pricing/cart-line";
 import { customerPriceTier } from "@/lib/pricing/unit-price";
-import { parseProductModifiers } from "@/lib/products/modifiers";
+import {
+  defaultModifierSelection,
+  modifierLabels,
+  parseProductModifiers,
+} from "@/lib/products/modifiers";
 import { validateManualOrderDiscountForRole } from "@/lib/security/discount-policy";
 import {
   RETAIL_BILLING_COPY,
@@ -340,9 +344,9 @@ export function BillingPos({
       setFeedback("Not available right now.");
       return;
     }
-    const mods = parseProductModifiers(product);
-    if (mods.length) {
-      setModifierPick({ product, ids: [] });
+    const groups = parseProductModifiers(product);
+    if (groups.length) {
+      setModifierPick({ product, ids: defaultModifierSelection(groups) });
       return;
     }
     addProductToCart(product, []);
@@ -592,10 +596,7 @@ export function BillingPos({
                 </div>
                 {line.modifierIds.length ? (
                   <p className="text-xs text-[var(--ob-text-muted)]">
-                    {parseProductModifiers(line.product)
-                      .filter((m) => line.modifierIds.includes(m.id))
-                      .map((m) => m.name)
-                      .join(", ")}
+                    {modifierLabels(line.product, line.modifierIds)}
                   </p>
                 ) : null}
                 <div className="mt-1 flex items-center justify-between gap-2">
@@ -1129,37 +1130,67 @@ export function BillingPos({
         <div className="ob-veil fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center">
           <Card className="w-full max-w-md p-4">
             <h3 className="font-semibold">{modifierPick.product.name}</h3>
-            <p className="mt-1 text-sm text-[var(--ob-text-muted)]">
-              Choose add-ons (optional)
-            </p>
-            <ul className="mt-3 space-y-2">
-              {parseProductModifiers(modifierPick.product).map((mod) => {
-                const on = modifierPick.ids.includes(mod.id);
+            <div className="mt-3 space-y-4">
+              {parseProductModifiers(modifierPick.product).map((group) => {
+                const inGroup = group.options.map((option) => option.id);
                 return (
-                  <li key={mod.id}>
-                    <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={on}
-                        onChange={() => {
-                          setModifierPick((prev) => {
-                            if (!prev) return prev;
-                            const ids = on
-                              ? prev.ids.filter((id) => id !== mod.id)
-                              : [...prev.ids, mod.id];
-                            return { ...prev, ids };
-                          });
-                        }}
-                      />
-                      <span className="flex-1">{mod.name}</span>
-                      <span className="text-[var(--ob-text-muted)]">
-                        +{formatMoney(mod.price, currencyCode)}
+                  <fieldset key={group.id}>
+                    <legend className="flex w-full items-baseline justify-between gap-2 pb-1 text-xs font-semibold uppercase tracking-wide text-[var(--ob-text-muted)]">
+                      <span>{group.name}</span>
+                      <span className="font-normal normal-case tracking-normal">
+                        {group.type === "single"
+                          ? group.required
+                            ? "Pick one"
+                            : "Pick one (optional)"
+                          : "Choose any"}
                       </span>
-                    </label>
-                  </li>
+                    </legend>
+                    <ul className="space-y-2">
+                      {group.options.map((option) => {
+                        const on = modifierPick.ids.includes(option.id);
+                        return (
+                          <li key={option.id}>
+                            <label className="flex cursor-pointer items-center gap-2 text-sm">
+                              <input
+                                type={
+                                  group.type === "single" ? "radio" : "checkbox"
+                                }
+                                name={`${modifierPick.product.id}-${group.id}`}
+                                checked={on}
+                                onChange={() => {
+                                  setModifierPick((prev) => {
+                                    if (!prev) return prev;
+                                    const rest = prev.ids.filter(
+                                      (id) => !inGroup.includes(id),
+                                    );
+                                    return {
+                                      ...prev,
+                                      ids:
+                                        group.type === "single"
+                                          ? [...rest, option.id]
+                                          : on
+                                            ? rest
+                                            : [...prev.ids, option.id],
+                                    };
+                                  });
+                                }}
+                              />
+                              <span className="flex-1">{option.name}</span>
+                              <span className="text-[var(--ob-text-muted)]">
+                                {formatModifierDelta(
+                                  option.price,
+                                  currencyCode,
+                                )}
+                              </span>
+                            </label>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </fieldset>
                 );
               })}
-            </ul>
+            </div>
             <div className="mt-4 flex gap-2">
               <Button
                 type="button"
@@ -1177,7 +1208,7 @@ export function BillingPos({
                   setModifierPick(null);
                 }}
               >
-                Add to bill
+                {copy.addButton}
               </Button>
             </div>
           </Card>

@@ -5,23 +5,27 @@ import {
   type ManagerModuleKey,
 } from "@/lib/workspace/manager-modules";
 
-export type WorkspaceNavChild = { href: string; label: string };
+export type WorkspaceNavIconKey =
+  | "Dashboard"
+  | "Billing"
+  | "Quotation"
+  | "Bill"
+  | "Orders"
+  | "Products"
+  | "Manager"
+  | "Analytics"
+  | "Customers"
+  | "Settings";
+
+export type WorkspaceNavChild = {
+  href: string;
+  label: string;
+};
 
 export type WorkspaceNavItem = {
   href: string;
   label: string;
-  iconKey:
-    | "Dashboard"
-    | "Billing"
-    | "Quotation"
-    | "Bill"
-    | "Orders"
-    | "Products"
-    | "Manager"
-    | "Analytics"
-    | "Customers"
-    | "Payments"
-    | "Settings";
+  iconKey: WorkspaceNavIconKey;
   children?: WorkspaceNavChild[];
 };
 
@@ -30,7 +34,7 @@ export function buildWorkspaceNavItems(
   profile: WorkspaceProfile,
   hiddenManagerModules: readonly ManagerModuleKey[] = [],
 ): WorkspaceNavItem[] {
-  const label = (key: WorkspaceNavItem["iconKey"], fallback: string) =>
+  const label = (fallback: string) =>
     profile.navLabelOverrides[fallback as keyof typeof profile.navLabelOverrides] ??
     fallback;
 
@@ -43,8 +47,7 @@ export function buildWorkspaceNavItems(
       {
         href: "/quotation",
         label:
-          profile.billingPos.quotationCartTitle ??
-          label("Quotation", "Quotation"),
+          profile.billingPos.quotationCartTitle ?? label("Quotation"),
         iconKey: "Quotation",
       },
       {
@@ -86,7 +89,6 @@ export function buildWorkspaceNavItems(
       iconKey: "Customers",
       children: CRM_MODULES.map((m) => ({ href: m.href, label: m.label })),
     },
-    { href: "/payments", label: "Payments", iconKey: "Payments" },
     { href: "/settings", label: "Settings", iconKey: "Settings" },
   );
 

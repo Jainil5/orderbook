@@ -2,11 +2,13 @@ import type {
   Brand,
   BrandSettings,
   Customer,
+  InventoryItem,
   Offer,
   Order,
   OrderItem,
   Payment,
   Product,
+  ProductIngredient,
 } from "@/types/database";
 import type { StaffMember } from "@/types/manager";
 import type {
@@ -33,6 +35,14 @@ export type DemoBrandPack = {
   brand: Brand;
   settings: BrandSettings;
   products: Product[];
+  /** Consumables bought in packs (bread, milk, plywood, fabric). */
+  inventory: InventoryItem[];
+  /**
+   * Recipe / bill-of-materials lines per product. Empty for brands that issue
+   * materials per job rather than consuming them per sale — a pack without a
+   * recipes file is a deliberate shape, not missing data.
+   */
+  ingredients: ProductIngredient[];
   customers: Customer[];
   orders: Order[];
   orderItems: OrderItem[];

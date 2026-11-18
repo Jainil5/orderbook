@@ -2,7 +2,14 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Product, ProductUpsertInput, StockAdjustment } from "@/types/database";
+import type {
+  InventoryItem,
+  Product,
+  ProductIngredient,
+  ProductIngredientInput,
+  ProductUpsertInput,
+  StockAdjustment,
+} from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -15,16 +22,66 @@ import {
   toggleProductActiveAction,
   toggleProductUnavailableAction,
 } from "@/services/product-actions";
+import {
+  saveProductIngredientsAction,
+} from "@/services/inventory-actions";
 import { Pencil, Plus } from "lucide-react";
 import { ProductPrice } from "@/components/products/product-price";
 import { ProductThumbnail } from "@/components/products/product-thumbnail";
 import { StockAdjustmentPanel } from "@/components/products/stock-adjustment-panel";
 import {
+  MAX_MODIFIER_GROUPS,
+  MAX_MODIFIER_OPTIONS,
   parseProductModifiers,
   serializeProductModifiers,
-  type ProductModifier,
+  type ModifierGroup,
+  type ModifierOption,
 } from "@/lib/products/modifiers";
+import {
+  costPerUnit,
+  formatUnitCount,
+} from "@/lib/inventory/stock";
 import { isLowStock } from "@/lib/pricing/cart-line";
+
+/** Mirrors `MAX_RECIPE_ROWS` in the demo write so the dialog cannot overrun it. */
+const MAX_INGREDIENT_ROWS = 20;
+
+/**
+ * One line of a recipe while it is being edited. `itemId` stays empty until the
+ * merchant picks a stock item, so a half-typed line is dropped rather than sent.
+ */
+type IngredientRow = {
+  key: string;
+  itemId: string;
+  qty: string;
+  /** Kept from the saved list so a seeded note survives a quantity edit. */
+  note: string;
+};
+
+let ingredientKeySeed = 0;
+function newIngredientKey(): string {
+  ingredientKeySeed += 1;
+  return `ing-${ingredientKeySeed}`;
+}
+
+function toIngredientRows(rows: ProductIngredient[]): IngredientRow[] {
+  return rows.map((row) => ({
+    key: row.id,
+    itemId: row.item_id,
+    qty: String(row.qty_per_sale),
+    note: row.note ?? "",
+  }));
+}
+
+function toIngredientInput(rows: IngredientRow[]): ProductIngredientInput[] {
+  return rows
+    .filter((row) => row.itemId)
+    .map((row) => ({
+      itemId: row.itemId,
+      qtyPerSale: row.qty,
+      note: row.note || null,
+    }));
+}
 
 type FormState = {
   name: string;
@@ -40,7 +97,8 @@ type FormState = {
   stock_qty: string;
   low_stock_threshold: string;
   wholesale_price: string;
-  modifiers: ProductModifier[];
+  groups: ModifierGroup[];
+  ingredients: IngredientRow[];
 };
 
 const emptyForm = (): FormState => ({
@@ -57,10 +115,14 @@ const emptyForm = (): FormState => ({
   stock_qty: "",
   low_stock_threshold: "",
   wholesale_price: "",
-  modifiers: [],
+  groups: [],
+  ingredients: [],
 });
 
-function productToForm(p: Product): FormState {
+function productToForm(
+  p: Product,
+  ingredients: ProductIngredient[],
+): FormState {
   return {
     name: p.name,
     description: p.description ?? "",
@@ -80,7 +142,8 @@ function productToForm(p: Product): FormState {
       p.low_stock_threshold != null ? String(p.low_stock_threshold) : "",
     wholesale_price:
       p.wholesale_price != null ? String(p.wholesale_price) : "",
-    modifiers: parseProductModifiers(p),
+    groups: parseProductModifiers(p),
+    ingredients: toIngredientRows(ingredients),
   };
 }
 
@@ -103,7 +166,7 @@ function formToInput(form: FormState): ProductUpsertInput {
       ? Number(form.low_stock_threshold)
       : null,
     wholesale_price: form.wholesale_price ? Number(form.wholesale_price) : null,
-    modifiers_json: serializeProductModifiers(form.modifiers),
+    modifiers_json: serializeProductModifiers(form.groups),
   };
 }
 
@@ -114,6 +177,8 @@ export function ProductsManager({
   userRole,
   loadError,
   stockAdjustmentsByProductId = {},
+  inventoryItems = [],
+  ingredients = [],
 }: {
   mode: "live" | "demo";
   initialProducts: Product[];
@@ -121,12 +186,41 @@ export function ProductsManager({
   userRole: string;
   loadError?: string | null;
   stockAdjustmentsByProductId?: Record<string, StockAdjustment[]>;
+  /** The brand's stock list; empty means the brand has no inventory module. */
+  inventoryItems?: InventoryItem[];
+  /** Saved recipe lines for every product, flattened. */
+  ingredients?: ProductIngredient[];
 }) {
   const router = useRouter();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [demoProducts, setDemoProducts] = useState(initialProducts);
   const products = mode === "demo" ? demoProducts : initialProducts;
   const setProducts = mode === "demo" ? setDemoProducts : () => {};
+  // Recipes are a separate write from the product row, so the list is tracked
+  // here: edits made in this dialog win, otherwise whatever the page rendered
+  // (which `router.refresh()` updates after an Inventory-tab change).
+  const [recipeEdits, setRecipeEdits] = useState<Record<string, ProductIngredient[]>>(
+    {},
+  );
+  const baseRecipes = useMemo(() => {
+    const map: Record<string, ProductIngredient[]> = {};
+    for (const row of ingredients) {
+      (map[row.product_id] ??= []).push(row);
+    }
+    return map;
+  }, [ingredients]);
+  function recipesOf(productId: string | null): ProductIngredient[] {
+    if (!productId) return [];
+    return recipeEdits[productId] ?? baseRecipes[productId] ?? [];
+  }
+  const itemsById = useMemo(
+    () => new Map(inventoryItems.map((item) => [item.id, item])),
+    [inventoryItems],
+  );
+  function itemName(id: string): string {
+    return itemsById.get(id)?.name ?? "that item";
+  }
+  const canSeeIngredients = inventoryItems.length > 0;
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [activeFilter, setActiveFilter] = useState<"all" | "active" | "inactive">(
@@ -178,7 +272,7 @@ export function ProductsManager({
 
   function openEdit(product: Product) {
     setEditingId(product.id);
-    setForm(productToForm(product));
+    setForm(productToForm(product, recipesOf(product.id)));
     setFormError(null);
     dialogRef.current?.showModal();
   }
@@ -196,6 +290,17 @@ export function ProductsManager({
     setFormError(null);
     setActionError(null);
     const input = formToInput(form);
+    // A line with no quantity would be rejected by the recipe write, so catch
+    // it here rather than save the product and half of its recipe.
+    const ingredientRows = toIngredientInput(form.ingredients);
+    const missingQty = ingredientRows.find((row) => !(Number(row.qtyPerSale) > 0));
+    if (canSeeIngredients && missingQty) {
+      setSaving(false);
+      setFormError(
+        `Enter how much of ${itemName(missingQty.itemId)} one sale uses, above 0.`,
+      );
+      return;
+    }
 
     if (mode === "demo") {
       // Persist through the demo cookie bucket so Billing/catalog see the
@@ -208,11 +313,28 @@ export function ProductsManager({
           return;
         }
         const product = result.product;
+        const recipeBefore = recipesOf(editingId).length;
         setProducts((prev) =>
           editingId
             ? prev.map((p) => (p.id === editingId ? product : p))
             : [...prev, product],
         );
+        // The ingredient list is a second write: it only runs when the brand
+        // keeps stock, and either saves everything or leaves the dialog open.
+        // A blank row the merchant never filled in is not an edit — only an
+        // editor emptied of every row counts as clearing the recipe.
+        const clearRequested = !form.ingredients.length && recipeBefore > 0;
+        if (canSeeIngredients && (ingredientRows.length || clearRequested)) {
+          const saved = await saveProductIngredientsAction(
+            product.id,
+            ingredientRows,
+          );
+          if (!saved.ok) {
+            setFormError(saved.error);
+            return;
+          }
+          setRecipeEdits((prev) => ({ ...prev, [product.id]: saved.ingredients }));
+        }
         closeDialog();
       } catch {
         // Network / 500 / server-action failure: surface it the same way as a
@@ -726,105 +848,19 @@ export function ProductsManager({
                 />
               </label>
             </div>
-            <div className="rounded-[var(--ob-radius-md)] border border-[var(--ob-border)] p-3">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-medium">Add-ons / modifiers</p>
-                {canAdd ? (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="text-xs"
-                    onClick={() =>
-                      setForm((f) => ({
-                        ...f,
-                        modifiers: [
-                          ...f.modifiers,
-                          {
-                            id: `mod-${Date.now()}`,
-                            name: "",
-                            price: 0,
-                          },
-                        ],
-                      }))
-                    }
-                  >
-                    Add modifier
-                  </Button>
-                ) : null}
-              </div>
-              {form.modifiers.length ? (
-                <ul className="mt-2 space-y-2">
-                  {form.modifiers.map((mod, index) => (
-                    <li key={mod.id} className="grid gap-2 sm:grid-cols-3">
-                      <Input
-                        placeholder="ID"
-                        value={mod.id}
-                        onChange={(e) =>
-                          setForm((f) => {
-                            const modifiers = [...f.modifiers];
-                            modifiers[index] = {
-                              ...modifiers[index],
-                              id: e.target.value,
-                            };
-                            return { ...f, modifiers };
-                          })
-                        }
-                      />
-                      <Input
-                        placeholder="Label"
-                        value={mod.name}
-                        onChange={(e) =>
-                          setForm((f) => {
-                            const modifiers = [...f.modifiers];
-                            modifiers[index] = {
-                              ...modifiers[index],
-                              name: e.target.value,
-                            };
-                            return { ...f, modifiers };
-                          })
-                        }
-                      />
-                      <div className="flex gap-1">
-                        <Input
-                          type="number"
-                          min={0}
-                          step="0.01"
-                          placeholder="Price"
-                          value={String(mod.price)}
-                          onChange={(e) =>
-                            setForm((f) => {
-                              const modifiers = [...f.modifiers];
-                              modifiers[index] = {
-                                ...modifiers[index],
-                                price: Number(e.target.value) || 0,
-                              };
-                              return { ...f, modifiers };
-                            })
-                          }
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          className="px-2 text-xs"
-                          onClick={() =>
-                            setForm((f) => ({
-                              ...f,
-                              modifiers: f.modifiers.filter((_, i) => i !== index),
-                            }))
-                          }
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="mt-2 text-xs text-[var(--ob-text-muted)]">
-                  Optional extras (extra shot, fabric swatch) shown at checkout.
-                </p>
-              )}
-            </div>
+            <ModifierGroupsEditor
+              groups={form.groups}
+              readOnly={!canAdd}
+              onChange={(groups) => setForm((f) => ({ ...f, groups }))}
+            />
+            {canSeeIngredients ? (
+              <IngredientListEditor
+                rows={form.ingredients}
+                items={inventoryItems}
+                currencyCode={currencyCode}
+                onChange={(rows) => setForm((f) => ({ ...f, ingredients: rows }))}
+              />
+            ) : null}
             <label className="block text-sm">
               <span className="font-medium">SKU</span>
               <Input
@@ -869,4 +905,427 @@ export function ProductsManager({
       </dialog>
     </div>
   );
+}
+
+/**
+ * Customizations are stored per product as groups of options (`modifiers_json`):
+ * `single` renders as radios at checkout (Size, seasoning), `multi` as
+ * checkboxes (add-ons). Each option carries a signed price delta, so a smaller
+ * size can cost less and a preference swap can cost nothing.
+ */
+function ModifierGroupsEditor({
+  groups,
+  readOnly,
+  onChange,
+}: {
+  groups: ModifierGroup[];
+  readOnly: boolean;
+  onChange: (groups: ModifierGroup[]) => void;
+}) {
+  function update(index: number, patch: Partial<ModifierGroup>) {
+    onChange(
+      groups.map((group, i) => (i === index ? { ...group, ...patch } : group)),
+    );
+  }
+
+  function updateOption(
+    groupIndex: number,
+    optionIndex: number,
+    patch: Partial<ModifierOption>,
+  ) {
+    onChange(
+      groups.map((group, i) =>
+        i === groupIndex
+          ? {
+              ...group,
+              options: group.options.map((option, j) =>
+                j === optionIndex ? { ...option, ...patch } : option,
+              ),
+            }
+          : group,
+      ),
+    );
+  }
+
+  /** Only one default per single group; multi groups can carry several. */
+  function toggleDefault(groupIndex: number, optionIndex: number) {
+    const group = groups[groupIndex];
+    const wasOn = !!group.options[optionIndex]?.default;
+    const single = group.type === "single";
+    onChange(
+      groups.map((current, i) =>
+        i !== groupIndex
+          ? current
+          : {
+              ...current,
+              options: current.options.map((option, j) => {
+                const on =
+                  j === optionIndex
+                    ? !wasOn
+                    : single
+                      ? false
+                      : !!option.default;
+                return on
+                  ? { ...option, default: true }
+                  : { id: option.id, name: option.name, price: option.price };
+              }),
+            },
+      ),
+    );
+  }
+
+  function addGroup() {
+    const used = usedIds(groups);
+    const group: ModifierGroup = {
+      id: nextId("group", used),
+      name: "",
+      type: "single",
+      required: true,
+      options: [],
+    };
+    used.add(group.id);
+    group.options = [{ id: nextId("option", used), name: "", price: 0 }];
+    onChange([...groups, group]);
+  }
+
+  function addOption(groupIndex: number) {
+    const used = usedIds(groups);
+    const group = groups[groupIndex];
+    onChange(
+      groups.map((current, i) =>
+        i === groupIndex
+          ? {
+              ...current,
+              options: [
+                ...current.options,
+                { id: nextId("option", used, group.id), name: "", price: 0 },
+              ],
+            }
+          : current,
+      ),
+    );
+  }
+
+  function removeGroup(index: number) {
+    onChange(groups.filter((_, i) => i !== index));
+  }
+
+  function removeOption(groupIndex: number, optionIndex: number) {
+    onChange(
+      groups.map((group, i) =>
+        i === groupIndex
+          ? {
+              ...group,
+              options: group.options.filter((_, j) => j !== optionIndex),
+            }
+          : group,
+      ),
+    );
+  }
+
+  return (
+    <div className="rounded-[var(--ob-radius-md)] border border-[var(--ob-border)] p-3">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm font-medium">Customizations</p>
+        {!readOnly && groups.length < MAX_MODIFIER_GROUPS ? (
+          <Button type="button" variant="ghost" className="text-xs" onClick={addGroup}>
+            Add group
+          </Button>
+        ) : null}
+      </div>
+      {groups.length ? (
+        <ul className="mt-2 space-y-3">
+          {groups.map((group, groupIndex) => (
+            <li
+              key={group.id}
+              className="space-y-2 rounded-[var(--ob-radius-md)] bg-[var(--ob-surface-muted)] p-2.5"
+            >
+              <div className="flex flex-wrap items-center gap-2">
+                <Input
+                  aria-label="Group name"
+                  className="min-w-0 flex-1 basis-40"
+                  placeholder="Size / Seasoning"
+                  value={group.name}
+                  onChange={(e) => update(groupIndex, { name: e.target.value })}
+                />
+                <div className="w-32 shrink-0">
+                  <select
+                    aria-label="How many can be picked"
+                    className="ob-input"
+                    value={group.type}
+                    onChange={(e) =>
+                      update(groupIndex, {
+                        type: e.target.value === "multi" ? "multi" : "single",
+                        required:
+                          e.target.value === "multi" ? false : group.required,
+                      })
+                    }
+                  >
+                    <option value="single">Pick one</option>
+                    <option value="multi">Choose any</option>
+                  </select>
+                </div>
+                {!readOnly ? (
+                  <button
+                    type="button"
+                    aria-label="Remove group"
+                    className="shrink-0 rounded-full px-2 text-lg leading-none text-[var(--ob-text-muted)] hover:bg-[var(--ob-surface)]"
+                    onClick={() => removeGroup(groupIndex)}
+                  >
+                    ×
+                  </button>
+                ) : null}
+              </div>
+              <label className="flex items-center gap-2 text-xs text-[var(--ob-text-muted)]">
+                <input
+                  type="checkbox"
+                  checked={!!group.required}
+                  disabled={group.type !== "single"}
+                  onChange={(e) =>
+                    update(groupIndex, { required: e.target.checked })
+                  }
+                />
+                Required — falls back to the default
+              </label>
+              <ul className="space-y-2">
+                {group.options.map((option, optionIndex) => (
+                  <li key={option.id} className="flex flex-wrap items-center gap-2">
+                    <Input
+                      aria-label="Option label"
+                      className="min-w-0 flex-1 basis-32"
+                      placeholder="Large"
+                      value={option.name}
+                      onChange={(e) =>
+                        updateOption(groupIndex, optionIndex, {
+                          name: e.target.value,
+                        })
+                      }
+                    />
+                    <div className="w-24 shrink-0">
+                      <Input
+                        aria-label="Price change"
+                        type="number"
+                        step="0.01"
+                        placeholder="+40"
+                        value={String(option.price)}
+                        onChange={(e) =>
+                          updateOption(groupIndex, optionIndex, {
+                            price: Number(e.target.value) || 0,
+                          })
+                        }
+                      />
+                    </div>
+                    <label className="flex shrink-0 items-center gap-1 whitespace-nowrap text-xs text-[var(--ob-text-muted)]">
+                      <input
+                        type="checkbox"
+                        checked={!!option.default}
+                        onChange={() => toggleDefault(groupIndex, optionIndex)}
+                      />
+                      Default
+                    </label>
+                    {!readOnly ? (
+                      <button
+                        type="button"
+                        aria-label="Remove option"
+                        className="shrink-0 rounded-full px-2 text-lg leading-none text-[var(--ob-text-muted)] hover:bg-[var(--ob-surface)]"
+                        onClick={() => removeOption(groupIndex, optionIndex)}
+                      >
+                        ×
+                      </button>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+              {!readOnly && group.options.length < MAX_MODIFIER_OPTIONS ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="text-xs"
+                  onClick={() => addOption(groupIndex)}
+                >
+                  Add option
+                </Button>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-2 text-xs text-[var(--ob-text-muted)]">
+          Sizes, toppings or prep choices (extra shot, peri peri) — asked at
+          checkout and priced as a change on the item.
+        </p>
+      )}
+    </div>
+  );
+}
+
+/**
+ * The recipe side of inventory: what one sale of this product eats from the
+ * shelf. Quantities are in the stock item's own units (slices, glasses, sq ft),
+ * so "2 slices of bread" and "150 ml of milk" sit on the same list. Saving a
+ * bill deducts exactly these amounts, which is how the Inventory tab's usage
+ * report and the remaining packs stay honest.
+ */
+function IngredientListEditor({
+  rows,
+  items,
+  currencyCode,
+  onChange,
+}: {
+  rows: IngredientRow[];
+  items: InventoryItem[];
+  currencyCode: string;
+  onChange: (rows: IngredientRow[]) => void;
+}) {
+  const byId = useMemo(() => new Map(items.map((item) => [item.id, item])), [items]);
+
+  /** 30+ stock items are easier to find grouped the way they are stored. */
+  const grouped = useMemo(() => {
+    const map: Record<string, InventoryItem[]> = {};
+    for (const item of [...items].sort((a, b) => a.name.localeCompare(b.name))) {
+      const key = item.category ?? "Uncategorized";
+      (map[key] ??= []).push(item);
+    }
+    return Object.keys(map)
+      .sort((a, b) => a.localeCompare(b))
+      .map((key) => [key, map[key]] as const);
+  }, [items]);
+
+  const picked = rows
+    .map((row) => ({ row, item: byId.get(row.itemId) }))
+    .filter((entry): entry is { row: IngredientRow; item: InventoryItem } =>
+      Boolean(entry.item),
+    );
+  const materialCost = picked.reduce(
+    (sum, { row, item }) =>
+      Number(row.qty) > 0 ? sum + Number(row.qty) * costPerUnit(item) : sum,
+    0,
+  );
+  const duplicates = rows.filter(
+    (row, index) =>
+      row.itemId &&
+      rows.findIndex((other) => other.itemId === row.itemId) !== index,
+  ).length;
+
+  function update(index: number, patch: Partial<IngredientRow>) {
+    onChange(rows.map((row, i) => (i === index ? { ...row, ...patch } : row)));
+  }
+
+  return (
+    <div className="rounded-[var(--ob-radius-md)] border border-[var(--ob-border)] p-3">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm font-medium">Ingredients</p>
+        {rows.length < MAX_INGREDIENT_ROWS ? (
+          <Button
+            type="button"
+            variant="ghost"
+            className="text-xs"
+            onClick={() =>
+              onChange([...rows, { key: newIngredientKey(), itemId: "", qty: "", note: "" }])
+            }
+          >
+            Add ingredient
+          </Button>
+        ) : null}
+      </div>
+
+      {picked.length ? (
+        <p className="mt-1 text-xs text-[var(--ob-text-muted)]">
+          Material per sale ≈ {formatMoney(Math.round(materialCost * 100) / 100, currencyCode)}
+          {" · deducted from Inventory every time this is billed"}
+        </p>
+      ) : null}
+
+      {rows.length ? (
+        <ul className="mt-2 space-y-2">
+          {rows.map((row, index) => {
+            const item = byId.get(row.itemId);
+            return (
+              <li key={row.key} className="flex flex-wrap items-center gap-2">
+                <div className="min-w-0 flex-1 basis-36">
+                  <select
+                    aria-label="Stock item"
+                    className="ob-input"
+                    value={row.itemId}
+                    onChange={(e) => update(index, { itemId: e.target.value })}
+                  >
+                    <option value="">Choose a stock item…</option>
+                    {grouped.map(([category, group]) => (
+                      <optgroup key={category} label={category}>
+                        {group.map((option) => (
+                          <option key={option.id} value={option.id}>
+                            {option.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                </div>
+                <div className="w-24 shrink-0">
+                  <Input
+                    aria-label="Amount per sale"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="2"
+                    value={row.qty}
+                    onChange={(e) => update(index, { qty: e.target.value })}
+                  />
+                </div>
+                <span className="shrink-0 whitespace-nowrap text-xs text-[var(--ob-text-muted)]">
+                  {item ? `${item.unit} per sale` : "per sale"}
+                </span>
+                <button
+                  type="button"
+                  aria-label="Remove ingredient"
+                  className="shrink-0 rounded-full px-2 text-lg leading-none text-[var(--ob-text-muted)] hover:bg-[var(--ob-surface)]"
+                  onClick={() => onChange(rows.filter((_, i) => i !== index))}
+                >
+                  ×
+                </button>
+                {item ? (
+                  <p className="basis-full -mt-1 text-xs text-[var(--ob-text-muted)]">
+                    {formatUnitCount(item.units_per_pack, item.unit)} a pack ·{" "}
+                    {formatMoney(item.cost_per_pack, currencyCode)}
+                    {item.note ? ` · ${item.note}` : ""}
+                  </p>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <p className="mt-2 text-xs text-[var(--ob-text-muted)]">
+          What goes into one sale — 2 slices of bread, 1 tomato. Every billed
+          order then deducts these from Inventory.
+        </p>
+      )}
+
+      {duplicates ? (
+        <p className="mt-2 text-xs text-[var(--ob-warning)]">
+          An item listed twice keeps only the last line — merge the amounts
+          instead.
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function usedIds(groups: ModifierGroup[]): Set<string> {
+  const ids = new Set<string>();
+  for (const group of groups) {
+    ids.add(group.id);
+    for (const option of group.options) ids.add(option.id);
+  }
+  return ids;
+}
+
+/** Option ids live in one flat per-product space, so they must not collide. */
+function nextId(kind: string, used: Set<string>, prefix?: string): string {
+  const base = `${prefix ? `${prefix}-` : ""}${kind}`.slice(0, 30);
+  let id = base;
+  let n = 2;
+  while (used.has(id)) id = `${base}-${n++}`;
+  used.add(id);
+  return id;
 }

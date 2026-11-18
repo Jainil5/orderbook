@@ -33,7 +33,7 @@ export const WORKSPACE_ROUTE_PREFIXES = [
   "/analytics",
   "/customers",
   "/settings",
-  "/payments",
+  "/payments", // legacy top-level URL, now redirects to /manager/payments
 ] as const;
 
 export function isWorkspacePath(pathname: string): boolean {
@@ -110,7 +110,6 @@ export type WorkspaceProfile = {
       | "Orders"
       | "Analytics"
       | "Customers"
-      | "Payments"
       | "Settings",
       string
     >
@@ -127,8 +126,8 @@ export const RETAIL_BILLING_COPY: BillingPosCopy = {
   confirmButton: "Confirm & save order",
   confirmQuoteButton: "Save quotation",
   saveAsQuoteLabel: "Save as quotation (no payment yet)",
-  savedBillMessage: "Order {orderNumber} saved to Orders. WhatsApp and PDF are optional below.",
-  savedQuoteMessage: "Quotation {orderNumber} saved to Orders. WhatsApp and PDF are optional below.",
+  savedBillMessage: "Order {orderNumber} saved to Orders. Browser, WhatsApp and PDF copies are optional below.",
+  savedQuoteMessage: "Quotation {orderNumber} saved to Orders. Browser, WhatsApp and PDF copies are optional below.",
 };
 
 const FURNITURE_BILLING_COPY: BillingPosCopy = {
@@ -156,8 +155,8 @@ const FURNITURE_BILLING_COPY: BillingPosCopy = {
   confirmButton: "Confirm bill & payment",
   confirmQuoteButton: "Save quotation",
   saveAsQuoteLabel: "Save as quotation (payment pending)",
-  savedBillMessage: "Bill {orderNumber} saved to Orders. WhatsApp and PDF are optional below.",
-  savedQuoteMessage: "Quotation {orderNumber} saved to Orders. WhatsApp and PDF are optional below.",
+  savedBillMessage: "Bill {orderNumber} saved to Orders. Browser, WhatsApp and PDF copies are optional below.",
+  savedQuoteMessage: "Quotation {orderNumber} saved to Orders. Browser, WhatsApp and PDF copies are optional below.",
 };
 
 const DEFAULT_PROFILE: WorkspaceProfile = {

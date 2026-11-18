@@ -9,9 +9,16 @@ import {
 import {
   applyOrderPatches,
   mergeDemoCustomers,
+  mergeDemoIngredients,
+  mergeDemoInventory,
   mergeDemoOffers,
   mergeDemoProducts,
 } from "@/lib/demo/merge-entities";
+import {
+  aggregateOrderUsage,
+  consumptionMovements,
+  isConsumingOrder,
+} from "@/lib/inventory/stock";
 import { getDemoBrandPack, resolveDemoBrandCode } from "@/lib/demo/brands";
 import {
   patchDemoOrderInStore,
@@ -38,6 +45,11 @@ import type {
   CreateOrderResult,
   Customer,
   CustomerUpsertInput,
+  InventoryAdjustment,
+  InventoryAdjustmentInput,
+  InventoryAdjustmentKind,
+  InventoryItem,
+  InventoryItemUpsertInput,
   Offer,
   OfferUpsertInput,
   Order,
@@ -46,6 +58,8 @@ import type {
   Payment,
   PaymentStatus,
   Product,
+  ProductIngredient,
+  ProductIngredientInput,
   ProductUpsertInput,
   RecordPaymentInput,
   RecordRefundInput,
@@ -70,7 +84,7 @@ function revalidateAll() {
   revalidatePath("/analytics");
   revalidatePath("/customers");
   revalidatePath("/billing");
-  revalidatePath("/payments");
+  revalidatePath("/manager/payments");
   revalidatePath("/offers");
   revalidatePath("/settings");
   revalidatePath("/kitchen");
@@ -355,6 +369,9 @@ export async function submitDemoOrder(
     }));
   }
   await appendDemoOrderRecord(code, order, items);
+  // Sales eat stock: the same bill that adds a payment also moves the shelf,
+  // so "6 packs of bread" this morning means something after lunch service.
+  await recordOrderConsumption(code, pack, order, items);
 
   // Money taken at the counter (a bill) or a quotation deposit lands in the
   // ledger right away, so Payments and the order header agree.
@@ -887,6 +904,10 @@ export async function acceptDemoQuote(publicToken: string) {
   const orders = [...pack.orders, ...stored.orders];
   const order = orders.find((o) => o.public_token === publicToken);
   if (!order) return { ok: false as const, message: "Quote not found." };
+  // A seeded pack order never changes, so its real status is the patch on top
+  // of it — that is also what stops a second "Accept" draining the shelf again.
+  const bucket = await readDemoMutableBucket(code);
+  const statusBefore = bucket.orderPatches[order.id]?.status ?? order.status;
   const patch = {
     status: "confirmed" as OrderStatus,
     payment_status: "pending" as PaymentStatus,
@@ -896,6 +917,18 @@ export async function acceptDemoQuote(publicToken: string) {
     ...b,
     orderPatches: { ...b.orderPatches, [order.id]: { ...b.orderPatches[order.id], ...patch } },
   }));
+  // Acceptance is the moment the order becomes a commitment, so it is the
+  // moment its ingredients leave the shelf — nothing was written at quote time.
+  if (statusBefore === "draft") {
+    await recordOrderConsumption(
+      code,
+      pack,
+      { ...order, ...patch },
+      [...pack.orderItems, ...stored.orderItems].filter(
+        (line) => line.order_id === order.id,
+      ),
+    );
+  }
   await appendDemoAudit(code, {
     brand_id: pack.brand.id,
     actor_email: null,
@@ -906,4 +939,293 @@ export async function acceptDemoQuote(publicToken: string) {
   });
   revalidateAll();
   return { ok: true as const, orderNumber: order.order_number };
+}
+
+const INVENTORY_KINDS: InventoryAdjustmentKind[] = [
+  "purchase",
+  "waste",
+  "stock_count",
+  "issue",
+];
+
+/** Rows one product's ingredient list may hold — generous, but bounded. */
+const MAX_RECIPE_ROWS = 20;
+
+function inventoryFromInput(
+  pack: ReturnType<typeof getDemoBrandPack>,
+  id: string,
+  input: InventoryItemUpsertInput,
+): InventoryItem {
+  return {
+    id,
+    brand_id: pack.brand.id,
+    name: input.name.trim(),
+    category: input.category?.trim() || null,
+    unit: input.unit.trim(),
+    units_per_pack: Number(input.units_per_pack),
+    cost_per_pack: Number(input.cost_per_pack),
+    stock_packs: Number(input.stock_packs),
+    low_stock_packs: numOrNull(input.low_stock_packs) ?? 0,
+    storage: input.storage ?? null,
+    note: input.note?.trim() || null,
+  };
+}
+
+function validateInventoryInput(input: InventoryItemUpsertInput): string | null {
+  if (!input.name.trim()) return "Name is required.";
+  if (!input.unit.trim()) return "Name the unit you count in — slice, ml, sq ft.";
+  const perPack = Number(input.units_per_pack);
+  if (!Number.isFinite(perPack) || perPack <= 0) {
+    return "A pack must contain more than 0 units.";
+  }
+  const cost = Number(input.cost_per_pack);
+  if (!Number.isFinite(cost) || cost < 0) return "Cost per pack must be 0 or more.";
+  const packs = Number(input.stock_packs);
+  if (!Number.isFinite(packs) || packs < 0) return "Packs on hand must be 0 or more.";
+  const low = numOrNull(input.low_stock_packs);
+  if (low !== null && low < 0) return "The reorder level cannot be negative.";
+  return null;
+}
+
+/**
+ * Create or edit a stock item. Pack items keep their identity and land in
+ * `inventoryOverrides`; anything the merchant adds lives in full in the bucket,
+ * mirroring how products are handled.
+ */
+export async function saveDemoInventoryItem(
+  itemId: string | null,
+  input: InventoryItemUpsertInput,
+): Promise<{ ok: true; item: InventoryItem } | { ok: false; error: string }> {
+  const code = await activeDemoBrandCode();
+  const pack = getDemoBrandPack(code);
+  const invalid = validateInventoryInput(input);
+  if (invalid) return { ok: false, error: invalid };
+
+  const bucket = await readDemoMutableBucket(code);
+  const base = pack.inventory.find((item) => item.id === itemId);
+  const existing = base ?? bucket.inventory.find((item) => item.id === itemId);
+
+  if (itemId && existing) {
+    const item = inventoryFromInput(pack, itemId, input);
+    if (base) {
+      const fields: Partial<InventoryItem> = { ...item };
+      delete fields.id;
+      delete fields.brand_id;
+      await updateDemoMutableBucket(code, (b) => ({
+        ...b,
+        inventoryOverrides: {
+          ...b.inventoryOverrides,
+          [itemId]: { ...b.inventoryOverrides[itemId], ...fields },
+        },
+      }));
+    } else {
+      await updateDemoMutableBucket(code, (b) => ({
+        ...b,
+        inventory: b.inventory.map((row) => (row.id === itemId ? item : row)),
+      }));
+    }
+    await appendDemoAudit(code, {
+      brand_id: pack.brand.id,
+      actor_email: null,
+      action: "inventory.updated",
+      entity_type: "inventory",
+      entity_id: itemId,
+      detail: item.name,
+    });
+    revalidateAll();
+    revalidatePath("/products");
+    return { ok: true, item };
+  }
+
+  if (bucket.inventory.length >= DEMO_LIMITS.inventory) {
+    return { ok: false, error: limitMessage("The inventory list is full") };
+  }
+  const id = newOpsId("demo-inv-item");
+  const item = inventoryFromInput(pack, id, input);
+  await updateDemoMutableBucket(code, (b) => ({
+    ...b,
+    inventory: [item, ...b.inventory],
+  }));
+  await appendDemoAudit(code, {
+    brand_id: pack.brand.id,
+    actor_email: null,
+    action: "inventory.created",
+    entity_type: "inventory",
+    entity_id: id,
+    detail: item.name,
+  });
+  revalidateAll();
+  revalidatePath("/products");
+  return { ok: true, item };
+}
+
+const KIND_SIGN_ERROR: Record<InventoryAdjustmentKind, string> = {
+  purchase: "A purchase adds packs, so enter a number above 0.",
+  waste: "Wastage removes packs, so enter a number below 0.",
+  issue: "Issuing material removes packs, so enter a number below 0.",
+  stock_count: "Enter the difference against your count, above or below 0.",
+};
+
+/**
+ * Goods in, goods out. This is the only way the shelf number moves by hand —
+ * order consumption writes the same kind of row automatically.
+ */
+export async function recordDemoInventoryMovement(
+  input: InventoryAdjustmentInput,
+): Promise<{ ok: true; movement: InventoryAdjustment } | { ok: false; error: string }> {
+  const code = await activeDemoBrandCode();
+  const pack = getDemoBrandPack(code);
+  const delta = Number(input.deltaPacks);
+  if (!INVENTORY_KINDS.includes(input.kind)) {
+    return { ok: false, error: "Choose what this movement is." };
+  }
+  if (!Number.isFinite(delta) || delta === 0) {
+    return { ok: false, error: "Enter how many packs moved, other than 0." };
+  }
+  if (input.kind === "purchase" && delta <= 0) {
+    return { ok: false, error: KIND_SIGN_ERROR.purchase };
+  }
+  if ((input.kind === "waste" || input.kind === "issue") && delta >= 0) {
+    return { ok: false, error: KIND_SIGN_ERROR[input.kind] };
+  }
+  const bucket = await readDemoMutableBucket(code);
+  const item = mergeDemoInventory(pack.inventory, bucket).find(
+    (row) => row.id === input.itemId,
+  );
+  if (!item) return { ok: false, error: "Stock item not found." };
+  const cost = numOrNull(input.cost);
+  if (cost !== null && cost < 0) {
+    return { ok: false, error: "The amount paid cannot be negative." };
+  }
+  const movement: InventoryAdjustment = {
+    id: newOpsId("demo-inv-move"),
+    brand_id: pack.brand.id,
+    item_id: item.id,
+    delta_packs: Math.round(delta * 1000) / 1000,
+    kind: input.kind,
+    cost: input.kind === "purchase" ? cost : null,
+    note: input.note?.trim().slice(0, 200) || null,
+    created_at: new Date().toISOString(),
+  };
+  await updateDemoMutableBucket(code, (b) => ({
+    ...b,
+    inventoryLedger: [movement, ...b.inventoryLedger].slice(
+      0,
+      DEMO_LIMITS.inventoryLedger,
+    ),
+  }));
+  await appendDemoAudit(code, {
+    brand_id: pack.brand.id,
+    actor_email: null,
+    action: `inventory.${movement.kind}`,
+    entity_type: "inventory",
+    entity_id: item.id,
+    detail: `${movement.delta_packs > 0 ? "+" : ""}${movement.delta_packs} packs · ${item.name}`,
+  });
+  revalidateAll();
+  revalidatePath("/products");
+  return { ok: true, movement };
+}
+
+/**
+ * Replace one product's ingredient list. Rows are keyed by stock item — a
+ * repeated item keeps the last line — and every item must exist, so a typo
+ * cannot create usage that never deducts.
+ */
+export async function saveDemoProductIngredients(
+  productId: string,
+  rows: ProductIngredientInput[],
+): Promise<{ ok: true; ingredients: ProductIngredient[] } | { ok: false; error: string }> {
+  const code = await activeDemoBrandCode();
+  const pack = getDemoBrandPack(code);
+  const bucket = await readDemoMutableBucket(code);
+  const product = mergeDemoProducts(pack.products, bucket).find(
+    (p) => p.id === productId,
+  );
+  if (!product) return { ok: false, error: "Product not found." };
+  const items = new Map(
+    mergeDemoInventory(pack.inventory, bucket).map((item) => [item.id, item]),
+  );
+  if (!items.size) {
+    return { ok: false, error: "Add stock items first, then list ingredients." };
+  }
+  const byItem = new Map<string, ProductIngredient>();
+  for (const row of rows) {
+    const item = items.get(row.itemId);
+    if (!item) return { ok: false, error: "Every ingredient must be a stock item." };
+    const qty = Number(row.qtyPerSale);
+    if (!Number.isFinite(qty) || qty <= 0) {
+      return {
+        ok: false,
+        error: `Enter how much of ${item.name} one sale uses, above 0.`,
+      };
+    }
+    byItem.set(item.id, {
+      id: newOpsId("demo-recipe"),
+      brand_id: pack.brand.id,
+      product_id: productId,
+      item_id: item.id,
+      qty_per_sale: Math.round(qty * 1000) / 1000,
+      note: row.note?.trim().slice(0, 160) || null,
+    });
+  }
+  if (byItem.size > MAX_RECIPE_ROWS) {
+    return { ok: false, error: `Keep an ingredient list under ${MAX_RECIPE_ROWS} lines.` };
+  }
+  const ingredients = Array.from(byItem.values());
+  await updateDemoMutableBucket(code, (b) => ({
+    ...b,
+    recipeOverrides: { ...b.recipeOverrides, [productId]: ingredients },
+  }));
+  await appendDemoAudit(code, {
+    brand_id: pack.brand.id,
+    actor_email: null,
+    action: ingredients.length ? "product.recipe_updated" : "product.recipe_cleared",
+    entity_type: "product",
+    entity_id: productId,
+    detail: `${ingredients.length} ingredient${ingredients.length === 1 ? "" : "s"} · ${product.name}`,
+  });
+  revalidateAll();
+  revalidatePath("/products");
+  return { ok: true, ingredients };
+}
+
+/**
+ * Sales eat stock. Called right after an order lands, so the shelf number and
+ * the bill agree without anyone counting. A brand whose pack has no recipes
+ * (the furniture one) writes nothing at all.
+ *
+ * Only commitments count: a quotation sits on the shelf until the customer
+ * accepts it, at which point `acceptDemoQuote` calls this with the same lines.
+ * Cancelling a bill does *not* put the bread back — the plates were made — so a
+ * merchant who physically got material back records a stock count.
+ */
+async function recordOrderConsumption(
+  code: DemoBrandCode,
+  pack: ReturnType<typeof getDemoBrandPack>,
+  order: Order,
+  items: OrderItem[],
+): Promise<void> {
+  if (!isConsumingOrder(order)) return;
+  const bucket = await readDemoMutableBucket(code);
+  const inventory = mergeDemoInventory(pack.inventory, bucket);
+  const ingredients = mergeDemoIngredients(pack.ingredients, bucket);
+  if (!inventory.length || !ingredients.length) return;
+  const movements = consumptionMovements(
+    aggregateOrderUsage(items, ingredients, inventory),
+    {
+      brandId: pack.brand.id,
+      orderNumber: order.order_number,
+      createdAt: order.created_at,
+      newId: () => newOpsId("demo-inv-move"),
+    },
+  );
+  if (!movements.length) return;
+  await updateDemoMutableBucket(code, (b) => ({
+    ...b,
+    inventoryLedger: [...movements, ...b.inventoryLedger].slice(
+      0,
+      DEMO_LIMITS.inventoryLedger,
+    ),
+  }));
 }

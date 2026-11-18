@@ -2,10 +2,12 @@ import type { DemoMutableBucket } from "@/lib/demo/mutable-store";
 import { mergeOpsEntities } from "@/lib/manager/ops-shared";
 import type {
   Customer,
+  InventoryItem,
   Offer,
   Order,
   Payment,
   Product,
+  ProductIngredient,
 } from "@/types/database";
 
 export function mergeDemoCustomers(
@@ -71,4 +73,42 @@ export function mergeDemoProducts(
 
 export function listDemoAudit(bucket: DemoMutableBucket) {
   return bucket.auditLog;
+}
+
+export function mergeDemoInventory(
+  base: InventoryItem[],
+  bucket: DemoMutableBucket,
+): InventoryItem[] {
+  const byId = new Map<string, InventoryItem>();
+  for (const item of base) {
+    byId.set(item.id, { ...item, ...(bucket.inventoryOverrides[item.id] ?? {}) });
+  }
+  for (const item of bucket.inventory ?? []) {
+    byId.set(item.id, { ...item, ...(bucket.inventoryOverrides[item.id] ?? {}) });
+  }
+  return Array.from(byId.values())
+    .filter((item) => !bucket.inventoryOverrides[item.id]?.deleted)
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/**
+ * Recipes are replaced per product, not row by row: a key in
+ * `recipeOverrides` stands for the whole ingredient list of that product, so
+ * clearing or re-ordering a recipe cannot leave orphan pack rows behind.
+ */
+export function mergeDemoIngredients(
+  base: ProductIngredient[],
+  bucket: DemoMutableBucket,
+): ProductIngredient[] {
+  const byProduct = new Map<string, ProductIngredient[]>();
+  for (const row of base) {
+    const list = byProduct.get(row.product_id) ?? [];
+    list.push(row);
+    byProduct.set(row.product_id, list);
+  }
+  for (const [productId, rows] of Object.entries(bucket.recipeOverrides ?? {})) {
+    if (rows.length) byProduct.set(productId, rows);
+    else byProduct.delete(productId);
+  }
+  return Array.from(byProduct.values()).flat();
 }

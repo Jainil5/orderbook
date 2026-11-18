@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ProductThumbnail } from "@/components/products/product-thumbnail";
 import { ProductPrice } from "@/components/products/product-price";
 import { cn } from "@/lib/cn";
-import { formatMoney } from "@/lib/format";
+import { formatModifierDelta } from "@/lib/format";
 import { parseProductModifiers } from "@/lib/products/modifiers";
 import { isLowStock, stockAvailable } from "@/lib/pricing/cart-line";
 import { X } from "lucide-react";
@@ -30,7 +30,7 @@ export function ProductPeekDialog({
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
-  const modifiers = product ? parseProductModifiers(product) : [];
+  const groups = product ? parseProductModifiers(product) : [];
   const available = product ? stockAvailable(product) : null;
   const stockLabel = available == null ? "Not tracked" : `Stock ${available}`;
 
@@ -107,21 +107,32 @@ export function ProductPeekDialog({
                 </dd>
               </div>
             </dl>
-            {modifiers.length ? (
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--ob-text-muted)]">
-                  Add-ons
-                </p>
-                <ul className="mt-1.5 space-y-1 text-sm">
-                  {modifiers.map((mod) => (
-                    <li key={mod.id} className="flex justify-between gap-3">
-                      <span>{mod.name}</span>
-                      <span className="text-[var(--ob-text-muted)]">
-                        +{formatMoney(mod.price, currencyCode)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+            {groups.length ? (
+              <div className="space-y-2.5">
+                {groups.map((group) => (
+                  <div key={group.id}>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[var(--ob-text-muted)]">
+                      {group.name}
+                    </p>
+                    <ul className="mt-1.5 space-y-1 text-sm">
+                      {group.options.map((option) => (
+                        <li key={option.id} className="flex justify-between gap-3">
+                          <span>
+                            {option.name}
+                            {option.default ? (
+                              <span className="text-[var(--ob-text-muted)]">
+                                {" · default"}
+                              </span>
+                            ) : null}
+                          </span>
+                          <span className="shrink-0 text-[var(--ob-text-muted)]">
+                            {formatModifierDelta(option.price, currencyCode)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </div>
             ) : null}
             <Button

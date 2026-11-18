@@ -15,7 +15,6 @@ import {
   Package,
   LineChart,
   Users,
-  CreditCard,
   Settings,
   PanelLeftClose,
   PanelLeft,
@@ -44,7 +43,6 @@ const icons = {
   Manager: ClipboardList,
   Analytics: LineChart,
   Customers: Users,
-  Payments: CreditCard,
   Settings: Settings,
 } as const;
 

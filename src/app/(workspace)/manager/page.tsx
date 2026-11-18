@@ -20,6 +20,7 @@ const MODULE_DESCRIPTIONS: Record<ManagerModuleKey, string> = {
   visits: "Field visits with check-in and reports.",
   schedules: "Staff shifts and the weekly rota.",
   tasks: "To-dos with priorities and due dates.",
+  payments: "Payments captured against bills, with method and status.",
 };
 
 export default async function ManagerPage() {

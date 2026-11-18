@@ -23,6 +23,10 @@ npm run dev
 Open http://localhost:3000, pick a demo business on the login screen, and
 explore. That's the whole setup — there is nothing to configure.
 
+The sidebar is the map: **Products** holds the catalog, the Inventory tab and
+offers; day-to-day operations sit under **Manager**, which is where Payments
+lives now (`/manager/payments`; the old `/payments` URL redirects there).
+
 | Script | Purpose |
 |--------|---------|
 | `npm run dev` | Dev server |
@@ -37,7 +41,9 @@ The dataset lives in **`data/demo/<brand>/*.csv`** — one file per table
 (products, customers, orders, order_items, payments, offers, staff, services,
 service_jobs, appointments, field_visits, shifts, tasks, leads, brand,
 brand_settings) plus the CRM tables (interactions, reviews, complaints,
-segments, campaigns, loyalty_rules, loyalty_ledger, memberships):
+segments, campaigns, loyalty_rules, loyalty_ledger, memberships) and the stock
+tables (`inventory.csv` for both brands, `recipes.csv` for the cafe only — see
+[Inventory and ingredient usage](#inventory-and-ingredient-usage)):
 
 - `BR-1` — Brewery Cafe (15 products, 10 customers, 20 orders over ~6 months)
 - `BR-2` — Cubig Furniture (8 products, 10 customers, 20 orders, quotations enabled)
@@ -103,6 +109,110 @@ Three things the CRM deliberately does **not** pretend to do:
   Review sentiment is a fixed lexicon score (`src/lib/crm/reviews.ts`), so the
   same text always gets the same answer — which is also what makes it something
   an AI feature can later be measured against.
+
+### Product customizations (modifiers)
+
+`products.modifiers_json` holds an array of **groups** — each one question the
+cashier answers when the item is added to a bill:
+
+```json
+[
+  { "id": "size", "name": "Size", "type": "single", "required": true,
+    "options": [
+      { "id": "sm", "name": "Small", "price": -30 },
+      { "id": "md", "name": "Medium", "price": 0, "default": true },
+      { "id": "lg", "name": "Large", "price": 40 }
+    ] },
+  { "id": "addons", "name": "Add-ons", "type": "multi",
+    "options": [{ "id": "shot", "name": "Extra shot", "price": 40 }] }
+]
+```
+
+- `single` renders as radios (coffee sizes, Fresh Lime Soda's
+  Sweet/Salted/Mixed, fries' Salted-or-Peri-peri); `multi` renders as checkboxes
+  (extra shot, cheese drizzle, "With ice cream +₹30").
+- `price` is a **signed delta** on the item's list price, so a smaller size can
+  cost less and a pure preference swap can cost nothing. A line never prices
+  below zero.
+- `default` preselects the choice. On a `required` single group it is also the
+  fallback whenever a line carries no pick from that group, so older bills and
+  API-created orders still price and print correctly.
+- Option ids must be unique within a product: a cart line is
+  `product + option ids`, so the same coffee at two sizes is two lines.
+- A flat legacy list `[{ "id": "shot", "name": "Extra shot", "price": 40 }]` is
+  still valid and reads as one optional "Add-ons" multi group — BR-2 ships it.
+
+Resolution lives in `src/lib/products/modifiers.ts`; the POS chooser, the line
+price, the saved order item and the product editor all read through it, so the
+receipt label and the bill can't disagree. Caps: 8 groups, 12 options per group,
+±100000 delta.
+
+### Inventory and ingredient usage
+
+**Products → Inventory** is the buying side of the business: material that
+comes in as a pack and goes out inside a sale.
+
+| What | Where it lives | Reads as |
+|------|----------------|----------|
+| Stock item | `data/demo/<brand>/inventory.csv` (`InventoryItem`) | Multigrain Bread — 18 slices a pack, ₹90 a pack, 6 packs on hand, reorder at 3 |
+| Usage unit | `unit` + `units_per_pack` | the thing a person counts — slice, glass, shot, patty, ml, sq ft |
+| Ingredient list | `data/demo/BR-1/recipes.csv` (`ProductIngredient`) | Flat White — 1 shot espresso, 150 ml milk, 1 cup, 1 lid, 1 decaf swap |
+| Movement | the mutable store (`InventoryAdjustment`) | purchase in, wastage out, stock-count correction; `issue` is what a saved bill consumed |
+
+- **Position** — what is on the shelf — is `stock_packs` plus every movement.
+  Sales write movements themselves: saving a bill appends one negative `issue`
+  row per stock item it drained, noted with the order number, so the count and
+  the bills agree without anyone writing it down. A quotation drains nothing
+  while it is a draft — accepting it is the commitment, and that is when the
+  shelf moves, once however many times the accept button is pressed.
+  Cancellations, refunds and credit notes consume nothing (`isConsumingOrder`),
+  and cancelling a bill does not put the material back; a merchant who physically
+  got it back records a stock count.
+- **Usage** — what the menu ate — is *derived*, never stored: each sold line
+  times its ingredient list. That is why a brand's seeded history reports usage
+  on day one even though its pack ships no ledger rows. The window is a URL
+  choice (`?tab=inventory&window=30`), so a shared link keeps its meaning.
+- Fractional packs are the normal case: one Granola Bowl took 60 g from a
+  1000 g bag (−0.06 packs), 150 g from a 2000 g yogurt tub (−0.07), 30 ml from
+  a 1000 ml tetra of pulp (−0.03). The floor is zero — a finished item still
+  prices correctly, the shelf just cannot go negative, and the tab says so.
+- Ingredient lists are edited in the product dialog; stock items and movements
+  in the Inventory tab. Both persist per browser in the same mutable demo
+  cookie every other editor uses. Caps: 40 stock items, 120 movements,
+  20 ingredient lines per product (`src/lib/demo/read-only.ts`).
+
+The maths is one pure module — `src/lib/inventory/stock.ts`, no cookies and no
+CSV reads — so the same functions price a sale, fill the tab and answer in
+tests.
+
+**The two verticals are stored differently on purpose.** BR-1 (Brewery Cafe)
+ships `inventory.csv` — 33 items — *and* `recipes.csv`, 60 lines across 14 menu
+products, because a kitchen has recipes; 31 of the 33 items are consumed by
+something. BR-2 (Cubig Furniture) ships `inventory.csv` only — 22 items of
+board, foam, fabric, hardware, finish and packaging, `flammable` storage on
+lacquer, PU polish and thinner — and deliberately no recipes, because a
+workshop's material leaves by the job rather than by the SKU. Its shelf moves
+through recorded purchases, wastage and stock counts, and its
+usage report stays empty until a merchant lists ingredients on a product. Same
+tool, different seeded shape.
+
+### Bill and quotation export
+
+Once an order is saved, the document panel offers three copies of the same
+paper — HTML in a browser tab, WhatsApp text, PDF — all built in the client from
+the saved order, so none of them needs a server route to read per-browser demo
+state.
+
+**Open in browser** (`src/lib/documents/render-bill-html.ts`, handed over by
+`open-bill-html.ts`) renders the bill or quotation as one standalone HTML file:
+inline CSS, the issuer's logo and a quotation's product photos inlined as data
+URLs, no `<script>` and no remote request. It is served to a new tab from a
+`blob:` URL, so the merchant can print it, save it or forward it and it still
+reads the same offline; `@media print` lays it out on A4. The tab is claimed
+inside the click and then pointed at the finished file, because waiting for the
+photos first would cost the click its user activation. If pop-ups are blocked the
+file goes to downloads and the button says so. Names match the PDF:
+`Bill-BC-1061.html`, `Quotation-CF-4491.html`.
 
 ### Full sample data (recovery copy)
 

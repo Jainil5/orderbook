@@ -1,5 +1,5 @@
 import type { Product } from "@/types/database";
-import { parseProductModifiers } from "@/lib/products/modifiers";
+import { modifierPriceDelta } from "@/lib/products/modifiers";
 import {
   lineNetTotal,
   productLineDiscountAmount,
@@ -18,11 +18,10 @@ export function pricedProductForCartLine(
   tier: PriceTier,
   modifierIds: string[],
 ): Product {
-  const modifiers = parseProductModifiers(product);
-  const extra = modifiers
-    .filter((m) => modifierIds.includes(m.id))
-    .reduce((sum, m) => sum + m.price, 0);
-  return { ...product, price: listUnitPrice(product, tier) + extra };
+  const base = listUnitPrice(product, tier);
+  // Size deltas can be negative; a line is never allowed to go below zero.
+  const unit = Math.max(0, base + modifierPriceDelta(product, modifierIds));
+  return { ...product, price: unit };
 }
 
 export function cartLineNetTotal(

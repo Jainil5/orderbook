@@ -3,20 +3,32 @@ import { readDemoMutableBucket } from "@/lib/demo/mutable-store";
 import {
   applyOrderPatches,
   mergeDemoCustomers,
+  mergeDemoIngredients,
+  mergeDemoInventory,
   mergeDemoOffers,
   mergeDemoPayments,
   mergeDemoProducts,
   listDemoAudit,
 } from "@/lib/demo/merge-entities";
 import { readDemoOrderStore } from "@/lib/demo/order-store";
+import {
+  aggregateOrderUsage,
+  inventoryPositions,
+  isConsumingOrder,
+  type InventoryPosition,
+  type UsageRow,
+} from "@/lib/inventory/stock";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
 import type {
   Customer,
+  InventoryAdjustment,
+  InventoryItem,
   Offer,
   Order,
   OrderItem,
   Payment,
   Product,
+  ProductIngredient,
   StockAdjustment,
 } from "@/types/database";
 
@@ -247,4 +259,84 @@ export async function listDemoStockAdjustments(
 
 export function toDemoBrandCode(brandCode: string): DemoBrandCode {
   return resolveDemoBrandCode(brandCode);
+}
+
+export async function listDemoInventoryMerged(
+  brandCode?: DemoBrandCode,
+): Promise<InventoryItem[]> {
+  const code = resolveCode(brandCode);
+  const pack = packFor(code);
+  const bucket = await readDemoMutableBucket(code);
+  return mergeDemoInventory(pack.inventory, bucket);
+}
+
+export async function listDemoIngredientsMerged(
+  brandCode?: DemoBrandCode,
+): Promise<ProductIngredient[]> {
+  const code = resolveCode(brandCode);
+  const pack = getDemoBrandPack(code);
+  const bucket = await readDemoMutableBucket(code);
+  return mergeDemoIngredients(pack.ingredients, bucket);
+}
+
+export async function listDemoInventoryLedger(
+  brandCode?: DemoBrandCode,
+): Promise<InventoryAdjustment[]> {
+  const code = resolveCode(brandCode);
+  const bucket = await readDemoMutableBucket(code);
+  return bucket.inventoryLedger;
+}
+
+export type DemoInventorySnapshot = {
+  items: InventoryItem[];
+  ingredients: ProductIngredient[];
+  ledger: InventoryAdjustment[];
+  positions: InventoryPosition[];
+  /** Consumption derived from the orders inside `windowDays`. */
+  usage: UsageRow[];
+  usageCost: number;
+  windowDays: number;
+  /** Bills the window is measured over — quotes and cancellations are out. */
+  orderCount: number;
+};
+
+/**
+ * One read for the Inventory tab: shelf position per item, what the recent
+ * bills consumed, and the recipes behind that. Usage is derived from orders
+ * rather than replayed from the ledger, so a brand's seeded history reports
+ * consumption without anyone back-filling movements.
+ */
+export async function demoInventorySnapshot(
+  brandCode?: DemoBrandCode,
+  windowDays = 7,
+): Promise<DemoInventorySnapshot> {
+  const code = resolveCode(brandCode);
+  const [items, ingredients, ledger, orders, orderItems] = await Promise.all([
+    listDemoInventoryMerged(code),
+    listDemoIngredientsMerged(code),
+    listDemoInventoryLedger(code),
+    listDemoOrders(undefined, code),
+    listDemoOrderItemsForOrders(code),
+  ]);
+  const since = Date.now() - windowDays * 24 * 60 * 60 * 1000;
+  const counted = orders.filter(
+    (order) =>
+      isConsumingOrder(order) && new Date(order.created_at).getTime() >= since,
+  );
+  const ids = new Set(counted.map((order) => order.id));
+  const usage = aggregateOrderUsage(
+    orderItems.filter((item) => ids.has(item.order_id)),
+    ingredients,
+    items,
+  );
+  return {
+    items,
+    ingredients,
+    ledger,
+    positions: inventoryPositions(items, ledger),
+    usage,
+    usageCost: Math.round(usage.reduce((sum, row) => sum + row.cost, 0) * 100) / 100,
+    windowDays,
+    orderCount: counted.length,
+  };
 }

@@ -20,6 +20,18 @@ export function formatDate(value: string | Date, locale = "en-IN"): string {
   }).format(d);
 }
 
+/**
+ * A modifier option's cost reads as a signed delta: "+₹40", "−₹30", or
+ * "Included" when the choice costs the same as the base item.
+ */
+export function formatModifierDelta(
+  price: number,
+  currencyCode = defaultCurrency,
+): string {
+  if (!price) return "Included";
+  return `${price > 0 ? "+" : "−"}${formatMoney(Math.abs(price), currencyCode)}`;
+}
+
 /** Picks the noun form that matches a count, so a screen never reads "1 bills". */
 export function pluralize(
   count: number,

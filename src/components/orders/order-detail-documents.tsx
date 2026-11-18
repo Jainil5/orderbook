@@ -10,8 +10,8 @@ export function OrderDetailDocuments({ document }: { document: BillDocument }) {
       <h2 className="font-semibold">Share or download</h2>
       <p className="mt-1 text-sm text-[var(--ob-text-muted)]">
         {document.kind === "quotation"
-          ? "Send the quotation on WhatsApp or save a PDF copy."
-          : "Send the bill on WhatsApp or save a PDF to your computer."}
+          ? "Open the quotation in a browser, send it on WhatsApp, or save a PDF copy."
+          : "Open the bill in a browser, send it on WhatsApp, or save a PDF to your computer."}
       </p>
       <div className="mt-4">
         <OrderDocumentActions document={document} compact />

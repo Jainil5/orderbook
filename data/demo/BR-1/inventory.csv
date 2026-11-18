@@ -1,0 +1,34 @@
+id,brand_id,name,category,unit,units_per_pack,cost_per_pack,stock_packs,low_stock_packs,storage,note
+iv1,demo-brewery-cafe,Multigrain Bread,Bakery,slice,18,90.00,6,3,ambient,1 pack = 18 sliced breads
+iv2,demo-brewery-cafe,Ciabatta Rolls,Bakery,bun,8,130.00,7,3,ambient,"1 pack = 8 rolls, split for sandwiches"
+iv3,demo-brewery-cafe,Full Cream Milk,Dairy,ml,1000,68.00,12,5,refrigerated,"1 tetra = 1000 ml, keep chilled after opening"
+iv4,demo-brewery-cafe,Oat Milk,Dairy,ml,1000,135.00,8,3,refrigerated,"Barista blend, 1 carton = 1000 ml"
+iv5,demo-brewery-cafe,Greek Yogurt,Dairy,g,2000,640.00,5,2,refrigerated,"1 tub = 2000 g, about 13 bowls"
+iv6,demo-brewery-cafe,Vanilla Ice Cream Tub,Dairy,scoop,30,780.00,2,2,frozen,1.5 L tub = 30 scoops
+iv7,demo-brewery-cafe,Cheese Slices,Dairy,slice,20,320.00,0,3,refrigerated,1 pack = 20 process cheese slices
+iv8,demo-brewery-cafe,Butter,Dairy,g,500,285.00,6,2,refrigerated,1 pack = 500 g unsalted
+iv9,demo-brewery-cafe,Tomatoes,Produce,slice,24,120.00,6,3,refrigerated,"1 kg tray = about 24 slices, cut each morning"
+iv10,demo-brewery-cafe,Lettuce,Produce,leaf,30,150.00,4,2,refrigerated,"1 crate = about 30 leaves, spin dry before use"
+iv11,demo-brewery-cafe,Cucumber,Produce,slice,36,90.00,5,2,refrigerated,3 cucumbers = about 36 slices
+iv12,demo-brewery-cafe,Avocado,Produce,piece,12,600.00,4,2,refrigerated,"1 crate = 12 fruit, ripen 2 days on the counter"
+iv13,demo-brewery-cafe,Limes,Produce,piece,20,160.00,7,3,refrigerated,"1 net = 20 limes, juice day of"
+iv14,demo-brewery-cafe,Alphonso Mango Pulp,Produce,ml,1000,340.00,6,2,refrigerated,"1 tetra = 1000 ml, pulp only no syrup"
+iv15,demo-brewery-cafe,Espresso Beans,Beverages,shot,55,1450.00,4,2,dry,1 kg bag = about 55 shots at 18 g
+iv16,demo-brewery-cafe,Vanilla Instant Coffee,Beverages,glass,60,480.00,5,2,dry,≈60 glasses per 200 g jar
+iv17,demo-brewery-cafe,Decaf Ground Coffee,Beverages,shot,25,850.00,3,2,dry,"500 g pack = about 25 shots, separate hopper"
+iv18,demo-brewery-cafe,Cold Brew Concentrate,Beverages,ml,2000,950.00,4,2,refrigerated,"Bag-in-box 2000 ml, dilute 1 to 1"
+iv19,demo-brewery-cafe,Sparkling Soda Water,Beverages,ml,750,45.00,18,6,ambient,"1 bottle = 750 ml, about 6 glasses"
+iv20,demo-brewery-cafe,Chocolate Powder,Dry goods,g,2000,720.00,5,2,dry,"1 drum = 2000 g, 40 g per cup"
+iv21,demo-brewery-cafe,Sugar Syrup,Dry goods,ml,1000,180.00,7,3,dry,"1 bottle = 1000 ml, 20 ml per pump"
+iv22,demo-brewery-cafe,Honey,Dry goods,g,1000,520.00,4,2,dry,1 squeeze jar = 1000 g
+iv23,demo-brewery-cafe,Protein Powder,Dry goods,scoop,33,1650.00,4,2,dry,"1 kg tub = 33 scoops, 1 scoop = 30 g"
+iv24,demo-brewery-cafe,Granola,Dry goods,g,1000,420.00,5,2,dry,"1 bag = 1000 g, 60 g per bowl"
+iv25,demo-brewery-cafe,Peri Peri Seasoning,Dry goods,g,500,340.00,2,2,dry,"1 shaker = 500 g, 3 g per plate"
+iv26,demo-brewery-cafe,Chicken Patties,Proteins,patty,10,480.00,5,2,frozen,1 pack = 10 patties at 90 g
+iv27,demo-brewery-cafe,Frozen Fries,Snacks,g,2500,320.00,8,3,frozen,"1 bag = 2500 g, about 14 plates"
+iv28,demo-brewery-cafe,Paper Cups (12 Oz),Packaging,ea,50,260.00,9,3,dry,1 sleeve = 50 hot and cold cups
+iv29,demo-brewery-cafe,Cup Lids,Packaging,ea,50,120.00,7,3,dry,"1 pack = 50 lids, fits the 12 oz cups"
+iv30,demo-brewery-cafe,Paper Napkins,Packaging,ea,200,90.00,3,4,dry,1 ream = 200 napkins
+iv31,demo-brewery-cafe,Takeaway Boxes,Packaging,ea,25,380.00,6,2,dry,1 bundle = 25 kraft boxes
+iv32,demo-brewery-cafe,Paper Straws,Packaging,ea,100,150.00,5,2,dry,1 pack = 100 paper straws
+iv33,demo-brewery-cafe,Dish Sanitiser,Cleaning,ml,1000,240.00,5,1,dry,"1 canner = 1000 ml, 10 ml per sink"

@@ -8,7 +8,10 @@ const nextConfig: NextConfig = {
   // The preview gateway serves this app under *.preview.qoderwork.com; without
   // an entry, dev-only assets (JS/CSS/HMR) are blocked cross-origin and the
   // page renders without its client bundle. Dev-only: ignored in production.
-  allowedDevOrigins: ["**.preview.qoderwork.com"],
+  // 127.0.0.1 is listed explicitly — the dev server only auto-allows
+  // "localhost", so a same-machine browser using the IP address would still
+  // have its HMR websocket blocked and the app would never hydrate.
+  allowedDevOrigins: ["**.preview.qoderwork.com", "localhost", "127.0.0.1"],
   turbopack: {
     root: resolve(import.meta.dirname),
     rules: {

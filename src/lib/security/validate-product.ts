@@ -1,4 +1,11 @@
-import type { ProductUpsertInput } from "@/types/database";
+import type {
+  ProductModifierGroup,
+  ProductUpsertInput,
+} from "@/types/database";
+import {
+  MAX_MODIFIER_GROUPS,
+  serializeProductModifiers,
+} from "@/lib/products/modifiers";
 
 const MAX_NAME = 120;
 const MAX_DESC = 500;
@@ -122,9 +129,27 @@ export function validateProductInput(
     wholesale_price = wp;
   }
 
-  const modifiers_json = input.modifiers_json ?? null;
-  if (modifiers_json && !Array.isArray(modifiers_json)) {
-    return { ok: false, message: "Invalid modifiers." };
+  const rawModifiers = input.modifiers_json ?? null;
+  let modifiers_json: ProductModifierGroup[] | null = null;
+  if (rawModifiers !== null) {
+    if (!Array.isArray(rawModifiers)) {
+      return { ok: false, message: "Invalid modifiers." };
+    }
+    if (rawModifiers.length > MAX_MODIFIER_GROUPS) {
+      return {
+        ok: false,
+        message: `A product can have at most ${MAX_MODIFIER_GROUPS} customization groups.`,
+      };
+    }
+    modifiers_json = serializeProductModifiers(
+      rawModifiers as ProductModifierGroup[],
+    );
+    if (modifiers_json.length !== rawModifiers.length) {
+      return {
+        ok: false,
+        message: "Give every group a name and at least one priced option.",
+      };
+    }
   }
 
   return {

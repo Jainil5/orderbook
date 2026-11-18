@@ -16,7 +16,6 @@ describe("buildWorkspaceNavItems", () => {
       "/manager",
       "/analytics",
       "/customers",
-      "/payments",
       "/settings",
     ]);
   });
@@ -32,7 +31,7 @@ describe("buildWorkspaceNavItems", () => {
     expect(items.find((i) => i.href === "/orders")?.label).toBe("Quotes & bills");
   });
 
-  it("adds Manager with all six children by default", () => {
+  it("adds Manager with all seven children by default", () => {
     const manager = buildWorkspaceNavItems(false, profile).find(
       (i) => i.href === "/manager",
     );
@@ -44,7 +43,17 @@ describe("buildWorkspaceNavItems", () => {
       "/manager/visits",
       "/manager/schedules",
       "/manager/tasks",
+      "/manager/payments",
     ]);
+  });
+
+  it("nests Payments under Manager instead of the top level", () => {
+    const items = buildWorkspaceNavItems(false, profile);
+    expect(items.map((i) => i.href)).not.toContain("/payments");
+    const payments = items
+      .find((i) => i.href === "/manager")
+      ?.children?.find((c) => c.href === "/manager/payments");
+    expect(payments?.label).toBe("Payments");
   });
 
   it("adds the leads board for project businesses", () => {
@@ -52,7 +61,7 @@ describe("buildWorkspaceNavItems", () => {
       (i) => i.href === "/manager",
     );
     expect(manager?.children?.map((c) => c.href)).toContain("/manager/leads");
-    expect(manager?.children).toHaveLength(7);
+    expect(manager?.children).toHaveLength(8);
   });
 
   it("drops hidden modules from Manager children", () => {
@@ -60,7 +69,16 @@ describe("buildWorkspaceNavItems", () => {
       (i) => i.href === "/manager",
     );
     expect(manager?.children?.some((c) => c.href === "/manager/visits")).toBe(false);
-    expect(manager?.children).toHaveLength(5);
+    expect(manager?.children).toHaveLength(6);
+  });
+
+  it("can hide the payments sub-module", () => {
+    const manager = buildWorkspaceNavItems(false, profile, ["payments"]).find(
+      (i) => i.href === "/manager",
+    );
+    expect(manager?.children?.some((c) => c.href === "/manager/payments")).toBe(
+      false,
+    );
   });
 
   it("gives Customers the CRM modules as children", () => {

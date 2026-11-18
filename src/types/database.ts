@@ -52,16 +52,51 @@ export type Product = {
   stock_qty?: number | null;
   low_stock_threshold?: number | null;
   wholesale_price?: number | null;
-  modifiers_json?: ProductModifier[] | null;
+  modifiers_json?: ProductModifiersJson | null;
   /** Catalog flag: cashier cannot add it to a bill (Billing shows NA). */
   unavailable?: boolean;
 };
 
+/**
+ * One choice inside a modifier group. `price` is a signed delta over the
+ * product's list price for this line, so a smaller size can be `-30` and an
+ * extra shot `+40`. Zero means "same price, different preference".
+ */
+export type ProductModifierOption = {
+  id: string;
+  name: string;
+  price: number;
+  /**
+   * Preselected for the cashier. Single groups fall back to their default when
+   * a line carries no pick from that group, so a required choice always has a
+   * price. On multi groups it is a preselection only — unchecking it sticks.
+   */
+  default?: boolean;
+};
+
+/**
+ * A named set of choices asked for at billing time. `single` renders as radios
+ * (exactly one option, e.g. Size), `multi` as checkboxes (any subset, e.g.
+ * Add-ons). `required` on a single group means the line must resolve to one of
+ * its options — the default fills in when nothing is picked.
+ */
+export type ProductModifierGroup = {
+  id: string;
+  name: string;
+  type: "single" | "multi";
+  required?: boolean;
+  options: ProductModifierOption[];
+};
+
+/** Legacy flat add-on row (`{id, name, price}`), normalised to one multi group. */
 export type ProductModifier = {
   id: string;
   name: string;
   price: number;
 };
+
+/** What `products.modifiers_json` may hold: modifier groups, or a legacy flat list. */
+export type ProductModifiersJson = (ProductModifierGroup | ProductModifier)[];
 
 export type ProductUpsertInput = {
   name: string;
@@ -77,7 +112,8 @@ export type ProductUpsertInput = {
   stock_qty?: number | null | string;
   low_stock_threshold?: number | null | string;
   wholesale_price?: number | null | string;
-  modifiers_json?: ProductModifier[] | null;
+  /** Group editor writes normalized groups; legacy flat rows still read. */
+  modifiers_json?: ProductModifierGroup[] | null;
 };
 
 export type CustomerUpsertInput = {
@@ -229,6 +265,95 @@ export type StockAdjustment = {
   delta_qty: number;
   reason: string;
   created_at: string;
+};
+
+/**
+ * Kitchen / workshop stock — the things that are bought in packs and eaten up
+ * by sales, as opposed to `Product.stock_qty`, which counts sellable units.
+ * `unit` is the smallest thing actually consumed ("slice", "ml", "sq ft") and
+ * `units_per_pack` says how many of those one purchased pack yields, so a
+ * merchant can record "6 packs of 18 slices" instead of doing the maths.
+ */
+export type InventoryStorage =
+  | "ambient"
+  | "dry"
+  | "refrigerated"
+  | "frozen"
+  | "flammable";
+
+export type InventoryItem = {
+  id: string;
+  brand_id: string;
+  name: string;
+  category: string | null;
+  unit: string;
+  units_per_pack: number;
+  cost_per_pack: number;
+  stock_packs: number;
+  low_stock_packs: number;
+  storage?: InventoryStorage | null;
+  note: string | null;
+};
+
+/**
+ * One line of a product's recipe / bill of materials: how much of an
+ * inventory item making a single sold unit consumes. Counter-service food
+ * brands ship these; project brands (furniture) issue materials per job
+ * instead, so a pack without a recipe file is a valid state, not a gap.
+ */
+export type ProductIngredient = {
+  id: string;
+  brand_id: string;
+  product_id: string;
+  item_id: string;
+  qty_per_sale: number;
+  note: string | null;
+};
+
+export type InventoryAdjustmentKind =
+  | "purchase"
+  | "waste"
+  | "stock_count"
+  | "issue";
+
+/** Paper trail behind `InventoryItem.stock_packs`: goods in, goods out. */
+export type InventoryAdjustment = {
+  id: string;
+  brand_id: string;
+  item_id: string;
+  delta_packs: number;
+  kind: InventoryAdjustmentKind;
+  /** Paid for this movement, when it was a purchase. */
+  cost: number | null;
+  note: string | null;
+  created_at: string;
+};
+
+export type InventoryItemUpsertInput = {
+  name: string;
+  category?: string | null;
+  unit: string;
+  units_per_pack: number | string;
+  cost_per_pack: number | string;
+  stock_packs: number | string;
+  low_stock_packs?: number | string;
+  storage?: InventoryStorage | null;
+  note?: string | null;
+};
+
+export type InventoryAdjustmentInput = {
+  itemId: string;
+  deltaPacks: number | string;
+  kind: InventoryAdjustmentKind;
+  cost?: number | string | null;
+  note?: string | null;
+};
+
+/** One ingredient row as typed in the product editor. */
+export type ProductIngredientInput = {
+  itemId: string;
+  qtyPerSale: number | string;
+  note?: string | null;
 };
 
 export type CreateOrderLineInput = {

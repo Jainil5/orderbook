@@ -4,6 +4,11 @@ import { describe, expect, it } from "vitest";
 import { getDemoBrandPack } from "./index";
 import { DEMO_LIMITS } from "../read-only";
 import { REVIEW_SOURCES } from "@/types/crm";
+import {
+  modifierLabels,
+  modifierPriceDelta,
+  parseProductModifiers,
+} from "@/lib/products/modifiers";
 
 const ROOT = resolve(import.meta.dirname, "../../../..");
 
@@ -187,5 +192,39 @@ describe("CSV demo packs", () => {
     expect(pack.products.filter((p) => p.category === "Desserts")).toHaveLength(2);
     const pastry = pack.products.find((p) => p.name === "Seasonal Pastry");
     expect(pastry?.default_discount_percent).toBe(50);
+  });
+
+  it("BR-1 ships customization groups; BR-2 still reads as a legacy add-on list", () => {
+    const cafe = getDemoBrandPack("BR-1");
+    const byId = (id: string) => cafe.products.find((p) => p.id === id)!;
+    const groupsOf = (id: string) => parseProductModifiers(byId(id));
+
+    expect(groupsOf("p1").map((g) => [g.id, g.type, !!g.required])).toEqual([
+      ["size", "single", true],
+      ["addons", "multi", false],
+    ]);
+    const size = groupsOf("p1")[0];
+    expect(size.options.map((o) => o.price)).toEqual([-30, 0, 40]);
+    expect(size.options.filter((o) => o.default).map((o) => o.id)).toEqual(["md"]);
+
+    expect(modifierPriceDelta(byId("p14"), ["icecream"])).toBe(30);
+    const fries = byId("p18");
+    expect(fries.name).toBe("French Fries");
+    expect(modifierLabels(fries, ["peri"])).toBe("Peri peri");
+    expect(modifierPriceDelta(fries, ["peri", "cheese"])).toBe(40);
+
+    // A hand-edited row that silently fails to parse would drop choices at
+    // checkout, so every stored row has to survive the parser intact.
+    for (const p of cafe.products) {
+      const raw = Array.isArray(p.modifiers_json) ? p.modifiers_json : [];
+      expect(parseProductModifiers(p).length, p.id).toBe(raw.length);
+    }
+
+    const furniture = getDemoBrandPack("BR-2");
+    const flat = parseProductModifiers(
+      furniture.products.find((p) => p.id === "fp1")!,
+    );
+    expect(flat).toHaveLength(1);
+    expect(flat[0]).toMatchObject({ id: "addons", name: "Add-ons", type: "multi" });
   });
 });

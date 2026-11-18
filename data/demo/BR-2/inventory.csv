@@ -1,0 +1,23 @@
+id,brand_id,name,category,unit,units_per_pack,cost_per_pack,stock_packs,low_stock_packs,storage,note
+fv1,demo-cubig-furniture,BWP Plywood Sheet 18mm,Wood & boards,sq ft,40,2850.00,12,5,dry,1 sheet = 40 sq ft usable after nesting cuts
+fv2,demo-cubig-furniture,MR Grade Plywood Sheet 12mm,Wood & boards,sq ft,40,1650.00,9,4,dry,"1 sheet = 40 sq ft, carcases and drawer bottoms"
+fv3,demo-cubig-furniture,MDF Board 6mm,Wood & boards,sheet,1,1450.00,0,3,dry,"Backordered till Friday, shift cut jobs to 18 mm ply"
+fv4,demo-cubig-furniture,Teak Hardwood Plank,Wood & boards,metre,4,3200.00,6,3,dry,1 bundle = 4 metres of 4 by 2 inch stock
+fv5,demo-cubig-furniture,PVC Edge Banding Coil,Wood & boards,metre,50,1250.00,7,3,dry,"1 coil = 50 metres, iron on at 140 C"
+fv6,demo-cubig-furniture,High Density PU Foam Sheet,Foam & padding,sheet,5,1950.00,9,4,dry,"1 bale = 5 sheets of 4 by 6 ft, D28 seat grade"
+fv7,demo-cubig-furniture,Performance Fabric Melange,Fabric & leather,metre,25,3750.00,5,2,dry,"1 roll = 25 linear metres, 58 inch wide"
+fv8,demo-cubig-furniture,Vegan Leather Roll,Fabric & leather,sq ft,30,2600.00,3,3,dry,"1 pack = 30 sq ft, wipe clean finish for bar stools"
+fv9,demo-cubig-furniture,Self Tapping Screws 25mm,Hardware,ea,500,420.00,14,5,dry,"1 box = 500 screws, keep a bin open on the bench"
+fv10,demo-cubig-furniture,Soft Close Drawer Channel 18 Inch,Hardware,pair,1,780.00,10,4,dry,"1 pack = 1 pair, wardrobes use 2 pairs"
+fv11,demo-cubig-furniture,Concealed Hinge Soft Close,Hardware,ea,20,950.00,7,3,dry,"1 bag = 20 hinges, 2 hinges per shutter"
+fv12,demo-cubig-furniture,Powder Coated Table Leg,Hardware,ea,4,1800.00,5,2,dry,"1 set = 4 legs at 72 cm, dining and desks"
+fv13,demo-cubig-furniture,Wood Glue D3,Finishes,ml,1000,340.00,8,3,dry,"1 can = 1000 ml, clamp 30 minutes minimum"
+fv14,demo-cubig-furniture,NC Lacquer Clear,Finishes,ml,1000,780.00,5,2,flammable,"1 tin = 1000 ml, spray only in the booth"
+fv15,demo-cubig-furniture,PU Polish Satin,Finishes,ml,900,1250.00,3,2,flammable,"1 tin = 900 ml, two coats on table tops"
+fv16,demo-cubig-furniture,Cellulose Thinner,Finishes,ml,1000,320.00,1,2,flammable,"1 can = 1000 ml, flush spray lines daily"
+fv17,demo-cubig-furniture,Beeswax Furniture Finish,Finishes,g,500,450.00,4,2,dry,"1 tin = 500 g, final hand rub before dispatch"
+fv18,demo-cubig-furniture,Sandpaper Assortment 80 To 400 Grit,Shop consumables,sheet,50,600.00,2,3,dry,"1 pack = 50 sheets, mixed grits"
+fv19,demo-cubig-furniture,Cotton Work Gloves,Shop consumables,pair,12,300.00,5,2,ambient,"1 packet = 12 pairs, sizing 9 and 10"
+fv20,demo-cubig-furniture,Bubble Wrap Roll,Packaging,metre,50,1400.00,6,3,ambient,"1 roll = 50 metres, 1200 mm wide"
+fv21,demo-cubig-furniture,Five Ply Carton,Packaging,ea,20,1100.00,7,3,dry,"1 bundle = 20 flat cartons, bedside and stools"
+fv22,demo-cubig-furniture,Stretch Film Roll,Packaging,ea,6,720.00,4,2,dry,"1 pack = 6 rolls, wrap sofas twice"

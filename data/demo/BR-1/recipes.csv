@@ -1,0 +1,61 @@
+id,brand_id,product_id,item_id,qty_per_sale,note
+rc1,demo-brewery-cafe,p1,iv15,1,1 double shot per cup
+rc2,demo-brewery-cafe,p1,iv3,150,150 ml steamed milk in a 6 oz cup
+rc3,demo-brewery-cafe,p1,iv28,1,"cup for takeaway, ceramic in house"
+rc4,demo-brewery-cafe,p1,iv29,1,lid on takeaway only
+rc5,demo-brewery-cafe,p1,iv17,1,decaf add-on swaps this for iv15
+rc6,demo-brewery-cafe,p2,iv18,120,120 ml concentrate made up with filtered water
+rc7,demo-brewery-cafe,p2,iv21,15,"default sweetener, skip on request"
+rc8,demo-brewery-cafe,p2,iv28,1,12 oz cup
+rc9,demo-brewery-cafe,p2,iv29,1,flat lid
+rc10,demo-brewery-cafe,p2,iv32,1,paper straw for cold pours
+rc11,demo-brewery-cafe,p3,iv1,2,2 slices per toast
+rc12,demo-brewery-cafe,p3,iv12,1,"1 avocado per plate, mash with lime"
+rc13,demo-brewery-cafe,p3,iv13,1,juice of 1 lime
+rc14,demo-brewery-cafe,p3,iv25,2,"chili flake dusting, peri peri stands in"
+rc15,demo-brewery-cafe,p3,iv26,1,smoked chicken add-on only
+rc16,demo-brewery-cafe,p4,iv24,60,60 g granola per bowl
+rc17,demo-brewery-cafe,p4,iv5,150,150 g yogurt
+rc18,demo-brewery-cafe,p4,iv22,15,honey drizzle to finish
+rc19,demo-brewery-cafe,p4,iv14,30,30 ml pulp over the seasonal fruit
+rc20,demo-brewery-cafe,p7,iv15,1,"18 g in, 36 g out, double shot"
+rc21,demo-brewery-cafe,p7,iv28,1,paper cup when served to go
+rc22,demo-brewery-cafe,p7,iv30,1,1 napkin under the cup
+rc23,demo-brewery-cafe,p8,iv15,1,1 double shot
+rc24,demo-brewery-cafe,p8,iv3,180,180 ml milk steamed to 60 C
+rc25,demo-brewery-cafe,p8,iv4,120,oat milk add-on only
+rc26,demo-brewery-cafe,p8,iv17,1,decaf add-on only
+rc27,demo-brewery-cafe,p8,iv28,1,cup for takeaway
+rc28,demo-brewery-cafe,p10,iv15,2,double shot
+rc29,demo-brewery-cafe,p10,iv3,200,200 ml velvet milk
+rc30,demo-brewery-cafe,p10,iv21,20,2 pumps of vanilla syrup base
+rc31,demo-brewery-cafe,p10,iv29,1,"lid, extra syrup add-on adds 20 ml more"
+rc32,demo-brewery-cafe,p13,iv20,40,40 g powder per cup
+rc33,demo-brewery-cafe,p13,iv3,200,"200 ml milk, no foam"
+rc34,demo-brewery-cafe,p13,iv28,1,cup for takeaway
+rc35,demo-brewery-cafe,p13,iv29,1,lid on takeaway only
+rc36,demo-brewery-cafe,p14,iv14,120,120 ml Alphonso pulp per glass
+rc37,demo-brewery-cafe,p14,iv5,150,150 g yogurt
+rc38,demo-brewery-cafe,p14,iv22,15,"a little honey, skip on request"
+rc39,demo-brewery-cafe,p14,iv6,1,with ice cream add-on only
+rc40,demo-brewery-cafe,p14,iv23,1,"protein boost add-on only, 1 scoop = 30 g"
+rc41,demo-brewery-cafe,p15,iv13,1,"juice of 1 lime, about 30 ml"
+rc42,demo-brewery-cafe,p15,iv19,120,120 ml soda top up
+rc43,demo-brewery-cafe,p15,iv21,20,sweet and mixed styles only
+rc44,demo-brewery-cafe,p15,iv32,1,straw
+rc45,demo-brewery-cafe,p16,iv1,2,2 slices per sandwich
+rc46,demo-brewery-cafe,p16,iv7,2,"2 cheese slices, hold the item while iv7 is at zero"
+rc47,demo-brewery-cafe,p16,iv9,3,3 tomato slices
+rc48,demo-brewery-cafe,p16,iv11,3,3 cucumber slices
+rc49,demo-brewery-cafe,p16,iv10,2,2 lettuce leaves
+rc50,demo-brewery-cafe,p18,iv27,180,180 g frozen fries per plate
+rc51,demo-brewery-cafe,p18,iv25,3,peri peri option only
+rc52,demo-brewery-cafe,p18,iv31,1,kraft box for delivery orders
+rc53,demo-brewery-cafe,p19,iv2,2,2 rolls split lengthwise
+rc54,demo-brewery-cafe,p19,iv8,25,25 g garlic butter per plate
+rc55,demo-brewery-cafe,p19,iv7,2,2 cheese slices melted over
+rc56,demo-brewery-cafe,p19,iv25,1,herb chili finish
+rc57,demo-brewery-cafe,p24,iv20,25,"batch bake, 25 g cocoa powder per piece"
+rc58,demo-brewery-cafe,p24,iv8,20,"batch bake, 20 g butter per piece"
+rc59,demo-brewery-cafe,p24,iv6,1,served warm with 1 vanilla scoop
+rc60,demo-brewery-cafe,p24,iv31,1,box for takeaway

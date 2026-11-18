@@ -38,6 +38,10 @@ export const DEMO_LIMITS = {
   /** Ledger-ish logs: trimmed silently, never a hard stop. */
   stockAdjustments: 40,
   refunds: 30,
+  /** Kitchen/workshop stock: items a session adds on top of the pack. */
+  inventory: 40,
+  /** Purchases, wastage and per-order consumption. Trimmed, not blocked. */
+  inventoryLedger: 120,
 } as const;
 
 export const DEMO_LIMIT_MESSAGE =

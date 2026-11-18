@@ -16,6 +16,7 @@ describe("manager modules", () => {
       "visits",
       "schedules",
       "tasks",
+      "payments",
     ]);
     expect(MANAGER_MODULES.every((m) => m.href.startsWith("/manager/"))).toBe(true);
   });
@@ -27,6 +28,7 @@ describe("manager modules", () => {
       "appointments",
       "schedules",
       "tasks",
+      "payments",
     ]);
   });
 
@@ -40,6 +42,15 @@ describe("manager modules", () => {
     expect(
       visibleManagerModules(["leads"], "project").map((m) => m.key),
     ).not.toContain("leads");
+  });
+
+  it("exposes payments as a Manager sub-module for every business", () => {
+    const payments = MANAGER_MODULES.find((m) => m.key === "payments");
+    expect(payments?.href).toBe("/manager/payments");
+    expect(payments?.projectOnly).toBe(false);
+    expect(visibleManagerModules([], "counter").map((m) => m.key)).toContain(
+      "payments",
+    );
   });
 
   it("ignores unknown keys in the hidden list", () => {

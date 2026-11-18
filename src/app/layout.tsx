@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { CardGlow } from "@/components/effects/card-glow";
 import {
@@ -57,6 +59,8 @@ export default async function RootLayout({
       <body className="flex min-h-full flex-col">
         <CardGlow />
         {children}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
