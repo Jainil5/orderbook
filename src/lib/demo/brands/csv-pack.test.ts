@@ -44,6 +44,52 @@ describe("CSV demo packs", () => {
       expect(max).toBeGreaterThanOrEqual(today.getTime());
       expect(max).toBeLessThan(today.getTime() + 86400000);
     });
+    it(`${code}: purchasing rows hang together`, () => {
+      const vendorIds = new Set(pack.vendors.map((v) => v.id));
+      const poIds = new Set(pack.purchaseOrders.map((po) => po.id));
+      const itemIds = new Set(pack.inventory.map((item) => item.id));
+      const byId = new Map(pack.purchaseOrders.map((po) => [po.id, po]));
+      const linesByPo = new Map<string, typeof pack.purchaseOrderLines>();
+      expect(pack.vendors.length).toBeGreaterThanOrEqual(2);
+      expect(pack.vendors.length).toBeLessThanOrEqual(DEMO_LIMITS.vendors);
+      expect(pack.purchaseOrders.length).toBeLessThanOrEqual(DEMO_LIMITS.purchaseOrders);
+      expect(pack.purchaseOrderLines.length).toBeLessThanOrEqual(
+        DEMO_LIMITS.purchaseOrderLines,
+      );
+      for (const po of pack.purchaseOrders) {
+        expect(vendorIds.has(po.vendor_id), po.id).toBe(true);
+        expect(new Date(po.created_at).getTime(), po.id).toBeLessThan(
+          Date.now() + 86400000,
+        );
+        if (po.status !== "draft") expect(po.sent_at, po.id).not.toBeNull();
+      }
+      for (const line of pack.purchaseOrderLines) {
+        expect(poIds.has(line.po_id), line.id).toBe(true);
+        expect(itemIds.has(line.item_id), line.id).toBe(true);
+        expect(line.received_packs, line.id).toBeLessThanOrEqual(line.packs);
+        expect(line.received_packs, line.id).toBeGreaterThanOrEqual(0);
+        const named = byId.get(line.po_id)!;
+        // The snapshot has to match the item the shelf still calls it.
+        const item = pack.inventory.find((row) => row.id === line.item_id)!;
+        expect(line.item_name, line.id).toBe(item.name);
+        // A draft can hold nothing; a closed order must have taken everything.
+        if (named.status === "draft") expect(line.received_packs, line.id).toBe(0);
+        if (named.status === "received") {
+          expect(line.received_packs, line.id).toBe(line.packs);
+        }
+        const list = linesByPo.get(line.po_id) ?? [];
+        list.push(line);
+        linesByPo.set(line.po_id, list);
+      }
+      for (const po of pack.purchaseOrders) {
+        if (po.status === "received" || po.status === "cancelled") {
+          expect(po.closed_at, po.id).not.toBeNull();
+        }
+        if (po.status !== "draft") {
+          expect(linesByPo.get(po.id)?.length, po.id).toBeGreaterThan(0);
+        }
+      }
+    });
     it(`${code}: stays inside the caps with a floor of rows per table`, () => {
       expect(pack.orders).toHaveLength(20);
       expect(pack.products.length).toBeLessThanOrEqual(DEMO_LIMITS.products);

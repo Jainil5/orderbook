@@ -32,10 +32,11 @@ import {
   findCustomerByPhone,
   phoneDigits,
 } from "@/lib/demo/customer-identity";
-import { sanitizePaymentMethod } from "@/lib/security/input";
+import { isValidOptionalCustomerPhone, sanitizePaymentMethod } from "@/lib/security/input";
 import { roundMoney } from "@/lib/pricing/discounts";
 import type { DemoBrandCode } from "@/lib/workspace/constants";
 import {
+  DEMO_BRAND_CODES,
   DEMO_WORKSPACE_COOKIE,
   parseDemoBrandCodeFromCookie,
 } from "@/lib/workspace/constants";
@@ -423,6 +424,178 @@ export async function submitDemoOrder(
   });
   revalidateAll();
   return { ok: true, orderId: order.id, orderNumber: order.order_number };
+}
+
+export type WebOrderLineInput = {
+  productId: string;
+  quantity: number;
+  modifierIds?: string[];
+};
+
+export type WebOrderInput = {
+  customerName: string;
+  phone?: string;
+  fulfilment: "takeaway" | "delivery";
+  address?: string;
+  notes?: string;
+  offerCode?: string;
+  lines: WebOrderLineInput[];
+};
+
+export type WebOrderResult =
+  | {
+      ok: true;
+      orderId: string;
+      orderNumber: string;
+      grandTotal: number;
+      itemCount: number;
+    }
+  | { ok: false; message: string };
+
+/**
+ * Orders placed on the public brand website (`/site/BR-1`, `/site/BR-2`).
+ * Unlike the workspace actions this takes the brand code explicitly — the
+ * visitor has no workspace cookie — and writes straight into that brand's
+ * demo bucket, so the ticket shows up in the merchant's Orders board with the
+ * "Online order" badge and their name, modifiers and note attached.
+ */
+export async function placeWebOrder(
+  brandCodeInput: string,
+  input: WebOrderInput,
+): Promise<WebOrderResult> {
+  const code = resolveDemoBrandCode(brandCodeInput);
+  if (
+    !brandCodeInput ||
+    brandCodeInput.trim().toUpperCase() !== code ||
+    !(DEMO_BRAND_CODES as readonly string[]).includes(
+      brandCodeInput.trim().toUpperCase(),
+    )
+  ) {
+    return { ok: false, message: "This brand site does not exist." };
+  }
+  const pack = getDemoBrandPack(code);
+  const bucket = await readDemoMutableBucket(code);
+  const customers = mergeDemoCustomers(pack.customers, bucket);
+
+  const name = input.customerName.trim().slice(0, 60);
+  if (!name) {
+    return { ok: false, message: "Tell us who the order is for." };
+  }
+  const rawPhone = input.phone?.trim() ?? "";
+  if (rawPhone && !isValidOptionalCustomerPhone(rawPhone)) {
+    return { ok: false, message: "Enter a valid mobile number (8–15 digits)." };
+  }
+  const delivery = input.fulfilment === "delivery";
+  const address = delivery ? input.address?.trim().slice(0, 240) ?? "" : "";
+  if (delivery && !address) {
+    return { ok: false, message: "Add a delivery address." };
+  }
+  const notes = input.notes?.trim().slice(0, 300) ?? "";
+
+  const lines = input.lines.slice(0, 20).map((line) => ({
+    productId: String(line.productId ?? "").trim(),
+    quantity: Math.max(1, Math.min(20, Math.round(Number(line.quantity) || 0))),
+    modifierIds: Array.isArray(line.modifierIds)
+      ? line.modifierIds.slice(0, 8).map(String)
+      : [],
+  }));
+
+  // Match the phone against existing customers, else create one (capped), so
+  // the workspace order and CRM show a real name instead of "walk-in".
+  let customerId: string | null = null;
+  let customerName = name;
+  let createdCustomer: Customer | null = null;
+  if (phoneDigits(rawPhone)) {
+    const matched = findCustomerByPhone(customers, rawPhone);
+    if (matched) {
+      customerId = matched.id;
+      customerName = matched.name;
+    } else if (bucket.customers.length < DEMO_LIMITS.customers) {
+      createdCustomer = {
+        id: newOpsId("demo-customer"),
+        brand_id: pack.brand.id,
+        name,
+        email: null,
+        phone: rawPhone,
+        notes: "Order placed on the brand website",
+        price_tier: "retail",
+        created_at: new Date().toISOString(),
+      };
+      customerId = createdCustomer.id;
+    }
+  }
+
+  const record = buildOrderRecord({
+    brandId: pack.brand.id,
+    orderId: newOpsId("demo-order"),
+    orderNumber: await nextDocumentNumber(code),
+    products: mergeDemoProducts(pack.products, bucket),
+    customers: createdCustomer ? [createdCustomer, ...customers] : customers,
+    taxRatePercent: pack.settings.tax_rate_percent ?? 0,
+    input: {
+      customerId,
+      walkInName: customerId ? undefined : customerName,
+      customerPhone: rawPhone || null,
+      notes,
+      lines,
+      offerCode: input.offerCode?.trim().slice(0, 64),
+      paymentMethod: "",
+      paymentStatus: "pending",
+      orderType: "online",
+      deliveryNotes: delivery
+        ? `Website order — deliver to ${address}`
+        : "Website order — pickup at counter",
+    },
+    offers: mergeDemoOffers(pack.offers, bucket),
+  });
+  if (!record.ok) {
+    return { ok: false, message: record.message };
+  }
+  const { order, items } = record.record;
+  if (createdCustomer) {
+    await updateDemoMutableBucket(code, (b) => ({
+      ...b,
+      customers: [createdCustomer, ...b.customers],
+    }));
+  }
+  await appendDemoOrderRecord(code, order, items);
+  await recordOrderConsumption(code, pack, order, items);
+
+  await appendDemoAudit(code, {
+    brand_id: pack.brand.id,
+    actor_email: null,
+    action: "order.created",
+    entity_type: "order",
+    entity_id: order.id,
+    detail: `${order.order_number} · website order by ${customerName}`,
+  });
+
+  revalidateAll();
+  return {
+    ok: true,
+    orderId: order.id,
+    orderNumber: order.order_number,
+    grandTotal: order.grand_total,
+    itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
+  };
+}
+
+/** Online orders for the workspace bell — newest first, any age. */
+export async function demoWebOrderFeed(): Promise<
+  { order: Order; itemCount: number }[]
+> {
+  const code = await activeDemoBrandCode();
+  const pack = getDemoBrandPack(code);
+  const stored = await readDemoOrderStore(code);
+  const itemsById = new Map<string, number>();
+  for (const item of [...pack.orderItems, ...stored.orderItems]) {
+    itemsById.set(item.order_id, (itemsById.get(item.order_id) ?? 0) + item.quantity);
+  }
+  const orders = await mergedDemoOrders(code);
+  return orders
+    .filter((order) => order.order_type === "online")
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .map((order) => ({ order, itemCount: itemsById.get(order.id) ?? 0 }));
 }
 
 export async function saveDemoCustomer(input: CustomerUpsertInput) {

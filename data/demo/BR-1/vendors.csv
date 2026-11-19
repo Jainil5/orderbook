@@ -1,0 +1,6 @@
+id,brand_id,name,category,contact_name,phone,email,lead_time_days,payment_terms,rating,note,active
+vnd1,demo-brewery-cafe,Green Lane Produce,Vegetables,Farhan Qureshi,+91 98200 41122,orders@greenlaneproduce.example,1,cash,4.5,Morning van. Tomato and lettuce shortfalls come up on Fridays.,true
+vnd2,demo-brewery-cafe,Milkma Dairy Co,Dairy,Sneha Rao,+91 98200 55310,supply@milkma.example,1,net_15,4.2,"Chilled van at 6am. Cheese slices run out at their end, so order a day early.",true
+vnd3,demo-brewery-cafe,Roast and Grind Coffee,Beverages,Ishan Mehta,+91 98200 77143,hello@roastgrind.example,3,net_30,4.8,Roasts on Tuesdays. Beans leave the roastery the next morning.,true
+vnd4,demo-brewery-cafe,PackRight Supplies,Packaging,Nita D Souza,+91 98200 29087,sales@packright.example,4,upi,3.6,Cheapest cups and lids in the city. Six-pack minimum on every line.,true
+vnd5,demo-brewery-cafe,Cold Chain Beverages,Beverages,Karan Bhatia,+91 98200 63455,despatch@coldchain.example,2,net_15,4.1,Soda and syrups. Delivers to the back ramp.,true

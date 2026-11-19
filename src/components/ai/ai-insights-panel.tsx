@@ -9,7 +9,6 @@ import {
   Copy,
   Loader2,
   Sparkles,
-  Star,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,35 +16,46 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   AI_INSIGHT_PROMPTS,
+  PREWRITTEN_SUMMARIES,
   aiSummaryHint,
   type AiInsightData,
   type AiInsightKind,
   type AiInsightPrompt,
+  type PrewrittenSummary,
   type InsightResult,
 } from "@/lib/ai/insights";
 import { requestInsight } from "@/lib/ai/request-insight";
 
 /** Which icon each summary card wears. */
 const SUMMARY_ICONS: Partial<Record<AiInsightKind, typeof CalendarDays>> = {
-  month_summary: CalendarDays,
+  today_report: CalendarDays,
   week_summary: CalendarDays,
-  reviews_summary: Star,
-  key_points: ClipboardList,
+  month_summary: CalendarDays,
+  suggestions: ClipboardList,
 };
 
 /**
  * The AI Insights tab.
  *
- * Four summary cards sit in a 2×2 grid because those are the reads a merchant
- * asks for unprompted — last month, last week, the reviews, the key points.
- * Everything narrower than that stays a button underneath.
+ * Four summary cards sit in a 2×2 grid and they arrive already written — today,
+ * last week, last month, and the suggestions those imply. The page composes them
+ * on the server from the same rows, so the tab opens with an answer on screen and
+ * a card only has to be read, not run. Everything narrower than that stays a
+ * button underneath, and those still take the drafting trip.
  *
  * Both call `requestInsight`, which today composes the brief in the browser
  * from the rows this workspace already loaded. That single function is where the
  * Python service gets wired in — the panel, its pending state and its result
  * shape already assume a round trip.
  */
-export function AiInsightsPanel({ data }: { data: AiInsightData }) {
+export function AiInsightsPanel({
+  data,
+  prewritten,
+}: {
+  data: AiInsightData;
+  /** The four cards' briefs, already composed on the server. */
+  prewritten: Record<PrewrittenSummary, InsightResult>;
+}) {
   const reduceMotion = useReducedMotion();
   const [pending, setPending] = useState<AiInsightKind | "ask" | null>(null);
   const [result, setResult] = useState<InsightResult | null>(null);
@@ -74,6 +84,15 @@ export function AiInsightsPanel({ data }: { data: AiInsightData }) {
     }
   }
 
+  /** A pre-written card needs no round trip — opening it is instant. */
+  function openPrewritten(brief: InsightResult) {
+    setError(null);
+    setCopied(false);
+    setResult(brief);
+    setAsked(null);
+    setDraft((n) => n + 1);
+  }
+
   async function ask(text: string) {
     setPending("ask");
     setError(null);
@@ -99,9 +118,10 @@ export function AiInsightsPanel({ data }: { data: AiInsightData }) {
     }
   }
 
-  const summaries = AI_INSIGHT_PROMPTS.filter(
-    (prompt) => prompt.group === "summary",
-  );
+  const cards = PREWRITTEN_SUMMARIES.flatMap((kind) => {
+    const prompt = AI_INSIGHT_PROMPTS.find((item) => item.kind === kind);
+    return prompt ? [{ kind, prompt, brief: prewritten[kind] }] : [];
+  });
   const briefs = AI_INSIGHT_PROMPTS.filter((prompt) => prompt.group === "brief");
 
   return (
@@ -111,24 +131,24 @@ export function AiInsightsPanel({ data }: { data: AiInsightData }) {
           <h2 id="ob-ai-summaries" className="font-display text-lg font-semibold">
             AI summaries
           </h2>
-          <Badge tone="demo">Drafted locally — no model wired yet</Badge>
+          <Badge tone="demo">Written from these rows — no model wired yet</Badge>
         </div>
         <p className="max-w-3xl text-sm text-[var(--ob-text-muted)]">
           Every figure is summed from bills, payments, customers, reviews and
-          shelf positions this workspace already holds.
+          shelf positions this workspace already holds, and the four cards below
+          are composed the moment the page loads.
         </p>
 
-        {/* Two rows of two. */}
+        {/* Two rows of two, each one already written. */}
         <div className="grid gap-3 sm:grid-cols-2">
-          {summaries.map((prompt) => (
+          {cards.map(({ kind, prompt, brief }) => (
             <SummaryCard
-              key={prompt.kind}
+              key={kind}
               prompt={prompt}
-              hint={aiSummaryHint(prompt.kind, data)}
-              active={pending === prompt.kind}
-              chosen={!busy && asked === null && result?.kind === prompt.kind}
-              busy={busy}
-              onRun={() => void run(prompt.kind)}
+              brief={brief}
+              hint={aiSummaryHint(kind, data)}
+              chosen={!busy && asked === null && result?.kind === kind}
+              onOpen={() => openPrewritten(brief)}
             />
           ))}
         </div>
@@ -137,7 +157,7 @@ export function AiInsightsPanel({ data }: { data: AiInsightData }) {
       <Card>
         <h2 className="font-display text-lg font-semibold">More AI briefs</h2>
         <p className="mt-1 max-w-2xl text-sm text-[var(--ob-text-muted)]">
-          Nine narrower questions for mid-shift — one window, one angle each.
+          Ten narrower questions for mid-shift — one window, one angle each.
         </p>
 
         <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -233,7 +253,8 @@ export function AiInsightsPanel({ data }: { data: AiInsightData }) {
 
       {!busy && !result && !error ? (
         <p className="text-sm text-[var(--ob-text-muted)]">
-          Pick a summary or a brief above to generate its report.
+          The four summaries above are already written — open one to read it in
+          full, or run a narrower brief.
         </p>
       ) : null}
     </div>
@@ -245,23 +266,22 @@ function labelFor(kind: AiInsightKind): string {
 }
 
 /**
- * One summary card. The `hint` line names the exact window the brief reads, so
- * "last month" is not a guess before the button is pressed.
+ * One pre-written summary card: the window it reads, the line a merchant would
+ * read first, and the three numbers behind it. The button only opens the full
+ * brief below — nothing is generated on click, because it is already here.
  */
 function SummaryCard({
   prompt,
+  brief,
   hint,
-  active,
   chosen,
-  busy,
-  onRun,
+  onOpen,
 }: {
   prompt: AiInsightPrompt;
+  brief: InsightResult;
   hint: string;
-  active: boolean;
   chosen: boolean;
-  busy: boolean;
-  onRun: () => void;
+  onOpen: () => void;
 }) {
   const Icon = SUMMARY_ICONS[prompt.kind] ?? Sparkles;
   return (
@@ -273,28 +293,42 @@ function SummaryCard({
           </span>
           {prompt.label}
         </span>
-        {chosen && !active ? (
+        {chosen ? (
           <Check className="mt-1.5 h-4 w-4 text-[var(--ob-primary)]" aria-hidden />
         ) : null}
       </div>
 
-      <p className="text-sm text-[var(--ob-text-muted)]">{prompt.blurb}</p>
-      <p className="mt-auto border-t border-[var(--ob-line)] pt-2 text-xs text-[var(--ob-text-muted)]">
+      <p className="mt-auto text-[15px] font-medium leading-snug">{brief.headline}</p>
+
+      <dl className="grid grid-cols-3 gap-2">
+        {brief.metrics.slice(0, 3).map((metric) => (
+          <div
+            key={metric.label}
+            className="rounded-[var(--ob-radius-md)] border border-[var(--ob-line)] bg-[var(--ob-tint-wash)] px-2 py-1.5"
+          >
+            <dt className="truncate text-[10px] uppercase tracking-wide text-[var(--ob-text-muted)]">
+              {metric.label}
+            </dt>
+            <dd className="ob-num mt-0.5 text-[13px] font-semibold">{metric.value}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <p className="border-t border-[var(--ob-line)] pt-2 text-xs text-[var(--ob-text-muted)]">
         {hint}
       </p>
 
       <Button
         variant="secondary"
-        onClick={onRun}
-        disabled={busy}
+        onClick={onOpen}
         className="self-start px-4 py-2 text-[13px]"
       >
-        {active ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+        {chosen ? (
+          <Check className="h-3.5 w-3.5" aria-hidden />
         ) : (
           <Sparkles className="h-3.5 w-3.5" aria-hidden />
         )}
-        {active ? "Drafting…" : chosen ? "Generate again" : "Generate"}
+        {chosen ? "Open below" : "Read full brief"}
       </Button>
     </Card>
   );

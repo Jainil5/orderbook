@@ -161,7 +161,7 @@ export function Landing({ summaries }: { summaries: DemoBrandSummary[] }) {
       <header className="ob-glass-bar sticky top-0 z-40 border-b border-[var(--ob-border)]">
         <div className="mx-auto flex h-[72px] max-w-6xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-3">
-            <LogoMark size={36} spin={!reduceMotion} />
+            <LogoMark size={36} />
             <Wordmark
               className="font-display block font-extrabold leading-none"
               size={21}
@@ -196,7 +196,7 @@ export function Landing({ summaries }: { summaries: DemoBrandSummary[] }) {
         {/* Hero */}
         <section className="relative mx-auto max-w-6xl px-4 pb-20 pt-16 sm:pt-24">
           <motion.div variants={child} className="flex justify-center">
-            <LogoMark size={72} spin={!reduceMotion} />
+            <LogoMark size={72} />
           </motion.div>
           <motion.p variants={child} className="ob-label mt-6 text-center">
             WebsiteIn · OrderBook

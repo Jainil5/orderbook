@@ -12,6 +12,11 @@ import type {
 } from "@/types/database";
 import type { StaffMember } from "@/types/manager";
 import type {
+  PurchaseOrder,
+  PurchaseOrderLine,
+  Vendor,
+} from "@/types/procurement";
+import type {
   Appointment,
   FieldVisit,
   Lead,
@@ -48,6 +53,13 @@ export type DemoBrandPack = {
   orderItems: OrderItem[];
   offers: Offer[];
   payments: Payment[];
+  // --- Purchasing ------------------------------------------------------
+  /** Who the brand buys from. */
+  vendors: Vendor[];
+  /** Orders placed on those vendors, header rows. */
+  purchaseOrders: PurchaseOrder[];
+  /** Line items of each purchase order, keyed by `po_id`. */
+  purchaseOrderLines: PurchaseOrderLine[];
   staff: StaffMember[];
   services: Service[];
   serviceJobs: ServiceJob[];

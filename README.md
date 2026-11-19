@@ -24,8 +24,10 @@ Open http://localhost:3000, pick a demo business on the login screen, and
 explore. That's the whole setup — there is nothing to configure.
 
 The sidebar is the map: **Products** holds the catalog, the Inventory tab and
-offers; day-to-day operations sit under **Manager**, which is where Payments
-lives now (`/manager/payments`; the old `/payments` URL redirects there).
+offers; **CRM** (route `/customers`) holds the customer-facing modules; and
+day-to-day operations sit under **Manager**, which is five screens —
+Staff & Schedules, Meetings & Visits, Tasks & Activities, Purchasing & Vendors
+and Payments (`/manager/payments`; the old `/payments` URL redirects there).
 
 | Script | Purpose |
 |--------|---------|
@@ -41,45 +43,120 @@ The dataset lives in **`data/demo/<brand>/*.csv`** — one file per table
 (products, customers, orders, order_items, payments, offers, staff, services,
 service_jobs, appointments, field_visits, shifts, tasks, leads, brand,
 brand_settings) plus the CRM tables (interactions, reviews, complaints,
-segments, campaigns, loyalty_rules, loyalty_ledger, memberships) and the stock
+segments, campaigns, loyalty_rules, loyalty_ledger, memberships), the stock
 tables (`inventory.csv` for both brands, `recipes.csv` for the cafe only — see
-[Inventory and ingredient usage](#inventory-and-ingredient-usage)):
+[Inventory and ingredient usage](#inventory-and-ingredient-usage)) and the
+purchasing tables (`vendors.csv`, `purchase_orders.csv`,
+`purchase_order_lines.csv`, both brands — see
+[Purchasing, vendors and receiving](#purchasing-vendors-and-receiving)):
 
 - `BR-1` — Brewery Cafe (15 products, 10 customers, 20 orders over ~6 months)
 - `BR-2` — Cubig Furniture (8 products, 10 customers, 20 orders, quotations enabled)
 
 Every table ships at least two rows, so no screen opens onto an empty list.
 
-### Adds are switched off — except in the CRM
+### Adds are capped, not switched off
 
-This build is a showcase of a fixed dataset, so nothing can be created: every
-"Add / New" control is hidden and the matching server actions reject with the
-message in [`src/lib/demo/read-only.ts`](src/lib/demo/read-only.ts). Editing
-existing rows — statuses, notes, prices, stock flags, check-ins — still works,
-and those edits persist **per browser** in cookies; the CSVs are never written
-at runtime.
+Creating works in every screen that needs it — bills, quotations, stock items,
+CRM records, manager tasks, vendors and purchase orders. None of it touches the
+CSVs: a new row lands in the same per-browser mutable cookie store an edit
+already uses (`src/lib/demo/mutable-store.ts`), so the seeded packs stay
+byte-for-byte what the showcase stats assert. What a visitor adds stays in that
+browser until its cookies are cleared — logging out of the demo keeps it, on
+purpose, so a bill rung up during a walkthrough is still there on the next
+screen. `src/lib/demo/read-only.ts` holds the caps the demo is sized to (per
+brand): 30 orders (bills, quotations and credit notes together), 15 products,
+10 customers, 30 payments, 40 stock items and 120 stock movements, 20 vendors
+and 30 purchase orders. When a capped collection is full the write is refused
+with a message that says how to reset it; for the document-style collections
+the oldest browser-created row is recycled instead, so seeded history is never
+dropped. `src/lib/demo/brands/csv-pack.test.ts` asserts the shipped packs stay
+inside the caps.
 
-The CRM is the documented exception, because a CRM with nothing to log is not a
-demo of a CRM. Creating an interaction, review, complaint, segment, campaign,
-membership or ledger entry is allowed, and it lands in the same per-browser
-mutable store an edit already uses — so the seeded CSVs still byte-for-byte
-match the numbers the showcase stats assert. Two rules hold in every one of
-those writes (`src/services/crm-actions.ts`): `brand_id` comes from the pack
-and never from the form, and every foreign key is checked against the merged
-rows the server reads, not against what the browser claims. Deleting a customer,
-a product or an order is still refused — those belong to the fixed dataset.
+Two rules hold in every one of those writes: `brand_id` comes from the pack and
+never from the form, and every foreign key is checked against the merged rows
+the server reads, not against what the browser claims. And there is still no
+delete path for a customer, a product or a saved bill — those belong to the
+fixed dataset. Deleting a vendor that an open order still depends on is refused
+too, by name of the order.
 
-The same file holds the caps the demo is sized to (per brand): 30 orders
-(bills, quotations and credit notes together), 15 products, 10 customers,
-30 payments. `src/lib/demo/brands/csv-pack.test.ts` asserts the shipped packs
-stay inside them, and `src/lib/demo/order-store.ts` trims any cookie data that
-would exceed the order cap.
+## Brand websites
+
+Each demo brand has a public storefront at **`/site/BR-1`** (Brewery Cafe) and
+**`/site/BR-2`** (Cubig Furniture) — reachable without signing in, themed per
+brand (`site-br1` espresso-and-caramel, `site-br2` graphite-and-brass), and laid
+out as one editorial page with an anchor nav in the idiom of the reference sites
+they borrow from (Ember Larder's section flow, Cubig's category tiles and
+best-seller rails): statement hero → the card → the room / the workshop → the
+set → voices → notes → visit → footer. Motion is motion.dev plus
+aceternity-style effects written in-repo: cursor-tracked spotlight cards
+(`.site-spot`), sweeping hero beams, Ken-Burns shelf photos, counters that sit
+at zero and roll up when they scroll into view, a looping review belt and
+spring-animated tabs.
+
+Two rows of numbers sit one under the other in the hero, and they say so: the
+counter row is house copy from `src/lib/site/registry.ts` ("12 hrs the cold
+brew steeps", "18 mm solid tops"), and the strip beneath it is counted from the
+pack's own ledger (tickets, customers on file, lines on the card, average
+rating). Everything else the page shows comes from `src/lib/site/menu.ts`: the
+brand's products grouped by their CSV categories, each product's default
+discount folded into the site price, the same Size/Add-on modifier groups the
+counter POS asks for, *Popular* on rows `order_items.csv` sold twice or more, a
+sold-out shelf exactly like Billing's, and a detail line per card — "120
+portions on the shelf · pulled when you order" — built from that row's own
+stock figure. The rail above the grid is the same history sorted by repeat
+volume, and the shelf header counts itself out of the rows.
+
+The set block is priced the same way. `resolveSet` looks each course up on the
+live card, sums the counter's own prices, and drops — and says it dropped — any
+line that is no longer sold. "Add the whole tray" puts exactly those rows, with
+their default modifiers, into the same cart the individual cards use.
+
+On the **Order** tab the cart (localStorage per brand) prices lines exactly
+like `build-order-record.ts` does — effective price plus modifier deltas — and
+applying an offer code runs `validateOfferCodeForCart` against the same pack
+offers. **Place order** is one plain `POST /api/site/BR-1/order`
+(`src/app/api/site/[brand]/order/route.ts`) — deliberately a JSON route handler
+rather than a server action: this is the one surface strangers use, and an
+action's `text/x-component` reply breaks behind CDNs, carrier proxies and the
+preview gateway, leaving the customer a crash screen on an order that actually
+went through. The route validates the body at its own boundary
+(`src/lib/site/order-request.ts` — limits, clamps, one readable message per
+rejection; a list too long to keep whole is refused, never silently shortened)
+and then calls `placeWebOrder` (`src/lib/demo/server.ts`), which
+takes the brand code explicitly, validates and re-prices everything
+server-side through the same `buildOrderRecord` the counter uses, matches the
+phone against the CRM (creating a customer row when it is new), records the
+sale's ingredient consumption, and writes an `order_type: "online"` ticket into
+that brand's demo bucket with the customer's name, modifiers and note on it.
+
+The workspace hears about it in two places: the **Orders** board shows the
+ticket with an *Online order* badge, and the **notification bell** is seeded
+from the same rows — "New online order BC-1061 · Kabir Rao · 3 items · ₹440 ·
+Brewery Cafe website" (`src/lib/notifications/web-orders.ts`), linking straight
+to the order. This replaced the old simulated incoming-orders tick, so
+everything in the bell is a real row. The workspace header's *Brand website*
+button now opens these sites, because `brand_settings.csv` points at the
+in-app route; printed documents keep their absolute URLs (only `http*` values
+override the document profile). As with all demo writes, orders land in the
+same browser's workspace — a visitor ordering from their own device writes to
+their own bucket, and nothing is charged anywhere.
+
+The same two signature effects now run inside the workspace too. `Odometer`
+takes an opt-in `whenInView` — the number holds at zero and rolls up the first
+time it scrolls into view, the way the reference sites' counters do — on the
+Dashboard's four KPI tiles and the Analytics cards, and
+`src/components/effects/reveal.tsx` fades-and-rises a block once as you reach it
+(the Dashboard's chart grid). Both keep the final string in the server HTML for
+no-JS and reduced-motion readers, and every other `StatCard`/`Odometer` call
+site renders exactly as before.
+
 
 ## CRM
 
-Seven modules under **Customers**, plus an overview — each its own route with
-its own filters and actions, sharing one `Customer` row with Billing rather than
-a copy of it (`src/lib/crm/*` holds the rules,
+Seven modules under the **CRM** tab (route `/customers`), plus an overview —
+each its own route with its own filters and actions, sharing one `Customer` row
+with Billing rather than a copy of it (`src/lib/crm/*` holds the rules,
 `src/services/crm-actions.ts` the writes):
 
 | Module | Route | What it is |
@@ -94,9 +171,10 @@ a copy of it (`src/lib/crm/*` holds the rules,
 | Loyalty | `/customers/loyalty` | Points, tiers and memberships on the rules each brand chose |
 
 `/customers/<id>` is the Customer 360: one stream projected from Billing, the
-CRM log, the ledger and the pipeline, filterable by source. `/manager/leads` now
-redirects to `/customers/leads`, so older links and the Manager overview card
-still land somewhere.
+CRM log, the ledger and the pipeline, filterable by source. The pipeline is a
+CRM screen and nothing else — the Manager overview still counts open leads and
+links here, and `/manager/leads` redirects to `/customers/leads` for older
+links.
 
 Three things the CRM deliberately does **not** pretend to do:
 
@@ -198,6 +276,49 @@ through recorded purchases, wastage and stock counts, and its
 usage report stays empty until a merchant lists ingredients on a product. Same
 tool, different seeded shape.
 
+### Purchasing, vendors and receiving
+
+**Manager → Purchasing & Vendors** (`/manager/purchasing`) is the other half of
+the buying side: the Inventory tab says what the shelf is short of, this screen
+turns that into an order on a named vendor and books what actually arrives back
+onto the shelf.
+
+| What | Where it lives | Reads as |
+|------|----------------|----------|
+| Vendor | `data/demo/<brand>/vendors.csv` (`Vendor`) | PackRight Supplies — 4-day lead, UPI, rating 3.6, 1 open order |
+| Purchase order | `purchase_orders.csv` (`PurchaseOrder`) | PO-1042 to PackRight — sent, ₹3,420 over three lines, and past the date it promised |
+| Order line | `purchase_order_lines.csv` (`PurchaseOrderLine`) | 10 packs of Paper Napkins at ₹90, 4 of them in |
+| Status machine | `draft → sent → partially_received → received`, or `cancelled` | derived on every receipt, never typed in |
+
+- **A receipt books only what arrived.** Over-receipt is refused with the
+  number of packs left on the line, and each accepted pack appends a `purchase`
+  movement to the same `inventoryLedger` the Inventory tab already reads —
+  costed at the line's ₹ per pack, noted `PO-1042 · Paper Napkins`. There is no
+  second book of stock, so the shelf and the order cannot disagree.
+- **Only a promised order counts as incoming.** `incomingPacksByItem` ignores
+  drafts and cancellations, which is what makes the reorder suggestion honest:
+  it targets the reorder level plus two packs of cover, minus what is on the
+  shelf and minus what is already on its way, and *Fill short items* turns that
+  list into a draft order in one press.
+- **The delivery promise is the vendor's, not a guess.** Sending a draft with no
+  expected date sets `sent_at + lead_time_days`; that date is what moves the
+  *Past their date* card.
+- **Cancelling never unwinds a booked movement.** What physically arrived stays
+  on the shelf; what did not simply stops being counted. Deleting an order is
+  only allowed while it is a draft or already cancelled, and it tombstones its
+  lines. A vendor with an open order cannot be deleted — the refusal names the
+  order.
+- Item name and unit are **snapshotted onto the line** at create time, so a
+  receipt years later still reads what was ordered even if the catalog changed.
+- The maths is one pure module (`src/lib/procurement/purchasing.ts` — totals,
+  outstanding, lateness, suggestions, validation), the writes are one server
+  action file (`src/services/procurement-actions.ts`), and both brands ship
+  seeds: BR-1 five vendors and six orders across dairy, produce, packaging and
+  coffee; BR-2 the workshop equivalent — board, foam and fabric, hardware,
+  finish, packaging. Caps: 20 vendors, 30 orders, 120 lines, and
+  `csv-pack.test.ts` keeps every line pointing at a real vendor and item with
+  `received_packs ≤ packs`.
+
 ### Bill and quotation export
 
 Once an order is saved, the document panel offers three copies of the same
@@ -205,9 +326,30 @@ paper — HTML in a browser tab, WhatsApp text, PDF — all built in the client 
 the saved order, so none of them needs a server route to read per-browser demo
 state.
 
+**The Billing panel is the bill.** The right-hand column of `/billing` (and
+`/quotation`) is not a card of form fields but a document sheet —
+`.ob-bill` in `globals.css` — with the same hierarchy as the printed copy:
+letterhead with the brand's own mark, a one-line bill-to (mobile + name), the
+order-type and payment controls, a recap of everything else as chips with an
+**Edit details** disclosure underneath, then ruled lines each carrying a small
+product photo, the CGST/SGST split, and the receipt footer. A validation failure
+inside the disclosure opens it, so a collapsed panel can never hide the field
+that needs fixing. When an order is saved the sheet switches to that issued
+document (`src/components/billing/bill-document-preview.tsx`) instead of an empty
+draft, with the export buttons and "Start the next bill" below it.
+
+The letterhead comes from `src/lib/documents/brand-profile.ts`, which now holds a
+profile per demo brand — Brewery Cafe (roast-brown accent, Indiranagar address,
+`/brands/brewery-cafe-logo.png`) and Cubig Furniture — so a cafe bill prints with
+the cafe's mark and terms rather than falling back to a bare brand name. Adding a
+third brand is one entry in that map. Photos print on **bills as well as
+quotations**: `build-bill-document.ts` snapshots `image_url` onto every line and
+the HTML and PDF renderers decide on the photo column by whether they were handed
+real images, not by document kind.
+
 **Open in browser** (`src/lib/documents/render-bill-html.ts`, handed over by
 `open-bill-html.ts`) renders the bill or quotation as one standalone HTML file:
-inline CSS, the issuer's logo and a quotation's product photos inlined as data
+inline CSS, the issuer's logo and the line photos inlined as data
 URLs, no `<script>` and no remote request. It is served to a new tab from a
 `blob:` URL, so the merchant can print it, save it or forward it and it still
 reads the same offline; `@media print` lays it out on A4. The tab is claimed
@@ -219,14 +361,22 @@ file goes to downloads and the button says so. Names match the PDF:
 ### AI Insights
 
 **AI Insights** (`/insights`) is a workspace tab in its own right, next to
-Analytics. Four summary cards sit in a 2×2 grid at the top — *Last month
-summary*, *Last 1 week summary*, *Reviews summary*, *Key points* — and nine
-narrower briefs stay as buttons underneath: *Today's report*, *Most sold
-items*, *Slow movers*, *Week vs week*, *Win-back list*, *Margin leaks*,
-*Stock-out risk*, *Bundle ideas*, *Peak hours*. A free-text box routes a
-question onto whichever brief it can actually answer ("what will we run out
-of?" opens Stock-out risk), and every card states the window it will read before
-anything is generated.
+Analytics. Four summary cards sit in a 2×2 grid at the top — *Today*, *Last
+week*, *Last month*, *Suggestions* — and they are **already written when the
+page opens**: the server composes each one before it renders, so the headline,
+the metrics and the window are on screen with no click and no spinner, and
+"Read full brief" expands instantly. Ten narrower briefs stay as buttons
+underneath — *Reviews summary*, *Key points*, *Most sold items*, *Slow movers*,
+*Week vs week*, *Win-back list*, *Margin leaks*, *Stock-out risk*, *Bundle
+ideas*, *Peak hours* — and those still go through the drafting path. A
+free-text box routes a question onto whichever brief it can actually answer
+("what will we run out of?" opens Stock-out risk), and every card states the
+window it will read before anything is generated.
+
+*Suggestions* is a composition rather than a fifth calculation: it quotes the
+first action of seven other briefs, in a fixed order (shelf, counter,
+reputation, margin, people, catalog, bundling), so a suggestion can never
+contradict the screen it came from.
 
 Each brief returns a headline, up to four computed metrics, the findings, and
 what to do about it, and the whole thing copies out as plain text. The maths is
@@ -240,7 +390,7 @@ the range picker on Analytics does not silently change what a report claims.
 **Nothing here is model-generated yet.** Every number in a sentence is summed
 from the dataset, so a brief agrees with the screen it came from, and an empty
 window produces a written empty state rather than a plausible-sounding zero —
-`src/lib/ai/insights-pack.test.ts` runs all thirteen briefs against both shipped
+`src/lib/ai/insights-pack.test.ts` runs all fourteen briefs against both shipped
 demo packs and fails on `NaN`, on a placeholder, or on "1 bills".
 
 `src/lib/ai/request-insight.ts` is the **single seam** the Python service

@@ -22,14 +22,6 @@ import {
 } from "@/lib/manager/leads";
 import { validateShiftInput, type ShiftInput } from "@/lib/manager/schedules";
 import {
-  jobAdvanceError,
-  nextJobStatus,
-  validateServiceInput,
-  validateServiceJobInput,
-  type ServiceInput,
-  type ServiceJobInput,
-} from "@/lib/manager/services";
-import {
   validateTaskInput,
   type TaskInput,
 } from "@/lib/manager/tasks";
@@ -148,89 +140,6 @@ function revalidateOps(modulePath: string) {
   revalidatePath("/customers", "layout");
 }
 
-export async function saveServiceAction(id: string | null, input: ServiceInput) {
-  const guard = await guardOps();
-  if (!guard.ok) return guard;
-  const parsed = validateServiceInput(input);
-  if (!parsed.ok) return parsed;
-  if (!id) {
-    const pack = getDemoBrandPack(guard.code);
-    await insertOps(guard.code, "services", {
-      id: newOpsId("demo-service"),
-      brand_id: pack.brand.id,
-      isActive: true,
-      ...parsed.value,
-    });
-  } else {
-    await patchOps(guard.code, "serviceOverrides", id, parsed.value);
-  }
-  revalidateOps("/manager/services");
-  return { ok: true as const };
-}
-
-export async function deleteServiceAction(id: string) {
-  const guard = await guardOps();
-  if (!guard.ok) return guard;
-  if (!(await hasOpsRecord(guard.code, "services", id)))
-    return { ok: false as const, message: "Service not found." };
-  await patchOps(guard.code, "serviceOverrides", id, { deleted: true });
-  revalidateOps("/manager/services");
-  return { ok: true as const };
-}
-
-export async function toggleServiceActiveAction(id: string, isActive: boolean) {
-  const guard = await guardOps();
-  if (!guard.ok) return guard;
-  if (!(await hasOpsRecord(guard.code, "services", id)))
-    return { ok: false as const, message: "Service not found." };
-  await patchOps(guard.code, "serviceOverrides", id, { isActive });
-  revalidateOps("/manager/services");
-  return { ok: true as const };
-}
-
-export async function saveServiceJobAction(id: string | null, input: ServiceJobInput) {
-  const guard = await guardOps();
-  if (!guard.ok) return guard;
-  const parsed = validateServiceJobInput(input, await knownIds(guard.code));
-  if (!parsed.ok) return parsed;
-  if (!id) {
-    const pack = getDemoBrandPack(guard.code);
-    await insertOps(guard.code, "serviceJobs", {
-      id: newOpsId("demo-job"),
-      brand_id: pack.brand.id,
-      status: "requested",
-      ...parsed.value,
-    });
-  } else {
-    await patchOps(guard.code, "serviceJobOverrides", id, parsed.value);
-  }
-  revalidateOps("/manager/services");
-  return { ok: true as const };
-}
-
-export async function advanceServiceJobAction(id: string) {
-  const guard = await guardOps();
-  if (!guard.ok) return guard;
-  const ops = await loadMergedOps(guard.code);
-  const job = ops.serviceJobs.find((j) => j.id === id);
-  if (!job) return { ok: false as const, message: "Job not found." };
-  const error = jobAdvanceError(job);
-  if (error) return { ok: false as const, message: error };
-  await patchOps(guard.code, "serviceJobOverrides", id, { status: nextJobStatus(job.status) });
-  revalidateOps("/manager/services");
-  return { ok: true as const };
-}
-
-export async function deleteServiceJobAction(id: string) {
-  const guard = await guardOps();
-  if (!guard.ok) return guard;
-  if (!(await hasOpsRecord(guard.code, "serviceJobs", id)))
-    return { ok: false as const, message: "Job not found." };
-  await patchOps(guard.code, "serviceJobOverrides", id, { deleted: true });
-  revalidateOps("/manager/services");
-  return { ok: true as const };
-}
-
 export async function saveAppointmentAction(id: string | null, input: AppointmentInput) {
   const guard = await guardOps();
   if (!guard.ok) return guard;
@@ -247,7 +156,7 @@ export async function saveAppointmentAction(id: string | null, input: Appointmen
   } else {
     await patchOps(guard.code, "appointmentOverrides", id, parsed.value);
   }
-  revalidateOps("/manager/appointments");
+  revalidateOps("/manager/meetings");
   return { ok: true as const };
 }
 
@@ -261,7 +170,7 @@ export async function setAppointmentStatusAction(id: string, status: "completed"
     return { ok: false as const, message: "Only scheduled appointments can change status." };
   }
   await patchOps(guard.code, "appointmentOverrides", id, { status });
-  revalidateOps("/manager/appointments");
+  revalidateOps("/manager/meetings");
   return { ok: true as const };
 }
 
@@ -271,7 +180,7 @@ export async function deleteAppointmentAction(id: string) {
   if (!(await hasOpsRecord(guard.code, "appointments", id)))
     return { ok: false as const, message: "Appointment not found." };
   await patchOps(guard.code, "appointmentOverrides", id, { deleted: true });
-  revalidateOps("/manager/appointments");
+  revalidateOps("/manager/meetings");
   return { ok: true as const };
 }
 
@@ -333,7 +242,7 @@ export async function saveShiftAction(id: string | null, input: ShiftInput) {
   } else {
     await patchOps(guard.code, "shiftOverrides", id, parsed.value);
   }
-  revalidateOps("/manager/schedules");
+  revalidateOps("/manager/staff");
   return { ok: true as const };
 }
 
@@ -343,7 +252,7 @@ export async function deleteShiftAction(id: string) {
   if (!(await hasOpsRecord(guard.code, "shifts", id)))
     return { ok: false as const, message: "Shift not found." };
   await patchOps(guard.code, "shiftOverrides", id, { deleted: true });
-  revalidateOps("/manager/schedules");
+  revalidateOps("/manager/staff");
   return { ok: true as const };
 }
 
@@ -366,7 +275,7 @@ export async function saveVisitAction(id: string | null, input: VisitInput) {
   } else {
     await patchOps(guard.code, "visitOverrides", id, parsed.value);
   }
-  revalidateOps("/manager/visits");
+  revalidateOps("/manager/meetings");
   return { ok: true as const };
 }
 
@@ -382,7 +291,7 @@ export async function checkInVisitAction(id: string) {
     status: "checked_in",
     checkInAt: new Date().toISOString(),
   });
-  revalidateOps("/manager/visits");
+  revalidateOps("/manager/meetings");
   return { ok: true as const };
 }
 
@@ -399,7 +308,7 @@ export async function checkOutVisitAction(id: string, report: string) {
     checkOutAt: new Date().toISOString(),
     report: report.trim().slice(0, 500),
   });
-  revalidateOps("/manager/visits");
+  revalidateOps("/manager/meetings");
   return { ok: true as const };
 }
 
@@ -409,7 +318,7 @@ export async function deleteVisitAction(id: string) {
   if (!(await hasOpsRecord(guard.code, "visits", id)))
     return { ok: false as const, message: "Visit not found." };
   await patchOps(guard.code, "visitOverrides", id, { deleted: true });
-  revalidateOps("/manager/visits");
+  revalidateOps("/manager/meetings");
   return { ok: true as const };
 }
 

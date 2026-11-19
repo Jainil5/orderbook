@@ -1,5 +1,5 @@
 import { InsightsStudio } from "@/components/ai/insights-studio";
-import type { AiInsightData } from "@/lib/ai/insights";
+import { prewriteSummaries, type AiInsightData } from "@/lib/ai/insights";
 import { calendarDateInZone } from "@/lib/analytics/date-range";
 import { loadDemoCrm } from "@/lib/crm/data";
 import {
@@ -50,5 +50,5 @@ export default async function InsightsPage() {
     usageWindowDays: inventory.windowDays,
   };
 
-  return <InsightsStudio data={data} />;
+  return <InsightsStudio data={data} prewritten={prewriteSummaries(data)} />;
 }

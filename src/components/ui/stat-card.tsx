@@ -10,6 +10,7 @@ export function StatCard({
   tone = "neutral",
   numericValue,
   format = { kind: "number" },
+  numericWhenInView = false,
   spark,
 }: {
   label: string;
@@ -20,6 +21,9 @@ export function StatCard({
    *  text; `value` stays the final-formatted string for SSR/a11y parity. */
   numericValue?: number;
   format?: OdometerFormat;
+  /** Opt the roll in to the scroll reveal: the number holds at zero until the
+   *  card is in view. Ignored when `numericValue` is unset. */
+  numericWhenInView?: boolean;
   /** Optional mini trend line drawn under the value. */
   spark?: number[];
 }) {
@@ -30,7 +34,11 @@ export function StatCard({
         {numericValue === undefined ? (
           value
         ) : (
-          <Odometer value={numericValue} format={format}>
+          <Odometer
+            value={numericValue}
+            format={format}
+            whenInView={numericWhenInView}
+          >
             {value}
           </Odometer>
         )}

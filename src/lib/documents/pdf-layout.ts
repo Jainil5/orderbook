@@ -211,6 +211,83 @@ export function quotationValidUntil(createdAt: string, days = 15) {
   }).format(date);
 }
 
+/**
+ * The header line every surface stamps on the document. A bare `YYYY-MM-DD`
+ * (a date input's value) is read as local midnight, never as UTC — otherwise a
+ * delivery booked for the 5th prints as the 4th west of Greenwich.
+ */
+export function formatDocumentDay(value: string): string {
+  if (!value) return "";
+  const date = new Date(value.length === 10 ? `${value}T00:00:00` : value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+}
+
+export function formatDocumentDateTime(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+export type DetailRow = { label: string; value: string };
+
+/**
+ * The document's own details — number, date, customer, mobile, and whatever
+ * else identifies this piece of paper — in the one order the counter reads:
+ * on screen, in the exported HTML and in the PDF. Deliberately a flat list
+ * rather than boxed cards: the sheet is a document, not a dashboard.
+ */
+export function buildDetailRows(doc: BillDocument): DetailRow[] {
+  const isQuote = doc.kind === "quotation";
+  const rows: DetailRow[] = [
+    {
+      label: isQuote ? "Quotation number" : "Invoice number",
+      value: doc.orderNumber,
+    },
+    { label: "Date", value: formatDocumentDateTime(doc.createdAt) },
+    {
+      label: "Customer",
+      value: doc.customerName?.trim() || "Walk-in customer",
+    },
+  ];
+  if (doc.customerPhone) {
+    rows.push({ label: "Mobile number", value: doc.customerPhone });
+  }
+  if (doc.customerAddress?.trim()) {
+    rows.push({
+      label: isQuote ? "Site" : "Delivery address",
+      value: doc.customerAddress.trim(),
+    });
+  }
+  rows.push({ label: "Currency", value: doc.currencyCode });
+  if (doc.serviceDate) {
+    rows.push({
+      label: isQuote ? "Target delivery" : "Delivery / installation",
+      value: formatDocumentDay(doc.serviceDate),
+    });
+  }
+  if (isQuote) {
+    rows.push({ label: "Valid until", value: quotationValidUntil(doc.createdAt) });
+    rows.push({ label: "Status", value: "Awaiting acceptance" });
+  } else {
+    if (doc.referenceNumber) {
+      rows.push({ label: "Against quotation", value: doc.referenceNumber });
+    }
+    rows.push({ label: "Payment", value: doc.paymentMethod ?? "pending" });
+  }
+  return rows;
+}
+
 function round2(amount: number) {
   return Math.round((amount + Number.EPSILON) * 100) / 100;
 }

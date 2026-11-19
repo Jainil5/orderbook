@@ -15,6 +15,11 @@ import type {
   StockAdjustment,
 } from "@/types/database";
 import type { StaffMember } from "@/types/manager";
+import type {
+  PurchaseOrder,
+  PurchaseOrderLine,
+  Vendor,
+} from "@/types/procurement";
 import type { Appointment, FieldVisit, Lead, Service, ServiceJob, Shift, Task } from "@/types/operations";
 import type {
   CustomerComplaint,
@@ -47,6 +52,13 @@ export type DemoMutableBucket = {
   inventoryOverrides: Record<string, Partial<InventoryItem> & { deleted?: boolean }>;
   /** Purchases, wastage and stock counts — the trail behind `stock_packs`. */
   inventoryLedger: InventoryAdjustment[];
+  // --- Purchasing ------------------------------------------------------
+  vendors: Vendor[];
+  vendorOverrides: Overrides<Vendor>;
+  purchaseOrders: PurchaseOrder[];
+  purchaseOrderOverrides: Overrides<PurchaseOrder>;
+  purchaseOrderLines: PurchaseOrderLine[];
+  purchaseOrderLineOverrides: Overrides<PurchaseOrderLine>;
   /**
    * Recipe edits keyed by product id. A present key replaces every pack row
    * for that product (an empty array means "cleared"), which keeps the
@@ -106,6 +118,12 @@ export function emptyBucket(): DemoMutableBucket {
     inventory: [],
     inventoryOverrides: {},
     inventoryLedger: [],
+    vendors: [],
+    vendorOverrides: {},
+    purchaseOrders: [],
+    purchaseOrderOverrides: {},
+    purchaseOrderLines: [],
+    purchaseOrderLineOverrides: {},
     recipeOverrides: {},
     staff: [],
     staffOverrides: {},

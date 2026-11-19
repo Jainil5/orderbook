@@ -2,7 +2,11 @@
 
 import { PageShell } from "@/components/workspace/page-shell";
 import { AiInsightsPanel } from "@/components/ai/ai-insights-panel";
-import type { AiInsightData } from "@/lib/ai/insights";
+import type {
+  AiInsightData,
+  InsightResult,
+  PrewrittenSummary,
+} from "@/lib/ai/insights";
 
 /**
  * The AI Insights workspace screen.
@@ -13,17 +17,25 @@ import type { AiInsightData } from "@/lib/ai/insights";
  * "chart the range I picked", and the row set they need only has to be loaded —
  * and shipped to the client — while this page is open.
  */
-export function InsightsStudio({ data }: { data: AiInsightData }) {
+export function InsightsStudio({
+  data,
+  prewritten,
+}: {
+  data: AiInsightData;
+  prewritten: Record<PrewrittenSummary, InsightResult>;
+}) {
   return (
     <PageShell title="AI Insights">
       <div className="space-y-4">
         <p className="max-w-3xl text-sm text-[var(--ob-text-muted)]">
-          Four summaries up top, nine narrower briefs below. Each one reads its
-          own fixed window — the last calendar month, the rolling seven days, a
-          30- or 90-day slice — over every row in this workspace, so the range
-          picker on Analytics does not change these answers.
+          Today, last week, last month and the suggestions they imply are written
+          the moment this page opens — composed on the server from every row this
+          workspace holds, so there is nothing to wait for and nothing to guess
+          at. Ten narrower briefs and a free-text box sit below, and each one
+          reads its own fixed window, so the range picker on Analytics does not
+          change these answers.
         </p>
-        <AiInsightsPanel data={data} />
+        <AiInsightsPanel data={data} prewritten={prewritten} />
       </div>
     </PageShell>
   );

@@ -11,10 +11,13 @@ import { Download, ExternalLink, MessageCircle } from "lucide-react";
 export function OrderDocumentActions({
   document,
   onDismiss,
+  dismissLabel = "Dismiss",
   compact = false,
 }: {
   document: BillDocument;
   onDismiss?: () => void;
+  /** At a counter the button starts the next order, so it can say so. */
+  dismissLabel?: string;
   compact?: boolean;
 }) {
   const [pdfBusy, setPdfBusy] = useState(false);
@@ -143,7 +146,7 @@ export function OrderDocumentActions({
           className="text-xs text-[var(--ob-text-muted)] underline"
           onClick={onDismiss}
         >
-          Dismiss
+          {dismissLabel}
         </button>
       ) : null}
     </div>

@@ -111,7 +111,7 @@ export function buildBillDocumentFromCheckout(params: {
       listUnitPrice: line.product.price,
       lineDiscount: productLineDiscountAmount(line.product, line.quantity),
       lineTotal: lineNetTotal(line.product, line.quantity),
-      imageUrl: params.isQuote ? (line.product.image_url ?? null) : null,
+      imageUrl: line.product.image_url ?? null,
       sku: line.product.sku ?? null,
       description: line.product.description ?? null,
     })),
@@ -188,10 +188,7 @@ export function buildBillDocumentFromOrder(params: {
         listUnitPrice: item.unit_price,
         lineDiscount: item.line_discount,
         lineTotal: item.line_total,
-        imageUrl:
-          kind === "quotation"
-            ? resolveOrderLineImageUrl(item, catalog)
-            : null,
+        imageUrl: resolveOrderLineImageUrl(item, catalog),
         sku: catalog?.sku ?? null,
         description: catalog?.description ?? null,
       };

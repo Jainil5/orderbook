@@ -42,7 +42,7 @@ export function DemoPicker({
       <header className="ob-glass-bar sticky top-0 z-40 border-b border-[var(--ob-border)]">
         <div className="mx-auto flex min-h-[72px] max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2">
           <div className="flex items-center gap-3">
-            <LogoMark size={34} spin={!reduceMotion} />
+            <LogoMark size={34} />
             <Wordmark
               className="font-display block font-extrabold leading-none"
               size={20}

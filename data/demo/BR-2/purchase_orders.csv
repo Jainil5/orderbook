@@ -1,0 +1,7 @@
+id,brand_id,number,vendor_id,status,created_at,sent_at,expected_at,closed_at,note
+po1,demo-cubig-furniture,PO-1101,vnd1,received,2026-10-28T10:00:00.000Z,2026-10-28T10:05:00.000Z,2026-11-02T15:00:00.000Z,2026-11-02T15:40:00.000Z,Sheet stock for the three-bedroom flat
+po2,demo-cubig-furniture,PO-1102,vnd1,sent,2026-11-04T09:15:00.000Z,2026-11-04T09:20:00.000Z,2026-11-09T11:00:00.000Z,,MDF for the wardrobes — running late again
+po3,demo-cubig-furniture,PO-1103,vnd2,partially_received,2026-11-07T13:30:00.000Z,2026-11-07T13:35:00.000Z,2026-11-14T10:00:00.000Z,,Foam arrived. Fabric is on the next roll truck
+po4,demo-cubig-furniture,PO-1104,vnd4,draft,2026-11-11T17:05:00.000Z,,2026-11-16T12:00:00.000Z,,Polish and thinner for the dining set finish
+po5,demo-cubig-furniture,PO-1105,vnd5,sent,2026-11-05T08:40:00.000Z,2026-11-05T08:45:00.000Z,2026-11-12T16:00:00.000Z,,Cartons and bubble wrap for the dispatch week
+po6,demo-cubig-furniture,PO-1106,vnd3,cancelled,2026-11-03T12:10:00.000Z,2026-11-03T12:15:00.000Z,,2026-11-05T09:30:00.000Z,Cancelled — collected over the counter instead

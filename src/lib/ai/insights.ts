@@ -35,11 +35,12 @@ import type {
 } from "@/types/database";
 
 export type AiInsightKind =
-  | "month_summary"
+  | "today_report"
   | "week_summary"
+  | "month_summary"
+  | "suggestions"
   | "reviews_summary"
   | "key_points"
-  | "today_report"
   | "top_sellers"
   | "slow_movers"
   | "week_change"
@@ -63,39 +64,46 @@ export type AiInsightPrompt = {
 
 export const AI_INSIGHT_PROMPTS: AiInsightPrompt[] = [
   {
-    kind: "month_summary",
-    label: "Last month summary",
-    blurb: "The whole of last month, read against the month before it",
+    kind: "today_report",
+    label: "Today",
+    blurb: "How the day has gone so far, bill by bill",
     group: "summary",
-    example: "Summarise last month",
+    example: "How is today going?",
   },
   {
     kind: "week_summary",
-    label: "Last 1 week summary",
+    label: "Last week",
     blurb: "What happened in the last seven days",
     group: "summary",
     example: "Give me a summary of this week",
   },
   {
+    kind: "month_summary",
+    label: "Last month",
+    blurb: "The whole of last month, read against the month before it",
+    group: "summary",
+    example: "Summarise last month",
+  },
+  {
+    kind: "suggestions",
+    label: "Suggestions",
+    blurb: "What to do next, lifted from every other brief on this page",
+    group: "summary",
+    example: "What should I do next?",
+  },
+  {
     kind: "reviews_summary",
     label: "Reviews summary",
     blurb: "Ratings, themes and what is still unanswered",
-    group: "summary",
+    group: "brief",
     example: "What are customers saying in reviews?",
   },
   {
     kind: "key_points",
     label: "Key points",
     blurb: "One line per area — money, menu, margin, people, shelf, reputation",
-    group: "summary",
-    example: "What are the key points I should act on?",
-  },
-  {
-    kind: "today_report",
-    label: "Today's report",
-    blurb: "How the day has gone so far",
     group: "brief",
-    example: "How is today going?",
+    example: "What are the key points I should act on?",
   },
   {
     kind: "top_sellers",
@@ -154,6 +162,29 @@ export const AI_INSIGHT_PROMPTS: AiInsightPrompt[] = [
     example: "When are my busiest hours?",
   },
 ];
+
+/**
+ * The four cards that are already written when the tab opens. The page calls
+ * `prewriteSummaries` on the server so a merchant reads an answer first and
+ * decides whether the full brief is worth opening — no spinner on a question
+ * this workspace can already answer from the rows in memory.
+ */
+export const PREWRITTEN_SUMMARIES = [
+  "today_report",
+  "week_summary",
+  "month_summary",
+  "suggestions",
+] as const;
+
+export type PrewrittenSummary = (typeof PREWRITTEN_SUMMARIES)[number];
+
+export function prewriteSummaries(
+  data: AiInsightData,
+): Record<PrewrittenSummary, InsightResult> {
+  return Object.fromEntries(
+    PREWRITTEN_SUMMARIES.map((kind) => [kind, generateInsight(kind, data)]),
+  ) as Record<PrewrittenSummary, InsightResult>;
+}
 
 /** The rows a brief is written from — plain JSON, safe to send anywhere. */
 export type AiInsightData = {
@@ -1712,17 +1743,77 @@ function keyPoints(data: AiInsightData): InsightResult {
   };
 }
 
+/**
+ * Where a suggestion may come from, in the order a merchant should act: what
+ * stops you selling first, then the money on the counter, then reputation,
+ * margin, the people behind it and the catalog around them.
+ */
+const SUGGESTION_SOURCES = [
+  { kind: "stock_risk", area: "Shelf" },
+  { kind: "today_report", area: "Counter" },
+  { kind: "reviews_summary", area: "Reputation" },
+  { kind: "margin_watch", area: "Margin" },
+  { kind: "win_back", area: "People" },
+  { kind: "slow_movers", area: "Catalog" },
+  { kind: "bundle_ideas", area: "Bundling" },
+] as const satisfies readonly { kind: AiInsightKind; area: string }[];
+
+/**
+ * The Suggestions card: each other brief's own first action, quoted rather than
+ * rewritten, in a fixed order. Composing the briefs keeps one source of truth —
+ * a suggestion can never disagree with the screen it came from, and when a model
+ * replaces the prose there is a diffable list to measure it against.
+ */
+function suggestions(data: AiInsightData): InsightResult {
+  const range = windowFor(data.today, 30);
+  const sums = totals(billsIn(data, range, true));
+  const alerts = data.positions.filter((position) => position.status !== "ok").length;
+  const stale = unansweredReviews(reviewsIn(data, range)).filter(
+    (review) => review.sentiment !== "positive",
+  );
+  const quiet = customerRecords(data).filter((record) => record.quietDays >= 45);
+  const moves = SUGGESTION_SOURCES.map((source) => {
+    const brief = generateInsight(source.kind, data);
+    const action = brief.actions[0] ?? brief.headline;
+    return { area: source.area, action, why: brief.headline };
+  });
+  const lead = alerts
+    ? `${counted(alerts, "item")} ${alerts === 1 ? "sits" : "sit"} at or below the reorder line`
+    : stale.length
+      ? `${counted(stale.length, "review")} ${isAre(stale.length)} still waiting for a reply`
+      : quiet.length
+        ? `${counted(quiet.length, "good customer")} ${hasHave(quiet.length)} gone quiet for 45 days or more`
+        : `${money(sums.net, data.currencyCode)} closed in the last 30 days, with nothing short`;
+
+  return {
+    kind: "suggestions",
+    title: "Suggestions",
+    window: `Last 30 days · ${counted(moves.length, "brief")}`,
+    headline: `${counted(moves.length, "move")} worth making, in the order they stop you selling. First signal — ${lead}.`,
+    metrics: [
+      { label: "Closed sales", value: money(sums.net, data.currencyCode) },
+      { label: "Still unpaid", value: money(sums.due, data.currencyCode) },
+      { label: "Shelf alerts", value: intText(alerts) },
+      { label: "Unanswered", value: intText(stale.length) },
+    ],
+    findings: moves.map((move) => `${move.area} — ${move.why}`),
+    actions: moves.map((move) => move.action),
+    caveat: "Every line above is another brief's own first action, quoted rather than rewritten, in a fixed order: shelf, counter, reputation, margin, people, catalog, bundling. Open the brief for the arithmetic behind it.",
+  };
+}
+
 /** Keeps the shelf sentence grammatical at one item. */
 function positionsWord(count: number): string {
   return `${intText(count)} ${pluralize(count, "item")} ${isAre(count)}`;
 }
 
 const GENERATORS: Record<AiInsightKind, (data: AiInsightData) => InsightResult> = {
-  month_summary: monthSummary,
+  today_report: todayReport,
   week_summary: weekSummary,
+  month_summary: monthSummary,
+  suggestions,
   reviews_summary: reviewsSummary,
   key_points: keyPoints,
-  today_report: todayReport,
   top_sellers: topSellers,
   slow_movers: slowMovers,
   week_change: weekChange,
@@ -1749,13 +1840,14 @@ export function generateInsight(
 
 /**
  * Keyword router for the free-text box. It deliberately chooses among the same
- * thirteen briefs instead of pretending to answer anything: a question it
+ * fourteen briefs instead of pretending to answer anything: a question it
  * cannot place says so, which is the honest behaviour until a model sits behind
  * it.
  */
 export function routeQuestion(question: string): AiInsightKind | null {
   const text = question.toLowerCase();
   const routes: { kind: AiInsightKind; words: string[] }[] = [
+    { kind: "suggestions", words: ["suggest", "what should i do", "what to do", "next step", "action plan", "advise", "advice"] },
     { kind: "month_summary", words: ["last month", "monthly", "month summary", "previous month", "whole month"] },
     { kind: "week_summary", words: ["this week", "last 1 week", "week summary", "seven days", "past week"] },
     { kind: "reviews_summary", words: ["review", "rating", "star", "saying", "customers saying", "reputation", "feedback"] },
@@ -1783,7 +1875,7 @@ export function routeQuestion(question: string): AiInsightKind | null {
 
 /** Shown when the box cannot place a question at all. */
 export const UNROUTED_HINT =
-  "This demo answers from the four summaries and nine briefs on this page. Ask about last month, this week, the reviews, the key points, today's sales, the most sold items, slow movers, quiet customers, margin, stock-outs, bundles or peak hours.";
+  "This demo answers from the four summaries and ten briefs on this page. Ask about today, last week, last month, what to do next, the reviews, the key points, the most sold items, slow movers, quiet customers, margin, stock-outs, bundles or peak hours.";
 
 /**
  * The one-line standing hint each summary card shows before anything is
@@ -1791,6 +1883,10 @@ export const UNROUTED_HINT =
  */
 export function aiSummaryHint(kind: AiInsightKind, data: AiInsightData): string {
   switch (kind) {
+    case "today_report":
+      return `${dayName(data.today)} ${data.today}, up to now`;
+    case "suggestions":
+      return `Ranked across ${counted(SUGGESTION_SOURCES.length, "brief")}`;
     case "month_summary":
       return lastTwoMonths(data.today).current.label;
     case "week_summary": {

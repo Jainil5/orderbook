@@ -4,11 +4,14 @@ import { describe, expect, it } from "vitest";
 import {
   AI_INSIGHT_KINDS,
   AI_INSIGHT_PROMPTS,
+  PREWRITTEN_SUMMARIES,
   aiSummaryHint,
   generateInsight,
   isAiInsightKind,
+  prewriteSummaries,
   routeQuestion,
   type AiInsightData,
+  type AiInsightKind,
 } from "./insights";
 import { inventoryPosition } from "@/lib/inventory/stock";
 import type { CustomerReview } from "@/types/crm";
@@ -600,15 +603,27 @@ describe("key points", () => {
 });
 
 describe("the summary cards themselves", () => {
-  it("keeps exactly four cards in the 2×2 grid", () => {
+  it("keeps exactly four cards in the 2×2 grid, already written", () => {
     const summaries = AI_INSIGHT_PROMPTS.filter((prompt) => prompt.group === "summary");
     expect(summaries.map((prompt) => prompt.kind)).toEqual([
-      "month_summary",
+      "today_report",
       "week_summary",
-      "reviews_summary",
-      "key_points",
+      "month_summary",
+      "suggestions",
     ]);
-    expect(AI_INSIGHT_PROMPTS.filter((prompt) => prompt.group === "brief")).toHaveLength(9);
+    // The page pre-writes exactly the cards it renders — no card opens blank.
+    expect([...PREWRITTEN_SUMMARIES]).toEqual(summaries.map((prompt) => prompt.kind));
+    expect(AI_INSIGHT_PROMPTS.filter((prompt) => prompt.group === "brief")).toHaveLength(10);
+  });
+
+  it("composes each pre-written card from its own brief", () => {
+    const rows = data();
+    const prewritten = prewriteSummaries(rows);
+    for (const kind of PREWRITTEN_SUMMARIES) {
+      expect(prewritten[kind]).toEqual(generateInsight(kind, rows));
+      expect(prewritten[kind].kind).toBe(kind);
+      expect(prewritten[kind].headline.length).toBeGreaterThan(0);
+    }
   });
 
   it("states on each card which window it will read", () => {
@@ -619,11 +634,75 @@ describe("the summary cards themselves", () => {
       "1 review in 90 days · 1 review on file",
     );
     expect(aiSummaryHint("key_points", withReviews)).toBe("Last 30 days at a glance");
+    expect(aiSummaryHint("today_report", withReviews)).toBe("Mon 2026-11-16, up to now");
+    expect(aiSummaryHint("suggestions", withReviews)).toBe("Ranked across 7 briefs");
     expect(aiSummaryHint("reviews_summary", data())).toBe("No review on file yet");
     // A narrow brief falls back to its blurb, so no card ever shows an empty line.
     expect(aiSummaryHint("stock_risk", withReviews)).toBe(
       AI_INSIGHT_PROMPTS.find((prompt) => prompt.kind === "stock_risk")?.blurb,
     );
+  });
+});
+
+describe("suggestions", () => {
+  const lowStock = { ...stockItemBase, stock_packs: 1 };
+  const rows = data({ positions: [inventoryPosition(lowStock, [])] });
+  const SOURCES: AiInsightKind[] = [
+    "stock_risk",
+    "today_report",
+    "reviews_summary",
+    "margin_watch",
+    "win_back",
+    "slow_movers",
+    "bundle_ideas",
+  ];
+
+  it("quotes each brief's own first action instead of inventing one", () => {
+    const result = generateInsight("suggestions", rows);
+    expect(result.actions).toEqual(SOURCES.map((kind) => generateInsight(kind, rows).actions[0]));
+    expect(result.findings).toHaveLength(SOURCES.length);
+    expect(result.findings[0].startsWith("Shelf —")).toBe(true);
+    expect(result.window).toBe("Last 30 days · 7 briefs");
+  });
+
+  it("leads with whatever stops you selling first", () => {
+    const result = generateInsight("suggestions", rows);
+    expect(result.headline).toContain("1 item sits at or below the reorder line");
+    expect(result.metrics.map((metric) => metric.label)).toEqual([
+      "Closed sales",
+      "Still unpaid",
+      "Shelf alerts",
+      "Unanswered",
+    ]);
+    expect(result.metrics.find((metric) => metric.label === "Shelf alerts")?.value).toBe("1");
+  });
+
+  it("says reviews before people when a low rating is still unanswered", () => {
+    const result = generateInsight(
+      "suggestions",
+      data({
+        reviews: [
+          review({
+            id: "r1",
+            rating: 2,
+            text: "Cold coffee and a long wait.",
+            sentiment: "negative",
+            response_text: null,
+          }),
+        ],
+      }),
+    );
+    expect(result.headline).toContain("1 review is still waiting for a reply");
+  });
+
+  it("keeps seven moves even on a workspace with nothing at all", () => {
+    const empty = generateInsight(
+      "suggestions",
+      data({ orders: [], items: [], products: [], payments: [] }),
+    );
+    expect(empty.actions).toHaveLength(SOURCES.length);
+    expect(empty.headline).toContain("₹0.00 closed in the last 30 days");
+    expect(empty.caveat).toContain("quoted rather than rewritten");
   });
 });
 

@@ -10,16 +10,13 @@ export async function downloadBillPdf(doc: BillDocument): Promise<void> {
   if (doc.issuer?.logoPath) {
     logoDataUrl = await loadImageDataUrl(doc.issuer.logoPath);
   }
-  const lineImageDataUrls =
-    doc.kind === "quotation"
-      ? await Promise.all(
-          doc.lines.map((line) =>
-            line.imageUrl?.trim()
-              ? loadImageDataUrl(line.imageUrl.trim())
-              : Promise.resolve(null),
-          ),
-        )
-      : [];
+  const lineImageDataUrls = await Promise.all(
+    doc.lines.map((line) =>
+      line.imageUrl?.trim()
+        ? loadImageDataUrl(line.imageUrl.trim())
+        : Promise.resolve(null),
+    ),
+  );
   renderBillPdf(doc, pdf, { logoDataUrl, lineImageDataUrls });
   pdf.save(billDocumentFilename(doc));
 }

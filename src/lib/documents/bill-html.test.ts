@@ -22,6 +22,11 @@ const ISSUER: DocumentBrandProfile = {
   invoiceTerms: "GST tax invoice. Payment as per agreed terms.",
 };
 
+/** One flat row of the details block, as the sheet prints it. */
+function detailRow(label: string, value: string): string {
+  return `<div class="row"><dt>${label}</dt><dd>${value}</dd></div>`;
+}
+
 function doc(overrides: Partial<BillDocument> = {}): BillDocument {
   return {
     kind: "quotation",
@@ -102,22 +107,35 @@ describe("renderBillHtml", () => {
     expect(billHtmlTitle(doc({ kind: "bill", orderNumber: "CB-1061" })).startsWith("Bill CB-1061")).toBe(true);
   });
 
-  it("prints the letterhead, the quote block and the validity window", () => {
+  it("prints the details block, the lines, and the address in the footer", () => {
     const html = renderBillHtml(doc());
     expect(html).toContain("QUOTATION");
     expect(html).toContain("CF-Q-1");
     expect(html).toContain("Cubig Furniture");
     expect(html).toContain("Modular office desks");
-    expect(html).toContain("info@cubigfurniture.com");
-    expect(html).toContain("Quote for");
-    expect(html).toContain("Asha Sheth");
-    expect(html).toContain("Mobile <b>9876500011</b>");
-    expect(html).toContain("Valid until <b>26 Nov 2026</b>");
-    expect(html).toContain("Status <b>Awaiting acceptance</b>");
+    expect(html).toContain("Quotation details");
+    expect(html).toContain(detailRow("Quotation number", "CF-Q-1"));
+    expect(html).toContain(detailRow("Customer", "Asha Sheth"));
+    expect(html).toContain(detailRow("Mobile number", "9876500011"));
+    expect(html).toContain(detailRow("Valid until", "26 Nov 2026"));
+    expect(html).toContain(detailRow("Status", "Awaiting acceptance"));
     expect(html).toContain("Proforma estimate");
     expect(html).toContain("Quotation valid for 15 days unless stated otherwise.");
     expect(html).toContain("For Cubig Furniture");
-    expect(html).toContain("Computer-generated quotation from Cubig Furniture.");
+    // No boxed cards any more: one flat list between two hairlines.
+    expect(html).not.toMatch(/class="meta"/);
+    // The address and contact print in the footer, after the money.
+    const footer = html.slice(html.indexOf('<footer class="sheet-footer">'));
+    expect(footer).toContain("<address>");
+    expect(footer).toContain("info@cubigfurniture.com");
+    expect(footer).toContain("Udhna Magdalla Road, Surat");
+    expect(footer).toContain("cubigfurniture.com");
+    expect(footer).toContain("Quotation valid for 15 days unless stated otherwise.");
+    expect(footer).toContain("For Cubig Furniture");
+    expect(footer).toContain("Computer-generated quotation from Cubig Furniture.");
+    expect(html.indexOf("<address>")).toBeGreaterThan(
+      html.indexOf("Cubic Workstation 1800"),
+    );
   });
 
   it("switches the whole document to bill language", () => {
@@ -133,11 +151,14 @@ describe("renderBillHtml", () => {
       }),
     );
     expect(html).toContain("TAX INVOICE");
-    expect(html).toContain("Bill to");
-    expect(html).toContain("Payment <b>UPI</b>");
-    expect(html).toContain("Against quotation <b>CF-Q-1</b>");
-    expect(html).toContain("Delivery / installation <b>05 Dec 2026</b>");
-    expect(html).toContain("Site <b>Bandra Kurla Complex, Tower 3</b>");
+    expect(html).toContain("Bill details");
+    expect(html).toContain(detailRow("Invoice number", "CB-1061"));
+    expect(html).toContain(detailRow("Payment", "UPI"));
+    expect(html).toContain(detailRow("Against quotation", "CF-Q-1"));
+    expect(html).toContain(detailRow("Delivery / installation", "05 Dec 2026"));
+    expect(html).toContain(
+      detailRow("Delivery address", "Bandra Kurla Complex, Tower 3"),
+    );
     expect(html).toContain("Amount received (UPI)");
     expect(html).toContain("Balance due");
     expect(html).toContain("GST tax invoice. Payment as per agreed terms.");
@@ -145,9 +166,9 @@ describe("renderBillHtml", () => {
   });
 
   it("says pending when a bill has no payment method", () => {
-    expect(renderBillHtml(doc({ kind: "bill", paymentMethod: null }))).toContain(
-      "Payment <b>pending</b>",
-    );
+    expect(
+      renderBillHtml(doc({ kind: "bill", paymentMethod: null })),
+    ).toContain(detailRow("Payment", "pending"));
   });
 
   it("falls back to a walk-in customer and the brand name without an issuer", () => {
@@ -206,7 +227,7 @@ describe("renderBillHtml", () => {
     );
   });
 
-  it("only gives quotations a photo column, and only with real images", () => {
+  it("gives every document a photo column, but only with real images", () => {
     const withPhotos = renderBillHtml(doc(), {
       lineImageDataUrls: ["data:image/jpeg;base64,AAA=", null],
     });
@@ -214,13 +235,33 @@ describe("renderBillHtml", () => {
     expect(withPhotos).toContain('src="data:image/jpeg;base64,AAA="');
     expect(withPhotos.match(/<img alt="" src="data:/g)?.length).toBe(1);
 
+    // A bill is a document too: the counter sells what the menu pictures.
     const bill = renderBillHtml(doc({ kind: "bill" }), {
-      lineImageDataUrls: ["data:image/jpeg;base64,AAA="],
+      lineImageDataUrls: ["data:image/jpeg;base64,AAA=", null],
     });
-    expect(bill).not.toContain("<th>Photo</th>");
+    expect(bill).toContain("<th>Photo</th>");
+    expect(bill).toContain('src="data:image/jpeg;base64,AAA="');
+    expect(bill.match(/<td class="photo">/g)?.length).toBe(2);
+    expect(bill.match(/<img alt="" src="data:/g)?.length).toBe(1);
+
+    const blankImages = renderBillHtml(doc({ kind: "bill" }), {
+      lineImageDataUrls: ["   ", null],
+    });
+    expect(blankImages).not.toContain("<th>Photo</th>");
 
     const noImages = renderBillHtml(doc(), { lineImageDataUrls: [null, null] });
     expect(noImages).not.toContain("<th>Photo</th>");
+    expect(renderBillHtml(doc())).not.toContain("<th>Photo</th>");
+  });
+
+  it("prints the brand mark on a bill letterhead as well as a quotation", () => {
+    const bill = renderBillHtml(doc({ kind: "bill", orderNumber: "BC-1061" }), {
+      logoDataUrl: "data:image/png;base64,LOGO",
+      lineImageDataUrls: ["data:image/jpeg;base64,AAA=", null],
+    });
+    expect(bill).toContain('src="data:image/png;base64,LOGO"');
+    expect(bill).toContain("<th>Photo</th>");
+    expect(bill).toContain("TAX INVOICE");
   });
 
   it("inlines the brand mark when one is supplied", () => {
@@ -276,7 +317,7 @@ describe("renderBillHtml", () => {
     const html = renderBillHtml(
       doc({ currencyCode: "USD", listSubtotal: 1200, taxableSubtotal: 1200, taxTotal: 0, taxRatePercent: 0, grandTotal: 1200, lines: [] }),
     );
-    expect(html).toContain("Currency <b>USD</b>");
+    expect(html).toContain(detailRow("Currency", "USD"));
     expect(html).toContain("1,200.00");
   });
 

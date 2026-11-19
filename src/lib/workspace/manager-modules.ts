@@ -1,29 +1,40 @@
-import type { CaptureMode } from "@/lib/workspace/constants";
-
 /**
- * `projectOnly` marks the enquiry pipeline, which only exists for brands that
- * capture quotes against a site (`capture: "project"`). Every entry carries the
- * key so it stays readable off the union without narrowing.
+ * The Manager sub-modules, in nav order.
+ *
+ * Five screens, each one a tab on the Manager subnav. Two of them carry more
+ * than one job, because the alternative was two more tabs for the same
+ * audience: Staff also holds the shift rota, and Meetings & Visits holds both
+ * the booked meetings and the field visits a team makes.
+ *
+ * The enquiry pipeline is deliberately absent — leads are a CRM concern and
+ * live under `/customers/leads`. `/manager/leads` still redirects there.
  */
 export const MANAGER_MODULES = [
-  { key: "staff", label: "Staff", href: "/manager/staff", projectOnly: false },
   {
-    key: "leads",
-    label: "Leads Pipeline",
-    href: "/manager/leads",
-    projectOnly: true,
+    key: "staff",
+    label: "Staff & Schedules",
+    href: "/manager/staff",
   },
-  { key: "services", label: "Services", href: "/manager/services", projectOnly: false },
   {
-    key: "appointments",
-    label: "Meetings & Appointments",
-    href: "/manager/appointments",
-    projectOnly: false,
+    key: "meetings",
+    label: "Meetings & Visits",
+    href: "/manager/meetings",
   },
-  { key: "visits", label: "Visits & Field Ops", href: "/manager/visits", projectOnly: false },
-  { key: "schedules", label: "Schedules", href: "/manager/schedules", projectOnly: false },
-  { key: "tasks", label: "Tasks & Activities", href: "/manager/tasks", projectOnly: false },
-  { key: "payments", label: "Payments", href: "/manager/payments", projectOnly: false },
+  {
+    key: "tasks",
+    label: "Tasks & Activities",
+    href: "/manager/tasks",
+  },
+  {
+    key: "purchasing",
+    label: "Purchasing & Vendors",
+    href: "/manager/purchasing",
+  },
+  {
+    key: "payments",
+    label: "Payments",
+    href: "/manager/payments",
+  },
 ] as const;
 
 export type ManagerModule = (typeof MANAGER_MODULES)[number];
@@ -35,13 +46,15 @@ export function isManagerModuleKey(value: string): value is ManagerModuleKey {
 
 export function visibleManagerModules(
   hidden: readonly string[],
-  capture: CaptureMode = "counter",
 ): ManagerModule[] {
-  return MANAGER_MODULES.filter(
-    (m) => !hidden.includes(m.key) && (!m.projectOnly || capture === "project"),
-  );
+  return MANAGER_MODULES.filter((m) => !hidden.includes(m.key));
 }
 
+/**
+ * Stored prefs outlive module lists — a key removed from the nav (an old
+ * `visits` or `schedules` hide, say) simply drops out instead of sticking
+ * around as a phantom.
+ */
 export function parseHiddenManagerModules(raw: unknown): ManagerModuleKey[] {
   if (!Array.isArray(raw)) return [];
   return raw.filter(

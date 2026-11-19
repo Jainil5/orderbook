@@ -42,19 +42,24 @@ describe("buildWorkspaceNavItems", () => {
     expect(analytics?.children).toBeUndefined();
   });
 
-  it("adds Manager with all seven children by default", () => {
+  it("adds Manager with its five screens by default", () => {
     const manager = buildWorkspaceNavItems(false, profile).find(
       (i) => i.href === "/manager",
     );
     expect(manager?.iconKey).toBe("Manager");
     expect(manager?.children?.map((c) => c.href)).toEqual([
       "/manager/staff",
-      "/manager/services",
-      "/manager/appointments",
-      "/manager/visits",
-      "/manager/schedules",
+      "/manager/meetings",
       "/manager/tasks",
+      "/manager/purchasing",
       "/manager/payments",
+    ]);
+    expect(manager?.children?.map((c) => c.label)).toEqual([
+      "Staff & Schedules",
+      "Meetings & Visits",
+      "Tasks & Activities",
+      "Purchasing & Vendors",
+      "Payments",
     ]);
   });
 
@@ -67,20 +72,22 @@ describe("buildWorkspaceNavItems", () => {
     expect(payments?.label).toBe("Payments");
   });
 
-  it("adds the leads board for project businesses", () => {
-    const manager = buildWorkspaceNavItems(true, getWorkspaceProfile("BR-2")).find(
-      (i) => i.href === "/manager",
-    );
-    expect(manager?.children?.map((c) => c.href)).toContain("/manager/leads");
-    expect(manager?.children).toHaveLength(8);
+  it("keeps the enquiry pipeline out of Manager for project businesses too", () => {
+    const items = buildWorkspaceNavItems(true, getWorkspaceProfile("BR-2"));
+    const manager = items.find((i) => i.href === "/manager");
+    expect(manager?.children?.map((c) => c.href)).not.toContain("/manager/leads");
+    expect(manager?.children).toHaveLength(5);
+    // …because the CRM holds it for every business.
+    const crm = items.find((i) => i.href === "/customers");
+    expect(crm?.children?.map((c) => c.href)).toContain("/customers/leads");
   });
 
   it("drops hidden modules from Manager children", () => {
-    const manager = buildWorkspaceNavItems(false, profile, ["visits"]).find(
+    const manager = buildWorkspaceNavItems(false, profile, ["meetings"]).find(
       (i) => i.href === "/manager",
     );
-    expect(manager?.children?.some((c) => c.href === "/manager/visits")).toBe(false);
-    expect(manager?.children).toHaveLength(6);
+    expect(manager?.children?.some((c) => c.href === "/manager/meetings")).toBe(false);
+    expect(manager?.children).toHaveLength(4);
   });
 
   it("can hide the payments sub-module", () => {
@@ -92,10 +99,11 @@ describe("buildWorkspaceNavItems", () => {
     );
   });
 
-  it("gives Customers the CRM modules as children", () => {
+  it("labels the CRM tab CRM and gives it the modules as children", () => {
     const customers = buildWorkspaceNavItems(false, profile).find(
       (i) => i.href === "/customers",
     );
+    expect(customers?.label).toBe("CRM");
     expect(customers?.iconKey).toBe("Customers");
     expect(customers?.children?.map((c) => c.href)).toEqual([
       "/customers/directory",
@@ -108,7 +116,7 @@ describe("buildWorkspaceNavItems", () => {
     ]);
   });
 
-  it("lists only module routes under Customers, never a record", () => {
+  it("lists only module routes under the CRM, never a record", () => {
     const customers = buildWorkspaceNavItems(false, profile).find(
       (i) => i.href === "/customers",
     );

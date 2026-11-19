@@ -11,7 +11,7 @@ export function ManagerSubnav({ activeHref }: { activeHref: string }) {
   const reduceMotion = useReducedMotion();
   const tabs = [
     { href: "/manager", label: "Overview" },
-    ...visibleManagerModules(ws.hiddenManagerModules, ws.profile.capture),
+    ...visibleManagerModules(ws.hiddenManagerModules),
   ];
   return (
     <nav

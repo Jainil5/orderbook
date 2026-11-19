@@ -3,11 +3,12 @@ import type { BillDocument } from "@/lib/documents/types";
 import { imageFormatFromDataUrl } from "@/lib/documents/load-image-data-url";
 import {
   advanceDueAmount,
+  buildDetailRows,
   buildTotalsRows,
   computeTableColumns,
+  formatDocumentDateTime,
   formatPdfAmount,
   lineRowHeight,
-  quotationValidUntil,
   type TableColumns,
 } from "@/lib/documents/pdf-layout";
 
@@ -25,7 +26,7 @@ const COLORS = {
 
 const MARGIN = 44;
 /** Blank band kept clear at the foot of every page for the stamped footer. */
-const FOOTER_BAND = 34;
+const FOOTER_BAND = 56;
 const THUMB = 40;
 const LINE_HEIGHT = 12;
 const META_LINE_HEIGHT = 10;
@@ -46,29 +47,6 @@ type Layout = {
 
 function money(amount: number, currency: string) {
   return `${amount < 0 ? "-" : ""}${formatPdfAmount(amount, currency)}`;
-}
-
-function formatDocDate(iso: string) {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "";
-  return new Intl.DateTimeFormat("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-}
-
-function formatDateOnly(value: string) {
-  if (!value) return "";
-  const date = new Date(value.length === 10 ? `${value}T00:00:00` : value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(date);
 }
 
 function setColor(pdf: jsPDF, color: Rgb, mode: "fill" | "text" | "draw") {
@@ -147,6 +125,11 @@ function drawLogo(
   }
 }
 
+/**
+ * The masthead: who issued the paper and which document it is. The brand's
+ * address and contact are printed once, in the footer band, so the sheet reads
+ * top-down — who, which order, what it costs, where to write.
+ */
 function drawLetterhead(
   layout: Layout,
   doc: BillDocument,
@@ -169,14 +152,14 @@ function drawLetterhead(
     pdf.text(docTitle, pageWidth - MARGIN, 28, { align: "right" });
     pdf.text(doc.orderNumber, pageWidth - MARGIN, 44, { align: "right" });
     font(pdf, "normal", 8, COLORS.white);
-    pdf.text(formatDocDate(doc.createdAt), pageWidth - MARGIN, 56, {
+    pdf.text(formatDocumentDateTime(doc.createdAt), pageWidth - MARGIN, 56, {
       align: "right",
     });
     layout.y = headerH + 24;
     return;
   }
 
-  const letterheadH = 96;
+  const letterheadH = 84;
   const titleBarH = 32;
   setColor(pdf, COLORS.white, "fill");
   pdf.rect(0, 0, pageWidth, letterheadH, "F");
@@ -184,7 +167,7 @@ function drawLetterhead(
   pdf.line(0, letterheadH, pageWidth, letterheadH);
 
   const drewLogo = logoDataUrl
-    ? drawLogo(pdf, logoDataUrl, MARGIN, 18, 168, 46)
+    ? drawLogo(pdf, logoDataUrl, MARGIN, 16, 168, 44)
     : false;
   if (!drewLogo) {
     font(pdf, "bold", 16, COLORS.text);
@@ -192,21 +175,21 @@ function drawLetterhead(
   }
   if (issuer.tagline) {
     font(pdf, "normal", 8, COLORS.muted);
-    pdf.text(issuer.tagline, MARGIN, drewLogo ? 76 : 52);
+    pdf.text(issuer.tagline, MARGIN, drewLogo ? 72 : 52);
   }
 
+  /* No address block up here any more — the masthead carries the mark and the
+     document's own title, and the contact details belong at the foot. The legal
+     name only appears on the right when the logo took the left. */
   font(pdf, "bold", 9, COLORS.text);
-  pdf.text(issuer.legalName, pageWidth - MARGIN, 24, { align: "right" });
-  font(pdf, "normal", 8, COLORS.muted);
-  let contactY = 37;
-  for (const line of [...issuer.addressLines, issuer.phone, issuer.email]) {
-    pdf.text(line, pageWidth - MARGIN, contactY, { align: "right" });
-    contactY += 10;
+  if (drewLogo) {
+    pdf.text(issuer.legalName, pageWidth - MARGIN, 24, { align: "right" });
   }
+  font(pdf, "normal", 8, COLORS.muted);
   pdf.text(
-    issuer.websiteUrl.replace(/^https?:\/\//, ""),
+    formatDocumentDateTime(doc.createdAt),
     pageWidth - MARGIN,
-    contactY,
+    drewLogo ? 37 : 24,
     { align: "right" },
   );
 
@@ -220,79 +203,62 @@ function drawLetterhead(
   layout.y = letterheadH + titleBarH + 22;
 }
 
-function drawMetaCards(layout: Layout, doc: BillDocument) {
+/**
+ * The document's own details, printed flat between two hairlines — number,
+ * date, customer, mobile, and the rest. Two columns because the list is long;
+ * no boxes, because this is a sheet of paper rather than a screen.
+ */
+function drawDetails(layout: Layout, doc: BillDocument, isQuote: boolean) {
   const { pdf, contentWidth } = layout;
-  const isQuote = doc.kind === "quotation";
+  const rows = buildDetailRows(doc);
   const colW = (contentWidth - 16) / 2;
-  const pad = 12;
+  const labelSize = 7.5;
+  const valueSize = 9;
+  /** Values are right-aligned in the column, so labels get a fixed gutter. */
+  const valueWidth = colW - 96;
 
-  const left: string[] = [];
-  if (doc.customerPhone) left.push(`Mobile: ${doc.customerPhone}`);
-  if (doc.customerAddress?.trim()) {
-    left.push(
-      ...pdf
-        .splitTextToSize(`Site: ${doc.customerAddress.trim()}`, colW - pad * 2)
-        .slice(0, 3),
-    );
-  }
-
-  const right: string[] = [
-    `Number: ${doc.orderNumber}`,
-    `Date: ${formatDocDate(doc.createdAt)}`,
-    `Currency: ${doc.currencyCode}`,
-  ];
-  if (doc.serviceDate) {
-    right.push(
-      `${isQuote ? "Target delivery" : "Delivery / installation"}: ${formatDateOnly(doc.serviceDate)}`,
-    );
-  }
-  if (isQuote) {
-    right.push(`Valid until: ${quotationValidUntil(doc.createdAt)}`);
-    right.push("Status: Awaiting acceptance");
-  } else {
-    if (doc.referenceNumber) {
-      right.push(`Against quotation: ${doc.referenceNumber}`);
+  // Measured before anything is drawn: a wrapped address makes the block taller.
+  const measured = rows.map((row) => {
+    font(pdf, "normal", valueSize, COLORS.text);
+    const lines: string[] = pdf.splitTextToSize(row.value, valueWidth);
+    return { ...row, lines: Math.max(1, lines.length) };
+  });
+  const half = Math.ceil(measured.length / 2);
+  const columnHeight = (start: number, end: number) => {
+    let height = 0;
+    for (let index = start; index < end; index += 1) {
+      height += 12 * measured[index].lines + 3;
     }
-    right.push(`Payment: ${doc.paymentMethod ?? "pending"}`);
-  }
+    return height;
+  };
+  const blockH =
+    Math.max(columnHeight(0, half), columnHeight(half, measured.length)) + 26;
 
-  const cardH =
-    Math.max(
-      72,
-      46 + left.length * META_LINE_HEIGHT,
-      30 + right.length * META_LINE_HEIGHT,
-    ) + pad;
-
-  setColor(pdf, COLORS.white, "fill");
+  ensurePage(layout, blockH);
+  const top = layout.y;
   setColor(pdf, COLORS.border, "draw");
-  pdf.roundedRect(MARGIN, layout.y, colW, cardH, 4, 4, "FD");
-  pdf.roundedRect(MARGIN + colW + 16, layout.y, colW, cardH, 4, 4, "FD");
+  pdf.line(MARGIN, top, MARGIN + contentWidth, top);
+  pdf.line(MARGIN, top + blockH, MARGIN + contentWidth, top + blockH);
 
-  font(pdf, "bold", 8, COLORS.muted);
-  pdf.text(isQuote ? "QUOTE FOR" : "BILL TO", MARGIN + pad, layout.y + 16);
-  pdf.text("DOCUMENT DETAILS", MARGIN + colW + 16 + pad, layout.y + 16);
+  // Plain capitals: jsPDF's standard fonts are WinAnsi, so a letter-spaced or
+  // thin-spaced title would print as garbage glyphs.
+  font(pdf, "bold", labelSize, COLORS.muted);
+  pdf.text(isQuote ? "QUOTATION DETAILS" : "BILL DETAILS", MARGIN, top + 14);
 
-  font(pdf, "bold", 11, COLORS.text);
-  pdf.text(
-    doc.customerName?.trim() || "Walk-in customer",
-    MARGIN + pad,
-    layout.y + 32,
-  );
-  font(pdf, "normal", 8.5, COLORS.muted);
-  let ly = layout.y + 46;
-  for (const line of left) {
-    pdf.text(line, MARGIN + pad, ly);
-    ly += META_LINE_HEIGHT;
-  }
+  let y = top + 30;
+  measured.forEach((row, index) => {
+    const column = index < half ? 0 : 1;
+    if (index === half) y = top + 30;
+    const x = MARGIN + column * (colW + 16);
+    const lines: string[] = pdf.splitTextToSize(row.value, valueWidth);
+    font(pdf, "normal", labelSize, COLORS.muted);
+    pdf.text(row.label.toUpperCase(), x, y);
+    font(pdf, "normal", valueSize, COLORS.text);
+    pdf.text(lines, x + colW - 4, y, { align: "right" });
+    y += 12 * Math.max(1, lines.length) + 3;
+  });
 
-  font(pdf, "normal", 8.5, COLORS.text);
-  let ry = layout.y + 30;
-  for (const line of right) {
-    pdf.text(line, MARGIN + colW + 16 + pad, ry);
-    ry += META_LINE_HEIGHT;
-  }
-
-  layout.y += cardH + 16;
+  layout.y = top + blockH + 14;
 }
 
 function drawLines(
@@ -386,43 +352,40 @@ function drawLines(
   });
 }
 
+/**
+ * The money, printed flat at the right edge of the sheet — the same rows the
+ * browser export lays out, with no panel around them.
+ */
 function drawTotals(layout: Layout, doc: BillDocument) {
   const { pdf, pageWidth } = layout;
   const rows = buildTotalsRows(doc);
-  const totalsW = Math.min(248, layout.contentWidth);
+  const totalsW = Math.min(268, layout.contentWidth);
   const totalsX = pageWidth - MARGIN - totalsW;
-  const rowH = 16;
-  const totalsH = 20 + rows.length * rowH;
+  const right = totalsX + totalsW;
+  const rowH = 15;
 
   layout.y += 10;
-  ensurePage(layout, totalsH);
+  ensurePage(layout, rows.length * rowH + 16);
 
-  setColor(pdf, COLORS.primaryLight, "fill");
-  pdf.roundedRect(totalsX, layout.y, totalsW, totalsH, 4, 4, "F");
-  setColor(pdf, COLORS.border, "draw");
-  pdf.roundedRect(totalsX, layout.y, totalsW, totalsH, 4, 4, "S");
-
-  let ty = layout.y + 18;
-  for (const row of rows) {
+  let ty = layout.y + 14;
+  rows.forEach((row, index) => {
     const strong = row.tone === "strong";
     const color = strong
       ? COLORS.text
       : row.tone === "discount"
         ? COLORS.success
         : COLORS.muted;
-    font(pdf, strong ? "bold" : "normal", strong ? 11 : 9, color);
-    pdf.text(row.label, totalsX + 12, ty);
-    pdf.text(money(row.amount, layout.currency), totalsX + totalsW - 12, ty, {
-      align: "right",
-    });
-    if (row.tone === "sub") {
+    if (index === 0 || strong) {
       setColor(pdf, COLORS.border, "draw");
-      pdf.line(totalsX + 12, ty + 4, totalsX + totalsW - 12, ty + 4);
+      pdf.line(totalsX, ty - 10, right, ty - 10);
     }
+    font(pdf, strong ? "bold" : "normal", strong ? 11 : 9, color);
+    pdf.text(row.label, totalsX, ty);
+    pdf.text(money(row.amount, layout.currency), right, ty, { align: "right" });
     ty += rowH;
-  }
+  });
 
-  layout.y += totalsH + 10;
+  layout.y = ty + 4;
 
   if (doc.kind === "quotation" && doc.depositPercent && doc.depositPercent > 0) {
     const advance = advanceDueAmount(doc.grandTotal, doc.depositPercent);
@@ -487,25 +450,44 @@ function drawTermsAndSignature(layout: Layout, doc: BillDocument, terms: string)
   pdf.text("Signature", rightX, layout.y + 52);
 }
 
+/**
+ * The footer band, stamped on every page: where the brand is and how to reach
+ * it, then what this paper is. Printing it per page is the point — a quotation
+ * that runs to three pages still carries its address on each of them.
+ */
 function stampFooters(layout: Layout, doc: BillDocument, primary: Rgb) {
-  const { pdf } = layout;
-  const issuerName = doc.issuer?.legalName ?? doc.brandName;
-  const pageCount = pdf.getNumberOfPages();
+  const { pdf, pageHeight } = layout;
+  const issuer = doc.issuer;
+  const issuerName = issuer?.legalName ?? doc.brandName;
   const label = doc.kind === "quotation" ? "quotation" : "invoice";
-  const site = (doc.issuer?.websiteUrl ?? "OrderBook").replace(/^https?:\/\//, "");
+  const pageCount = pdf.getNumberOfPages();
+  const rule = pageHeight - 46;
+  const contact = issuer
+    ? [issuer.addressLines.join(", "), issuer.phone, issuer.email]
+        .map((value) => value.trim())
+        .filter(Boolean)
+        .join(" · ")
+    : "";
+  const site = issuer
+    ? issuer.websiteUrl.replace(/^https?:\/\//, "")
+    : "OrderBook";
 
   for (let page = 1; page <= pageCount; page += 1) {
     pdf.setPage(page);
-    const y = layout.pageHeight - 20;
     setColor(pdf, COLORS.border, "draw");
-    pdf.line(MARGIN, y - 9, MARGIN + layout.contentWidth, y - 9);
-    font(pdf, "normal", 8, COLORS.muted);
-    pdf.text(`Computer-generated ${label} from ${issuerName}.`, MARGIN, y);
-    pdf.text(`Page ${page} of ${pageCount}`, MARGIN + layout.contentWidth / 2, y, {
+    pdf.line(MARGIN, rule, MARGIN + layout.contentWidth, rule);
+    if (contact) {
+      font(pdf, "normal", 7.5, COLORS.muted);
+      const fitted: string[] = pdf.splitTextToSize(contact, layout.contentWidth - 120);
+      pdf.text(fitted[0] ?? contact, MARGIN, rule + 9);
+      setColor(pdf, primary, "text");
+      pdf.text(site, MARGIN + layout.contentWidth, rule + 9, { align: "right" });
+    }
+    font(pdf, "normal", 7.5, COLORS.muted);
+    pdf.text(`Computer-generated ${label} from ${issuerName}.`, MARGIN, rule + 19);
+    pdf.text(`Page ${page} of ${pageCount}`, MARGIN + layout.contentWidth / 2, rule + 19, {
       align: "center",
     });
-    setColor(pdf, doc.issuer ? primary : COLORS.accent, "text");
-    pdf.text(site, MARGIN + layout.contentWidth, y, { align: "right" });
   }
 }
 
@@ -519,8 +501,9 @@ export function renderBillPdf(
   const contentWidth = pageWidth - MARGIN * 2;
   const isQuote = doc.kind === "quotation";
   const lineImageDataUrls = opts?.lineImageDataUrls ?? [];
-  const showLineImages =
-    isQuote && lineImageDataUrls.some((url) => Boolean(url?.trim()));
+  const showLineImages = lineImageDataUrls.some((url) =>
+    Boolean(url?.trim()),
+  );
 
   const layout: Layout = {
     pdf,
@@ -546,7 +529,7 @@ export function renderBillPdf(
       "Payment as per agreed terms. Goods are covered by the company warranty policy.");
 
   drawLetterhead(layout, doc, primary, opts?.logoDataUrl ?? null);
-  drawMetaCards(layout, doc);
+  drawDetails(layout, doc, isQuote);
 
   ensurePage(layout, 40);
   font(pdf, "italic", 9, COLORS.muted);

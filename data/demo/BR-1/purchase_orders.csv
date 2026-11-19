@@ -1,0 +1,7 @@
+id,brand_id,number,vendor_id,status,created_at,sent_at,expected_at,closed_at,note
+po1,demo-brewery-cafe,PO-1041,vnd2,received,2026-11-02T05:10:00.000Z,2026-11-02T05:12:00.000Z,2026-11-03T06:00:00.000Z,2026-11-03T06:20:00.000Z,Weekly dairy top-up
+po2,demo-brewery-cafe,PO-1042,vnd4,sent,2026-11-05T09:30:00.000Z,2026-11-05T09:35:00.000Z,2026-11-10T14:00:00.000Z,,Cups and napkins for the banquet booking
+po3,demo-brewery-cafe,PO-1043,vnd1,partially_received,2026-11-10T07:00:00.000Z,2026-11-10T07:05:00.000Z,2026-11-13T08:00:00.000Z,,Half the tomatoes came on the first run
+po4,demo-brewery-cafe,PO-1044,vnd3,draft,2026-11-11T16:40:00.000Z,,2026-11-15T09:00:00.000Z,,Holding for the roastery price list
+po5,demo-brewery-cafe,PO-1045,vnd2,sent,2026-11-11T05:20:00.000Z,2026-11-11T05:25:00.000Z,2026-11-12T18:00:00.000Z,,Cheese — their fridge is short on Fridays
+po6,demo-brewery-cafe,PO-1046,vnd5,cancelled,2026-11-04T11:00:00.000Z,2026-11-04T11:05:00.000Z,,2026-11-06T10:00:00.000Z,Pulled — the soda deal covered the syrup

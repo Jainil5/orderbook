@@ -25,13 +25,10 @@ vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 import { readDemoMutableBucket } from "@/lib/demo/mutable-store";
 import {
   deleteAppointmentAction,
-  deleteServiceAction,
-  deleteServiceJobAction,
   deleteShiftAction,
   deleteTaskAction,
   deleteVisitAction,
   setTaskStatusAction,
-  toggleServiceActiveAction,
 } from "./manager-ops-actions";
 
 // Fixture rows shipped in the BR-1 brand pack.
@@ -40,16 +37,12 @@ const cases: {
   id: string;
   message: string;
   overridesKey:
-    | "serviceOverrides"
-    | "serviceJobOverrides"
     | "appointmentOverrides"
     | "taskOverrides"
     | "shiftOverrides"
     | "visitOverrides";
   remove: (id: string) => Promise<{ ok: boolean; message?: string }>;
 }[] = [
-  { label: "service", id: "bc-svc-1", message: "Service not found.", overridesKey: "serviceOverrides", remove: deleteServiceAction },
-  { label: "service job", id: "bc-job-1", message: "Job not found.", overridesKey: "serviceJobOverrides", remove: deleteServiceJobAction },
   { label: "appointment", id: "bc-apt-1", message: "Appointment not found.", overridesKey: "appointmentOverrides", remove: deleteAppointmentAction },
   { label: "task", id: "bc-task-1", message: "Task not found.", overridesKey: "taskOverrides", remove: deleteTaskAction },
   { label: "shift", id: "bc-shift-1", message: "Shift not found.", overridesKey: "shiftOverrides", remove: deleteShiftAction },
@@ -74,26 +67,11 @@ describe("existence guards on destructive ops actions", () => {
     });
   }
 
-  it("refuses to toggle a service that does not exist", async () => {
-    expect(await toggleServiceActiveAction("ghost-id", false)).toEqual({
-      ok: false,
-      message: "Service not found.",
-    });
-    expect(await readDemoMutableBucket("BR-1")).toMatchObject({ serviceOverrides: {} });
-  });
-
   it("refuses to move a task that does not exist through the board", async () => {
     expect(await setTaskStatusAction("ghost-id", "done")).toEqual({
       ok: false,
       message: "Task not found.",
     });
     expect(await readDemoMutableBucket("BR-1")).toMatchObject({ taskOverrides: {} });
-  });
-
-  it("still toggles a known service", async () => {
-    expect(await toggleServiceActiveAction("bc-svc-1", false)).toEqual({ ok: true });
-    expect((await readDemoMutableBucket("BR-1")).serviceOverrides["bc-svc-1"]).toMatchObject({
-      isActive: false,
-    });
   });
 });

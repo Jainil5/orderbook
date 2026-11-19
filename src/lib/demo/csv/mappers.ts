@@ -14,6 +14,17 @@ import type {
 } from "@/types/database";
 import type { StaffMember } from "@/types/manager";
 import type {
+  PurchaseOrder,
+  PurchaseOrderLine,
+  PurchaseOrderStatus,
+  Vendor,
+  VendorPaymentTerm,
+} from "@/types/procurement";
+import {
+  PURCHASE_ORDER_STATUSES,
+  VENDOR_PAYMENT_TERMS,
+} from "@/types/procurement";
+import type {
   Appointment,
   FieldVisit,
   Lead,
@@ -369,5 +380,73 @@ export function mapProductIngredient(
     item_id: reqStr(r.item_id, "item_id", source),
     qty_per_sale: reqNum(r.qty_per_sale, "qty_per_sale", source),
     note: str(r.note),
+  };
+}
+
+export function mapVendor(r: CsvRow, source: string): Vendor {
+  const terms = reqStr(r.payment_terms, "payment_terms", source);
+  if (!(VENDOR_PAYMENT_TERMS as readonly string[]).includes(terms)) {
+    throw new Error(`Invalid payment terms "${terms}" in ${source}`);
+  }
+  const rating = num(r.rating, "rating", source);
+  return {
+    id: reqStr(r.id, "id", source),
+    brand_id: reqStr(r.brand_id, "brand_id", source),
+    name: reqStr(r.name, "name", source),
+    category: str(r.category),
+    contact_name: str(r.contact_name),
+    phone: str(r.phone),
+    email: str(r.email),
+    lead_time_days: num(r.lead_time_days, "lead_time_days", source) ?? 0,
+    payment_terms: terms as VendorPaymentTerm,
+    rating: rating === null ? null : Math.min(5, Math.max(1, rating)),
+    note: str(r.note),
+    active: bool(r.active),
+  };
+}
+
+export function mapPurchaseOrder(r: CsvRow, source: string): PurchaseOrder {
+  const status = reqStr(r.status, "status", source);
+  if (!(PURCHASE_ORDER_STATUSES as readonly string[]).includes(status)) {
+    throw new Error(`Invalid purchase order status "${status}" in ${source}`);
+  }
+  return {
+    id: reqStr(r.id, "id", source),
+    brand_id: reqStr(r.brand_id, "brand_id", source),
+    number: reqStr(r.number, "number", source),
+    vendor_id: reqStr(r.vendor_id, "vendor_id", source),
+    status: status as PurchaseOrderStatus,
+    created_at: reqStr(r.created_at, "created_at", source),
+    sent_at: str(r.sent_at),
+    expected_at: str(r.expected_at),
+    closed_at: str(r.closed_at),
+    note: str(r.note),
+  };
+}
+
+/**
+ * A received quantity above the ordered quantity would make the shelf and the
+ * invoice disagree, so the pack is checked at load rather than trusted.
+ */
+export function mapPurchaseOrderLine(
+  r: CsvRow,
+  source: string,
+): PurchaseOrderLine {
+  const id = reqStr(r.id, "id", source);
+  const packs = reqNum(r.packs, "packs", source);
+  const received = num(r.received_packs, "received_packs", source) ?? 0;
+  if (received > packs) {
+    throw new Error(`${source}: ${id} received ${received} of ${packs} ordered`);
+  }
+  return {
+    id,
+    brand_id: reqStr(r.brand_id, "brand_id", source),
+    po_id: reqStr(r.po_id, "po_id", source),
+    item_id: reqStr(r.item_id, "item_id", source),
+    item_name: reqStr(r.item_name, "item_name", source),
+    unit: reqStr(r.unit, "unit", source),
+    packs,
+    received_packs: received,
+    cost_per_pack: reqNum(r.cost_per_pack, "cost_per_pack", source),
   };
 }

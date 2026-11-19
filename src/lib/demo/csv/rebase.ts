@@ -22,6 +22,7 @@ export type DatedPack = Pick<
   | "campaigns"
   | "loyaltyLedger"
   | "memberships"
+  | "purchaseOrders"
 >;
 
 function startOfDayMs(d: Date): number {
@@ -137,6 +138,15 @@ export function rebasePackDates<T extends DatedPack>(pack: T, now: Date = new Da
       ...m,
       started_at: shiftIso(m.started_at, days),
       expires_at: shiftNullableIso(m.expires_at, days),
+    })),
+    // A purchase order keeps its story: how long ago it was sent, and whether
+    // the vendor's promised date has already gone by.
+    purchaseOrders: pack.purchaseOrders.map((po) => ({
+      ...po,
+      created_at: shiftIso(po.created_at, days),
+      sent_at: shiftNullableIso(po.sent_at, days),
+      expected_at: shiftNullableIso(po.expected_at, days),
+      closed_at: shiftNullableIso(po.closed_at, days),
     })),
   };
 }

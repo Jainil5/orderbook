@@ -348,6 +348,7 @@ export function AnalyticsStudio({
       label="Net sales"
       value={money(snapshot.netSales)}
       numericValue={snapshot.netSales}
+      numericWhenInView
       format={{ kind: "currency", currency }}
       spark={trend.map((point) => point.revenue)}
       hint={
@@ -363,6 +364,7 @@ export function AnalyticsStudio({
       value={snapshot.orderCount.toString()}
       hint="In this sample"
       numericValue={snapshot.orderCount}
+      numericWhenInView
       spark={trend.map((point) => point.orders)}
     />,
     <StatCard
@@ -370,6 +372,7 @@ export function AnalyticsStudio({
       label="Avg. order"
       value={money(snapshot.averageOrderValue)}
       numericValue={snapshot.averageOrderValue}
+      numericWhenInView
       format={{ kind: "currency", currency }}
       hint={snapshot.itemsSold ? `${snapshot.itemsSold} items sold` : undefined}
     />,
@@ -378,6 +381,7 @@ export function AnalyticsStudio({
       label="Collected"
       value={`${collectionRate.toFixed(0)}%`}
       numericValue={collectionRate / 100}
+      numericWhenInView
       format={{ kind: "percent" }}
       hint={`${money(snapshot.paidAmount)} in · ${money(snapshot.pendingAmount)} open`}
       tone={collectionRate >= 80 ? "up" : collectionRate >= 40 ? "neutral" : "down"}
@@ -627,6 +631,7 @@ export function AnalyticsStudio({
           value={money(marginSnapshot.revenue)}
           hint="Excludes credit notes"
           numericValue={marginSnapshot.revenue}
+          numericWhenInView
           format={{ kind: "currency", currency }}
         />
         <StatCard
@@ -634,6 +639,7 @@ export function AnalyticsStudio({
           value={money(marginSnapshot.cost)}
           hint="From product cost price"
           numericValue={marginSnapshot.cost}
+          numericWhenInView
           format={{ kind: "currency", currency }}
         />
         <StatCard
@@ -641,12 +647,14 @@ export function AnalyticsStudio({
           value={money(marginSnapshot.margin)}
           tone={marginSnapshot.margin >= 0 ? "up" : "down"}
           numericValue={marginSnapshot.margin}
+          numericWhenInView
           format={{ kind: "currency", currency }}
         />
         <StatCard
           label="Margin %"
           value={`${marginSnapshot.marginPercent.toFixed(1)}%`}
           numericValue={marginSnapshot.marginPercent / 100}
+          numericWhenInView
           format={{ kind: "percent" }}
         />
       </div>
@@ -732,6 +740,7 @@ export function AnalyticsStudio({
       label="Best day"
       value={money(bestDay.revenue)}
       numericValue={bestDay.revenue}
+      numericWhenInView
       format={{ kind: "currency", currency }}
       hint={`${bestDay.date} in the sample`}
     />
@@ -765,6 +774,7 @@ export function AnalyticsStudio({
             label="Open orders"
             value={String(openOrders)}
             numericValue={openOrders}
+            numericWhenInView
             hint="Not completed in this sample"
           />,
         ]

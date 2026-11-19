@@ -1,0 +1,6 @@
+id,brand_id,name,category,contact_name,phone,email,lead_time_days,payment_terms,rating,note,active
+vnd1,demo-cubig-furniture,Mumbai Plywood Traders,Wood and boards,Rajesh Patil,+91 98199 20450,sales@mumbai-ply.example,5,net_30,4.4,BWP and MR sheets cut to size. Five days is honest; three is a favour.,true
+vnd2,demo-cubig-furniture,Supreme Foam and Fabric,Foam and fabric,Aftab Sheikh,+91 98199 61277,orders@supremefoam.example,4,net_15,3.9,"PU foam is reliable, fabric colours vary between rolls.",true
+vnd3,demo-cubig-furniture,Hathway Hardware,Fasteners,Divya Nair,+91 98199 38814,quotes@hathwayhardware.example,2,cash,4.7,"Screws, hinges and channels. Same-day collection if the van is full.",true
+vnd4,demo-cubig-furniture,Finish Line Chemicals,Finishes,Salim Ansari,+91 98199 74903,depot@finishline.example,3,upi,4.0,Lacquer and polish. Thinner is the line they forget most often.,true
+vnd5,demo-cubig-furniture,ShipRight Packaging,Packaging,Meera Joshi,+91 98199 55620,desk@shipright.example,6,net_30,4.2,Longest lead time of the lot. Cartons are the one thing never to run out of.,true

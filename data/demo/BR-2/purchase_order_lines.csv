@@ -1,0 +1,11 @@
+id,brand_id,po_id,item_id,item_name,unit,packs,received_packs,cost_per_pack
+po1-l1,demo-cubig-furniture,po1,fv1,BWP Plywood Sheet 18mm,sq ft,20,20,2850.00
+po1-l2,demo-cubig-furniture,po1,fv2,MR Grade Plywood Sheet 12mm,sq ft,15,15,1650.00
+po2-l1,demo-cubig-furniture,po2,fv3,MDF Board 6mm,sheet,12,0,1450.00
+po3-l1,demo-cubig-furniture,po3,fv6,High Density PU Foam Sheet,sheet,10,4,1950.00
+po3-l2,demo-cubig-furniture,po3,fv8,Vegan Leather Roll,sq ft,6,0,2600.00
+po4-l1,demo-cubig-furniture,po4,fv15,PU Polish Satin,ml,5,0,1250.00
+po4-l2,demo-cubig-furniture,po4,fv16,Cellulose Thinner,ml,8,0,320.00
+po5-l1,demo-cubig-furniture,po5,fv20,Bubble Wrap Roll,metre,10,0,1400.00
+po5-l2,demo-cubig-furniture,po5,fv21,Five Ply Carton,ea,20,0,1100.00
+po6-l1,demo-cubig-furniture,po6,fv9,Self Tapping Screws 25mm,ea,20,0,420.00

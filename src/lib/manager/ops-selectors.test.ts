@@ -21,8 +21,11 @@ describe("customerOperationsTimeline", () => {
   it("collects the customer's records with deep links, newest first, undated last", () => {
     const rows = customerOperationsTimeline("c1", { appointments: [apt], visits: [visit], jobs: [job], tasks: [task] }, { s1: "Catering" });
     expect(rows.map((r) => r.kind)).toEqual(["appointment", "visit", "task", "job"]);
-    expect(rows[0].href).toBe("/manager/appointments");
+    expect(rows[0].href).toBe("/manager/meetings");
+    expect(rows[1].href).toBe("/manager/meetings?tab=visits");
+    // A service job has no editing screen of its own, so its row is history.
     expect(rows[3].title).toBe("Catering");
+    expect(rows[3].href).toBeNull();
   });
   it("excludes other customers and done tasks", () => {
     const rows = customerOperationsTimeline("c2", { appointments: [apt], visits: [visit], jobs: [job], tasks: [task] }, {});
@@ -33,9 +36,9 @@ describe("customerOperationsTimeline", () => {
 });
 
 describe("overviewRollups", () => {
-  it("counts today's scheduled appointments, overdue tasks, on-shift, active visits, open jobs", () => {
-    const r = overviewRollups({ appointments: [apt, { ...apt, id: "a2", status: "cancelled" }], tasks: [task, { ...task, id: "t2", status: "done" }], shifts: [shift], visits: [visit], jobs: [job, { ...job, id: "j2", status: "completed" }] }, now);
-    expect(r).toEqual({ todayAppointments: 1, overdueTasks: 1, onShiftNow: 1, activeVisits: 1, openJobs: 1 });
+  it("counts today's scheduled appointments, overdue tasks, on-shift and active visits", () => {
+    const r = overviewRollups({ appointments: [apt, { ...apt, id: "a2", status: "cancelled" }], tasks: [task, { ...task, id: "t2", status: "done" }], shifts: [shift], visits: [visit] }, now);
+    expect(r).toEqual({ todayAppointments: 1, overdueTasks: 1, onShiftNow: 1, activeVisits: 1 });
   });
   it("counts work that sits in the 00:00–05:30 IST window on the local day", () => {
     // 01:00 IST on 8 Nov is 19:30 UTC on 7 Nov, and the night shift's UTC
@@ -47,11 +50,10 @@ describe("overviewRollups", () => {
         tasks: [],
         shifts: [nightShift],
         visits: [],
-        jobs: [],
       },
       new Date("2026-11-08T20:00:00+05:30"),
     );
-    expect(r).toEqual({ todayAppointments: 1, overdueTasks: 0, onShiftNow: 1, activeVisits: 0, openJobs: 0 });
+    expect(r).toEqual({ todayAppointments: 1, overdueTasks: 0, onShiftNow: 1, activeVisits: 0 });
   });
 });
 

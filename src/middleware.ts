@@ -47,6 +47,7 @@ export async function middleware(request: NextRequest) {
     path === "/login" ||
     path === "/" ||
     path.startsWith("/quote/") ||
+    path.startsWith("/site/") ||
     path.startsWith("/api/auth");
 
   if (

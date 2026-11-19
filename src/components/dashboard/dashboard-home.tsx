@@ -11,6 +11,7 @@ import type { AnalyticsSnapshot } from "@/lib/analytics/snapshot";
 import type { ResolvedRange } from "@/lib/analytics/date-range";
 import type { Order } from "@/types/database";
 import { OpenQuotesWidget } from "@/components/dashboard/open-quotes-widget";
+import { Reveal } from "@/components/effects/reveal";
 import { RangeSelector } from "@/components/workspace/range-selector";
 
 const TrendChart = dynamic(
@@ -110,6 +111,7 @@ export function DashboardHome({
           value={money(snapshot.netSales)}
           hint={range.label}
           numericValue={snapshot.netSales}
+          numericWhenInView
           format={{ kind: "currency", currency: snapshot.currencyCode }}
           spark={revenueSpark}
         />
@@ -117,12 +119,14 @@ export function DashboardHome({
           label="Orders"
           value={snapshot.orderCount.toString()}
           numericValue={snapshot.orderCount}
+          numericWhenInView
           spark={ordersSpark}
         />
         <StatCard
           label="Avg. order value"
           value={money(snapshot.averageOrderValue)}
           numericValue={snapshot.averageOrderValue}
+          numericWhenInView
           format={{ kind: "currency", currency: snapshot.currencyCode }}
           spark={snapshot.salesOverTime.map((point) =>
             point.orders ? Math.round(point.revenue / point.orders) : 0,
@@ -132,6 +136,7 @@ export function DashboardHome({
           label="Collected"
           value={collected ? `${collectionRate.toFixed(0)}%` : "—"}
           numericValue={collected ? collectionRate / 100 : undefined}
+          numericWhenInView
           format={{ kind: "percent" }}
           hint={
             collected
@@ -141,7 +146,10 @@ export function DashboardHome({
           tone={collectionRate >= 80 ? "up" : "neutral"}
         />
       </div>
-      <div className="ob-stagger mt-4 grid gap-4 lg:grid-cols-5">
+      {/* The trend chart and the mix sit below the fold, so the block
+          assembles on scroll. The reveal *is* the grid here: its cards keep
+          the CSS `.ob-stagger` rise, so no single node is animated twice. */}
+      <Reveal className="ob-stagger mt-4 grid gap-4 lg:grid-cols-5">
         <Card className="lg:col-span-3">
           <div className="mb-4 flex items-start justify-between gap-3">
             <div>
@@ -213,7 +221,7 @@ export function DashboardHome({
             </p>
           )}
         </Card>
-      </div>
+      </Reveal>
     </PageShell>
   );
 }

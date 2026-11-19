@@ -29,14 +29,14 @@ export function CommandPalette() {
   const links = useMemo(() => {
     const managerLinks = [
       { href: "/manager", label: "Manager overview" },
-      ...visibleManagerModules(ws.hiddenManagerModules, ws.profile.capture).map((m) => ({ href: m.href, label: m.label })),
+      ...visibleManagerModules(ws.hiddenManagerModules).map((m) => ({ href: m.href, label: m.label })),
     ];
     const crmLinks = CRM_MODULES.map((m) => ({
       href: m.href,
       label: m.key === "directory" ? "Customer directory" : `CRM ${m.label}`,
     }));
     return [...LINKS, ...managerLinks, ...crmLinks];
-  }, [ws.hiddenManagerModules, ws.profile.capture]);
+  }, [ws.hiddenManagerModules]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {

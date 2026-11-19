@@ -21,16 +21,13 @@ async function collectAssets(doc: BillDocument): Promise<BillHtmlAssets> {
   const logoDataUrl = doc.issuer?.logoPath
     ? await loadImageDataUrl(doc.issuer.logoPath)
     : null;
-  const lineImageDataUrls =
-    doc.kind === "quotation"
-      ? await Promise.all(
-          doc.lines.map((line) =>
-            line.imageUrl?.trim()
-              ? loadImageDataUrl(line.imageUrl.trim())
-              : Promise.resolve(null),
-          ),
-        )
-      : [];
+  const lineImageDataUrls = await Promise.all(
+    doc.lines.map((line) =>
+      line.imageUrl?.trim()
+        ? loadImageDataUrl(line.imageUrl.trim())
+        : Promise.resolve(null),
+    ),
+  );
   return { logoDataUrl, lineImageDataUrls };
 }
 
@@ -58,10 +55,10 @@ function saveAsFile(url: string, doc: BillDocument): void {
 export async function openBillHtml(
   doc: BillDocument,
 ): Promise<OpenBillHtmlResult> {
-  // Claim the tab while the click is still a user gesture. A quotation inlines
-  // its product photos first, which costs a few network round trips — waiting
-  // for those before window.open would make the browser treat it as a pop-up
-  // and the merchant would get a download instead of the document on screen.
+  // Claim the tab while the click is still a user gesture. Inlining the
+  // product photos costs a few network round trips — waiting for those before
+  // window.open would make the browser treat it as a pop-up and the merchant
+  // would get a download instead of the document on screen.
   const tab = window.open("", "_blank");
   let navigated = false;
   try {

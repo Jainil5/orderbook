@@ -11,7 +11,7 @@ export type BillLineItem = {
   listUnitPrice: number;
   lineDiscount: number;
   lineTotal: number;
-  /** Product photo for quotation PDFs and previews */
+  /** Product photo, printed on bills and quotations alike. */
   imageUrl?: string | null;
   /** Catalog code, printed under the description when known. */
   sku?: string | null;

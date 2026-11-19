@@ -1,0 +1,14 @@
+id,brand_id,po_id,item_id,item_name,unit,packs,received_packs,cost_per_pack
+po1-l1,demo-brewery-cafe,po1,iv3,Full Cream Milk,ml,24,24,68.00
+po1-l2,demo-brewery-cafe,po1,iv4,Oat Milk,ml,12,12,135.00
+po1-l3,demo-brewery-cafe,po1,iv5,Greek Yogurt,g,8,8,640.00
+po2-l1,demo-brewery-cafe,po2,iv30,Paper Napkins,ea,10,4,90.00
+po2-l2,demo-brewery-cafe,po2,iv28,Paper Cups (12 Oz),ea,6,0,260.00
+po2-l3,demo-brewery-cafe,po2,iv29,Cup Lids,ea,8,0,120.00
+po3-l1,demo-brewery-cafe,po3,iv9,Tomatoes,slice,10,4,120.00
+po3-l2,demo-brewery-cafe,po3,iv10,Lettuce,leaf,8,0,150.00
+po4-l1,demo-brewery-cafe,po4,iv15,Espresso Beans,shot,6,0,1450.00
+po4-l2,demo-brewery-cafe,po4,iv18,Cold Brew Concentrate,ml,4,0,950.00
+po5-l1,demo-brewery-cafe,po5,iv7,Cheese Slices,slice,12,0,320.00
+po6-l1,demo-brewery-cafe,po6,iv19,Sparkling Soda Water,ml,24,0,45.00
+po6-l2,demo-brewery-cafe,po6,iv21,Sugar Syrup,ml,10,0,180.00

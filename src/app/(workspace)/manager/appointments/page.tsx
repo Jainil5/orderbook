@@ -1,38 +1,9 @@
 import { redirect } from "next/navigation";
-import { PageShell } from "@/components/workspace/page-shell";
-import { ManagerSubnav } from "@/components/manager/manager-subnav";
-import { AppointmentsManager } from "@/components/manager/appointments-manager";
-import { getDemoBrandPack } from "@/lib/demo/brands";
-import { toDemoBrandCode } from "@/lib/demo/data";
-import { mergeDemoCustomers } from "@/lib/demo/merge-entities";
-import { readDemoMutableBucket } from "@/lib/demo/mutable-store";
-import { loadDemoOperations } from "@/lib/demo/operations-data";
-import { listDemoStaff } from "@/lib/demo/staff-data";
-import { loadWorkspaceSession } from "@/lib/workspace/session";
-import { canAddWorkspaceRecords } from "@/lib/workspace/settings-access";
 
-export default async function AppointmentsPage() {
-  const ws = await loadWorkspaceSession();
-  if (!ws) redirect("/login");
-  if (ws.hiddenManagerModules.includes("appointments")) redirect("/manager");
-
-
-  const code = toDemoBrandCode(ws.brand.code);
-  const ops = await loadDemoOperations(code);
-  const staff = await listDemoStaff(code);
-  const customers = mergeDemoCustomers(getDemoBrandPack(code).customers, await readDemoMutableBucket(code));
-  return (
-    <PageShell title="Meetings & Appointments">
-      <ManagerSubnav activeHref="/manager/appointments" />
-      <AppointmentsManager
-        appointments={ops.appointments}
-        customers={customers.map((c) => ({ id: c.id, name: c.name }))}
-        staff={staff.filter((s) => s.status === "active").map((s) => ({ id: s.id, name: s.name }))}
-        services={ops.services.filter((s) => s.isActive).map((s) => ({ id: s.id, name: s.name }))}
-        canEdit
-
-        canAdd={canAddWorkspaceRecords()}
-      />
-    </PageShell>
-  );
+/**
+ * Meetings and field visits are one screen now (`/manager/meetings`). This URL
+ * keeps working for older links and saved shortcuts.
+ */
+export default function AppointmentsPage() {
+  redirect("/manager/meetings");
 }

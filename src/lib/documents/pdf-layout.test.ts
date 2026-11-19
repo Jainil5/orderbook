@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildDetailRows,
   buildTotalsRows,
   computeTableColumns,
   formatPdfAmount,
@@ -190,5 +191,75 @@ describe("quotationValidUntil", () => {
 
   it("falls back to a 15-day window", () => {
     expect(quotationValidUntil("2026-11-11T10:00:00.000Z")).toBe("26 Nov 2026");
+  });
+});
+
+describe("buildDetailRows", () => {
+  it("reads number, date, customer, mobile first — the order a counter checks", () => {
+    const rows = buildDetailRows(doc());
+    expect(rows.slice(0, 4).map((row) => row.label)).toEqual([
+      "Quotation number",
+      "Date",
+      "Customer",
+      "Mobile number",
+    ]);
+    expect(rows[0].value).toBe("CF-Q-1");
+    expect(rows[2].value).toBe("Asha Sheth");
+    expect(rows[3].value).toBe("9876500011");
+  });
+
+  it("keeps the quotation's own language and window", () => {
+    const labels = buildDetailRows(doc()).map((row) => row.label);
+    expect(labels).toContain("Valid until");
+    expect(labels).toContain("Status");
+    expect(labels).not.toContain("Payment");
+  });
+
+  it("carries the site address and the reference when a bill has them", () => {
+    const rows = buildDetailRows(
+      doc({
+        kind: "bill",
+        orderNumber: "CB-1061",
+        paymentMethod: "UPI",
+        referenceNumber: "CF-Q-1",
+        serviceDate: "2026-12-05",
+        customerAddress: "  Bandra Kurla Complex, Tower 3  ",
+      }),
+    );
+    expect(rows.map((row) => row.label)).toEqual([
+      "Invoice number",
+      "Date",
+      "Customer",
+      "Mobile number",
+      "Delivery address",
+      "Currency",
+      "Delivery / installation",
+      "Against quotation",
+      "Payment",
+    ]);
+    expect(rows.find((row) => row.label === "Delivery address")?.value).toBe(
+      "Bandra Kurla Complex, Tower 3",
+    );
+    // A date-only value is read as local midnight, never shifted a day by UTC.
+    expect(
+      rows.find((row) => row.label === "Delivery / installation")?.value,
+    ).toBe("05 Dec 2026");
+  });
+
+  it("says who a walk-in bill belongs to and stays quiet about what is missing", () => {
+    const rows = buildDetailRows(
+      doc({ kind: "bill", customerName: "  ", customerPhone: null }),
+    );
+    expect(rows.map((row) => row.label)).toEqual([
+      "Invoice number",
+      "Date",
+      "Customer",
+      "Currency",
+      "Payment",
+    ]);
+    expect(rows.find((row) => row.label === "Customer")?.value).toBe(
+      "Walk-in customer",
+    );
+    expect(rows.find((row) => row.label === "Payment")?.value).toBe("pending");
   });
 });

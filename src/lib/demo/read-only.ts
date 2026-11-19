@@ -42,10 +42,14 @@ export const DEMO_LIMITS = {
   inventory: 40,
   /** Purchases, wastage and per-order consumption. Trimmed, not blocked. */
   inventoryLedger: 120,
+  /** Purchasing: vendors, and the orders placed on them. */
+  vendors: 20,
+  purchaseOrders: 30,
+  purchaseOrderLines: 120,
 } as const;
 
 export const DEMO_LIMIT_MESSAGE =
-  "The demo keeps a bounded dataset per browser, and this collection is full. Exit the workspace and re-enter the demo to reset it.";
+  "The demo keeps a bounded dataset per browser, and this collection is full. Clear this site's cookies to reset it.";
 
 export function limitMessage(what: string) {
   return `${what} — ${DEMO_LIMIT_MESSAGE}`;

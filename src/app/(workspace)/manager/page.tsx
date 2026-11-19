@@ -8,18 +8,16 @@ import { listDemoOrders, toDemoBrandCode } from "@/lib/demo/data";
 import { staffAvailabilitySummary } from "@/lib/manager/staff";
 import { pipelineSummary } from "@/lib/manager/leads";
 import { loadDemoOperations } from "@/lib/demo/operations-data";
+import { loadDemoPurchasing } from "@/lib/demo/procurement-data";
 import { ongoingOrderCount, overviewRollups } from "@/lib/manager/ops-selectors";
 import { visibleManagerModules, type ManagerModuleKey } from "@/lib/workspace/manager-modules";
 import { loadWorkspaceSession } from "@/lib/workspace/session";
 
 const MODULE_DESCRIPTIONS: Record<ManagerModuleKey, string> = {
-  staff: "Profiles, roles and availability.",
-  leads: "Enquiry pipeline from first contact to won or lost.",
-  services: "Service catalogue, requests and work orders.",
-  appointments: "Meetings, tastings and scheduled sessions.",
-  visits: "Field visits with check-in and reports.",
-  schedules: "Staff shifts and the weekly rota.",
+  staff: "Profiles, roles and availability, and the weekly rota.",
+  meetings: "Meetings booked in, and the visits the team makes on site.",
   tasks: "To-dos with priorities and due dates.",
+  purchasing: "Vendors, purchase orders and what is still to arrive.",
   payments: "Payments captured against bills, with method and status.",
 };
 
@@ -27,15 +25,22 @@ export default async function ManagerPage() {
   const ws = await loadWorkspaceSession();
   if (!ws) redirect("/login");
 
-  const modules = visibleManagerModules(ws.hiddenManagerModules, ws.profile.capture);
+  const modules = visibleManagerModules(ws.hiddenManagerModules);
 
 
   const brandCode = toDemoBrandCode(ws.brand.code);
   const staff = await listDemoStaff(brandCode);
   const summary = staffAvailabilitySummary(staff);
   const ops = await loadDemoOperations(brandCode);
+  const purchasing = await loadDemoPurchasing(brandCode);
+  const purchase = {
+    total: purchasing.purchaseOrders.length,
+    open: purchasing.purchaseOrders.filter(
+      (po) => po.status === "sent" || po.status === "partially_received",
+    ).length,
+  };
   const rollups = overviewRollups(
-    { appointments: ops.appointments, tasks: ops.tasks, shifts: ops.shifts, visits: ops.visits, jobs: ops.serviceJobs },
+    { appointments: ops.appointments, tasks: ops.tasks, shifts: ops.shifts, visits: ops.visits },
     new Date(),
   );
   // Bills captured today but not yet completed — surfaced on every manager's
@@ -47,6 +52,9 @@ export default async function ManagerPage() {
   const count = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
   const detailCards: { label: string; value: number; detail: string; href: string }[] = [
     { label: "Ongoing orders", value: ongoing, detail: `of ${count(orders.length, "captured bill")}`, href: "/orders" },
+    // The pipeline is a CRM screen now, but a manager still opens the day on
+    // it, so the count stays on this overview regardless of module visibility.
+    { label: "Open leads", value: pipeline.openCount, detail: `of ${count(ops.leads.length, "captured lead")}`, href: "/customers/leads" },
   ];
   if (!ws.hiddenManagerModules.includes("staff")) {
     detailCards.push({
@@ -57,12 +65,11 @@ export default async function ManagerPage() {
     });
   }
   const rollupCards: { label: string; value: number; detail: string; module: ManagerModuleKey; href: string }[] = [
-    { label: "Open leads", value: pipeline.openCount, detail: `of ${count(ops.leads.length, "captured lead")}`, href: "/manager/leads", module: "leads" },
-    { label: "Today's appointments", value: rollups.todayAppointments, detail: `of ${ops.appointments.length} booked`, href: "/manager/appointments", module: "appointments" },
+    { label: "Today's meetings", value: rollups.todayAppointments, detail: `of ${ops.appointments.length} booked`, href: "/manager/meetings", module: "meetings" },
     { label: "Overdue tasks", value: rollups.overdueTasks, detail: `of ${count(openTasks, "open task")}`, href: "/manager/tasks", module: "tasks" },
-    { label: "On shift now", value: rollups.onShiftNow, detail: `of ${count(ops.shifts.length, "rostered shift")}`, href: "/manager/schedules", module: "schedules" },
-    { label: "Active visits", value: rollups.activeVisits, detail: `of ${count(ops.visits.length, "field visit")}`, href: "/manager/visits", module: "visits" },
-    { label: "Open jobs", value: rollups.openJobs, detail: `of ${count(ops.serviceJobs.length, "service job")}`, href: "/manager/services", module: "services" },
+    { label: "On shift now", value: rollups.onShiftNow, detail: `of ${count(ops.shifts.length, "rostered shift")}`, href: "/manager/staff?tab=schedules", module: "staff" },
+    { label: "Active visits", value: rollups.activeVisits, detail: `of ${count(ops.visits.length, "field visit")}`, href: "/manager/meetings?tab=visits", module: "meetings" },
+    { label: "Awaiting delivery", value: purchase.open, detail: `of ${count(purchase.total, "purchase order")} placed`, href: "/manager/purchasing", module: "purchasing" },
   ];
   const cards = [
     ...detailCards,

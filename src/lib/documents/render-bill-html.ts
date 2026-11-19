@@ -1,7 +1,8 @@
 import { formatMoney } from "@/lib/format";
 import {
+  buildDetailRows,
   buildTotalsRows,
-  quotationValidUntil,
+  formatDocumentDateTime,
   type TotalsRow,
 } from "@/lib/documents/pdf-layout";
 import type { BillDocument } from "@/lib/documents/types";
@@ -17,7 +18,7 @@ import type { BillDocument } from "@/lib/documents/types";
 export type BillHtmlAssets = {
   /** Brand mark, already a data URL so the file survives being moved. */
   logoDataUrl?: string | null;
-  /** One data URL per line, in `doc.lines` order — quotations only. */
+  /** One data URL per line, in `doc.lines` order. */
   lineImageDataUrls?: (string | null)[];
 };
 
@@ -43,28 +44,6 @@ function quantity(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(2);
 }
 
-function docDate(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  return new Intl.DateTimeFormat("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-}
-
-function dayOnly(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(date);
-}
-
 export function billHtmlTitle(doc: BillDocument): string {
   const label = doc.kind === "quotation" ? "Quotation" : "Bill";
   return `${label} ${doc.orderNumber} · ${doc.issuer?.legalName ?? doc.brandName}`;
@@ -81,21 +60,20 @@ const STYLE = `
     border: 1px solid var(--line); border-top: 4px solid var(--accent); }
   .letterhead { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start; }
   .brand { display: flex; gap: 14px; min-width: 0; }
-  .brand img { width: 62px; height: 62px; object-fit: contain; flex: none; }
+  .brand img { height: 54px; width: auto; max-width: 210px; object-fit: contain; flex: none; }
   .brand h1 { margin: 0; font-size: 20px; letter-spacing: .01em; }
   .brand p { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; }
-  .brand address { margin: 6px 0 0; font-style: normal; color: var(--muted); font-size: 12px; }
   .doctype { text-align: right; flex: none; }
   .doctype strong { display: block; font-size: 15px; letter-spacing: .14em; color: var(--accent); }
   .doctype span { display: block; margin-top: 4px; font-size: 12.5px; color: var(--muted); }
-  .meta { display: flex; flex-wrap: wrap; gap: 14px; margin: 22px 0 6px; }
-  .meta > div { flex: 1 1 260px; border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
-  .meta h2 { margin: 0 0 6px; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+  .details { margin: 22px 0 4px; padding: 12px 0;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .details h2 { margin: 0 0 8px; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
     color: var(--muted); font-weight: 700; }
-  .meta .who { margin: 0; font-weight: 600; }
-  .meta ul { margin: 6px 0 0; padding: 0; list-style: none; color: var(--muted); font-size: 12.5px; }
-  .meta li { margin-top: 2px; }
-  .meta li b { color: var(--ink); font-weight: 600; }
+  .details dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px 28px; margin: 0; }
+  .details .row { display: flex; justify-content: space-between; gap: 14px; align-items: baseline; }
+  .details dt { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .details dd { margin: 0; font-size: 12.5px; font-weight: 600; text-align: right; }
   .descriptor { margin: 14px 0 8px; color: var(--muted); font-size: 12.5px; font-style: italic; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   thead th { text-align: left; padding: 8px 6px; border-bottom: 1.5px solid var(--ink);
@@ -118,21 +96,32 @@ const STYLE = `
   .block h2 { margin: 0 0 4px; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
     color: var(--muted); font-weight: 700; }
   .block p { margin: 0; font-size: 12.5px; white-space: pre-wrap; }
-  .sign { display: flex; justify-content: space-between; gap: 24px; margin-top: 26px;
-    align-items: flex-end; }
-  .sign .terms { flex: 1 1 55%; font-size: 12px; color: var(--muted); }
-  .sign .box { width: 190px; text-align: left; }
-  .sign .box .for { font-size: 12.5px; font-weight: 600; margin-bottom: 30px; }
-  .sign .box .rule { border-top: 1px solid var(--ink); padding-top: 4px; font-size: 11.5px;
-    color: var(--muted); }
-  .sheet-footer { display: flex; justify-content: space-between; gap: 12px; margin-top: 26px;
-    padding-top: 8px; border-top: 1px solid var(--line); font-size: 11.5px; color: var(--muted); }
+  /* One footer holds everything after the money: terms, the signature, the
+     brand's address, and the line saying what this paper is. */
+  .sheet-footer { margin-top: 26px; padding-top: 12px; border-top: 1.5px solid var(--ink);
+    font-size: 11.5px; color: var(--muted); }
+  .sheet-footer h2 { margin: 0 0 4px; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--muted); font-weight: 700; }
+  .sheet-footer .sign { display: flex; justify-content: space-between; gap: 24px; align-items: flex-end; }
+  .sheet-footer .terms { flex: 1 1 55%; font-size: 12px; }
+  .sheet-footer .box { flex: none; width: 190px; }
+  .sheet-footer .box .for { font-size: 12.5px; font-weight: 600; margin: 0 0 30px; }
+  .sheet-footer .box .rule { border-top: 1px solid var(--ink); padding-top: 4px; }
+  .thankyou { margin: 18px 0 0; font-size: 12px; color: var(--muted); white-space: pre-wrap; }
+  .colophon { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px;
+    margin-top: 16px; padding-top: 9px; border-top: 1px solid var(--line); }
+  .colophon .who { margin: 0 0 2px; color: var(--ink); font-weight: 700; font-size: 12.5px; }
+  .colophon address { font-style: normal; line-height: 1.5; }
+  .colophon .stamp { margin: 0; flex: none; max-width: 38%; text-align: right; }
   @media (max-width: 640px) {
     .sheet { padding: 22px 16px; margin: 0 0 28px; border-left: 0; border-right: 0; }
     .toolbar { padding: 12px 14px 0; }
     .letterhead { flex-direction: column; }
     .doctype { text-align: left; }
+    .details dl { grid-template-columns: 1fr; }
     .totals table { width: 100%; }
+    .sheet-footer .sign, .colophon { flex-direction: column; align-items: flex-start; }
+    .colophon .stamp { max-width: none; text-align: left; }
   }
   @media print {
     body { background: #fff; }
@@ -142,66 +131,45 @@ const STYLE = `
   }
 `;
 
+/**
+ * The masthead: who is issuing the paper and which document it is. The brand's
+ * address and contact sit in the footer, the way a letterhead and a footnote
+ * split on real stationery.
+ */
 function letterhead(doc: BillDocument, logoDataUrl?: string | null): string {
   const issuer = doc.issuer;
   const name = issuer?.legalName ?? doc.receiptHeader ?? doc.brandName;
   const mark = logoDataUrl
     ? `<img alt="" src="${escapeHtml(logoDataUrl)}">`
     : "";
-  const contact = issuer
-    ? `<address>${issuer.addressLines.map((line) => escapeHtml(line)).join("<br>")}<br>
-        ${escapeHtml(issuer.phone)} · ${escapeHtml(issuer.email)} · ${escapeHtml(issuer.websiteUrl)}</address>`
-    : "";
   return `
   <header class="letterhead">
     <div class="brand">${mark}<div>
       <h1>${escapeHtml(name)}</h1>
       ${issuer ? `<p>${escapeHtml(issuer.tagline)}</p>` : ""}
-      ${contact}
     </div></div>
     <div class="doctype">
       <strong>${doc.kind === "quotation" ? "QUOTATION" : "TAX INVOICE"}</strong>
       <span>${escapeHtml(doc.orderNumber)}</span>
-      <span>${escapeHtml(docDate(doc.createdAt))}</span>
+      <span>${escapeHtml(formatDocumentDateTime(doc.createdAt))}</span>
     </div>
   </header>`;
 }
 
-function metaCards(doc: BillDocument): string {
-  const isQuote = doc.kind === "quotation";
-  const left: string[] = [];
-  if (doc.customerPhone) left.push(`Mobile <b>${escapeHtml(doc.customerPhone)}</b>`);
-  if (doc.customerAddress?.trim()) {
-    left.push(`Site <b>${escapeHtml(doc.customerAddress.trim())}</b>`);
-  }
-  const right: string[] = [
-    `Currency <b>${escapeHtml(doc.currencyCode)}</b>`,
-  ];
-  if (doc.serviceDate) {
-    right.push(
-      `${isQuote ? "Target delivery" : "Delivery / installation"} <b>${escapeHtml(dayOnly(doc.serviceDate))}</b>`,
-    );
-  }
-  if (isQuote) {
-    right.push(`Valid until <b>${escapeHtml(quotationValidUntil(doc.createdAt))}</b>`);
-    right.push("Status <b>Awaiting acceptance</b>");
-  } else {
-    if (doc.referenceNumber) {
-      right.push(`Against quotation <b>${escapeHtml(doc.referenceNumber)}</b>`);
-    }
-    right.push(`Payment <b>${escapeHtml(doc.paymentMethod ?? "pending")}</b>`);
-  }
+/** Flat details list — number, date, customer, mobile, and the rest. */
+function detailsBlock(doc: BillDocument): string {
+  const rows = buildDetailRows(doc)
+    .map(
+      (row) =>
+        `<div class="row"><dt>${escapeHtml(row.label)}</dt><dd>${escapeHtml(
+          row.value,
+        )}</dd></div>`,
+    )
+    .join("");
   return `
-  <section class="meta">
-    <div>
-      <h2>${isQuote ? "Quote for" : "Bill to"}</h2>
-      <p class="who">${escapeHtml(doc.customerName?.trim() || "Walk-in customer")}</p>
-      ${left.length ? `<ul>${left.map((line) => `<li>${line}</li>`).join("")}</ul>` : ""}
-    </div>
-    <div>
-      <h2>Document details</h2>
-      <ul>${right.map((line) => `<li>${line}</li>`).join("")}</ul>
-    </div>
+  <section class="details">
+    <h2>${doc.kind === "quotation" ? "Quotation details" : "Bill details"}</h2>
+    <dl>${rows}</dl>
   </section>`;
 }
 
@@ -265,13 +233,58 @@ function totalsTable(rows: TotalsRow[], currencyCode: string): string {
   return `<div class="totals"><table><tbody>${body}</tbody></table></div>`;
 }
 
+/**
+ * The foot of the sheet: terms and the signature, the brand's address and
+ * contact, then the line saying what this paper is. The address lives here
+ * rather than in the masthead so the document reads top-down — who issued it,
+ * which order it is, what it costs, where to write.
+ */
+function documentFooter(doc: BillDocument, terms: string): string {
+  const issuer = doc.issuer;
+  const isQuote = doc.kind === "quotation";
+  const contact = issuer
+    ? `<address>${issuer.addressLines.map((line) => escapeHtml(line)).join("<br>")}<br>${escapeHtml(
+        [
+          issuer.phone,
+          issuer.email,
+          issuer.websiteUrl.replace(/^https?:\/\//, ""),
+        ]
+          .filter(Boolean)
+          .join(" · "),
+      )}</address>`
+    : "";
+  return `
+<footer class="sheet-footer">
+  <section class="sign">
+    <div class="terms">
+      <h2>${isQuote ? "Terms of this quotation" : "Terms"}</h2>
+      ${escapeHtml(terms)}
+    </div>
+    <div class="box">
+      <p class="for">${escapeHtml(issuer ? `For ${issuer.legalName}` : "Authorised signatory")}</p>
+      <p class="rule">Signature</p>
+    </div>
+  </section>
+  <div class="colophon">
+    <div>
+      <p class="who">${escapeHtml(issuer?.legalName ?? doc.brandName)}</p>
+      ${contact}
+    </div>
+    <p class="stamp">Computer-generated ${isQuote ? "quotation" : "invoice"}${
+      issuer ? ` from ${escapeHtml(issuer.legalName)}` : ""
+    }.</p>
+  </div>
+</footer>`;
+}
+
 export function renderBillHtml(
   doc: BillDocument,
   assets: BillHtmlAssets = {},
 ): string {
   const isQuote = doc.kind === "quotation";
-  const showPhoto =
-    isQuote && (assets.lineImageDataUrls ?? []).some((url) => Boolean(url));
+  const showPhoto = (assets.lineImageDataUrls ?? []).some((url) =>
+    Boolean(url?.trim()),
+  );
   const terms = isQuote
     ? (doc.issuer?.quotationTerms ??
       "Prices are exclusive of taxes unless stated above. Quotation valid for 15 days.")
@@ -280,7 +293,6 @@ export function renderBillHtml(
   const accent = doc.issuer
     ? `rgb(${doc.issuer.accentColor.join(", ")})`
     : "rgb(18, 99, 63)";
-  const site = (doc.issuer?.websiteUrl ?? "OrderBook").replace(/^https?:\/\//, "");
 
   return `<!doctype html>
 <html lang="en">
@@ -296,7 +308,7 @@ export function renderBillHtml(
 print or save-as-PDF if you want a copy of it.</p>
 <main class="sheet">
 ${letterhead(doc, assets.logoDataUrl)}
-${metaCards(doc)}
+${detailsBlock(doc)}
 <p class="descriptor">${
     isQuote
       ? "Proforma estimate — not a receipt until payment is confirmed."
@@ -324,27 +336,10 @@ ${
 }
 ${
   doc.receiptFooter?.trim()
-    ? `<section class="block"><p>${escapeHtml(doc.receiptFooter.trim())}</p></section>`
+    ? `<p class="thankyou">${escapeHtml(doc.receiptFooter.trim())}</p>`
     : ""
 }
-<section class="sign">
-  <div class="terms">
-    <h2 style="margin:0 0 4px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">${
-      isQuote ? "Terms of this quotation" : "Terms"
-    }</h2>
-    ${escapeHtml(terms)}
-  </div>
-  <div class="box">
-    <p class="for">${escapeHtml(doc.issuer ? `For ${doc.issuer.legalName}` : "Authorised signatory")}</p>
-    <p class="rule">Signature</p>
-  </div>
-</section>
-<footer class="sheet-footer">
-  <span>Computer-generated ${isQuote ? "quotation" : "invoice"} from ${escapeHtml(
-    doc.issuer?.legalName ?? doc.brandName,
-  )}.</span>
-  <span>${escapeHtml(site)}</span>
-</footer>
+${documentFooter(doc, terms)}
 </main>
 </body>
 </html>

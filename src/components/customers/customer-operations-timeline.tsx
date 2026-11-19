@@ -26,17 +26,24 @@ export function CustomerOperationsTimeline({ rows }: { rows: OpsTimelineRow[] })
   return (
     <div className="space-y-2">
       {rows.map((row) => (
-        <Link key={`${row.kind}-${row.id}`} href={row.href} className="ob-touch-target block">
-          <Card className="p-4 transition-shadow hover:shadow-[var(--ob-shadow-sm)]">
-            <div className="flex flex-wrap items-center justify-between gap-2">
+        <Card
+          key={`${row.kind}-${row.id}`}
+          className="p-4 transition-shadow hover:shadow-[var(--ob-shadow-sm)]"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            {row.href ? (
+              <Link href={row.href} className="ob-touch-target font-medium">
+                {row.title}
+              </Link>
+            ) : (
               <p className="font-medium">{row.title}</p>
-              <p className="text-sm text-[var(--ob-text-muted)]">
-                {KIND_LABELS[row.kind]} · {row.status.replace(/_/g, " ")}
-                {mounted && row.when ? ` · ${new Date(row.when).toLocaleString()}` : ""}
-              </p>
-            </div>
-          </Card>
-        </Link>
+            )}
+            <p className="text-sm text-[var(--ob-text-muted)]">
+              {KIND_LABELS[row.kind]} · {row.status.replace(/_/g, " ")}
+              {mounted && row.when ? ` · ${new Date(row.when).toLocaleString()}` : ""}
+            </p>
+          </div>
+        </Card>
       ))}
     </div>
   );

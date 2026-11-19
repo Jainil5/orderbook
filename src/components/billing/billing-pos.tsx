@@ -13,6 +13,7 @@ import { findCustomerByPhone } from "@/lib/demo/customer-identity";
 import { localDayKey } from "@/lib/manager/time";
 import { ProductPrice } from "@/components/products/product-price";
 import { ProductThumbnail } from "@/components/products/product-thumbnail";
+import { LogoMark } from "@/components/brand/logo-mark";
 import { PosProductTileWithButton } from "@/components/billing/pos-product-tile";
 import {
   PosCatalogColumn,
@@ -53,7 +54,10 @@ import {
 } from "@/lib/workspace/constants";
 import type { CartLine } from "@/components/billing/types";
 import { OrderDocumentActions } from "@/components/billing/order-document-actions";
+import { BillDocumentPreview } from "@/components/billing/bill-document-preview";
 import { buildBillDocumentFromCheckout } from "@/lib/documents/build-bill-document";
+import { getDocumentBrandProfile } from "@/lib/documents/brand-profile";
+import { splitStateTax } from "@/lib/documents/pdf-layout";
 import type { BillDocument } from "@/lib/documents/types";
 import {
   categoryLabel,
@@ -73,6 +77,28 @@ function lineTotal(
   tier: ReturnType<typeof customerPriceTier>,
 ) {
   return cartLineNetTotal(line.product, line.quantity, tier, line.modifierIds);
+}
+
+/** Walk-in service modes. The label is what prints in the bill's context chips. */
+const ORDER_TYPES = [
+  ["dine_in", "Dine-in"],
+  ["takeaway", "Take-away"],
+  ["delivery", "Delivery"],
+  ["online", "Online order"],
+] as const;
+
+function shortDay(value: string): string {
+  const date = new Date(value.length === 10 ? `${value}T00:00:00` : value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "2-digit",
+    month: "short",
+  }).format(date);
+}
+
+/** Chips are a glance-line, not a preview pane. */
+function clampText(value: string, max: number): string {
+  return value.length > max ? `${value.slice(0, max - 1)}…` : value;
 }
 
 export function BillingPos({
@@ -166,6 +192,7 @@ export function BillingPos({
   const [depositPercent, setDepositPercent] = useState("");
   const [feesInput, setFeesInput] = useState("");
   const [mobileCartOpen, setMobileCartOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [flashProductId, setFlashProductId] = useState<string | null>(null);
@@ -217,7 +244,6 @@ export function BillingPos({
       : documentMode === "bill"
         ? copy.billModeHint
         : null;
-  const showLineImages = documentMode === "quotation";
   const confirmLabel = savingAsQuote ? copy.confirmQuoteButton : copy.confirmButton;
 
   const cartQtyByProduct = useMemo(() => {
@@ -300,6 +326,53 @@ export function BillingPos({
   }, [pricedCart, taxRatePercent, parsedOrderDiscount, offerCode, offers, feesAmount]);
 
   const itemCount = cart.reduce((s, l) => s + l.quantity, 0);
+
+  /* The bill wears the same letterhead the printed copy does, so the counter
+     and the PDF agree on who is charging and for how much tax. */
+  const issuer = brandCode
+    ? getDocumentBrandProfile(brandCode, brandSettings)
+    : null;
+  const taxSplit = splitStateTax(taxRatePercent, totals.taxTotal);
+
+  /** What the collapsed details panel is hiding, readable at a glance. */
+  const contextChips: string[] = [];
+  contextChips.push(shortDay(serviceDate));
+  if (!isProject) {
+    contextChips.push(
+      ORDER_TYPES.find(([value]) => value === orderType)?.[1] ?? orderType,
+    );
+  }
+  if (tableTag.trim()) contextChips.push(tableTag.trim());
+  if (!isProject && guests.trim()) contextChips.push(`${guests.trim()} guests`);
+  if (deliveryAddress.trim()) {
+    contextChips.push(
+      isProject ? "Site address noted" : `To ${clampText(deliveryAddress.trim(), 24)}`,
+    );
+  }
+  if (deliveryNotes.trim()) contextChips.push(clampText(deliveryNotes.trim(), 24));
+  if (isProject && parsedFees.ok && parsedFees.amount > 0) {
+    contextChips.push(`Charges ${formatMoney(parsedFees.amount, currencyCode)}`);
+  }
+  if (offerCode.trim()) contextChips.push(offerCode.trim().toUpperCase());
+  if (parsedOrderDiscount.ok && parsedOrderDiscount.discount) {
+    const { type, value } = parsedOrderDiscount.discount;
+    contextChips.push(
+      type === "percent"
+        ? `${value}% off`
+        : `${formatMoney(value, currencyCode)} off`,
+    );
+  }
+  if (!savingAsQuote && paymentMethod !== "PENDING") {
+    contextChips.push(
+      paymentReference.trim()
+        ? `${paymentMethod} · ${clampText(paymentReference.trim(), 16)}`
+        : paymentMethod,
+    );
+  }
+  if (savingAsQuote && depositPercent.trim()) {
+    contextChips.push(`Deposit ${depositPercent.trim()}%`);
+  }
+  if (notes.trim()) contextChips.push(`Note: ${clampText(notes.trim(), 22)}`);
 
   function stockBlockMessage(product: Product, addQty: number): string | null {
     const inCart = cartQtyByProduct.get(product.id) ?? 0;
@@ -399,21 +472,25 @@ export function BillingPos({
       return;
     }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(serviceDate)) {
+      setDetailsOpen(true);
       setFeedback("Pick a valid date.");
       return;
     }
     if (!isProject && guests.trim()) {
       const g = Number(guests);
       if (!Number.isInteger(g) || g < 1 || g > 99) {
+        setDetailsOpen(true);
         setFeedback("Guests must be a whole number between 1 and 99.");
         return;
       }
     }
     if (!parsedFees.ok) {
+      setDetailsOpen(true);
       setFeedback(parsedFees.message);
       return;
     }
     if (!parsedOrderDiscount.ok) {
+      setDetailsOpen(true);
       setFeedback(parsedOrderDiscount.message);
       return;
     }
@@ -422,6 +499,7 @@ export function BillingPos({
       parsedOrderDiscount.discount,
     );
     if (!roleCheck.ok) {
+      setDetailsOpen(true);
       setFeedback(roleCheck.message);
       return;
     }
@@ -433,6 +511,7 @@ export function BillingPos({
         totals.subtotalAfterProductDiscounts - totals.orderDiscountAmount,
       );
       if (!offerCheck.ok) {
+        setDetailsOpen(true);
         setFeedback(offerCheck.message);
         return;
       }
@@ -442,6 +521,7 @@ export function BillingPos({
         ? null
         : Number(depositPercent);
     if (deposit != null && (!Number.isFinite(deposit) || deposit < 0 || deposit > 100)) {
+      setDetailsOpen(true);
       setFeedback("Deposit must be between 0 and 100.");
       return;
     }
@@ -556,206 +636,120 @@ export function BillingPos({
     }
   }
 
-  const cartPanel = (
-    <Card className="flex h-full flex-col shadow-[var(--ob-shadow-md)]">
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="text-base font-semibold">{cartTitle}</h2>
-        {itemCount > 0 ? (
-          <span className="rounded-full bg-[var(--ob-primary)] px-2.5 py-0.5 text-xs font-medium text-[var(--ob-primary-foreground)]">
-            {itemCount} items
-          </span>
-        ) : null}
-      </div>
-      {modeHint ? (
-        <p className="mt-2 text-xs text-[var(--ob-text-muted)]">{modeHint}</p>
-      ) : null}
-      <div className="mt-4 flex-1 space-y-3 overflow-y-auto">
-        {cart.length === 0 ? (
-          <p className="text-sm text-[var(--ob-text-muted)]">
-            {copy.emptyCartHint}
-          </p>
-        ) : (
-          cart.map((line) => (
-            <div
-              key={cartLineKey(line.product.id, line.modifierIds)}
-              className="flex gap-2 border-b border-[var(--ob-border)] pb-3 text-sm"
-            >
-              {showLineImages ? (
-                <ProductThumbnail
-                  name={line.product.name}
-                  imageUrl={line.product.image_url}
-                  size="sm"
+  const cartPanel =
+    lastSavedDocument && cart.length === 0 ? (
+      <BillDocumentPreview
+        document={lastSavedDocument}
+        className="h-full overflow-y-auto"
+        actions={
+          <OrderDocumentActions
+            document={lastSavedDocument}
+            compact
+            dismissLabel={
+              savingAsQuote ? "Start another quotation" : "Start the next bill"
+            }
+            onDismiss={() => setLastSavedDocument(null)}
+          />
+        }
+      />
+    ) : (
+      <div className="ob-bill flex h-full min-h-0 flex-col">
+        <header className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-start gap-2.5">
+            {issuer?.logoPath ? (
+              <span className="ob-bill-mark">
+                {/* eslint-disable-next-line @next/next/no-img-element -- demo brand mark on the bill's letterhead */}
+                <img
+                  src={issuer.logoPath}
+                  alt=""
+                  width={40}
+                  height={40}
+                  className="h-7 w-auto max-w-[5.5rem] object-contain"
                 />
-              ) : null}
-              <div className="min-w-0 flex-1">
-                <div className="flex items-start justify-between gap-2">
-                  <p className="min-w-0 font-medium">{line.product.name}</p>
-                  <p className="shrink-0 font-medium">
-                    {formatMoney(lineTotal(line, priceTier), currencyCode)}
-                  </p>
-                </div>
-                {line.modifierIds.length ? (
-                  <p className="text-xs text-[var(--ob-text-muted)]">
-                    {modifierLabels(line.product, line.modifierIds)}
-                  </p>
-                ) : null}
-                <div className="mt-1 flex items-center justify-between gap-2">
-                  <div className="min-w-0">
-                    <ProductPrice
-                      product={pricedProductForCartLine(
-                        line.product,
-                        priceTier,
-                        line.modifierIds,
-                      )}
-                      currencyCode={currencyCode}
-                      size="sm"
-                    />
-                    <p className="text-xs text-[var(--ob-text-muted)]">
-                      {line.product.unit ?? "unit"} · qty {line.quantity}
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-1">
-                    <button
-                      type="button"
-                      className="ob-touch-target flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--ob-border)] hover:bg-[var(--ob-surface-muted)]"
-                      onClick={() =>
-                        setQty(
-                          line.product.id,
-                          line.quantity - 1,
-                          line.modifierIds,
-                        )
-                      }
-                      aria-label="Decrease quantity"
-                    >
-                      −
-                    </button>
-                    <input
-                      className="ob-input py-2 text-center"
-                      style={{ width: "3.5rem" }}
-                      value={line.quantity}
-                      onChange={(e) =>
-                        setQty(
-                          line.product.id,
-                          Number(e.target.value) || 0,
-                          line.modifierIds,
-                        )
-                      }
-                      aria-label="Quantity"
-                    />
-                    <button
-                      type="button"
-                      className="ob-touch-target flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--ob-border)] hover:bg-[var(--ob-surface-muted)]"
-                      onClick={() =>
-                        setQty(
-                          line.product.id,
-                          line.quantity + 1,
-                          line.modifierIds,
-                        )
-                      }
-                      aria-label="Increase quantity"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-              </div>
+              </span>
+            ) : (
+              <LogoMark size={30} />
+            )}
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold">
+                {issuer?.legalName ?? receiptHeader}
+              </p>
+              <p className="truncate text-[11px] text-[var(--ob-text-muted)]">
+                {issuer ? `${issuer.tagline} · ${issuer.phone}` : brandName}
+              </p>
             </div>
-          ))
-        )}
-      </div>
-      <div className="mt-4 space-y-2 border-t border-[var(--ob-border)] pt-4 text-sm">
-        <label className="block">
-          <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-            Mobile number <span className="text-[var(--ob-danger)]">*</span>
-          </span>
-          <Input
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
-            value={customerMobile}
-            onChange={(e) => {
-              setCustomerMobile(e.target.value);
-              setLastSavedDocument(null);
-            }}
-            placeholder="e.g. 9876543210"
-            className="mt-1"
-            aria-describedby="billing-mobile-hint"
-          />
-          <span
-            id="billing-mobile-hint"
-            className="mt-1 block text-xs text-[var(--ob-text-muted)]"
-          >
-            {matchedCustomer
-              ? `Existing customer: ${matchedCustomer.name}`
-              : "The customer is matched or created automatically."}
-          </span>
-        </label>
-        <label className="block">
-          <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-            Name <span className="font-normal">(optional)</span>
-          </span>
-          <Input
-            type="text"
-            autoComplete="name"
-            value={customerName}
-            onChange={(e) => {
-              setCustomerName(e.target.value);
-              setLastSavedDocument(null);
-            }}
-            placeholder="Defaults to 'User'"
-            className="mt-1"
-          />
-        </label>
-        <label className="block">
-          <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-            {isProject
-              ? (projectCopy?.dateLabel ?? "Delivery / installation date")
-              : "Date"}
-          </span>
-          <Input
-            type="date"
-            value={serviceDate}
-            onChange={(e) => setServiceDate(e.target.value)}
-            className="mt-1"
-            aria-label={isProject ? "Installation date" : "Service date"}
-          />
-        </label>
-        {isProject ? (
+          </div>
+          <div className="shrink-0 text-right">
+            <p className="ob-bill-label mb-0.5">
+              {savingAsQuote ? "Quotation" : "Tax invoice"}
+            </p>
+            <p className="text-[11px] text-[var(--ob-text-muted)]">
+              {cartTitle}
+            </p>
+            <p className="text-xs font-medium">
+              {itemCount > 0
+                ? `${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                : "Draft"}
+            </p>
+          </div>
+        </header>
+
+        {modeHint ? (
+          <p className="mt-2 text-[11px] text-[var(--ob-text-muted)]">
+            {modeHint}
+          </p>
+        ) : null}
+
+        <div className="mt-3 grid grid-cols-2 gap-2">
           <label className="block">
-            <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-              {projectCopy?.siteLabel ?? "Site address"}
+            <span className="ob-bill-label">
+              Mobile number <span className="text-[var(--ob-danger)]">*</span>
             </span>
-            <textarea
-              className="ob-input mt-1 w-full"
-              rows={2}
-              value={deliveryAddress}
+            <Input
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              value={customerMobile}
               onChange={(e) => {
-                setDeliveryAddress(e.target.value);
+                setCustomerMobile(e.target.value);
                 setLastSavedDocument(null);
               }}
-              placeholder={projectCopy?.sitePlaceholder ?? "Site address…"}
+              placeholder="9876543210"
+              aria-describedby="billing-mobile-hint"
             />
           </label>
-        ) : null}
-        {!isProject ? (
-          <>
-            <div>
-              <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-                Order type
-              </span>
+          <label className="block">
+            <span className="ob-bill-label">Name (optional)</span>
+            <Input
+              type="text"
+              autoComplete="name"
+              value={customerName}
+              onChange={(e) => {
+                setCustomerName(e.target.value);
+                setLastSavedDocument(null);
+              }}
+              placeholder="Walk-in name"
+            />
+          </label>
+        </div>
+        <p
+          id="billing-mobile-hint"
+          className="mt-1 text-[11px] text-[var(--ob-text-muted)]"
+        >
+          {matchedCustomer
+            ? `Existing customer: ${matchedCustomer.name}`
+            : "The customer is matched or created automatically."}
+        </p>
+
+        {!isProject || !savingAsQuote ? (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {!isProject ? (
               <div
                 role="radiogroup"
                 aria-label="Order type"
-                className="mt-1 flex flex-wrap gap-2"
+                className="flex flex-wrap gap-1.5"
               >
-                {(
-                  [
-                    ["dine_in", "Dine-in"],
-                    ["takeaway", "Take-away"],
-                    ["delivery", "Delivery"],
-                    ["online", "Online order"],
-                  ] as const
-                ).map(([value, label]) => (
+                {ORDER_TYPES.map(([value, label]) => (
                   <button
                     key={value}
                     type="button"
@@ -763,222 +757,20 @@ export function BillingPos({
                     aria-checked={orderType === value}
                     onClick={() => setOrderType(value)}
                     className={cn(
-                      "ob-touch-target rounded-full border px-3 py-1.5 text-sm transition",
+                      "ob-bill-chip ob-touch-target border px-2.5 py-1.5 text-[13px] transition",
                       orderType === value
-                        ? "border-[var(--ob-primary)] bg-[var(--ob-primary)] text-[var(--ob-primary-foreground)]"
-                        : "border-[var(--ob-border)] bg-[var(--ob-surface)] hover:bg-[var(--ob-surface-muted)]",
+                        ? "border-[var(--ob-primary)] bg-[var(--ob-primary)] font-semibold text-[var(--ob-primary-foreground)]"
+                        : "bg-[var(--ob-surface)] hover:bg-[var(--ob-surface-muted)]",
                     )}
                   >
                     {label}
                   </button>
                 ))}
               </div>
-            </div>
-            {orderType === "dine_in" ? (
-              <div className="flex flex-wrap gap-2">
-                <label className="block min-w-[8rem] flex-1">
-                  <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-                    Table / tag
-                  </span>
-                  <Input
-                    value={tableTag}
-                    onChange={(e) => setTableTag(e.target.value)}
-                    placeholder="e.g. T12"
-                    className="mt-1"
-                  />
-                </label>
-                <label className="block w-24">
-                  <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-                    Guests
-                  </span>
-                  <Input
-                    type="number"
-                    min={1}
-                    max={99}
-                    value={guests}
-                    onChange={(e) => setGuests(e.target.value)}
-                    placeholder="e.g. 2"
-                    className="mt-1"
-                  />
-                </label>
-              </div>
             ) : null}
-            {orderType === "delivery" ? (
-              <label className="block">
-                <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-                  Delivery address
-                </span>
-                <textarea
-                  className="ob-input mt-1 w-full"
-                  rows={2}
-                  value={deliveryAddress}
-                  onChange={(e) => setDeliveryAddress(e.target.value)}
-                  placeholder="Flat, street, landmark…"
-                />
-              </label>
-            ) : null}
-            {orderType === "takeaway" || orderType === "online" ? (
-              <label className="block">
-                <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-                  Table / tag
-                </span>
-                <Input
-                  value={tableTag}
-                  onChange={(e) => setTableTag(e.target.value)}
-                  placeholder="e.g. pickup token, order ref"
-                  className="mt-1"
-                />
-              </label>
-            ) : null}
-          </>
-        ) : null}
-        {dedicatedFlow ? (
-          <label className="block">
-            <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-              Delivery / site notes
-            </span>
-            <Input
-              value={deliveryNotes}
-              onChange={(e) => setDeliveryNotes(e.target.value)}
-              placeholder="Floor, installation, access…"
-              className="mt-1"
-            />
-          </label>
-        ) : null}
-        {isProject ? (
-          <label className="block">
-            <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-              {projectCopy?.chargesLabel ?? "Delivery & installation charges"}
-            </span>
-            <Input
-              type="number"
-              min={0}
-              step="1"
-              inputMode="decimal"
-              value={feesInput}
-              onChange={(e) => {
-                setFeesInput(e.target.value);
-                setLastSavedDocument(null);
-              }}
-              placeholder={projectCopy?.chargesPlaceholder ?? "0"}
-              className="mt-1"
-              aria-label="Delivery and installation charges"
-              aria-invalid={!parsedFees.ok}
-            />
-            {!parsedFees.ok ? (
-              <p role="alert" className="mt-1 text-xs text-[var(--ob-danger)]">
-                {parsedFees.message}
-              </p>
-            ) : null}
-          </label>
-        ) : null}
-        {savingAsQuote ? (
-          <label className="block">
-            <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-              {isProject
-                ? (projectCopy?.depositLabel ?? "Advance / deposit %")
-                : "Deposit % (optional)"}
-            </span>
-            <Input
-              value={depositPercent}
-              onChange={(e) => setDepositPercent(e.target.value)}
-              placeholder="e.g. 30"
-              className="mt-1"
-            />
-          </label>
-        ) : null}
-        <label className="block">
-          <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-            Offer code <span className="font-normal">(optional)</span>
-          </span>
-          <select
-            className="mt-1 w-full ob-input"
-            value={offerPick}
-            onChange={(e) => setOfferPick(e.target.value)}
-            aria-label="Offer code"
-          >
-            <option value="">— None —</option>
-            {offers
-              .filter(
-                (o): o is Offer & { code: string } =>
-                  o.is_active !== false && Boolean(o.code),
-              )
-              .map((o) => (
-                <option key={o.id} value={o.code}>
-                  {o.code} · {o.name}
-                </option>
-              ))}
-            <option value="__custom">Enter your own code…</option>
-          </select>
-          {offerPick === "__custom" ? (
-            <Input
-              value={offerCustom}
-              onChange={(e) => setOfferCustom(e.target.value)}
-              placeholder="Type offer code"
-              className="mt-1"
-            />
-          ) : null}
-        </label>
-        <label className="block">
-          <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-            Notes <span className="font-normal">(optional)</span>
-          </span>
-          <Input
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="e.g. no ice"
-            className="mt-1"
-          />
-        </label>
-        <div className="rounded-[var(--ob-radius-md)] border border-[var(--ob-border)] p-3">
-          <p className="text-xs font-medium uppercase tracking-wide text-[var(--ob-text-muted)]">
-            Order discount <span className="font-normal normal-case">(optional)</span>
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <select
-              className="ob-input min-w-[8rem] flex-1"
-              value={orderDiscountType}
-              onChange={(e) =>
-                setOrderDiscountType(
-                  e.target.value as "none" | "percent" | "fixed",
-                )
-              }
-              aria-label="Order discount type"
-            >
-              <option value="none">None</option>
-              <option value="percent">Percent off</option>
-              <option value="fixed">Fixed amount off</option>
-            </select>
-            {orderDiscountType !== "none" ? (
-              <Input
-                type="number"
-                min={0}
-                max={orderDiscountType === "percent" ? 100 : undefined}
-                step="0.01"
-                value={orderDiscountValue}
-                onChange={(e) => setOrderDiscountValue(e.target.value)}
-                placeholder={
-                  orderDiscountType === "percent" ? "e.g. 10" : "Amount"
-                }
-                className="min-w-[6rem] flex-1"
-                aria-label="Order discount value"
-              />
-            ) : null}
-          </div>
-          {!parsedOrderDiscount.ok ? (
-            <p role="alert" className="mt-2 text-xs text-[var(--ob-danger)]">
-              {parsedOrderDiscount.message}
-            </p>
-          ) : null}
-        </div>
-        {!savingAsQuote ? (
-          <>
-            <label className="block">
-              <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-                Payment
-              </span>
+            {!savingAsQuote ? (
               <select
-                className="mt-1 w-full ob-input"
+                className="ob-input w-auto min-w-[8.5rem] py-1.5 text-[13px]"
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
                 aria-label="Payment method"
@@ -988,69 +780,431 @@ export function BillingPos({
                 <option value="Card">Card</option>
                 <option value="Cash">Cash</option>
               </select>
+            ) : null}
+          </div>
+        ) : null}
+
+        <div className="mt-2 flex flex-wrap items-center gap-1.5">
+          {contextChips.map((chip) => (
+            <span
+              key={chip}
+              className="ob-bill-chip border-[var(--ob-line)] bg-[var(--ob-tint-wash)] px-2 py-0.5 text-[11px] text-[var(--ob-text-muted)]"
+            >
+              {chip}
+            </span>
+          ))}
+          <button
+            type="button"
+            onClick={() => setDetailsOpen((open) => !open)}
+            aria-expanded={detailsOpen}
+            className="ob-bill-chip border-[var(--ob-line-emphasis)] bg-transparent px-2 py-0.5 text-[11px] font-semibold text-[var(--ob-leaf)]"
+          >
+            {detailsOpen ? "Hide details" : "Edit details"}
+          </button>
+        </div>
+
+        {detailsOpen ? (
+          <div className="ob-bill-rule mt-2 grid gap-2 pt-2 sm:grid-cols-2">
+            <label className="block">
+              <span className="ob-bill-label">
+                {isProject
+                  ? (projectCopy?.dateLabel ?? "Delivery / installation date")
+                  : "Date"}
+              </span>
+              <Input
+                type="date"
+                value={serviceDate}
+                onChange={(e) => setServiceDate(e.target.value)}
+                aria-label={isProject ? "Installation date" : "Service date"}
+              />
             </label>
-            {paymentMethod !== "PENDING" ? (
+            {!isProject && orderType === "dine_in" ? (
+              <>
+                <label className="block">
+                  <span className="ob-bill-label">Table / tag</span>
+                  <Input
+                    value={tableTag}
+                    onChange={(e) => setTableTag(e.target.value)}
+                    placeholder="e.g. T12"
+                  />
+                </label>
+                <label className="block">
+                  <span className="ob-bill-label">Guests</span>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={99}
+                    value={guests}
+                    onChange={(e) => setGuests(e.target.value)}
+                    placeholder="e.g. 2"
+                  />
+                </label>
+              </>
+            ) : null}
+            {!isProject &&
+            (orderType === "takeaway" || orderType === "online") ? (
               <label className="block">
-                <span className="text-xs font-medium text-[var(--ob-text-muted)]">
-                  Payment reference{" "}
-                  <span className="font-normal">(optional)</span>
+                <span className="ob-bill-label">Table / tag</span>
+                <Input
+                  value={tableTag}
+                  onChange={(e) => setTableTag(e.target.value)}
+                  placeholder="e.g. pickup token, order ref"
+                />
+              </label>
+            ) : null}
+            {(isProject || orderType === "delivery") && (
+              <label className="block sm:col-span-2">
+                <span className="ob-bill-label">
+                  {isProject
+                    ? (projectCopy?.siteLabel ?? "Site address")
+                    : "Delivery address"}
                 </span>
+                <textarea
+                  className="ob-input w-full"
+                  rows={2}
+                  value={deliveryAddress}
+                  onChange={(e) => {
+                    setDeliveryAddress(e.target.value);
+                    setLastSavedDocument(null);
+                  }}
+                  placeholder={
+                    isProject
+                      ? (projectCopy?.sitePlaceholder ?? "Site address…")
+                      : "Flat, street, landmark…"
+                  }
+                />
+              </label>
+            )}
+            {dedicatedFlow ? (
+              <label className="block sm:col-span-2">
+                <span className="ob-bill-label">Delivery / site notes</span>
+                <Input
+                  value={deliveryNotes}
+                  onChange={(e) => setDeliveryNotes(e.target.value)}
+                  placeholder="Floor, installation, access…"
+                />
+              </label>
+            ) : null}
+            {isProject ? (
+              <label className="block">
+                <span className="ob-bill-label">
+                  {projectCopy?.chargesLabel ??
+                    "Delivery & installation charges"}
+                </span>
+                <Input
+                  type="number"
+                  min={0}
+                  step="1"
+                  inputMode="decimal"
+                  value={feesInput}
+                  onChange={(e) => {
+                    setFeesInput(e.target.value);
+                    setLastSavedDocument(null);
+                  }}
+                  placeholder={projectCopy?.chargesPlaceholder ?? "0"}
+                  aria-label="Delivery and installation charges"
+                  aria-invalid={!parsedFees.ok}
+                />
+                {!parsedFees.ok ? (
+                  <p role="alert" className="mt-1 text-xs text-[var(--ob-danger)]">
+                    {parsedFees.message}
+                  </p>
+                ) : null}
+              </label>
+            ) : null}
+            {savingAsQuote ? (
+              <label className="block">
+                <span className="ob-bill-label">
+                  {isProject
+                    ? (projectCopy?.depositLabel ?? "Advance / deposit %")
+                    : "Deposit % (optional)"}
+                </span>
+                <Input
+                  value={depositPercent}
+                  onChange={(e) => setDepositPercent(e.target.value)}
+                  placeholder="e.g. 30"
+                />
+              </label>
+            ) : null}
+            <label className="block">
+              <span className="ob-bill-label">Offer code</span>
+              <select
+                className="ob-input w-full"
+                value={offerPick}
+                onChange={(e) => setOfferPick(e.target.value)}
+                aria-label="Offer code"
+              >
+                <option value="">— None —</option>
+                {offers
+                  .filter(
+                    (o): o is Offer & { code: string } =>
+                      o.is_active !== false && Boolean(o.code),
+                  )
+                  .map((o) => (
+                    <option key={o.id} value={o.code}>
+                      {o.code} · {o.name}
+                    </option>
+                  ))}
+                <option value="__custom">Enter your own code…</option>
+              </select>
+              {offerPick === "__custom" ? (
+                <Input
+                  value={offerCustom}
+                  onChange={(e) => setOfferCustom(e.target.value)}
+                  placeholder="Type offer code"
+                  className="mt-1"
+                />
+              ) : null}
+            </label>
+            <label className="block">
+              <span className="ob-bill-label">Notes</span>
+              <Input
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="e.g. no ice"
+              />
+            </label>
+            <div className="sm:col-span-2">
+              <span className="ob-bill-label">Order discount</span>
+              <div className="flex flex-wrap gap-2">
+                <select
+                  className="ob-input min-w-[8rem] flex-1"
+                  value={orderDiscountType}
+                  onChange={(e) =>
+                    setOrderDiscountType(
+                      e.target.value as "none" | "percent" | "fixed",
+                    )
+                  }
+                  aria-label="Order discount type"
+                >
+                  <option value="none">None</option>
+                  <option value="percent">Percent off</option>
+                  <option value="fixed">Fixed amount off</option>
+                </select>
+                {orderDiscountType !== "none" ? (
+                  <Input
+                    type="number"
+                    min={0}
+                    max={orderDiscountType === "percent" ? 100 : undefined}
+                    step="0.01"
+                    value={orderDiscountValue}
+                    onChange={(e) => setOrderDiscountValue(e.target.value)}
+                    placeholder={
+                      orderDiscountType === "percent" ? "e.g. 10" : "Amount"
+                    }
+                    className="min-w-[6rem] flex-1"
+                    aria-label="Order discount value"
+                  />
+                ) : null}
+              </div>
+              {!parsedOrderDiscount.ok ? (
+                <p role="alert" className="mt-1 text-xs text-[var(--ob-danger)]">
+                  {parsedOrderDiscount.message}
+                </p>
+              ) : null}
+            </div>
+            {paymentMethod !== "PENDING" && !savingAsQuote ? (
+              <label className="block sm:col-span-2">
+                <span className="ob-bill-label">Payment reference</span>
                 <Input
                   value={paymentReference}
                   onChange={(e) => setPaymentReference(e.target.value)}
                   placeholder="UPI txn / card ref / platform order no"
                   maxLength={80}
-                  className="mt-1"
                 />
               </label>
             ) : null}
-          </>
-        ) : null}
-        <div className="flex justify-between pt-2">
-          <span>List subtotal</span>
-          <span>{formatMoney(totals.listSubtotal, currencyCode)}</span>
-        </div>
-        {totals.productDiscountTotal > 0 ? (
-          <div className="flex justify-between text-[var(--ob-success)]">
-            <span>Product discounts</span>
-            <span>−{formatMoney(totals.productDiscountTotal, currencyCode)}</span>
           </div>
         ) : null}
-        {totals.orderDiscountAmount > 0 ? (
-          <div className="flex justify-between text-[var(--ob-success)]">
-            <span>Order discount</span>
-            <span>−{formatMoney(totals.orderDiscountAmount, currencyCode)}</span>
-          </div>
-        ) : null}
-        {totals.offerDiscountAmount > 0 ? (
-          <div className="flex justify-between text-[var(--ob-success)]">
-            <span>Offer discount</span>
-            <span>−{formatMoney(totals.offerDiscountAmount, currencyCode)}</span>
-          </div>
-        ) : null}
-        <div className="flex justify-between font-medium">
-          <span>Subtotal</span>
-          <span>{formatMoney(totals.taxableSubtotal, currencyCode)}</span>
+
+        <div className="ob-bill-rule mt-3 min-h-0 flex-1 overflow-y-auto pt-2">
+          {cart.length === 0 ? (
+            <p className="py-4 text-sm text-[var(--ob-text-muted)]">
+              {copy.emptyCartHint}
+            </p>
+          ) : (
+            <ul className="text-sm">
+              {cart.map((line, index) => (
+                <li
+                  key={cartLineKey(line.product.id, line.modifierIds)}
+                  className="flex items-start gap-2 border-b border-dashed border-[var(--ob-line)] py-2 last:border-b-0"
+                >
+                  <span className="w-4 shrink-0 pt-2 text-[11px] text-[var(--ob-text-muted)]">
+                    {index + 1}
+                  </span>
+                  <ProductThumbnail
+                    name={line.product.name}
+                    imageUrl={line.product.image_url}
+                    category={line.product.category}
+                    size="sm"
+                    className="h-9 w-10"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="min-w-0 font-medium">{line.product.name}</p>
+                      <p className="ob-bill-figure shrink-0 font-medium">
+                        {formatMoney(lineTotal(line, priceTier), currencyCode)}
+                      </p>
+                    </div>
+                    {line.modifierIds.length ? (
+                      <p className="text-[11px] text-[var(--ob-text-muted)]">
+                        {modifierLabels(line.product, line.modifierIds)}
+                      </p>
+                    ) : null}
+                    <div className="mt-1 flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <ProductPrice
+                          product={pricedProductForCartLine(
+                            line.product,
+                            priceTier,
+                            line.modifierIds,
+                          )}
+                          currencyCode={currencyCode}
+                          size="sm"
+                        />
+                        <p className="text-[11px] text-[var(--ob-text-muted)]">
+                          {line.product.unit ?? "unit"} · qty {line.quantity}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-1">
+                        <button
+                          type="button"
+                          className="ob-bill-chip ob-touch-target flex h-9 w-9 shrink-0 items-center justify-center hover:bg-[var(--ob-surface-muted)]"
+                          onClick={() =>
+                            setQty(
+                              line.product.id,
+                              line.quantity - 1,
+                              line.modifierIds,
+                            )
+                          }
+                          aria-label="Decrease quantity"
+                        >
+                          −
+                        </button>
+                        <input
+                          className="ob-input py-1.5 text-center"
+                          style={{ width: "3rem" }}
+                          value={line.quantity}
+                          onChange={(e) =>
+                            setQty(
+                              line.product.id,
+                              Number(e.target.value) || 0,
+                              line.modifierIds,
+                            )
+                          }
+                          aria-label="Quantity"
+                        />
+                        <button
+                          type="button"
+                          className="ob-bill-chip ob-touch-target flex h-9 w-9 shrink-0 items-center justify-center hover:bg-[var(--ob-surface-muted)]"
+                          onClick={() =>
+                            setQty(
+                              line.product.id,
+                              line.quantity + 1,
+                              line.modifierIds,
+                            )
+                          }
+                          aria-label="Increase quantity"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
-        <div className="flex justify-between text-[var(--ob-text-muted)]">
-          <span>Tax ({taxRatePercent}%)</span>
-          <span>{formatMoney(totals.taxTotal, currencyCode)}</span>
-        </div>
-        {totals.feesTotal > 0 ? (
-          <div className="flex justify-between text-[var(--ob-text-muted)]">
-            <span>Delivery & installation</span>
-            <span>{formatMoney(totals.feesTotal, currencyCode)}</span>
+
+        <dl className="ob-bill-rule mt-2 space-y-1 pt-2 text-[13px]">
+          <div className="flex justify-between gap-3">
+            <dt>List subtotal</dt>
+            <dd className="ob-bill-figure">
+              {formatMoney(totals.listSubtotal, currencyCode)}
+            </dd>
           </div>
+          {totals.productDiscountTotal > 0 ? (
+            <div className="flex justify-between gap-3 text-[var(--ob-success)]">
+              <dt>Product discounts</dt>
+              <dd className="ob-bill-figure">
+                −{formatMoney(totals.productDiscountTotal, currencyCode)}
+              </dd>
+            </div>
+          ) : null}
+          {totals.orderDiscountAmount > 0 ? (
+            <div className="flex justify-between gap-3 text-[var(--ob-success)]">
+              <dt>Order discount</dt>
+              <dd className="ob-bill-figure">
+                −{formatMoney(totals.orderDiscountAmount, currencyCode)}
+              </dd>
+            </div>
+          ) : null}
+          {totals.offerDiscountAmount > 0 ? (
+            <div className="flex justify-between gap-3 text-[var(--ob-success)]">
+              <dt>Offer discount</dt>
+              <dd className="ob-bill-figure">
+                −{formatMoney(totals.offerDiscountAmount, currencyCode)}
+              </dd>
+            </div>
+          ) : null}
+          {totals.feesTotal > 0 ? (
+            <div className="flex justify-between gap-3 text-[var(--ob-text-muted)]">
+              <dt>Delivery & installation</dt>
+              <dd className="ob-bill-figure">
+                {formatMoney(totals.feesTotal, currencyCode)}
+              </dd>
+            </div>
+          ) : null}
+          <div className="flex justify-between gap-3 border-t border-[var(--ob-line)] pt-1.5 font-medium">
+            <dt>Taxable amount</dt>
+            <dd className="ob-bill-figure">
+              {formatMoney(totals.taxableSubtotal, currencyCode)}
+            </dd>
+          </div>
+          {taxRatePercent > 0 ? (
+            <>
+              <div className="flex justify-between gap-3 text-[var(--ob-text-muted)]">
+                <dt>CGST ({taxRatePercent / 2}%)</dt>
+                <dd className="ob-bill-figure">
+                  {formatMoney(taxSplit.cgstAmount, currencyCode)}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-3 text-[var(--ob-text-muted)]">
+                <dt>SGST ({taxRatePercent / 2}%)</dt>
+                <dd className="ob-bill-figure">
+                  {formatMoney(taxSplit.sgstAmount, currencyCode)}
+                </dd>
+              </div>
+            </>
+          ) : (
+            <div className="flex justify-between gap-3 text-[var(--ob-text-muted)]">
+              <dt>Tax ({taxRatePercent}%)</dt>
+              <dd className="ob-bill-figure">
+                {formatMoney(totals.taxTotal, currencyCode)}
+              </dd>
+            </div>
+          )}
+          <div className="flex justify-between gap-3 border-t border-[var(--ob-line)] pt-1.5 text-base font-semibold">
+            <dt>{savingAsQuote ? "Quotation total" : "Total payable"}</dt>
+            <dd className="ob-bill-figure">
+              {formatMoney(totals.grandTotal, currencyCode)}
+            </dd>
+          </div>
+        </dl>
+
+        {receiptFooter ? (
+          <p className="mt-2 text-[11px] text-[var(--ob-text-muted)]">
+            {receiptFooter}
+          </p>
         ) : null}
-        <div className="flex justify-between text-base font-semibold">
-          <span>{savingAsQuote ? "Quotation total" : "Total"}</span>
-          <span>{formatMoney(totals.grandTotal, currencyCode)}</span>
-        </div>
+
         {feedback ? (
           <p
             className={cn(
-              "text-sm",
-              feedback.includes("saved to Orders") || feedback.includes("saved successfully")
+              "mt-2 text-sm",
+              feedback.includes("saved to Orders") ||
+                feedback.includes("saved successfully")
                 ? "text-[var(--ob-success)]"
                 : "text-[var(--ob-text-secondary)]",
             )}
@@ -1059,24 +1213,17 @@ export function BillingPos({
             {feedback}
           </p>
         ) : null}
+
         <Button
-          className="ob-touch-target w-full"
+          className="ob-touch-target mt-3 w-full"
           onClick={() => handleSubmit()}
           loading={submitting}
           disabled={!cart.length}
         >
           {confirmLabel}
         </Button>
-        {lastSavedDocument ? (
-          <OrderDocumentActions
-            document={lastSavedDocument}
-            compact
-            onDismiss={() => setLastSavedDocument(null)}
-          />
-        ) : null}
       </div>
-    </Card>
-  );
+    );
 
   const productTile = (product: Product) => {
     const inCart = cartQtyByProduct.get(product.id) ?? 0;

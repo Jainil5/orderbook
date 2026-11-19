@@ -114,8 +114,7 @@ is a pill containing pill children.
 ### Motion
 
 `@keyframes`: `ob-glare`, `ob-fade-in`, `ob-rise`, `ob-slide-in`, `ob-scrim`,
-`ob-flip-in`, `ob-pop`, `ob-drop`, `ob-ripple`, `ob-wave`,
-`ob-crest`, `ob-fwave`, `ob-grow-bar`, `ob-caret`.
+`ob-flip-in`, `ob-pop`, `ob-drop`, `ob-grow-bar`, `ob-caret`.
 
 **A — Glare sweep.** `.ob-glare` / `.ob-glare-top`: a blurred light band
 (`blur(9px)`, rotated) passes *behind* the card content on hover/focus,
@@ -134,12 +133,14 @@ active item (`ob-nav-active`), `Tabs` (`ob-tab-active-{label}`),
 `SegmentedControl` (`ob-segment-active-{label}`) and `ManagerSubnav`
 (`ob-manager-tab-active`). Panels use `{ stiffness: 460, damping: 34 }`.
 
-**D — Wordmark wave.** Each letter of `Order`+`Book` is its own span with
-`animation-delay: idx * 0.11s`; `ob-wave` crests `-5px` at the 25% stop over 3.2s
-and `ob-crest` flashes the `Book` half to `--ob-crest` in phase. The footer
-repeats it at giant scale with `ob-fwave` (5.2s, `.16s` stagger) and a mask so it
-sinks through the bottom edge. On paper `--ob-crest` dips to `#0b5c33` instead of
-flashing white.
+**D — Wordmark, held still.** Each letter of `Order`+`Book` is still its own
+span, now with a static two-tone instead of a wave: `Order` in `--ob-leaf`,
+`Book` in `--ob-crest` (`#0b5c33` on paper, white on dark). The `ob-wave` /
+`ob-crest` loop on the header mark and the `ob-fwave` loop on the giant footer
+mark are gone — they ran for the life of the page and pulled the eye off the
+data. The footer mark keeps its `--mark-w` sizing and the mask that sinks it
+through the bottom edge. `LogoMark` is static markup too: no rotation on
+showcase surfaces, no pulsing rings in the sidebar.
 
 **Other timings.** Entrance `ob-rise` 1s from `translateY(28px)`, staggered
 `0/.1/.2/.3/.35s` via `.ob-stagger > *`. Typewriter (landing hero): 55ms per

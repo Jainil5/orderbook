@@ -21,6 +21,9 @@ import {
   mapShift,
   mapTask,
   mapLead,
+  mapPurchaseOrder,
+  mapPurchaseOrderLine,
+  mapVendor,
 } from "./mappers";
 import {
   mapCampaign,
@@ -59,6 +62,9 @@ import b1Campaigns from "../../../../data/demo/BR-1/campaigns.csv";
 import b1LoyaltyRules from "../../../../data/demo/BR-1/loyalty_rules.csv";
 import b1LoyaltyLedger from "../../../../data/demo/BR-1/loyalty_ledger.csv";
 import b1Memberships from "../../../../data/demo/BR-1/memberships.csv";
+import b1Vendors from "../../../../data/demo/BR-1/vendors.csv";
+import b1PurchaseOrders from "../../../../data/demo/BR-1/purchase_orders.csv";
+import b1PurchaseOrderLines from "../../../../data/demo/BR-1/purchase_order_lines.csv";
 
 import b2Brand from "../../../../data/demo/BR-2/brand.csv";
 import b2Settings from "../../../../data/demo/BR-2/brand_settings.csv";
@@ -85,6 +91,9 @@ import b2Campaigns from "../../../../data/demo/BR-2/campaigns.csv";
 import b2LoyaltyRules from "../../../../data/demo/BR-2/loyalty_rules.csv";
 import b2LoyaltyLedger from "../../../../data/demo/BR-2/loyalty_ledger.csv";
 import b2Memberships from "../../../../data/demo/BR-2/memberships.csv";
+import b2Vendors from "../../../../data/demo/BR-2/vendors.csv";
+import b2PurchaseOrders from "../../../../data/demo/BR-2/purchase_orders.csv";
+import b2PurchaseOrderLines from "../../../../data/demo/BR-2/purchase_order_lines.csv";
 
 type BrandCsvFiles = {
   brand: string;
@@ -114,6 +123,9 @@ type BrandCsvFiles = {
   loyaltyRules: string;
   loyaltyLedger: string;
   memberships: string;
+  vendors: string;
+  purchaseOrders: string;
+  purchaseOrderLines: string;
 };
 
 const FILES: Record<DemoBrandCode, BrandCsvFiles> = {
@@ -126,6 +138,8 @@ const FILES: Record<DemoBrandCode, BrandCsvFiles> = {
     interactions: b1Interactions, reviews: b1Reviews, complaints: b1Complaints,
     segments: b1Segments, campaigns: b1Campaigns, loyaltyRules: b1LoyaltyRules,
     loyaltyLedger: b1LoyaltyLedger, memberships: b1Memberships,
+    vendors: b1Vendors, purchaseOrders: b1PurchaseOrders,
+    purchaseOrderLines: b1PurchaseOrderLines,
   },
   "BR-2": {
     brand: b2Brand, settings: b2Settings, products: b2Products, customers: b2Customers,
@@ -136,6 +150,8 @@ const FILES: Record<DemoBrandCode, BrandCsvFiles> = {
     interactions: b2Interactions, reviews: b2Reviews, complaints: b2Complaints,
     segments: b2Segments, campaigns: b2Campaigns, loyaltyRules: b2LoyaltyRules,
     loyaltyLedger: b2LoyaltyLedger, memberships: b2Memberships,
+    vendors: b2Vendors, purchaseOrders: b2PurchaseOrders,
+    purchaseOrderLines: b2PurchaseOrderLines,
   },
 };
 
@@ -193,6 +209,15 @@ export function loadDemoBrandPack(code: DemoBrandCode): DemoBrandPack {
     ),
     memberships: rows(f.memberships, "memberships.csv").map((r) =>
       mapMembership(r, src("memberships.csv")),
+    ),
+    vendors: rows(f.vendors, "vendors.csv").map((r) =>
+      mapVendor(r, src("vendors.csv")),
+    ),
+    purchaseOrders: rows(f.purchaseOrders, "purchase_orders.csv").map((r) =>
+      mapPurchaseOrder(r, src("purchase_orders.csv")),
+    ),
+    purchaseOrderLines: rows(f.purchaseOrderLines, "purchase_order_lines.csv").map(
+      (r) => mapPurchaseOrderLine(r, src("purchase_order_lines.csv")),
     ),
   };
   const rebased = rebasePackDates(pack);

@@ -76,7 +76,7 @@ export function buildWorkspaceNavItems(
       href: "/manager",
       label: "Manager",
       iconKey: "Manager",
-      children: visibleManagerModules(hiddenManagerModules, profile.capture).map(
+      children: visibleManagerModules(hiddenManagerModules).map(
         (m) => ({
           href: m.href,
           label: m.label,
@@ -87,7 +87,7 @@ export function buildWorkspaceNavItems(
     { href: "/insights", label: "AI Insights", iconKey: "Insights" },
     {
       href: "/customers",
-      label: "Customers",
+      label: "CRM",
       iconKey: "Customers",
       children: CRM_MODULES.map((m) => ({ href: m.href, label: m.label })),
     },

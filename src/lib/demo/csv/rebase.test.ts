@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Customer, Order, Payment, Offer } from "@/types/database";
 import type { StaffMember } from "@/types/manager";
+import type { PurchaseOrder } from "@/types/procurement";
 import type { Appointment, FieldVisit, Lead, ServiceJob, Shift, Task } from "@/types/operations";
 import type {
   CustomerComplaint,
@@ -110,6 +111,14 @@ function membership(over: Partial<Membership> & Pick<Membership, "id" | "started
     status: "active", notes: null, ...over,
   };
 }
+function purchaseOrder(
+  over: Partial<PurchaseOrder> & Pick<PurchaseOrder, "id" | "created_at">,
+): PurchaseOrder {
+  return {
+    brand_id: "b", number: "PO-1001", vendor_id: "v1", status: "sent",
+    sent_at: null, expected_at: null, closed_at: null, note: null, ...over,
+  };
+}
 
 describe("shift helpers", () => {
   it("shiftIso adds whole days preserving time", () => {
@@ -187,6 +196,19 @@ describe("rebasePackDates", () => {
         expires_at: new Date(2027, 10, 1, 9, 0).toISOString(),
       }),
     ],
+    purchaseOrders: [
+      purchaseOrder({
+        id: "po1",
+        created_at: new Date(2026, 10, 1, 9, 0).toISOString(),
+        sent_at: new Date(2026, 10, 1, 9, 30).toISOString(),
+        expected_at: new Date(2026, 10, 8, 12, 0).toISOString(),
+      }),
+      purchaseOrder({
+        id: "po2",
+        status: "draft",
+        created_at: new Date(2026, 10, 10, 9, 0).toISOString(),
+      }),
+    ],
   };
 
   it("offset 0 returns equal data", () => {
@@ -225,6 +247,10 @@ describe("rebasePackDates", () => {
     expect(out.campaigns[0].ends_at).toBeNull();
     expect(out.loyaltyLedger[0].expires_at).toBe(new Date(2027, 10, 11, 9, 0).toISOString());
     expect(out.memberships[0].started_at).toBe(new Date(2026, 10, 11, 9, 0).toISOString());
+    expect(out.purchaseOrders[0].sent_at).toBe(new Date(2026, 10, 11, 9, 30).toISOString());
+    // A vendor date in the past stays in the past: +10 days keeps it overdue.
+    expect(out.purchaseOrders[0].expected_at).toBe(new Date(2026, 10, 18, 12, 0).toISOString());
+    expect(out.purchaseOrders[1].expected_at).toBeNull();
   });
 
   it("leaves date_of_birth alone so birthdays keep landing in season", () => {
