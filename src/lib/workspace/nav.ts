@@ -1,5 +1,6 @@
 import type { WorkspaceProfile } from "@/lib/workspace/constants";
 import { CRM_MODULES } from "@/lib/workspace/crm-modules";
+import { MARKETING_MODULES } from "@/lib/workspace/marketing-modules";
 import {
   visibleManagerModules,
   type ManagerModuleKey,
@@ -15,6 +16,7 @@ export type WorkspaceNavIconKey =
   | "Manager"
   | "Analytics"
   | "Customers"
+  | "Marketing"
   | "Settings";
 
 export type WorkspaceNavChild = {
@@ -88,6 +90,12 @@ export function buildWorkspaceNavItems(
       label: "Customers",
       iconKey: "Customers",
       children: CRM_MODULES.map((m) => ({ href: m.href, label: m.label })),
+    },
+    {
+      href: "/marketing",
+      label: "Content & Ads",
+      iconKey: "Marketing",
+      children: MARKETING_MODULES.map((m) => ({ href: m.href, label: m.label })),
     },
     { href: "/settings", label: "Settings", iconKey: "Settings" },
   );

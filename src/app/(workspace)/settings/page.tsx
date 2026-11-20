@@ -8,6 +8,7 @@ import { QuotationBuilderSetting } from "@/components/settings/quotation-builder
 import { ManagerModulesSetting } from "@/components/settings/manager-modules-setting";
 import { BrandWebsiteSetting } from "@/components/settings/brand-website-setting";
 import { ReceiptSettingsCard } from "@/components/settings/receipt-settings";
+import { ExportDataSetting } from "@/components/settings/export-data-setting";
 import { useWorkspace } from "@/components/workspace/workspace-provider";
 import { canEditWorkspaceFeatures } from "@/lib/workspace/settings-access";
 import { Card } from "@/components/ui/card";
@@ -20,6 +21,7 @@ const SETTINGS_TABS = [
   { id: "features", label: "Features" },
   { id: "catalog", label: "Catalog" },
   { id: "brand", label: "Brand website" },
+  { id: "export", label: "Export data" },
   { id: "team", label: "Team" },
 ] as const;
 
@@ -30,6 +32,7 @@ function tabFromParam(value: string | null): SettingsTabId {
     value === "features" ||
     value === "catalog" ||
     value === "brand" ||
+    value === "export" ||
     value === "profile" ||
     value === "receipt" ||
     value === "team"
@@ -158,6 +161,17 @@ export default function SettingsPage() {
               initialUrl={ws.settings.brand_website_url}
               canEdit={canEdit}
             />
+          </Card>
+        ) : null}
+
+        {tab === "export" ? (
+          <Card className="max-w-3xl">
+            <h2 className="font-semibold">Export data</h2>
+            <p className="mt-1 text-sm text-[var(--ob-text-muted)]">
+              Pick the months you want and download them as CSV — for an
+              accountant, a spreadsheet, or a backup of the demo so far.
+            </p>
+            <ExportDataSetting />
           </Card>
         ) : null}
 

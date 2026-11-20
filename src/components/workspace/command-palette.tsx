@@ -16,8 +16,11 @@ const LINKS = [
   { href: "/orders", label: "Orders" },
   { href: "/kitchen", label: "Kitchen board" },
   { href: "/customers", label: "CRM overview" },
+  { href: "/marketing/ads", label: "Digital Ads" },
+  { href: "/marketing/content", label: "Content Management" },
   { href: "/analytics", label: "Analytics" },
   { href: "/settings", label: "Settings" },
+  { href: "/settings?tab=export", label: "Export data" },
 ];
 
 export function CommandPalette() {

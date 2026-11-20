@@ -23,6 +23,7 @@ import {
   FileText,
   FileCheck2,
   ClipboardList,
+  Megaphone,
   ChevronDown,
 } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -43,6 +44,7 @@ const icons = {
   Manager: ClipboardList,
   Analytics: LineChart,
   Customers: Users,
+  Marketing: Megaphone,
   Settings: Settings,
 } as const;
 

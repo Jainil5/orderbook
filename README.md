@@ -110,6 +110,46 @@ Three things the CRM deliberately does **not** pretend to do:
   same text always gets the same answer — which is also what makes it something
   an AI feature can later be measured against.
 
+## Content & Ads
+
+One sidebar item, two screens (`src/lib/workspace/marketing-modules.ts`), and no
+overview of its own — `/marketing` redirects to Digital Ads.
+
+| Module | Route | What it is |
+|--------|-------|------------|
+| Digital Ads | `/marketing/ads` | The CRM campaigns on WhatsApp, email and SMS, with what each returned |
+| Content Management | `/marketing/content` | Reel scripts and photo-post ideas built from the catalog |
+
+**Content Management** asks four things about one product: what it is, whether
+the post is a reel (7s, 15s or 30s) or a photo (no timing at all), what the post
+is for — a discount, a new launch, or content on its own — and a free-text brief
+like *"30% off this pizza this weekend, shot at the counter"*. **Generate
+script** answers with a hook, a shot list, on-screen lines, voiceover, a call to
+action, a caption and hashtags, which can be copied out for the phone.
+
+The writer is `src/lib/marketing/script.ts`, and it is a deliberate stub: it
+composes its copy from the product, the objective and the offer actually written
+in the brief — it never invents a discount the merchant did not state — and a
+reel's shots tile the chosen duration exactly. It is pure and seeded, so the
+same brief and the same random seed produce the same script, which is what makes
+it testable today and measurable against a real model later. No external call is
+made or possible here: the CSP allows no remote connect targets, and the file
+marks the seam where a provider would be wired in. Nothing is published to any
+platform.
+
+**Digital Ads** reads, it does not run anything. The demo has no ad account, so
+the board shows the campaigns already logged in the CRM on digital channels
+(in-store stays off it) and says so in the fine print.
+
+### Exporting the books
+
+**Settings → Export data** (`/settings?tab=export`) lists every month that holds
+records for the current business, lets you pick one month or several, and
+downloads bills and quotations, sold line items, or payments as CSV. The maths is
+one pure module (`src/lib/export/months.ts`), the read is one server action
+(`src/services/data-export-actions.ts`), and like every other export it reads the
+merged rows — repo dataset plus this browser's edits — and writes nothing back.
+
 ### Product customizations (modifiers)
 
 `products.modifiers_json` holds an array of **groups** — each one question the

@@ -16,6 +16,7 @@ describe("buildWorkspaceNavItems", () => {
       "/manager",
       "/analytics",
       "/customers",
+      "/marketing",
       "/settings",
     ]);
   });
@@ -107,9 +108,21 @@ describe("buildWorkspaceNavItems", () => {
     }
   });
 
+  it("gives Content & Ads its two sub-modules as children", () => {
+    const marketing = buildWorkspaceNavItems(false, profile).find(
+      (i) => i.href === "/marketing",
+    );
+    expect(marketing?.label).toBe("Content & Ads");
+    expect(marketing?.iconKey).toBe("Marketing");
+    expect(marketing?.children?.map((c) => c.href)).toEqual([
+      "/marketing/ads",
+      "/marketing/content",
+    ]);
+  });
+
   it("flat items have no children", () => {
     const items = buildWorkspaceNavItems(false, profile);
-    const grouped = new Set(["/manager", "/customers"]);
+    const grouped = new Set(["/manager", "/customers", "/marketing"]);
     expect(items.filter((i) => !grouped.has(i.href)).every((i) => !i.children)).toBe(true);
   });
 });

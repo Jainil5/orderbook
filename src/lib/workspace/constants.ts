@@ -32,6 +32,7 @@ export const WORKSPACE_ROUTE_PREFIXES = [
   "/manager",
   "/analytics",
   "/customers",
+  "/marketing",
   "/settings",
   "/payments", // legacy top-level URL, now redirects to /manager/payments
 ] as const;
