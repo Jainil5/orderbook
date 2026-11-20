@@ -4,12 +4,16 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import {
   readManagerModulesPref,
+  writeBlockOversellPref,
   writeBrandWebsitePref,
   writeManagerModulesPref,
+  writeOrdersPausedPref,
   writeQuotationBuilderPref,
   writeReceiptSettingsPref,
+  writeWorkingHoursPref,
 } from "@/lib/workspace/prefs";
 import { isManagerModuleKey } from "@/lib/workspace/manager-modules";
+import { validateWorkingHours } from "@/lib/hours/working-hours";
 import { normalizeBrandWebsiteUrl } from "@/lib/security/input";
 import {
   DEMO_WORKSPACE_COOKIE,
@@ -86,5 +90,48 @@ export async function setManagerModuleHidden(moduleKey: string, hidden: boolean)
   await writeManagerModulesPref(brandCode, next);
   revalidatePath("/settings");
   revalidatePath("/manager");
+  return { ok: true as const };
+}
+
+/**
+ * Save the week. The payload is whatever the editor posted — a plain object
+ * or the JSON text a hidden field carries — and only a usable seven-day
+ * schedule is stored. `raw` is never allowed to name a brand: tenancy comes
+ * from the workspace cookie.
+ */
+export async function setWorkingHours(raw: unknown) {
+  const parsed = validateWorkingHours(raw);
+  if (!parsed.ok) {
+    return { ok: false as const, message: parsed.message };
+  }
+
+  const brandCode = await activeBrandCode();
+  await writeWorkingHoursPref(brandCode, parsed.value);
+  revalidatePath("/settings");
+  revalidatePath("/menu");
+  revalidatePath("/dashboard");
+  return { ok: true as const };
+}
+
+/** The manual switch: "not taking orders right now", inside the hours or not. */
+export async function setOrdersPaused(paused: boolean) {
+  const brandCode = await activeBrandCode();
+  await writeOrdersPausedPref(brandCode, paused);
+  revalidatePath("/settings");
+  revalidatePath("/menu");
+  revalidatePath("/dashboard");
+  return { ok: true as const };
+}
+
+/**
+ * Whether the counter refuses a sale the shelf cannot cover. Left unset by the
+ * shipped pack, so this is remembered per brand rather than written to the CSV.
+ */
+export async function setBlockOversell(enabled: boolean) {
+  const brandCode = await activeBrandCode();
+  await writeBlockOversellPref(brandCode, enabled);
+  revalidatePath("/settings");
+  revalidatePath("/billing");
+  revalidatePath("/quotation");
   return { ok: true as const };
 }

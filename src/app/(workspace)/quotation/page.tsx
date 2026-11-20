@@ -5,6 +5,7 @@ import {
   toDemoBrandCode,
 } from "@/lib/demo/data";
 import { BillingWorkspace } from "@/components/billing/billing-workspace";
+import { resolveAvailabilityForProducts } from "@/lib/inventory/resolve";
 import { PageShell } from "@/components/workspace/page-shell";
 import { loadWorkspaceSession } from "@/lib/workspace/session";
 import { redirect } from "next/navigation";
@@ -25,6 +26,9 @@ export default async function QuotationPage() {
     listDemoCustomers(undefined, demoCode),
     listDemoOffers(demoCode),
   ]);
+  // A quotation is a promise about the shelf, so it is priced against what the
+  // shelf can actually make — nobody quotes 20 tables the timber cannot cover.
+  const availability = await resolveAvailabilityForProducts(demoCode, products);
   return (
     <PageShell title={pageTitle}>
       <BillingWorkspace
@@ -33,6 +37,7 @@ export default async function QuotationPage() {
         products={products}
         customers={customers}
         offers={offers}
+        availability={availability}
         currencyCode={ws.settings.currency_code}
         taxRatePercent={ws.settings.tax_rate_percent ?? 0}
         billingCopy={ws.profile.billingPos}

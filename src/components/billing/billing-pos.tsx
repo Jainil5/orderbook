@@ -39,6 +39,10 @@ import {
 } from "@/lib/pricing/cart-line";
 import { customerPriceTier } from "@/lib/pricing/unit-price";
 import {
+  cartStockMessage,
+  type ProductAvailability,
+} from "@/lib/inventory/availability";
+import {
   defaultModifierSelection,
   modifierLabels,
   parseProductModifiers,
@@ -91,6 +95,7 @@ export function BillingPos({
   offers = [],
   userRole = "owner",
   blockOversell = false,
+  availability,
   onSubmitOrder,
 }: {
   products: Product[];
@@ -108,6 +113,13 @@ export function BillingPos({
   offers?: Offer[];
   userRole?: BrandRole;
   blockOversell?: boolean;
+  /**
+   * What the shelf can really make, product by product, from the recipe and
+   * the current positions. When it is absent the counter falls back to the
+   * `stock_qty` typed on the product row — the old behaviour, and the right one
+   * for a brand with no recipes at all.
+   */
+  availability?: Map<string, ProductAvailability>;
   onSubmitOrder: (payload: {
     lines: {
       productId: string;
@@ -303,6 +315,10 @@ export function BillingPos({
 
   function stockBlockMessage(product: Product, addQty: number): string | null {
     const inCart = cartQtyByProduct.get(product.id) ?? 0;
+    const known = availability?.get(product.id);
+    if (known) {
+      return cartStockMessage(known, inCart, addQty, blockOversell);
+    }
     const available = stockAvailable(product);
     if (blockOversell && available != null && available <= 0) {
       return `${product.name} is out of stock.`;
@@ -368,7 +384,9 @@ export function BillingPos({
         (cartQtyByProduct.get(productId) ?? 0) -
         (cart.find((l) => cartLineKey(l.product.id, l.modifierIds) === key)
           ?.quantity ?? 0);
-      const available = stockAvailable(product);
+      const available = availability
+        ? availability.get(productId)?.sellableUnits ?? null
+        : stockAvailable(product);
       if (available != null && inCartOthers + quantity > available) {
         setFeedback(`Only ${available} in stock for ${product.name}.`);
         return;
@@ -1079,11 +1097,32 @@ export function BillingPos({
     </Card>
   );
 
+  /**
+   * Tile and peek wording for one product. A recipe product is counted by what
+   * the shelf can make, not by the number someone typed on its row — "3 left"
+   * when the milk says 3, even if the product row still says 40.
+   */
+  function stockNoteFor(product: Product): { label: string | null; low: boolean } {
+    const known = availability?.get(product.id);
+    if (known) {
+      return {
+        label:
+          known.badge ??
+          (known.sellableUnits != null ? `Stock ${known.sellableUnits}` : null),
+        low: known.status === "low" || known.status === "out",
+      };
+    }
+    const available = stockAvailable(product);
+    return {
+      label: available != null ? `Stock ${available}` : null,
+      low: isLowStock(product),
+    };
+  }
+
   const productTile = (product: Product) => {
     const inCart = cartQtyByProduct.get(product.id) ?? 0;
     const flashing = flashProductId === product.id;
-    const available = stockAvailable(product);
-    const stockLabel = available != null ? `Stock ${available}` : null;
+    const stock = stockNoteFor(product);
     const displayProduct = pricedProductForCartLine(product, priceTier, []);
     return (
       <PosProductTileWithButton
@@ -1093,8 +1132,8 @@ export function BillingPos({
         inCartQty={inCart}
         flashing={flashing}
         addLabel={copy.addButton}
-        stockLabel={stockLabel}
-        lowStock={isLowStock(product)}
+        stockLabel={stock.label}
+        lowStock={stock.low}
         onAdd={() => tryAddProduct(product)}
         onPeek={() => setPeekProduct(displayProduct)}
       />
@@ -1219,6 +1258,8 @@ export function BillingPos({
         product={peekProduct}
         currencyCode={currencyCode}
         addLabel={copy.addButton}
+        stockLabel={peekProduct ? stockNoteFor(peekProduct).label : undefined}
+        lowStock={peekProduct ? stockNoteFor(peekProduct).low : undefined}
         onAdd={tryAddProduct}
         onClose={() => setPeekProduct(null)}
       />

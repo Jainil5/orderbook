@@ -65,10 +65,7 @@ export function ProductsWorkspace({
           usageCost={inventory.usageCost}
           windowDays={inventory.windowDays}
           orderCount={inventory.orderCount}
-          products={products.map((product) => ({
-            id: product.id,
-            name: product.name,
-          }))}
+          products={products}
           currencyCode={currencyCode}
         />
       ) : null}

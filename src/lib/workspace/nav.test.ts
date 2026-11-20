@@ -117,6 +117,7 @@ describe("buildWorkspaceNavItems", () => {
     expect(marketing?.children?.map((c) => c.href)).toEqual([
       "/marketing/ads",
       "/marketing/content",
+      "/marketing/signals",
     ]);
   });
 

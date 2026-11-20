@@ -1,2 +1,2 @@
-brand_id,currency_code,tax_rate_percent,receipt_header,receipt_footer,contact_email,contact_phone,quotation_builder_enabled,brand_website_url,block_oversell
-demo-brewery-cafe,INR,5,Brewery Cafe,Thank you for visiting!,hello@brewery-cafe.demo,+91 98765 43210,false,/menu,
+brand_id,currency_code,tax_rate_percent,receipt_header,receipt_footer,contact_email,contact_phone,quotation_builder_enabled,brand_website_url,block_oversell,working_hours_json
+demo-brewery-cafe,INR,5,Brewery Cafe,Thank you for visiting!,hello@brewery-cafe.demo,+91 98765 43210,false,/menu,,"{""mon"":{""open"":""07:00"",""close"":""16:00""},""tue"":{""open"":""07:00"",""close"":""16:00""},""wed"":{""open"":""07:00"",""close"":""16:00""},""thu"":{""open"":""07:00"",""close"":""16:00""},""fri"":{""open"":""07:00"",""close"":""17:00""},""sat"":{""open"":""08:00"",""close"":""17:00""},""sun"":{""open"":""08:00"",""close"":""17:00""}}"

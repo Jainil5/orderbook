@@ -7,18 +7,36 @@ import {
   type WorkspaceProfile,
 } from "@/lib/workspace/constants";
 import {
+  readBlockOversellPref,
   readBrandWebsitePref,
   readManagerModulesPref,
+  readOrdersPausedPref,
   readQuotationBuilderPref,
   readReceiptSettingsPref,
+  readWorkingHoursPref,
 } from "@/lib/workspace/prefs";
 import type { ManagerModuleKey } from "@/lib/workspace/manager-modules";
+import {
+  DEFAULT_WORKING_HOURS,
+  parseWorkingHours,
+  type WorkingHours,
+} from "@/lib/hours/working-hours";
 import type { Brand, BrandSettings } from "@/types/database";
+
+/**
+ * `BrandSettings` plus the fields the workspace renders from a merge:
+ * pref (this browser) > CSV pack (the shipped demo) > built-in default week.
+ * `block_oversell` follows the same precedence without gaining a new name.
+ */
+export type WorkspaceSettings = BrandSettings & {
+  working_hours: WorkingHours;
+  orders_paused: boolean;
+};
 
 async function mergeBrandSettings(
   settings: BrandSettings,
   brandCode: string,
-): Promise<BrandSettings> {
+): Promise<WorkspaceSettings> {
   const quotationPref = await readQuotationBuilderPref(brandCode);
   const websitePref = await readBrandWebsitePref(brandCode);
   let next = settings;
@@ -38,13 +56,26 @@ async function mergeBrandSettings(
       contact_phone: receiptPref.contactPhone ?? next.contact_phone,
     };
   }
-  return next;
+  const blockPref = await readBlockOversellPref(brandCode);
+  if (blockPref !== undefined) {
+    next = { ...next, block_oversell: blockPref };
+  }
+  const hoursPref = await readWorkingHoursPref(brandCode);
+  const pausedPref = await readOrdersPausedPref(brandCode);
+  return {
+    ...next,
+    working_hours:
+      hoursPref ??
+      parseWorkingHours(next.working_hours_json) ??
+      DEFAULT_WORKING_HOURS,
+    orders_paused: pausedPref ?? false,
+  };
 }
 
 export type WorkspaceSession = {
   mode: "demo";
   brand: Brand;
-  settings: BrandSettings;
+  settings: WorkspaceSettings;
   role: "owner";
   profile: WorkspaceProfile;
   hiddenManagerModules: ManagerModuleKey[];

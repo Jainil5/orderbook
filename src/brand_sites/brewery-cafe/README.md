@@ -15,11 +15,14 @@ share one read) pulls:
 | menu sections, cards, prices, offers, sold-out | `listDemoProductsMerged` + `effectiveUnitPrice` |
 | "Made with" in the item dialog | `listDemoIngredientsMerged` (the product's recipe) |
 | GST rate, currency, phone, email | `brand_settings.csv` via `getDemoBrandPack` |
+| the "Open until 16:00" pill and the Visit hours table | `resolveWorkingHours` + `openStateAt` / `hoursRows`, from Settings → Working hours |
 | testimonials | the CRM review inbox, filtered to positive 4★+ |
 | "Back to the Website" link target | `brand_website_url`, set to `/menu` |
 
 Nothing with a number on it is typed in this folder. `components/cafe.ts` holds
-only voice: tagline, story, hours, photo captions.
+only voice: tagline, story, photo captions. Opening hours used to live there
+too; they now come from the brand's own settings so the page cannot promise a
+table at ten when the counter has closed at nine.
 
 Switch brand by changing `SITE_BRAND_CODE` in `src/lib/demo/site-brand.ts`.
 

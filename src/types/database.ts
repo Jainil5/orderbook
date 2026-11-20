@@ -31,6 +31,12 @@ export type BrandSettings = {
   brand_website_url?: string | null;
   /** When true, POS blocks adding products with stock_qty <= 0 */
   block_oversell?: boolean;
+  /**
+   * Opening hours as JSON text (`{"mon":{"open":"07:00","close":"16:00"},…}`),
+   * read by `parseWorkingHours` in `src/lib/hours/working-hours.ts`. Absent
+   * means the brand ships no schedule of its own and uses the default week.
+   */
+  working_hours_json?: string;
 };
 
 export type Product = {

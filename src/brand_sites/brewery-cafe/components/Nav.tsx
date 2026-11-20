@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Menu, X } from 'lucide-react';
 import { instaFeed } from './instaFeed';
+import type { SiteOpenState } from '../site/data';
 import { SunriseMark } from './SunriseMark';
 
 /** One page, so every link is an anchor into the same scroll. */
@@ -17,7 +18,41 @@ const links = [
   { href: '#visit', label: 'Visit' },
 ];
 
-export function Nav({ onOrderClick }: { onOrderClick: () => void }) {
+/**
+ * Whether the doors are open right now. It comes from the brand's own working
+ * hours in Settings — the site never keeps a second copy of them, so moving
+ * Friday's closing time in the workspace moves this line on the next load.
+ */
+const PILL_STYLE: Record<SiteOpenState['status'], string> = {
+  open: 'bg-[var(--bc-green)] text-[#fbf4e9]',
+  closing_soon: 'bg-[var(--bc-honey)] text-[#2a1408]',
+  closed: 'bg-[#2a211b]/10 text-[#2a211b]/75',
+};
+
+const DOT_STYLE: Record<SiteOpenState['status'], string> = {
+  open: 'bg-[#8fd6a1]',
+  closing_soon: 'bg-[var(--bc-ember)]',
+  closed: 'bg-[#2a211b]/45',
+};
+
+function OpenPill({ open }: { open: SiteOpenState }) {
+  return (
+    <span
+      className={`bc-display inline-flex min-h-8 shrink-0 items-center gap-2 rounded-full px-3 text-[12px] uppercase tracking-[0.14em] ${PILL_STYLE[open.status]}`}
+    >
+      <span aria-hidden className={`h-1.5 w-1.5 shrink-0 rounded-full ${DOT_STYLE[open.status]}`} />
+      {open.label}
+    </span>
+  );
+}
+
+export function Nav({
+  open: openState,
+  onOrderClick,
+}: {
+  open: SiteOpenState;
+  onOrderClick: () => void;
+}) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -77,6 +112,9 @@ export function Nav({ onOrderClick }: { onOrderClick: () => void }) {
                 {l.label}
               </a>
             ))}
+            <span className="hidden md:inline-flex">
+              <OpenPill open={openState} />
+            </span>
             <button type="button" onClick={onOrderClick} className="focus-ring bc-btn bc-btn-solid">
               Place order
             </button>
@@ -91,6 +129,12 @@ export function Nav({ onOrderClick }: { onOrderClick: () => void }) {
           >
             {open ? <X aria-hidden className="h-6 w-6" /> : <Menu aria-hidden className="h-6 w-6" />}
           </button>
+        </div>
+
+        {/* Phones get the status on its own line — no room for it beside the
+            wordmark and the menu button. */}
+        <div className="border-t border-[var(--bc-line)] bg-[#fbf4e9]/85 px-5 py-1.5 backdrop-blur-md md:hidden">
+          <OpenPill open={openState} />
         </div>
 
         {open ? (

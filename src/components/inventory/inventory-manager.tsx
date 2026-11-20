@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import type {
@@ -8,6 +9,7 @@ import type {
   InventoryAdjustmentKind,
   InventoryItem,
   InventoryStorage,
+  Product,
   ProductIngredient,
 } from "@/types/database";
 import { Button } from "@/components/ui/button";
@@ -16,12 +18,19 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { cn } from "@/lib/cn";
-import { formatMoney } from "@/lib/format";
+import { formatMoney, formatDate } from "@/lib/format";
+import { useMounted } from "@/lib/use-mounted";
+import { clampNotes } from "@/lib/marketing/script";
 import {
   recordInventoryMovementAction,
   saveInventoryItemAction,
 } from "@/services/inventory-actions";
 import { formatUnitCount, type InventoryPosition, type UsageRow } from "@/lib/inventory/stock";
+import {
+  recentlyRestocked,
+  restockQueue,
+  type RecentRestock,
+} from "@/lib/inventory/availability";
 
 type WindowDays = "7" | "30" | "90";
 
@@ -105,10 +114,15 @@ export function InventoryManager({
   usageCost: number;
   windowDays: number;
   orderCount: number;
-  products: { id: string; name: string }[];
+  /** The whole menu, active or not — a recipe may sit on a retired product. */
+  products: Product[];
   currencyCode: string;
 }) {
   const router = useRouter();
+  const mounted = useMounted();
+  /** The clock the "just landed" window is measured back from, kept in state so
+   *  render stays pure and the window still slides while the screen is open. */
+  const [clock, setClock] = useState(() => Date.now());
   const itemDialogRef = useRef<HTMLDialogElement>(null);
   const moveDialogRef = useRef<HTMLDialogElement>(null);
   const [form, setForm] = useState<ItemForm>(EMPTY_ITEM);
@@ -125,9 +139,21 @@ export function InventoryManager({
   const [moving, setMoving] = useState(false);
   const [category, setCategory] = useState("all");
 
+  useEffect(() => {
+    const interval = setInterval(() => setClock(Date.now()), 60_000);
+    return () => clearInterval(interval);
+  }, []);
+
   const itemNames = useMemo(
     () => new Map(positions.map((row) => [row.item.id, row.item.name])),
     [positions],
+  );
+
+  /** The stock rows themselves — a position already carries its item. */
+  const items = useMemo(() => positions.map((row) => row.item), [positions]);
+  const itemById = useMemo(
+    () => new Map(items.map((item) => [item.id, item])),
+    [items],
   );
 
   /** Which menu items drain which stock — the join the merchant never has to write. */
@@ -187,9 +213,15 @@ export function InventoryManager({
     itemDialogRef.current?.showModal();
   }
 
-  function openMovement(row: InventoryItem) {
+  function openMovement(row: InventoryItem, packs?: number) {
     setMoveError(null);
-    setMove({ itemId: row.id, kind: "purchase", packs: "", cost: "", note: "" });
+    setMove({
+      itemId: row.id,
+      kind: "purchase",
+      packs: packs != null && Number.isFinite(packs) ? String(packs) : "",
+      cost: "",
+      note: "",
+    });
     moveDialogRef.current?.showModal();
   }
 
@@ -242,6 +274,62 @@ export function InventoryManager({
   const movedItem = itemNames.get(move.itemId);
   const outOfStock = positions.filter((row) => row.status === "out");
 
+  /**
+   * The buy list, worst first: everything finished, then everything past its
+   * own reorder line. `restockQueue` does the ordering and the suggested packs;
+   * the recipe context is what lets an alert say which menu items are at risk
+   * rather than just naming a bag of something.
+   */
+  const buyList = useMemo(
+    () => restockQueue(items, positions, { ingredients, products }),
+    [items, positions, ingredients, products],
+  );
+
+  /**
+   * Deliveries inside the same window the usage figures use. Gated on mount
+   * because the window is measured from the wall clock, and a server render
+   * would answer for a different moment than the phone in someone's hand.
+   */
+  const landed = useMemo(
+    () =>
+      mounted
+        ? recentlyRestocked(items, ledger, positions, {
+            withinDays: windowDays,
+            now: clock,
+          })
+        : [],
+    [mounted, items, ledger, positions, windowDays, clock],
+  );
+
+  /** Which live menu item a restock is worth announcing on. */
+  const announceProduct = useMemo(() => {
+    const byId = new Map(products.map((product) => [product.id, product]));
+    const first = new Map<string, Product>();
+    for (const row of ingredients) {
+      if (first.has(row.item_id)) continue;
+      const product = byId.get(row.product_id);
+      if (product?.is_active) first.set(row.item_id, product);
+    }
+    return first;
+  }, [ingredients, products]);
+
+  function announceHref(alert: RecentRestock, product: Product): string {
+    const outFor =
+      alert.wasOutForDays == null
+        ? ""
+        : ` after ${alert.wasOutForDays} day${alert.wasOutForDays === 1 ? "" : "s"} out`;
+    const params = new URLSearchParams({
+      product: product.id,
+      objective: "content",
+      kind: "reel",
+      seconds: "7",
+      notes: clampNotes(
+        `${alert.name} is back on the shelf${outFor}. Tell the people who kept asking for ${product.name}.`,
+      ),
+    });
+    return `/marketing/content?${params.toString()}`;
+  }
+
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -276,6 +364,123 @@ export function InventoryManager({
           {outOfStock.map((row) => row.item.name).join(", ")} — sales still price
           correctly, but the shelf count cannot go below zero.
         </p>
+      ) : null}
+
+      {buyList.length || landed.length ? (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <section className="ob-card p-4 sm:p-5">
+            <h2 className="font-semibold">Buy list</h2>
+            <p className="mt-1 text-sm text-[var(--ob-text-muted)]">
+              Finished first, then whatever has slipped past its own reorder
+              line. The packs suggested bring the shelf back to that line plus
+              one.
+            </p>
+            {buyList.length === 0 ? (
+              <p className="mt-3 text-sm text-[var(--ob-text-muted)]">
+                Nothing to order. Every shelf is above its line.
+              </p>
+            ) : (
+              <ul className="mt-3 space-y-3">
+                {buyList.slice(0, 6).map((alert) => {
+                  const item = itemById.get(alert.itemId);
+                  return (
+                    <li
+                      key={alert.itemId}
+                      className="rounded-[var(--ob-radius-sm)] border border-[var(--ob-border)] p-3"
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="font-medium">{alert.name}</p>
+                          <p className="mt-1 text-sm text-[var(--ob-text-muted)]">
+                            {formatPacks(alert.packsOnShelf)} {alert.unit} packs
+                            on the shelf · reorder at{" "}
+                            {formatPacks(alert.reorderAt)}
+                          </p>
+                        </div>
+                        <Badge tone={alert.status === "out" ? "danger" : "warning"}>
+                          {alert.status === "out" ? "Finished" : "Reorder"}
+                        </Badge>
+                      </div>
+                      {alert.drainsProducts.length ? (
+                        <p className="mt-2 text-sm text-[var(--ob-text-secondary)]">
+                          Puts at risk: {alert.drainsProducts.slice(0, 3).join(", ")}
+                          {alert.drainsProducts.length > 3
+                            ? ` +${alert.drainsProducts.length - 3} more`
+                            : ""}
+                        </p>
+                      ) : null}
+                      <div className="mt-3">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          disabled={!item}
+                          onClick={() =>
+                            item && openMovement(item, alert.suggestedPacks)
+                          }
+                        >
+                          Buy {alert.suggestedPacks} pack
+                          {alert.suggestedPacks === 1 ? "" : "s"}
+                        </Button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
+
+          <section className="ob-card p-4 sm:p-5">
+            <h2 className="font-semibold">Just landed</h2>
+            <p className="mt-1 text-sm text-[var(--ob-text-muted)]">
+              A delivery inside the same {windowDays}-day window the usage above
+              covers, after the shelf sat empty. This is the moment to tell the
+              people who asked.
+            </p>
+            {landed.length === 0 ? (
+              <p className="mt-3 text-sm text-[var(--ob-text-muted)]">
+                No restock has landed in this window, so there is nothing to
+                announce yet. Recording a purchase here is what puts a delivery
+                on this list — and the shelf it refills is what the buy list
+                above is asking for.
+              </p>
+            ) : (
+              <ul className="mt-3 space-y-3">
+                {landed.slice(0, 5).map((restock) => {
+                  const product = announceProduct.get(restock.itemId);
+                  const unit = itemById.get(restock.itemId)?.unit ?? "";
+                  return (
+                    <li
+                      key={restock.itemId}
+                      className="rounded-[var(--ob-radius-sm)] border border-[var(--ob-border)] p-3"
+                    >
+                      <p className="font-medium">{restock.name}</p>
+                      <p className="mt-1 text-sm text-[var(--ob-text-muted)]">
+                        {formatUnitCount(restock.unitsAdded, unit)} back on{" "}
+                        {formatDate(restock.restockedAt)}
+                        {restock.wasOutForDays != null && restock.wasOutForDays > 0
+                          ? ` · the shelf was empty for ${restock.wasOutForDays} day${restock.wasOutForDays === 1 ? "" : "s"}`
+                          : ""}
+                      </p>
+                      {product ? (
+                        <Link
+                          href={announceHref(restock, product)}
+                          className="mt-2 inline-block text-sm font-semibold text-[var(--ob-primary)] underline underline-offset-2"
+                        >
+                          Announce it is back on {product.name} →
+                        </Link>
+                      ) : (
+                        <p className="mt-2 text-sm text-[var(--ob-text-muted)]">
+                          No live menu item uses this, so there is nothing to
+                          announce.
+                        </p>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
+        </div>
       ) : null}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

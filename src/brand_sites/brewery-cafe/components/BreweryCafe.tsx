@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import type { SiteBrand } from '@/lib/demo/site-brand';
+import type { SiteHoursRow, SiteOpenState } from '../site/data';
 import type { MenuGroup } from './menu';
 import type { Voice } from './voices';
 import { trayFrom, useCart } from './cart';
@@ -19,11 +20,13 @@ interface BreweryCafeProps {
   brand: SiteBrand;
   groups: MenuGroup[];
   voices: Voice[];
+  hours: SiteHoursRow[];
+  open: SiteOpenState;
 }
 
 /** The section flow, borrowed from summermooncoffee.com: the landing, then the
  *  goods, the story band, the proof, and the room. */
-export function BreweryCafe({ brand, groups, voices }: BreweryCafeProps) {
+export function BreweryCafe({ brand, groups, voices, hours, open }: BreweryCafeProps) {
   const tray = useMemo(() => trayFrom(groups, brand.currencyCode), [groups, brand.currencyCode]);
   const [cart, dispatch] = useCart(tray);
   const [trayOpen, setTrayOpen] = useState(false);
@@ -35,7 +38,7 @@ export function BreweryCafe({ brand, groups, voices }: BreweryCafeProps) {
 
   return (
     <div className="brewery-cafe min-h-screen">
-      <Nav onOrderClick={orderLines} />
+      <Nav open={open} onOrderClick={orderLines} />
       <main>
         <Hero onPlaceOrder={orderLines} />
         <MenuExperience
@@ -51,7 +54,7 @@ export function BreweryCafe({ brand, groups, voices }: BreweryCafeProps) {
         <Feed />
         <Testimonials groups={groups} voices={voices} />
         <Mosaic />
-        <Visit brand={brand} />
+        <Visit brand={brand} hours={hours} open={open} />
       </main>
       <SiteFooter brand={brand} />
     </div>

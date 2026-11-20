@@ -5,6 +5,7 @@ import {
   toDemoBrandCode,
 } from "@/lib/demo/data";
 import { BillingWorkspace } from "@/components/billing/billing-workspace";
+import { resolveAvailabilityForProducts } from "@/lib/inventory/resolve";
 import { PageShell } from "@/components/workspace/page-shell";
 import { loadWorkspaceSession } from "@/lib/workspace/session";
 import { redirect } from "next/navigation";
@@ -25,6 +26,9 @@ export default async function BillingPage() {
     listDemoCustomers(undefined, demoCode),
     listDemoOffers(demoCode),
   ]);
+  // What the shelf can actually make, so the counter cannot bill a Flat White
+  // the milk has already ruled out.
+  const availability = await resolveAvailabilityForProducts(demoCode, products);
   return (
     <PageShell title={pageTitle}>
       <BillingWorkspace
@@ -47,6 +51,7 @@ export default async function BillingPage() {
         receiptHeader={ws.settings.receipt_header ?? ws.brand.name}
         receiptFooter={ws.settings.receipt_footer ?? null}
         blockOversell={Boolean(ws.settings.block_oversell)}
+        availability={availability}
       />
     </PageShell>
   );

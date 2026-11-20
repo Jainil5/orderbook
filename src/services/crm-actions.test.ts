@@ -838,7 +838,12 @@ describe("lead pipeline actions", () => {
 
     const lead = (await ops()).leads.find((l) => l.id === leadId)!;
     expect(lead).toMatchObject({ stage: "won", converted_customer_id: customerId });
-    expect(Date.parse(lead.created_at)).toBeLessThan(Date.parse(lead.converted_at!));
+    // Both stamps come from `new Date().toISOString()`, and a fast run can
+    // convert in the same millisecond the enquiry was created — so the
+    // invariant this really tests is "never converted before it existed".
+    expect(Date.parse(lead.created_at)).toBeLessThanOrEqual(
+      Date.parse(lead.converted_at!),
+    );
     expect(customer.created_at).toBe(lead.converted_at);
 
     expect(await convertLeadAction(leadId, convert())).toEqual({

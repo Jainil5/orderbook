@@ -1,8 +1,9 @@
 /**
- * The voice of the brand: copy, opening hours and the photographs on the room
- * pages. Everything with a number attached — prices, stock, offers, reviews,
- * contact details — comes from the brand's own Orderbook rows instead, because
- * a website that disagrees with the till is worse than a plain one.
+ * The voice of the brand: the copy and the photographs on the room pages.
+ * Everything with a number attached — prices, stock, offers, reviews, contact
+ * details, and the opening hours too — comes from the brand's own Orderbook
+ * rows instead, because a website that disagrees with the till is worse than a
+ * plain one. Hours live in Settings → Working hours.
  */
 export const cafe = {
   name: 'Brewery Cafe',
@@ -13,11 +14,6 @@ export const cafe = {
   story:
     'We started with one deck oven, a second-hand two-group, a bag of bread flour and the stubborn idea that a neighbourhood deserves somewhere to be unhurried before work. Everything is still made in the room you eat in — rolled by hand, boiled, then baked until the crust catches the sun.',
   heroImage: '/showcase/brewery-cafe/hero.jpg',
-  hours: [
-    { days: 'Mon–Thu', time: '7:00 – 16:00' },
-    { days: 'Friday', time: '7:00 – 17:00' },
-    { days: 'Sat–Sun', time: '8:00 – 17:00' },
-  ],
   where: 'Pickup at the counter, delivery across the city',
   notes: [
     'Sixteen seats, four of them at the window ledge',

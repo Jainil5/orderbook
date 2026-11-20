@@ -19,20 +19,32 @@ export function ProductPeekDialog({
   product,
   currencyCode,
   addLabel,
+  stockLabel: stockLabelProp,
+  lowStock: lowStockProp,
   onAdd,
   onClose,
 }: {
   product: Product | null;
   currencyCode: string;
   addLabel: string;
+  /**
+   * What the shelf can actually hand out, when the caller knows it. A recipe
+   * product's own `stock_qty` is a typed number, so the catalog passes the
+   * derived figure instead and the dialog cannot tell a story the till will
+   * contradict.
+   */
+  stockLabel?: string | null;
+  lowStock?: boolean;
   onAdd: (product: Product) => void;
   onClose: () => void;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   const groups = product ? parseProductModifiers(product) : [];
-  const available = product ? stockAvailable(product) : null;
-  const stockLabel = available == null ? "Not tracked" : `Stock ${available}`;
+  const tracked = product ? stockAvailable(product) : null;
+  const stockLabel =
+    stockLabelProp ?? (tracked == null ? "Not tracked" : `Stock ${tracked}`);
+  const lowStock = lowStockProp ?? (product ? isLowStock(product) : false);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -99,7 +111,7 @@ export function ProductPeekDialog({
                 <dt className="text-[var(--ob-text-muted)]">Stock</dt>
                 <dd
                   className={cn(
-                    isLowStock(product) &&
+                    lowStock &&
                       "text-[var(--ob-warning)] font-medium",
                   )}
                 >

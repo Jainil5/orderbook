@@ -28,6 +28,15 @@ export type ContentProductOption = {
   image_url?: string | null;
 };
 
+/** A brief handed over from Growth Signals, already validated server-side. */
+export type ContentInitialBrief = {
+  productId: string;
+  objective: ContentObjective;
+  kind: ContentKind;
+  seconds: number;
+  notes: string;
+};
+
 const KIND_OPTIONS = (["reel", "image"] as const).map((id) => ({
   id,
   label: CONTENT_KIND_LABELS[id],
@@ -46,16 +55,28 @@ export function ContentManager({
   brandName,
   currencyCode,
   products,
+  initialBrief,
 }: {
   brandName: string;
   currencyCode: string;
   products: ContentProductOption[];
+  initialBrief?: ContentInitialBrief | null;
 }) {
-  const [productId, setProductId] = useState(products[0]?.id ?? "");
-  const [objective, setObjective] = useState<ContentObjective>("discount");
-  const [kind, setKind] = useState<ContentKind>("reel");
-  const [seconds, setSeconds] = useState<string>(String(REEL_DURATIONS[0]));
-  const [notes, setNotes] = useState("");
+  const handed =
+    initialBrief && products.some((p) => p.id === initialBrief.productId)
+      ? initialBrief
+      : null;
+  const [productId, setProductId] = useState(
+    handed?.productId ?? products[0]?.id ?? "",
+  );
+  const [objective, setObjective] = useState<ContentObjective>(
+    handed?.objective ?? "discount",
+  );
+  const [kind, setKind] = useState<ContentKind>(handed?.kind ?? "reel");
+  const [seconds, setSeconds] = useState<string>(
+    String(handed?.seconds ?? REEL_DURATIONS[0]),
+  );
+  const [notes, setNotes] = useState(handed?.notes ?? "");
   const [script, setScript] = useState<GeneratedScript | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hint, setHint] = useState<string | null>(null);
@@ -120,6 +141,12 @@ export function ContentManager({
           Pick the product, say what the post should do, and write the brief in
           your own words.
         </p>
+        {handed ? (
+          <p className="mt-2 text-xs text-[var(--ob-leaf)]">
+            Brief handed over from Growth Signals — change any of it before
+            generating.
+          </p>
+        ) : null}
 
         <div className="mt-4 space-y-4">
           <label className="block text-sm">

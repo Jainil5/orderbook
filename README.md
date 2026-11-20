@@ -118,7 +118,27 @@ overview of its own — `/marketing` redirects to Digital Ads.
 | Module | Route | What it is |
 |--------|-------|------------|
 | Digital Ads | `/marketing/ads` | The CRM campaigns on WhatsApp, email and SMS, with what each returned |
+| Growth Signals | `/marketing/signals` | What is actually moving, what people keep asking, and which campaigns sold anything |
 | Content Management | `/marketing/content` | Reel scripts and photo-post ideas built from the catalog |
+
+**Growth Signals** is the demand side of the same coin: it reads the bills, the
+sold lines, the review inbox, the complaint queue and the campaign log for a
+window (7, 30 or 90 days, `?window=30`) and answers four questions a merchant
+actually asks — what is moving, what is not, what people keep asking or
+objecting to, and whether a campaign brought orders or only impressions. The
+maths is one pure module (`src/lib/marketing/signals.ts`), and every row hands
+over a content brief: the "make this a post" link carries the product, the
+objective, the format and the notes into Content Management, which prefills the
+form and says where the brief came from.
+
+Two rules keep it honest. Only bills that earned money count as demand — the
+repo's own `isRevenueOrder` predicate plus the documented credit-note exclusion,
+so a cancelled table is not a trend. And a campaign is judged on orders that
+carried its offer code, not on the redemption number someone typed in; where
+nothing was tracked, the board says `No offer tracked` rather than borrowing the
+merchant's own optimism. The topics are a fixed keyword lexicon over real
+review and complaint text — no sentiment model, nothing invented, and an
+unclassified row is dropped instead of forced into a bucket.
 
 **Content Management** asks four things about one product: what it is, whether
 the post is a reel (7s, 15s or 30s) or a photo (no timing at all), what the post
@@ -149,6 +169,30 @@ downloads bills and quotations, sold line items, or payments as CSV. The maths i
 one pure module (`src/lib/export/months.ts`), the read is one server action
 (`src/services/data-export-actions.ts`), and like every other export it reads the
 merged rows — repo dataset plus this browser's edits — and writes nothing back.
+
+### Working hours
+
+**Settings → Working hours** (`/settings?tab=hours`) holds two things: the
+week's opening windows, and a switch for whether the business is taking orders
+*right now*. The switch is the panic button — a rush it cannot serve, a day shut
+early — and it is deliberately separate from the schedule, so closing for the
+evening does not mean rewriting Friday's hours.
+
+The hours are brand data, not site copy. `brand_settings.csv` carries a
+`working_hours_json` column per brand, and any edit lands in the same
+per-browser prefs cookie every other workspace setting uses, so the till, the
+dashboard and the public website all read one schedule. `src/lib/hours/working-hours.ts`
+is the pure maths (`openStateAt` answers *open / closing soon / closed* and the
+sentence that goes with it, `hoursRows` groups consecutive days into the printed
+table); `src/lib/hours/resolve.ts` is the one line of I/O that lets a visitor
+with no workspace cookie read the same schedule.
+
+Brewery Cafe's public site shows the result twice: a pill in the sticky header
+("Open until 16:00", "Closing soon · until 16:00", "Closed · opens 7:00 Fri",
+"Not taking orders right now") and the full table in the Visit section, both
+drawn from settings. Nothing with a number attached is typed in
+`src/brand_sites/**` any more — the hours used to be, which is how a site ends
+up promising a table at ten when the counter closed at nine.
 
 ### Product customizations (modifiers)
 
@@ -225,6 +269,32 @@ The maths is one pure module — `src/lib/inventory/stock.ts`, no cookies and no
 CSV reads — so the same functions price a sale, fill the tab and answer in
 tests.
 
+**Sellability is a second question, and it now has its own answer.** A
+`stock_qty` typed on a product row is a guess about anything made from stock:
+the milk decides whether a Flat White can be poured, and the milk is not on the
+coffee's row. `src/lib/inventory/availability.ts` derives the truth instead —
+one sale drains what the recipe says, the shelf hands out what the position
+holds, and the smaller quotient wins — and its impure sibling
+`src/lib/inventory/resolve.ts` loads the rows so Billing, the quotation builder
+and the product tiles all ask the same question. A product with no recipe falls
+back to its own `stock_qty`, so a brand that ships no recipes (Cubig) is
+untouched, and a product with neither is reported as untracked rather than as
+zero.
+
+- The counter shows what it means: tiles read "3 left" or "Milk out", and the
+  add/quantity guard says "Only 3 in stock for Flat White." **Settings →
+  Features** decides how far that goes — *Warn* lets a manager override during
+  service, *Refuse* never oversells (`block_oversell`, remembered per brand).
+- The Inventory tab gained a **Buy list** — everything finished first, then
+  everything past its own reorder line, with the packs that bring the shelf back
+  to the line plus one, and the menu items each shortfall puts at risk. One tap
+  opens the purchase dialog with that number already in it.
+- And a **Just landed** list: anything bought back inside the window after the
+  shelf sat empty, with how long it was missing. That is the moment a customer
+  who asked deserves to hear about, so each row links straight into Content
+  Management with a brief that names the item, the outage and the product it
+  was missed on.
+
 **The two verticals are stored differently on purpose.** BR-1 (Brewery Cafe)
 ships `inventory.csv` — 33 items — *and* `recipes.csv`, 60 lines across 14 menu
 products, because a kitchen has recipes; 31 of the 33 items are consumed by
@@ -253,6 +323,41 @@ inside the click and then pointed at the finished file, because waiting for the
 photos first would cost the click its user activation. If pop-ups are blocked the
 file goes to downloads and the button says so. Names match the PDF:
 `Bill-BC-1061.html`, `Quotation-CF-4491.html`.
+
+### Order help (post-purchase)
+
+`/support` is the one public screen a customer needs after paying: the bill
+number and the mobile it was placed on, and the page shows the order as the
+counter sees it — status, total, line names — with a short form underneath for
+the four things that actually go wrong (missing, wrong, quality, refund/return).
+
+It is deliberately small and deliberately honest:
+
+- **Nothing is sent.** No SMS, no email, no WhatsApp, and the policy text says
+  so on the page. Logging an issue writes two real rows — a `CustomerComplaint`
+  (open, severity derived from the kind) and the `CustomerInteraction` it links
+  back to — through the same id and row conventions `src/services/crm-actions.ts`
+  uses, so it lands on the manager's complaint list in the CRM exactly like a
+  call would. A refund is a person's decision at the till, not a switch here.
+- **A lookup is a matching problem, not an identifier.** Both halves must match
+  one of that brand's own bills, and every failure returns the same sentence, so
+  the page cannot be walked to enumerate order numbers. Both actions are
+  rate-limited per IP with `consumeRateLimit` (30 lookups, 5 issues, ten-minute
+  windows) exactly like the public order flow in `src/services/site-order-actions.ts`.
+- **Off-hours behaviour is real, not decorative.** The reply text is built from
+  `openStateAt`, so a report at 16:20 reads "Closing soon · until 17:00. Say it
+  now and it gets put right before we lock up", one at 23:00 reads "Closed ·
+  opens 7:00 Mon — that is the first time a person will read this", and the
+  follow-up date handed to the CRM is only set when that opening time is
+  genuinely in the future. When the owner has flipped the availability switch
+  off, the page says the counter is not taking orders rather than implying a
+  shift is coming.
+- The copy, kinds, severity-independent policy lines and the customer-facing
+  projection of an order are one pure module (`src/lib/support/self-serve.ts`),
+  so a real notification layer can be hung on the same answers later.
+
+A cash walk-in bill with no mobile on the customer row cannot be looked up at
+all, and the page says so instead of inventing an alternative.
 
 ### Full sample data (recovery copy)
 

@@ -18,6 +18,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function BrandSitePage() {
-  const { brand, groups, voices } = await loadSiteContent();
-  return <BreweryCafe brand={brand} groups={groups} voices={voices} />;
+  const { brand, groups, voices, hours, open } = await loadSiteContent();
+  return (
+    <BreweryCafe
+      brand={brand}
+      groups={groups}
+      voices={voices}
+      hours={hours}
+      open={open}
+    />
+  );
 }

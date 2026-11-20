@@ -62,6 +62,7 @@ export function mapBrandSettings(r: CsvRow, source: string): BrandSettings {
       r.quotation_builder_enabled === "" ? undefined : bool(r.quotation_builder_enabled),
     brand_website_url: str(r.brand_website_url),
     block_oversell: r.block_oversell === "" ? undefined : bool(r.block_oversell),
+    working_hours_json: r.working_hours_json === "" ? undefined : r.working_hours_json,
   };
 }
 

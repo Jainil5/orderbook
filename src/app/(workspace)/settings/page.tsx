@@ -8,6 +8,8 @@ import { QuotationBuilderSetting } from "@/components/settings/quotation-builder
 import { ManagerModulesSetting } from "@/components/settings/manager-modules-setting";
 import { BrandWebsiteSetting } from "@/components/settings/brand-website-setting";
 import { ReceiptSettingsCard } from "@/components/settings/receipt-settings";
+import { WorkingHoursSetting } from "@/components/settings/working-hours-setting";
+import { StockGuardSetting } from "@/components/settings/stock-guard-setting";
 import { ExportDataSetting } from "@/components/settings/export-data-setting";
 import { useWorkspace } from "@/components/workspace/workspace-provider";
 import { canEditWorkspaceFeatures } from "@/lib/workspace/settings-access";
@@ -18,6 +20,7 @@ import { Tabs } from "@/components/ui/tabs";
 const SETTINGS_TABS = [
   { id: "profile", label: "Profile" },
   { id: "receipt", label: "Receipt" },
+  { id: "hours", label: "Working hours" },
   { id: "features", label: "Features" },
   { id: "catalog", label: "Catalog" },
   { id: "brand", label: "Brand website" },
@@ -35,6 +38,7 @@ function tabFromParam(value: string | null): SettingsTabId {
     value === "export" ||
     value === "profile" ||
     value === "receipt" ||
+    value === "hours" ||
     value === "team"
   ) {
     return value;
@@ -128,6 +132,23 @@ export default function SettingsPage() {
           </Card>
         ) : null}
 
+        {tab === "hours" ? (
+          <Card className="max-w-2xl">
+            <h2 className="font-semibold">Working hours</h2>
+            <p className="mt-1 text-sm text-[var(--ob-text-muted)]">
+              When the doors are open, and whether you are taking orders right
+              now. Your brand website header and every &ldquo;are you open?&rdquo;
+              screen read this.
+            </p>
+            <WorkingHoursSetting
+              initialHours={ws.settings.working_hours}
+              initialPaused={Boolean(ws.settings.orders_paused)}
+              canEdit={canEdit}
+              websiteUrl={ws.settings.brand_website_url ?? null}
+            />
+          </Card>
+        ) : null}
+
         {tab === "features" ? (
           <Card className="max-w-2xl">
             <h2 className="font-semibold">Workspace features</h2>
@@ -136,6 +157,10 @@ export default function SettingsPage() {
             </p>
             <QuotationBuilderSetting
               initialEnabled={Boolean(ws.settings.quotation_builder_enabled)}
+              canEdit={canEdit}
+            />
+            <StockGuardSetting
+              initialEnabled={Boolean(ws.settings.block_oversell)}
               canEdit={canEdit}
             />
             <ManagerModulesSetting hidden={ws.hiddenManagerModules} canEdit={canEdit} />

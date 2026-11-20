@@ -18,6 +18,12 @@ export const MARKETING_MODULES = [
     href: "/marketing/content",
     description: "Reel scripts and photo-post ideas from the products you sell.",
   },
+  {
+    key: "signals",
+    label: "Growth Signals",
+    href: "/marketing/signals",
+    description: "What is moving, what people keep asking, and what actually sold.",
+  },
 ] as const;
 
 export type MarketingModule = (typeof MARKETING_MODULES)[number];

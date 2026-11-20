@@ -1,6 +1,7 @@
 "use client";
 
 import type { BrandRole, Customer, Offer, Product } from "@/types/database";
+import type { ProductAvailability } from "@/lib/inventory/availability";
 import { BillingPos, type BillBrandSettings } from "@/components/billing/billing-pos";
 import { submitDemoOrder } from "@/lib/demo/server";
 import type {
@@ -28,6 +29,7 @@ export function BillingWorkspace({
   receiptFooter,
   userRole = "owner",
   blockOversell = false,
+  availability,
 }: {
   documentMode?: BillingDocumentMode;
   captureMode?: CaptureMode;
@@ -44,6 +46,7 @@ export function BillingWorkspace({
   receiptFooter: string | null;
   userRole?: BrandRole;
   blockOversell?: boolean;
+  availability?: Map<string, ProductAvailability>;
 }) {
   return (
     <BillingPos
@@ -62,6 +65,7 @@ export function BillingWorkspace({
       receiptHeader={receiptHeader}
       receiptFooter={receiptFooter}
       blockOversell={blockOversell}
+      availability={availability}
       onSubmitOrder={async (payload) => {
         const input = {
           customerId: null,
