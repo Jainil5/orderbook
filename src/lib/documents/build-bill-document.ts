@@ -7,6 +7,7 @@ import {
 import type { BillDocument, BillDocumentKind } from "@/lib/documents/types";
 import type { Order, OrderItem, Product } from "@/types/database";
 import type { BrandSettings } from "@/types/database";
+import type { CaptureMode } from "@/lib/workspace/constants";
 import { getDocumentBrandProfile } from "@/lib/documents/brand-profile";
 
 function attachIssuer(
@@ -87,6 +88,7 @@ export function buildBillDocumentFromCheckout(params: {
   serviceDate?: string | null;
   siteAddress?: string | null;
   depositPercent?: number | null;
+  capture?: CaptureMode;
 }): BillDocument {
   const kind = inferDocumentKind(params.orderNumber, params.isQuote);
   const doc: BillDocument = {
@@ -97,6 +99,7 @@ export function buildBillDocumentFromCheckout(params: {
     receiptFooter: params.receiptFooter,
     currencyCode: params.currencyCode,
     taxRatePercent: params.taxRatePercent,
+    capture: params.capture ?? "counter",
     customerName: params.customerName,
     customerPhone: params.customerPhone,
     customerAddress: params.siteAddress?.trim() || null,
@@ -145,12 +148,14 @@ export function buildBillDocumentFromOrder(params: {
   products?: CatalogLine[];
   /** Quote number this bill was raised from, for the reference line. */
   referenceNumber?: string | null;
+  capture?: CaptureMode;
 }): BillDocument {
   const { order, items } = params;
+  // Unpaid is not the same as a quotation: a counter or website bill waiting on
+  // payment is still a bill. Only a draft, or a number the quote flow minted,
+  // prints as a quotation.
   const kind =
-    order.status === "draft" ||
-    order.payment_status === "pending" ||
-    inferDocumentKind(order.order_number) === "quotation"
+    order.status === "draft" || inferDocumentKind(order.order_number) === "quotation"
       ? "quotation"
       : "bill";
 
@@ -172,6 +177,7 @@ export function buildBillDocumentFromOrder(params: {
     receiptFooter: params.receiptFooter,
     currencyCode: params.currencyCode,
     taxRatePercent: params.taxRatePercent,
+    capture: params.capture ?? "counter",
     customerName: order.customer_name_snapshot,
     customerPhone: params.customerPhone ?? null,
     customerAddress: order.delivery_address?.trim() || null,

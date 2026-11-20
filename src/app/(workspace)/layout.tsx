@@ -2,7 +2,7 @@ import { loadWorkspaceSession } from "@/lib/workspace/session";
 import { redirect } from "next/navigation";
 import { WorkspaceProvider } from "@/components/workspace/workspace-provider";
 import { NotificationsProvider } from "@/components/notifications/notifications-context";
-import { DemoIncomingOrders } from "@/components/notifications/demo-incoming-orders";
+import { NewOrderAlerts } from "@/components/notifications/new-order-alerts";
 import { DemoFeedSeed } from "@/components/notifications/demo-feed-seed";
 
 export const dynamic = "force-dynamic";
@@ -20,12 +20,11 @@ export default async function WorkspaceLayout({
   return (
     <NotificationsProvider>
       <WorkspaceProvider value={ws}>
-        {ws.mode === "demo" ? (
-          <>
-            <DemoFeedSeed />
-            <DemoIncomingOrders brandCode={ws.brand.code} />
-          </>
-        ) : null}
+        <NewOrderAlerts
+          brandCode={ws.brand.code}
+          currencyCode={ws.settings.currency_code}
+        />
+        {ws.mode === "demo" ? <DemoFeedSeed /> : null}
         {children}
       </WorkspaceProvider>
     </NotificationsProvider>

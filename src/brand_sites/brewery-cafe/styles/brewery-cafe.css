@@ -1,0 +1,2878 @@
+/* ============================================================
+   Brewery Cafe — sunrise editorial (bc-*)
+   Warm ember-to-apricot light over cream, grounded in a deep
+   botanical green. Scoped so the brand shell and the other
+   client sites keep their own tokens.
+   ============================================================ */
+.brewery-cafe {
+  --bc-cream: #fbf4e9;
+  --bc-paper: #fffdf8;
+  --bc-ink: #2a211b;
+  --bc-muted: #7a6a5d;
+  --bc-line: rgba(42, 33, 27, 0.12);
+  --bc-ember: #e4572e;
+  --bc-ember-deep: #c03f1c;
+  --bc-apricot: #f2a65a;
+  --bc-honey: #f7d08a;
+  --bc-lilac: #c2a9cb;
+  --bc-green: #1f4d3a;
+  --bc-green-deep: #143026;
+  background: var(--bc-cream);
+  color: var(--bc-ink);
+  font-family: var(--bc-sans), ui-sans-serif, system-ui, sans-serif;
+  overflow-x: clip;
+}
+
+/* Display face: Inter pushed heavy and tight, the way a painted board is. */
+.brewery-cafe .bc-display {
+  font-family: var(--bc-sans), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.brewery-cafe .bc-serif {
+  font-family: var(--bc-serif), Georgia, serif;
+}
+
+/* --- Hero ---------------------------------------------------- */
+/* Two washes: a fixed scrim for legibility, and a slow sunrise pan
+   that keeps the still photograph moving. */
+.brewery-cafe .bc-hero-wash {
+  background:
+    linear-gradient(
+      100deg,
+      rgba(228, 87, 46, 0.72) 0%,
+      rgba(242, 166, 90, 0.42) 34%,
+      rgba(42, 33, 27, 0.34) 60%,
+      rgba(20, 15, 12, 0.82) 100%
+    ),
+    linear-gradient(180deg, rgba(20, 15, 12, 0.42) 0%, transparent 38%, rgba(20, 15, 12, 0.6) 100%);
+}
+
+.brewery-cafe .bc-hero-grain {
+  background-image: linear-gradient(
+    115deg,
+    rgba(247, 208, 138, 0.34) 0%,
+    rgba(228, 87, 46, 0.2) 26%,
+    rgba(194, 169, 203, 0.26) 52%,
+    rgba(242, 166, 90, 0.3) 76%,
+    rgba(247, 208, 138, 0.34) 100%
+  );
+  background-size: 320% 320%;
+  mix-blend-mode: soft-light;
+  animation: bc-sunrise 22s ease-in-out infinite alternate;
+}
+
+@keyframes bc-sunrise {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+/* --- Buttons -------------------------------------------------- */
+.brewery-cafe .bc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0.85rem 1.85rem;
+  font-family: var(--bc-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: transform 180ms ease, background-color 180ms ease, color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.brewery-cafe .bc-btn-solid {
+  background: var(--bc-ember);
+  color: var(--bc-paper);
+  box-shadow: 0 14px 28px -16px rgba(228, 87, 46, 0.95);
+}
+.brewery-cafe .bc-btn-solid:hover {
+  background: var(--bc-ember-deep);
+  transform: translateY(-2px);
+}
+
+.brewery-cafe .bc-btn-ghost {
+  border: 1px solid rgba(255, 253, 248, 0.5);
+  color: var(--bc-paper);
+  background: rgba(20, 15, 12, 0.18);
+  backdrop-filter: blur(6px);
+}
+.brewery-cafe .bc-btn-ghost:hover {
+  background: rgba(255, 253, 248, 0.16);
+  transform: translateY(-2px);
+}
+
+/* Ember on ember disappears, so the picker's primary button inverts. */
+.brewery-cafe .bc-btn-cream {
+  background: var(--bc-paper);
+  color: var(--bc-ink);
+  box-shadow: 0 14px 30px rgba(58, 18, 4, 0.28);
+}
+
+.brewery-cafe .bc-btn-cream:hover {
+  background: var(--bc-cream);
+  color: var(--bc-ember-deep);
+}
+
+/* --- Tab row: category pills + mode toggle in one line ----------- */
+.brewery-cafe .bc-tab-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 14px;
+}
+
+/* --- Category filter tabs ---------------------------------------
+   One row of pills above the grid. The menu shows everything by
+   default; a tab is just a shortcut for the customer who only wants
+   coffee. The grid underneath never changes shape. */
+.brewery-cafe .bc-cat-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.brewery-cafe .bc-cat-tab {
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 1px solid rgba(251, 244, 233, 0.35);
+  border-radius: 999px;
+  background: rgba(20, 8, 3, 0.22);
+  color: rgba(251, 244, 233, 0.85);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 220ms ease, color 220ms ease, border-color 220ms ease,
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.brewery-cafe .bc-cat-tab:hover {
+  border-color: rgba(251, 244, 233, 0.65);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.brewery-cafe .bc-cat-tab[aria-selected='true'] {
+  background: var(--bc-honey);
+  border-color: var(--bc-honey);
+  color: var(--bc-ink-deep, #2a1408);
+}
+
+.brewery-cafe .bc-cat-tab:focus-visible {
+  outline: 2px solid var(--bc-honey);
+  outline-offset: 3px;
+}
+
+/* --- Square tile grid ------------------------------------------- */
+/* Every item on the menu as one grid of square tiles; the Gen Z /
+   Traditional switch only restyles the tile skin, never the layout. */
+.brewery-cafe .bc-square-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  perspective: 900px;
+}
+@media (min-width: 640px) {
+  .brewery-cafe .bc-square-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .brewery-cafe .bc-square-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.brewery-cafe .bc-tile {
+  --bc-bob: -6px;
+  --bc-lean: 2deg;
+  position: relative;
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  overflow: hidden;
+  animation: bc-float 6s ease-in-out infinite;
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 260ms ease;
+}
+
+/* Ambient 3D breathing: tiles bob and lean under the grid's perspective.
+   It rides the individual translate/rotate properties so the pointer-tilt
+   hover transform composes on top instead of being overridden. */
+@keyframes bc-float {
+  0%,
+  100% {
+    translate: 0 0;
+    rotate: x 0deg;
+  }
+  50% {
+    translate: 0 var(--bc-bob, -6px);
+    rotate: x var(--bc-lean, 2deg);
+  }
+}
+
+/* Phones: a 6px bob on a ~170px tile reads as still — swing harder below
+   the two-column breakpoint so the grid visibly breathes. */
+@media (max-width: 639px) {
+  .brewery-cafe .bc-tile {
+    --bc-bob: -10px;
+    --bc-lean: 3deg;
+  }
+}
+
+.brewery-cafe .bc-tile:nth-child(4n + 2) {
+  animation-duration: 7s;
+  animation-delay: -1.4s;
+}
+
+.brewery-cafe .bc-tile:nth-child(4n + 3) {
+  animation-duration: 5.6s;
+  animation-delay: -2.8s;
+}
+
+.brewery-cafe .bc-tile:nth-child(4n) {
+  animation-duration: 6.4s;
+  animation-delay: -4.2s;
+}
+
+.brewery-cafe .bc-tile:hover {
+  transform: translateY(-4px);
+}
+
+.brewery-cafe .bc-tile:active {
+  transform: translateY(-1px) scale(0.97);
+  transition-duration: 110ms;
+}
+
+.brewery-cafe .bc-tile:focus-visible {
+  outline: 2px solid var(--bc-honey);
+  outline-offset: 3px;
+}
+
+.brewery-cafe .bc-tile-img {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.brewery-cafe .bc-tile-img img {
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.brewery-cafe .bc-tile:hover .bc-tile-img img {
+  transform: scale(1.07);
+}
+
+/* 3D pointer tilt — only mice and trackpads get the lean; the photo
+   drifts against the tilt for parallax depth. Touch keeps the plain
+   press-squash above, and the reduce block disables this entirely. */
+@media (hover: hover) and (pointer: fine) {
+  .brewery-cafe .bc-tile:hover {
+    transform: perspective(600px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))
+      translateY(-4px);
+  }
+
+  .brewery-cafe .bc-tile:hover .bc-tile-img img {
+    transform: translate3d(var(--px, 0px), var(--py, 0px), 0) scale(1.12);
+  }
+}
+
+.brewery-cafe .bc-tile-cap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: 6px;
+  row-gap: 2px;
+  padding: 22px 10px 9px;
+}
+
+.brewery-cafe .bc-tile-name {
+  font-family: var(--bc-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.brewery-cafe .bc-tile-price {
+  flex-shrink: 0;
+  font-family: var(--bc-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The list price, struck, beside the one the till will actually charge. */
+.brewery-cafe .bc-tile-was {
+  display: block;
+  margin-top: 1px;
+  font-size: 10px;
+  font-weight: 600;
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+/* Off the board today: still on the wall, never on the tray. */
+.brewery-cafe .bc-tile[data-unavailable='true'] {
+  filter: saturate(0.35);
+  opacity: 0.62;
+}
+
+.brewery-cafe .bc-list-row:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* The one-line description. On the wide board it rides the dusk gradient as
+   a single clipped line; on a phone it gets two, below the name. */
+.brewery-cafe .bc-tile-note {
+  grid-column: 1 / -1;
+  min-width: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+  font-family: var(--bc-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 10.5px;
+  line-height: 1.35;
+  color: rgba(251, 244, 233, 0.72);
+}
+
+.brewery-cafe .bc-tile-cat {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-family: var(--bc-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.brewery-cafe .bc-tile-qty {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--bc-ember);
+  color: #fff;
+  font-family: var(--bc-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 3px 10px rgba(20, 8, 3, 0.35);
+}
+
+/* The star steps aside when a tray count owns the corner. */
+.brewery-cafe .bc-tile:has(.bc-tile-qty) .bc-card-star {
+  right: 40px;
+}
+
+/* Gen Z tiles: full-bleed photo squares with a dusk-gradient caption.
+   Traditional no longer skins these tiles — it renders a printed
+   listing (.bc-menu-list) instead, so only the Gen Z skin remains. */
+.brewery-cafe .bc-square-grid .bc-tile {
+  border-radius: 18px;
+  box-shadow: 0 16px 34px -18px rgba(20, 8, 3, 0.6);
+}
+
+.brewery-cafe .bc-square-grid .bc-tile-cap {
+  background: linear-gradient(180deg, transparent, rgba(46, 14, 4, 0.88));
+}
+
+.brewery-cafe .bc-square-grid .bc-tile-name {
+  color: var(--bc-cream);
+}
+
+.brewery-cafe .bc-square-grid .bc-tile-price {
+  color: var(--bc-honey);
+}
+
+.brewery-cafe .bc-square-grid .bc-tile-cat {
+  color: var(--bc-ink);
+  background: rgba(255, 253, 248, 0.9);
+}
+
+/* Phones: a 169px square cannot hold a photo, a name, a price and a
+   description at once, so the caption steps out of the photo and takes its
+   own paper strip underneath it. The order part lives in the floating bar
+   instead, which is what frees this room in the first place. */
+@media (max-width: 639px) {
+  .brewery-cafe .bc-tile {
+    aspect-ratio: auto;
+    display: flex;
+    flex-direction: column;
+    background: var(--bc-paper);
+    border: 1px solid var(--bc-line);
+  }
+  .brewery-cafe .bc-tile-img {
+    position: relative;
+    inset: auto;
+    aspect-ratio: 4 / 3;
+  }
+  .brewery-cafe .bc-tile-cap {
+    position: static;
+    padding: 9px 11px 11px;
+  }
+  .brewery-cafe .bc-square-grid .bc-tile-cap {
+    background: none;
+  }
+  .brewery-cafe .bc-square-grid .bc-tile-name {
+    font-size: 13.5px;
+    color: var(--bc-ink);
+  }
+  .brewery-cafe .bc-square-grid .bc-tile-price {
+    font-size: 13px;
+    color: var(--bc-ember);
+  }
+  .brewery-cafe .bc-tile-note {
+    -webkit-line-clamp: 2;
+    font-size: 11.5px;
+    color: rgba(43, 22, 10, 0.66);
+  }
+}
+
+/* --- Barrel gallery ---------------------------------------------
+   The Gen Z board for a single section: cards stand on the skin of a
+   cylinder and the cylinder spins. Every number below is geometry, not
+   decoration — the radius is derived from the card width so neighbours
+   keep a real gap all the way round, and cos() of a card's angle to
+   camera drives its fade and scale. One custom property (--rot) per
+   frame moves the whole barrel. */
+.brewery-cafe .bc-barrel {
+  --cw: clamp(196px, 60vw, 248px);
+  --ch: calc(var(--cw) * 1.3);
+  --gap: 22px;
+  --tilt: -7deg;
+  --persp: 1150px;
+  /* The base value is the phone one, so it has to clear the 40px thumb. */
+  --dot-hit: 40px;
+  position: relative;
+}
+
+@media (min-width: 640px) {
+  .brewery-cafe .bc-barrel {
+    --cw: clamp(232px, 26vw, 268px);
+    --gap: 30px;
+    --persp: 1350px;
+    --dot-hit: 30px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .brewery-cafe .bc-barrel {
+    --cw: 286px;
+    --gap: 34px;
+  }
+}
+
+.brewery-cafe .bc-barrel-stage {
+  --step: calc(360deg / var(--n, 8));
+  /* Radius that keeps a `gap` between neighbours all the way round:
+     chord = 2R·sin(step/2), solved for R. */
+  --r: calc((var(--cw) + var(--gap)) / (2 * sin(var(--step) / 2)));
+  position: relative;
+  height: calc(var(--ch) + 64px);
+  overflow: hidden;
+  border-radius: 26px;
+  perspective: var(--persp);
+  perspective-origin: 50% 46%;
+  /* pan-y keeps a vertical thumb on the page scroll; the barrel only
+     listens to the horizontal component of the gesture. */
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.brewery-cafe .bc-barrel-stage:active {
+  cursor: grabbing;
+}
+
+.brewery-cafe .bc-barrel-glow {
+  position: absolute;
+  inset: 14% 8%;
+  border-radius: 50%;
+  background: radial-gradient(
+    58% 54% at 50% 50%,
+    rgba(247, 208, 138, 0.3),
+    rgba(228, 87, 46, 0.14) 56%,
+    transparent 76%
+  );
+  pointer-events: none;
+}
+
+/* --- Swipe hint overlay on the barrel ---------------------------- */
+.brewery-cafe .bc-swipe-hint {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
+  padding-bottom: 6px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+/* Armed by an IntersectionObserver once the barrel is on screen, so the
+   hint is actually seen rather than burning its seconds behind the hero. */
+.brewery-cafe .bc-swipe-hint[data-live='true'] {
+  opacity: 1;
+}
+
+.brewery-cafe .bc-swipe-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(251, 244, 233, 0.92);
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(20, 8, 3, 0.55);
+  border: 1px solid rgba(251, 244, 233, 0.16);
+}
+
+.brewery-cafe .bc-swipe-arrow {
+  font-size: 28px;
+  line-height: 1;
+  color: var(--bc-honey);
+  animation: bc-swipe-bounce 1.6s ease-in-out infinite;
+}
+.brewery-cafe .bc-swipe-arrow-l {
+  animation-name: bc-swipe-bounce-l;
+}
+.brewery-cafe .bc-swipe-arrow-r {
+  animation-name: bc-swipe-bounce-r;
+}
+
+@keyframes bc-swipe-bounce-l {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-8px); }
+}
+@keyframes bc-swipe-bounce-r {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(8px); }
+}
+
+/* The push-back by --r puts the near arc on the picture plane, so the facing
+   card renders at exactly its written size instead of inflating between the
+   camera and the stage; every neighbour then recedes behind it.
+   The tilt wraps the scene, so it goes on the outside of that push-back:
+   move the cylinder off the camera first, then tip it, which keeps the
+   facing card dead centre instead of sliding it down the stage. */
+.brewery-cafe .bc-barrel-ring {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--tilt)) translateZ(calc(var(--r) * -1)) rotateY(var(--rot, 0deg));
+}
+
+.brewery-cafe .bc-barrel-slot {
+  --rel: calc(var(--a, 0deg) + var(--rot, 0deg));
+  /* cos() of the angle to camera: 1 facing us, 0 at the sides. */
+  --face: max(0, cos(var(--rel)));
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--cw);
+  height: var(--ch);
+  margin-left: calc(var(--cw) / -2);
+  margin-top: calc(var(--ch) / -2);
+  transform: rotateY(var(--a, 0deg)) translateZ(var(--r))
+    scale(calc(0.86 + var(--face) * 0.14));
+  opacity: calc(0.16 + var(--face) * 0.84);
+  backface-visibility: hidden;
+}
+
+.brewery-cafe .bc-barrel-card {
+  position: absolute;
+  inset: 0;
+  display: block;
+  padding: 0;
+  border: 1px solid rgba(251, 244, 233, 0.14);
+  border-radius: 20px;
+  overflow: hidden;
+  background: #2a1408;
+  color: var(--bc-cream);
+  text-align: left;
+  cursor: pointer;
+  /* The far side of the cylinder would otherwise show through the near
+     cards as a mirror of the caption. */
+  backface-visibility: hidden;
+  box-shadow: 0 22px 44px -24px rgba(20, 8, 3, 0.85);
+  transition: translate 320ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 260ms ease,
+    border-color 260ms ease;
+}
+
+.brewery-cafe .bc-barrel-card[data-active='true'] {
+  translate: 0 -8px;
+  border-color: rgba(247, 208, 138, 0.62);
+  box-shadow: 0 34px 62px -26px rgba(20, 8, 3, 0.95), 0 0 0 3px rgba(247, 208, 138, 0.16);
+}
+
+.brewery-cafe .bc-barrel-card:focus-visible {
+  outline: 2px solid var(--bc-honey);
+  outline-offset: 3px;
+}
+
+.brewery-cafe .bc-barrel-img {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.brewery-cafe .bc-barrel-img img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.brewery-cafe .bc-barrel-cap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 26px 12px 11px;
+  background: linear-gradient(180deg, transparent, rgba(30, 12, 4, 0.74) 44%, rgba(20, 8, 3, 0.95));
+}
+
+.brewery-cafe .bc-barrel-name {
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--bc-cream);
+}
+
+/* The note only unfolds on the card facing the customer, so the side
+   cards stay quiet and the barrel reads as one object. */
+.brewery-cafe .bc-barrel-note {
+  max-height: 0;
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 1.35;
+  color: rgba(251, 244, 233, 0.72);
+  opacity: 0;
+  transition: max-height 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease;
+}
+
+.brewery-cafe .bc-barrel-card[data-active='true'] .bc-barrel-note {
+  max-height: 48px;
+  opacity: 1;
+}
+
+.brewery-cafe .bc-barrel-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 3px;
+}
+
+.brewery-cafe .bc-barrel-price {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--bc-honey);
+  font-variant-numeric: tabular-nums;
+}
+
+.brewery-cafe .bc-barrel-cta {
+  flex-shrink: 0;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(251, 244, 233, 0.14);
+  color: rgba(251, 244, 233, 0.82);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: background 220ms ease, color 220ms ease;
+}
+
+.brewery-cafe .bc-barrel-card[data-active='true'] .bc-barrel-cta {
+  background: var(--bc-honey);
+  color: #2a1408;
+}
+
+.brewery-cafe .bc-barrel-qty {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--bc-ember);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 3px 10px rgba(20, 8, 3, 0.35);
+}
+
+.brewery-cafe .bc-barrel-card:has(.bc-barrel-qty) .bc-card-star {
+  right: 40px;
+}
+
+.brewery-cafe .bc-barrel-card[data-active='true'] .bc-card-star-label {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+.brewery-cafe .bc-barrel-curtain {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 3;
+  width: 26%;
+  pointer-events: none;
+}
+
+.brewery-cafe .bc-barrel-curtain-l {
+  left: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(36, 17, 8, 0.58) 0%,
+    rgba(36, 17, 8, 0.2) 44%,
+    transparent 100%
+  );
+}
+
+.brewery-cafe .bc-barrel-curtain-r {
+  right: 0;
+  background: linear-gradient(
+    270deg,
+    rgba(36, 17, 8, 0.58) 0%,
+    rgba(36, 17, 8, 0.2) 44%,
+    transparent 100%
+  );
+}
+
+.brewery-cafe .bc-barrel-hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.brewery-cafe .bc-barrel-nav {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(251, 244, 233, 0.3);
+  border-radius: 999px;
+  background: rgba(20, 8, 3, 0.28);
+  color: var(--bc-cream);
+  cursor: pointer;
+  transition: background 200ms ease, border-color 200ms ease,
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.brewery-cafe .bc-barrel-nav svg {
+  width: 20px;
+  height: 20px;
+}
+
+.brewery-cafe .bc-barrel-nav:hover:not(:disabled) {
+  border-color: rgba(251, 244, 233, 0.62);
+  background: rgba(251, 244, 233, 0.14);
+  transform: translateY(-1px);
+}
+
+.brewery-cafe .bc-barrel-nav:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.brewery-cafe .bc-barrel-nav:focus-visible {
+  outline: 2px solid var(--bc-honey);
+  outline-offset: 3px;
+}
+
+.brewery-cafe .bc-barrel-count {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(251, 244, 233, 0.72);
+  font-variant-numeric: tabular-nums;
+}
+
+.brewery-cafe .bc-barrel-count-now {
+  color: var(--bc-honey);
+  font-size: 15px;
+}
+
+.brewery-cafe .bc-barrel-count-name {
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--bc-cream);
+}
+
+.brewery-cafe .bc-barrel-dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.brewery-cafe .bc-barrel-dot {
+  display: grid;
+  place-items: center;
+  width: var(--dot-hit);
+  height: var(--dot-hit);
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.brewery-cafe .bc-barrel-dot::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(251, 244, 233, 0.34);
+  transition: width 220ms cubic-bezier(0.22, 1, 0.36, 1), background 200ms ease;
+}
+
+.brewery-cafe .bc-barrel-dot:hover::after {
+  background: rgba(251, 244, 233, 0.7);
+}
+
+.brewery-cafe .bc-barrel-dot[aria-current='true']::after {
+  width: 20px;
+  background: var(--bc-honey);
+}
+
+.brewery-cafe .bc-barrel-dot:focus-visible {
+  outline: 2px solid var(--bc-honey);
+  outline-offset: -2px;
+  border-radius: 999px;
+}
+
+.brewery-cafe .bc-barrel-hint {
+  margin: 6px 0 0;
+  text-align: center;
+  font-size: 11px;
+  color: rgba(251, 244, 233, 0.6);
+}
+
+/* Phones: the barrel is the whole board, so it gets the room. Taller card,
+   taller stage for the lifted card, tighter curtains, and type big enough to
+   read at arm's length without opening the dialog first. */
+@media (max-width: 639px) {
+  .brewery-cafe .bc-barrel {
+    --ch: calc(var(--cw) * 1.36);
+  }
+  .brewery-cafe .bc-barrel-stage {
+    height: calc(var(--ch) + 92px);
+  }
+  .brewery-cafe .bc-barrel-curtain {
+    width: 16%;
+  }
+  .brewery-cafe .bc-barrel-name {
+    font-size: 17px;
+  }
+  .brewery-cafe .bc-barrel-note {
+    font-size: 12.5px;
+  }
+  .brewery-cafe .bc-barrel-price {
+    font-size: 15px;
+  }
+  .brewery-cafe .bc-barrel-card[data-active='true'] .bc-barrel-note {
+    max-height: 66px;
+  }
+  .brewery-cafe .bc-barrel-hint {
+    font-size: 11.5px;
+    padding: 0 8px;
+  }
+}
+
+/* --- Combo builder ----------------------------------------------- */
+.brewery-cafe .bc-combo {
+  padding: 28px 20px 32px;
+  border-radius: 20px;
+  background: linear-gradient(160deg, #241108 0%, #4a2510 60%, #7a3d14 100%);
+  color: var(--bc-cream);
+}
+
+.brewery-cafe .bc-combo-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.brewery-cafe .bc-combo-wheels {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .brewery-cafe .bc-combo-wheels {
+    flex-direction: row;
+    justify-content: center;
+    gap: 28px;
+  }
+}
+
+.brewery-cafe .bc-combo-wheel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.brewery-cafe .bc-combo-wheel-label {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--bc-honey);
+}
+
+.brewery-cafe .bc-combo-stage {
+  position: relative;
+  width: 100%;
+  height: 260px;
+  perspective: 900px;
+  overflow: hidden;
+}
+
+.brewery-cafe .bc-combo-ring {
+  --r: 160px;
+  --tilt: 4deg;
+}
+
+.brewery-cafe .bc-combo-slot {
+  width: 130px;
+  height: 220px;
+}
+
+.brewery-cafe .bc-combo-card {
+  min-height: auto;
+  padding: 10px;
+  font-size: 12px;
+}
+
+.brewery-cafe .bc-combo-card .bc-barrel-img {
+  height: 100px;
+}
+
+.brewery-cafe .bc-combo-plus {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--bc-honey);
+  line-height: 1;
+}
+
+.brewery-cafe .bc-combo-summary {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.brewery-cafe .bc-combo-pair {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.brewery-cafe .bc-combo-sep {
+  color: var(--bc-honey);
+  font-weight: 700;
+}
+
+.brewery-cafe .bc-combo-price {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.brewery-cafe .bc-combo-now {
+  font-size: 24px;
+  color: var(--bc-honey);
+}
+
+.brewery-cafe .bc-combo-add {
+  margin-top: 8px;
+  min-width: 200px;
+}
+
+/* --- Traditional printed listing ---------------------------------
+   A paper menu sheet: serif section headings with side rules and
+   rows of thumbnail · name · dotted leader · price. Tapping a row
+   opens the same center dialog as a tile. */
+.brewery-cafe .bc-menu-list {
+  padding: 26px 18px 30px;
+  border-radius: 14px;
+  background: var(--bc-paper);
+  border: 1px solid var(--bc-line);
+  box-shadow: 0 24px 50px -30px rgba(20, 8, 3, 0.75);
+}
+
+.brewery-cafe .bc-menu-list section + section {
+  margin-top: 26px;
+}
+
+.brewery-cafe .bc-list-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 10px;
+  font-size: 15px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bc-ink);
+}
+
+.brewery-cafe .bc-list-heading::before,
+.brewery-cafe .bc-list-heading::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--bc-line);
+}
+
+.brewery-cafe .bc-list-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 7px 4px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background 180ms ease;
+}
+
+.brewery-cafe .bc-list-row:hover {
+  background: rgba(122, 58, 18, 0.07);
+}
+
+.brewery-cafe .bc-list-thumb {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 9px;
+  overflow: hidden;
+  border: 1px solid var(--bc-line);
+}
+
+.brewery-cafe .bc-list-name {
+  font-family: var(--bc-serif), Georgia, serif;
+  font-size: 15px;
+  color: var(--bc-ink);
+}
+
+.brewery-cafe .bc-list-star {
+  color: var(--bc-ember);
+  font-size: 13px;
+}
+
+.brewery-cafe .bc-list-leader {
+  flex: 1;
+  min-width: 22px;
+  border-bottom: 2px dotted rgba(42, 33, 27, 0.35);
+  transform: translateY(3px);
+}
+
+.brewery-cafe .bc-list-price {
+  flex-shrink: 0;
+  font-family: var(--bc-serif), Georgia, serif;
+  font-weight: 700;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: var(--bc-ember);
+}
+
+.brewery-cafe .bc-list-qty {
+  flex-shrink: 0;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--bc-ember);
+  color: var(--bc-paper);
+  font-size: 11px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  padding: 0 6px;
+}
+
+/* --- Menu footer: the mode switch lives under the cards --------- */
+.brewery-cafe .bc-menu-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.brewery-cafe .bc-pill {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--bc-line);
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--bc-muted);
+  background: var(--bc-paper);
+}
+
+/* --- The menu section ------------------------------------------- */
+/* The whole menu on one sunrise wash: square tiles first, the style
+   switch and the wayfinding buttons underneath them. The wash is a
+   deep espresso-to-caramel table glow with window light top-right. */
+.brewery-cafe .bc-menu {
+  background:
+    radial-gradient(90% 70% at 78% 8%, rgba(247, 208, 138, 0.34), transparent 60%),
+    radial-gradient(60% 50% at 12% 88%, rgba(201, 138, 75, 0.28), transparent 65%),
+    linear-gradient(155deg, #241108 0%, #4a2412 30%, #7a3a12 60%, #a85a20 84%, #c98a4b 100%);
+}
+
+/* Cup rings left on the table: faint double-edge circles, no asset. */
+.brewery-cafe .bc-stains {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(96px at 12% 20%, transparent 0 68%, rgba(36, 17, 8, 0.34) 69% 71%, transparent 72%),
+    radial-gradient(74px at 88% 26%, transparent 0 66%, rgba(36, 17, 8, 0.26) 67% 69%, transparent 70%),
+    radial-gradient(120px at 72% 86%, transparent 0 70%, rgba(36, 17, 8, 0.3) 71% 73%, transparent 74%),
+    radial-gradient(64px at 24% 76%, transparent 0 64%, rgba(36, 17, 8, 0.2) 65% 67%, transparent 68%);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Roasted-bean and steam-swirl doodles, tiled as one inline SVG. */
+.brewery-cafe .bc-beans {
+  position: absolute;
+  inset: -12%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cg fill='none' stroke='%23fff' stroke-opacity='0.55' stroke-width='2' stroke-linecap='round'%3E%3Cellipse cx='42' cy='48' rx='15' ry='9.5' transform='rotate(-24 42 48)'/%3E%3Cpath d='M29 43q13 6 26 0'/%3E%3Cellipse cx='132' cy='126' rx='13' ry='8' transform='rotate(32 132 126)'/%3E%3Cpath d='M121 122q11 5 22 0'/%3E%3Cpath d='M108 34c6-6-6-11 0-17M118 37c6-6-6-11 0-17'/%3E%3Cpath d='M36 140c5-5-5-10 0-15'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  opacity: 0.07;
+  animation: bc-beans-drift 26s linear infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes bc-beans-drift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 340px 260px;
+  }
+}
+
+/* Individual roasted beans adrift over the hero and the menu board. */
+.brewery-cafe .bc-beans-field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.brewery-cafe .bc-bean {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--sw);
+  opacity: var(--op);
+  animation: bc-bean-float var(--dur) ease-in-out var(--delay) infinite alternate;
+}
+
+@keyframes bc-bean-float {
+  from {
+    transform: translate(0, 0) rotate(var(--r1));
+  }
+  to {
+    transform: translate(var(--dx), var(--dy)) rotate(var(--r2));
+  }
+}
+
+.brewery-cafe .bc-hero-cta {
+  align-self: flex-start;
+  min-height: 52px;
+  font-size: 15px;
+}
+
+/* --- Instagram feed shelf ------------------------------------- */
+.brewery-cafe .bc-feed-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.brewery-cafe .bc-post {
+  border: 1px solid var(--bc-line);
+  border-radius: 18px;
+  background: var(--bc-paper);
+  padding: 10px;
+  box-shadow: 0 18px 40px rgba(42, 33, 27, 0.08);
+}
+
+.brewery-cafe .bc-post-frame {
+  min-height: 320px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--bc-cream);
+}
+
+.brewery-cafe .bc-post-fallback {
+  display: flex;
+  min-height: 320px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+}
+
+.brewery-cafe .bc-post-fallback-mark {
+  width: 44px;
+  height: 44px;
+  border: 3px solid var(--bc-ember);
+  border-radius: 13px;
+}
+
+.brewery-cafe .bc-post-fallback-caption {
+  color: var(--bc-muted);
+}
+
+/* --- Testimonial carousel (motion.dev) -------------------------- */
+.brewery-cafe .bc-voices-section {
+  background: linear-gradient(160deg, #241108 0%, #5a2d12 48%, #a85a20 100%);
+  color: var(--bc-cream);
+}
+
+.brewery-cafe .bc-carousel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brewery-cafe .bc-carousel-viewport {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.brewery-cafe .bc-carousel-track {
+  display: flex;
+  gap: var(--gap, 20px);
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+.brewery-cafe .bc-carousel-track:active {
+  cursor: grabbing;
+}
+
+.brewery-cafe .bc-carousel-card {
+  /* --card-w comes from the same measurement the track offset uses. */
+  flex: 0 0 var(--card-w, 100%);
+  display: flex;
+  min-height: 280px;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px;
+  border: 1px solid rgba(251, 244, 233, 0.16);
+  border-radius: 20px;
+  background: rgba(255, 253, 248, 0.07);
+  color: var(--bc-cream);
+  text-align: left;
+}
+
+.brewery-cafe .bc-carousel-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 244, 233, 0.28);
+  background: rgba(255, 253, 248, 0.1);
+  color: var(--bc-cream);
+  transition:
+    background 0.25s,
+    transform 0.25s;
+}
+
+.brewery-cafe .bc-carousel-btn:hover {
+  background: rgba(255, 253, 248, 0.22);
+  transform: scale(1.06);
+}
+
+.brewery-cafe .bc-carousel-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(251, 244, 233, 0.3);
+  transition:
+    background 0.25s,
+    transform 0.25s;
+}
+
+.brewery-cafe .bc-carousel-dot[data-active='true'] {
+  background: var(--bc-honey);
+  transform: scale(1.3);
+}
+
+/* The carousel drifts on its own, so the customer gets a real pause. */
+.brewery-cafe .bc-carousel-pause {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(251, 244, 233, 0.78);
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 244, 233, 0.28);
+  transition:
+    color 0.25s,
+    border-color 0.25s,
+    background 0.25s;
+}
+
+.brewery-cafe .bc-carousel-pause:hover {
+  color: var(--bc-paper);
+  border-color: var(--bc-honey);
+}
+
+.brewery-cafe .bc-carousel-pause[aria-pressed='true'] {
+  color: var(--bc-ink);
+  background: var(--bc-honey);
+  border-color: var(--bc-honey);
+}
+
+.brewery-cafe .bc-voice-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brewery-cafe .bc-voice-avatar {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--bc-ember);
+  color: var(--bc-paper);
+  font-weight: 600;
+}
+
+.brewery-cafe .bc-voice-name {
+  display: block;
+  color: var(--bc-paper);
+  font-weight: 600;
+}
+
+.brewery-cafe .bc-voice-when {
+  display: block;
+  font-size: 11px;
+  color: rgba(251, 244, 233, 0.6);
+}
+
+.brewery-cafe .bc-voice-quote {
+  flex: 1;
+  font-size: 15px;
+  line-height: 1.55;
+  color: rgba(251, 244, 233, 0.92);
+}
+
+.brewery-cafe .bc-voice-tag {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 5px;
+  border-radius: 999px;
+  background: var(--bc-paper);
+  color: var(--bc-ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+@media (max-width: 1023px) {
+  /* Card width and gap are measured in JS now (--card-w / --gap), so this
+     breakpoint only decides whether the arrow buttons are worth showing. */
+  .brewery-cafe .bc-carousel-btn {
+    display: none;
+  }
+}
+
+.brewery-cafe .bc-pick-wash {
+  position: absolute;
+  inset: -22%;
+  background:
+    radial-gradient(40% 40% at 24% 30%, rgba(242, 166, 90, 0.55), transparent 70%),
+    radial-gradient(36% 36% at 74% 74%, rgba(247, 208, 138, 0.42), transparent 72%);
+  animation: bc-pick-breathe 15s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes bc-pick-breathe {
+  from {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.14) translateY(-2%);
+  }
+}
+
+/* --- Mode toggle (Gen Z / Traditional) ------------------------- */
+/* Two equal columns, each at least as wide as its label: the pill stays
+   at 50% while "Traditional" never gets clipped by a shrinking button. */
+.brewery-cafe .bc-mode {
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(max-content, 1fr));
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(42, 21, 12, 0.34);
+  box-shadow: inset 0 0 0 1px rgba(251, 244, 233, 0.18);
+}
+
+.brewery-cafe .bc-mode-pill {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  border-radius: 999px;
+  background: var(--bc-honey);
+  transform: translateX(calc(var(--pos, 0) * 100%));
+  transition: transform 460ms cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 8px 20px rgba(42, 21, 12, 0.3);
+}
+
+.brewery-cafe .bc-mode-btn {
+  position: relative;
+  z-index: 1;
+  padding: 0.5rem 1.05rem;
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: center;
+  white-space: nowrap;
+  color: rgba(251, 244, 233, 0.82);
+  transition: color 260ms ease;
+}
+
+.brewery-cafe .bc-mode-btn[aria-pressed='true'] {
+  color: var(--bc-ink);
+}
+
+@keyframes bc-pick-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.brewery-cafe .bc-card-star {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border-radius: 999px;
+  background: rgba(20, 8, 3, 0.66);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  color: var(--bc-honey);
+}
+
+.brewery-cafe .bc-star-icon {
+  display: block;
+  width: 15px;
+  height: 15px;
+  filter: drop-shadow(0 1px 3px rgba(20, 8, 3, 0.5));
+}
+
+.brewery-cafe .bc-card-star-label {
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 6px);
+  transform: translateY(-50%) translateX(5px);
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--bc-paper);
+  color: var(--bc-ink);
+  font-family: var(--bc-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.brewery-cafe .bc-tile:hover .bc-card-star-label,
+.brewery-cafe .bc-tile:focus-visible .bc-card-star-label {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .brewery-cafe .bc-card-star {
+    animation: bc-star-pulse 2.9s ease-in-out infinite;
+  }
+  @keyframes bc-star-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.14);
+    }
+  }
+}
+
+/* --- Order tray ---------------------------------------------------- */
+.brewery-cafe .bc-tray {
+  min-width: 0;
+}
+@media (min-width: 1024px) {
+  .brewery-cafe .bc-tray {
+    position: sticky;
+    top: 96px;
+  }
+}
+
+/* The floating bar and sheet belong to the phone only; the desktop
+   sticky panel above already owns the tray there. */
+.brewery-cafe .bc-tray-bar {
+  display: none;
+}
+.brewery-cafe .bc-tray-scrim {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  /* The bar is pinned for the whole scroll, so every band has to end clear
+     of it — the last menu row and the footer line both sat under it. */
+  .brewery-cafe .bc-menu {
+    padding-bottom: 96px;
+  }
+  .brewery-cafe .bc-footer {
+    padding-bottom: 88px;
+  }
+
+  .brewery-cafe .bc-tray-bar {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 999px;
+    background: var(--bc-ink);
+    color: var(--bc-cream);
+    box-shadow: 0 18px 40px -14px rgba(20, 8, 3, 0.7);
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .brewery-cafe .bc-tray-bar-total {
+    margin-left: auto;
+    color: var(--bc-honey);
+    font-size: 16px;
+  }
+
+  /* An empty tray has nothing to say, so the bar stays out of the hero until
+     the first item lands on it. */
+  .brewery-cafe .bc-tray[data-idle='true'] .bc-tray-bar {
+    display: none;
+  }
+
+  .brewery-cafe .bc-tray-bar-chev {
+    font-size: 13px;
+    opacity: 0.85;
+  }
+
+  .brewery-cafe .bc-tray-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    background: rgba(20, 8, 3, 0.55);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 260ms ease;
+  }
+
+  .brewery-cafe .bc-tray[data-open='true'] .bc-tray-scrim {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* The existing panel becomes a bottom sheet, parked off-screen
+     until the bar opens it. Same DOM, same cart state. It also drops out of
+     the tab order while parked, so a keyboard or a screen reader never lands
+     on a + button nobody can see. */
+  .brewery-cafe .bc-tray-panel {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    z-index: 55;
+    max-height: min(60vh, 460px);
+    overflow-y: auto;
+    transform: translateY(140%);
+    visibility: hidden;
+    transition:
+      transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s linear 320ms;
+  }
+
+  .brewery-cafe .bc-tray[data-open='true'] .bc-tray-panel {
+    transform: none;
+    visibility: visible;
+    transition:
+      transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s;
+  }
+}
+
+.brewery-cafe .bc-tray-panel {
+  background: var(--bc-paper);
+  border: 1px solid var(--bc-line);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 18px 40px -24px rgba(58, 18, 4, 0.45);
+}
+
+.brewery-cafe .bc-tray-head {
+  font-size: 15px;
+  margin-bottom: 10px;
+  color: var(--bc-ink);
+}
+
+.brewery-cafe .bc-tray-empty p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--bc-muted);
+}
+
+.brewery-cafe .bc-tray-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.brewery-cafe .bc-tray-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: bc-line-in 380ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes bc-line-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}
+
+.brewery-cafe .bc-tray-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.brewery-cafe .bc-tray-line-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.brewery-cafe .bc-tray-each {
+  font-size: 11px;
+  color: var(--bc-muted);
+}
+
+/* The list price the offer took off, struck where the line is priced. */
+.brewery-cafe .bc-tray-each-was {
+  margin-right: 5px;
+  opacity: 0.65;
+}
+
+.brewery-cafe .bc-tray-variant {
+  font-size: 11px;
+  color: var(--bc-ember-deep);
+  font-weight: 600;
+}
+
+.brewery-cafe .bc-tray-step {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.brewery-cafe .bc-tray-step button {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid var(--bc-line);
+  background: var(--bc-cream);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--bc-ink);
+  cursor: pointer;
+  transition: background 160ms ease, transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.brewery-cafe .bc-tray-step button:hover {
+  background: var(--bc-honey);
+  transform: scale(1.1);
+}
+
+.brewery-cafe .bc-tray-step button:active {
+  transform: scale(0.9);
+}
+
+.brewery-cafe .bc-tray-step span {
+  min-width: 18px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--bc-ink);
+}
+
+.brewery-cafe .bc-tray-line-total {
+  font-size: 13px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--bc-ember);
+}
+
+/* The bill, worked out by the same helpers the counter uses. */
+.brewery-cafe .bc-tray-totals {
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 2px dashed rgba(42, 33, 27, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--bc-muted);
+}
+
+.brewery-cafe .bc-tray-totals > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.brewery-cafe .bc-tray-totals dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--bc-ink);
+}
+
+.brewery-cafe .bc-tray-totals .bc-tray-save dd {
+  color: #1f7a4d;
+}
+
+.brewery-cafe .bc-tray-totals .bc-tray-grand {
+  margin-top: 6px;
+  padding-top: 9px;
+  border-top: 1px solid var(--bc-line);
+  font-size: 13px;
+  color: var(--bc-ink);
+}
+
+/* Sending the tray to the counter. */
+.brewery-cafe .bc-tray-form {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.brewery-cafe .bc-tray-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--bc-muted);
+}
+
+/* Eat in, collect, or send out — this choice decides the fields below it. */
+.brewery-cafe .bc-tray-mode {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.brewery-cafe .bc-tray-mode legend {
+  padding: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--bc-muted);
+}
+
+.brewery-cafe .bc-tray-mode-opts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.brewery-cafe .bc-tray-mode-opts button {
+  border: 1px solid var(--bc-line);
+  border-radius: 999px;
+  background: var(--bc-cream);
+  color: var(--bc-muted);
+  cursor: pointer;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 8px 4px;
+}
+
+.brewery-cafe .bc-tray-mode-opts button[data-on="true"] {
+  border-color: var(--bc-ember);
+  background: color-mix(in srgb, var(--bc-ember) 14%, var(--bc-cream));
+  color: var(--bc-ember-deep);
+}
+
+.brewery-cafe .bc-tray-mode-line {
+  margin-top: 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--bc-ember-deep);
+}
+
+.brewery-cafe .bc-tray-form input,
+.brewery-cafe .bc-tray-form textarea,
+.brewery-cafe .bc-tray-form select {
+  width: 100%;
+  border: 1px solid var(--bc-line);
+  border-radius: 12px;
+  background: var(--bc-cream);
+  color: var(--bc-ink);
+  font: inherit;
+  font-size: 13px;
+  padding: 9px 11px;
+}
+
+.brewery-cafe .bc-tray-form textarea {
+  resize: vertical;
+  min-height: 52px;
+}
+
+.brewery-cafe .bc-tray-form input:focus-visible,
+.brewery-cafe .bc-tray-form textarea:focus-visible,
+.brewery-cafe .bc-tray-form select:focus-visible {
+  outline: 2px solid var(--bc-ember);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+.brewery-cafe .bc-tray-error {
+  margin: 10px 0 0;
+  border-left: 3px solid var(--bc-ember-deep);
+  background: rgba(228, 87, 46, 0.1);
+  color: var(--bc-ember-deep);
+  font-size: 12px;
+  line-height: 1.45;
+  padding: 8px 10px;
+  border-radius: 0 10px 10px 0;
+}
+
+.brewery-cafe .bc-tray-sent {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: var(--bc-muted);
+}
+
+.brewery-cafe .bc-tray-sent .bc-display {
+  color: var(--bc-ember);
+}
+
+.brewery-cafe .bc-tray-fine {
+  margin: 9px 0 0;
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--bc-muted);
+}
+
+.brewery-cafe .bc-tray-place:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.brewery-cafe .bc-combo-empty {
+  border: 1px dashed rgba(251, 244, 233, 0.35);
+  border-radius: 16px;
+  padding: 22px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(251, 244, 233, 0.78);
+}
+
+.brewery-cafe .bc-tray-total {
+  font-size: 18px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--bc-ember);
+  animation: bc-pick-rise 380ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.brewery-cafe .bc-tray-place {
+  width: 100%;
+  margin-top: 12px;
+  justify-content: center;
+  background: var(--bc-ember);
+  color: #fff;
+  border-color: var(--bc-ember);
+}
+
+.brewery-cafe .bc-tray-place:hover {
+  background: var(--bc-ember-deep);
+}
+
+/* --- Order ticket --------------------------------------------------- */
+.brewery-cafe .bc-ticket {
+  text-align: center;
+  padding: 18px 14px;
+  background: var(--bc-cream);
+  border: 2px dashed var(--bc-ember);
+  border-radius: 12px;
+  animation: bc-ticket-print 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes bc-ticket-print {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) scaleY(0.9);
+  }
+}
+
+.brewery-cafe .bc-ticket-stamp {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bc-ember-deep);
+}
+
+.brewery-cafe .bc-ticket-no {
+  font-size: 30px;
+  margin: 6px 0;
+  color: var(--bc-ink);
+}
+
+.brewery-cafe .bc-ticket-mode {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--bc-ember-deep);
+  margin-bottom: 10px;
+}
+
+.brewery-cafe .bc-ticket-eta {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--bc-muted);
+  margin-bottom: 12px;
+}
+
+.brewery-cafe .bc-tray-restart {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  border: 2px solid var(--bc-ink);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--bc-ink);
+  font-family: var(--bc-display), serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 200ms ease, color 200ms ease;
+}
+
+.brewery-cafe .bc-tray-restart:hover {
+  background: var(--bc-ink);
+  color: var(--bc-paper);
+}
+
+/* --- Item dialog --------------------------------------------------
+   Tapping a tile opens the item centred: photo, full story, and one
+   big add control. Everything inside is sized for a thumb. */
+.brewery-cafe .bc-dialog-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(20, 8, 3, 0.62);
+  backdrop-filter: blur(6px);
+  animation: bc-scrim-fade 220ms ease;
+}
+
+.brewery-cafe .bc-dialog {
+  position: relative;
+  width: min(420px, 100%);
+  max-height: min(86vh, 720px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--bc-paper);
+  border-radius: 22px;
+  box-shadow: 0 40px 90px rgba(10, 4, 1, 0.55);
+  animation: bc-dialog-in 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes bc-scrim-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes bc-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+  }
+}
+
+.brewery-cafe .bc-dialog-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 999px;
+  background: rgba(20, 8, 3, 0.55);
+  color: #fff;
+  cursor: pointer;
+  transition: background 200ms ease, transform 180ms ease;
+}
+
+.brewery-cafe .bc-dialog-close:hover {
+  background: rgba(20, 8, 3, 0.78);
+  transform: scale(1.06);
+}
+
+.brewery-cafe .bc-dialog-close svg {
+  width: 20px;
+  height: 20px;
+}
+
+.brewery-cafe .bc-dialog-img {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+
+.brewery-cafe .bc-dialog-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.brewery-cafe .bc-dialog-body {
+  padding: 18px 20px 22px;
+}
+
+.brewery-cafe .bc-dialog-cat {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bc-muted);
+  margin-bottom: 4px;
+}
+
+.brewery-cafe .bc-dialog-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.brewery-cafe .bc-dialog-name {
+  font-family: var(--bc-display), serif;
+  font-size: 26px;
+  line-height: 1.1;
+  color: var(--bc-ink);
+}
+
+.brewery-cafe .bc-dialog-price {
+  font-family: var(--bc-display), serif;
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  color: var(--bc-ember-deep);
+}
+
+.brewery-cafe .bc-dialog-reason {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bc-ink);
+  background: var(--bc-honey);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.brewery-cafe .bc-dialog-note {
+  margin-top: 10px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: rgba(38, 22, 12, 0.82);
+}
+
+.brewery-cafe .bc-dialog-label {
+  margin: 16px 0 2px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--bc-muted);
+}
+
+.brewery-cafe .bc-dialog-text {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--bc-ink);
+}
+
+.brewery-cafe .bc-dialog-kcal {
+  margin-top: 14px;
+  font-size: 12.5px;
+  color: var(--bc-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Variant pickers (size + add-ons) ---------------------------- */
+.brewery-cafe .bc-dialog-variants {
+  margin-top: 14px;
+  border: none;
+  padding: 0;
+}
+
+.brewery-cafe .bc-variant-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.brewery-cafe .bc-variant-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 36px;
+  padding: 6px 14px;
+  border: 1px solid rgba(42, 33, 27, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--bc-ink);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 180ms, border-color 180ms, transform 150ms;
+}
+
+.brewery-cafe .bc-variant-btn[data-active='true'] {
+  background: var(--bc-ember);
+  border-color: var(--bc-ember);
+  color: #fff;
+}
+
+.brewery-cafe .bc-variant-btn:hover {
+  transform: translateY(-1px);
+}
+
+.brewery-cafe .bc-variant-extra {
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+.brewery-cafe .bc-dialog-add {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+  min-height: 48px;
+  border: none;
+  border-radius: 999px;
+  background: var(--bc-ember);
+  color: #fff;
+  font-family: var(--bc-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1), background 200ms ease;
+}
+
+.brewery-cafe .bc-dialog-add:hover {
+  background: var(--bc-ember-deep);
+  transform: translateY(-1px);
+}
+
+.brewery-cafe .bc-dialog-add:active {
+  transform: scale(0.97);
+}
+
+.brewery-cafe .bc-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.brewery-cafe .bc-dialog-line-total {
+  font-family: var(--bc-display), serif;
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+  color: var(--bc-ink);
+  margin-right: auto;
+}
+
+.brewery-cafe .bc-dialog-done {
+  min-height: 44px;
+  padding: 0 22px;
+  border: 2px solid var(--bc-ink);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--bc-ink);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 200ms ease, color 200ms ease;
+}
+
+.brewery-cafe .bc-dialog-done:hover {
+  background: var(--bc-ink);
+  color: var(--bc-paper);
+}
+
+/* --- Touch targets -------------------------------------------------
+   The menu is ordered from phones, so at phone/tablet widths every
+   ordering control grows to a comfortable ~44px tap area without
+   changing the compact desktop pills. */
+@media (max-width: 1023px) {
+  .brewery-cafe .bc-tray-step button {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+
+  .brewery-cafe .bc-tray-step span {
+    min-width: 26px;
+    font-size: 15px;
+  }
+
+  .brewery-cafe .bc-mode-btn {
+    min-height: 44px;
+  }
+
+  /* The star icon stays on tiles, but its text reason pill has no room
+     inside a square phone tile. */
+  .brewery-cafe .bc-card-star-label {
+    display: none;
+  }
+}
+
+/* --- Story band ----------------------------------------------- */
+.brewery-cafe .bc-story {
+  background: var(--bc-green);
+  color: var(--bc-cream);
+}
+
+.brewery-cafe .bc-story-glow {
+  background:
+    radial-gradient(58% 46% at 18% 8%, rgba(228, 87, 46, 0.5), transparent 70%),
+    radial-gradient(52% 44% at 84% 92%, rgba(194, 169, 203, 0.34), transparent 72%);
+}
+
+/* --- Cards ---------------------------------------------------- */
+.brewery-cafe .bc-card {
+  background: var(--bc-paper);
+  border: 1px solid var(--bc-line);
+  border-radius: 18px;
+  box-shadow: 0 18px 40px -30px rgba(42, 33, 27, 0.55);
+}
+
+/* --- Mosaic --------------------------------------------------- */
+.brewery-cafe .bc-mosaic {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 9rem;
+  gap: 1.1rem;
+}
+@media (min-width: 768px) {
+  .brewery-cafe .bc-mosaic {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: 13rem;
+    gap: 1.5rem;
+  }
+}
+.brewery-cafe .bc-mosaic-tall {
+  grid-row: span 2;
+}
+
+.brewery-cafe .bc-shot {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 5px solid var(--bc-paper);
+  background: var(--bc-paper);
+  box-shadow: 0 22px 44px -26px rgba(42, 33, 27, 0.7);
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 320ms ease;
+}
+.brewery-cafe .bc-shot:hover {
+  transform: rotate(0deg) translateY(-7px) scale(1.015);
+  box-shadow: 0 34px 60px -28px rgba(42, 33, 27, 0.8);
+}
+
+.brewery-cafe .bc-shot-caption {
+  position: absolute;
+  left: 0.65rem;
+  bottom: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 999px;
+  background: rgba(20, 15, 12, 0.62);
+  backdrop-filter: blur(5px);
+  color: var(--bc-cream);
+  padding: 0.3rem 0.7rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.brewery-cafe .bc-shot-dot {
+  height: 0.35rem;
+  width: 0.35rem;
+  border-radius: 999px;
+  background: var(--bc-honey);
+}
+
+/* --- Footer --------------------------------------------------- */
+.brewery-cafe .bc-footer {
+  background: var(--bc-green-deep);
+  color: var(--bc-cream);
+}
+
+/* --- The pour: six plates at real depths, one shared timeline ---- */
+.brewery-cafe .bc-pour-scene {
+  --bc-loop: 9s;
+  perspective: 720px;
+}
+
+/* Sized down and faded on small screens so the headline keeps the room,
+   and lifted clear of the bottom edge so the glass stays in the first view. */
+.brewery-cafe .bc-pour-anchor {
+  position: absolute;
+  right: -3%;
+  bottom: 21%;
+  width: 41%;
+  max-width: 210px;
+  opacity: 0.46;
+}
+
+@media (min-width: 768px) {
+  .brewery-cafe .bc-pour-anchor {
+    top: 52%;
+    bottom: auto;
+    right: 2%;
+    width: 35%;
+    max-width: 320px;
+    transform: translateY(-50%);
+    opacity: 0.7;
+  }
+}
+
+@media (min-width: 1024px) {
+  .brewery-cafe .bc-pour-anchor {
+    right: 3.5%;
+    width: 29%;
+    max-width: 350px;
+    opacity: 0.86;
+  }
+}
+
+@media (min-width: 1440px) {
+  .brewery-cafe .bc-pour-anchor {
+    right: 6.5%;
+  }
+}
+
+.brewery-cafe .bc-pour-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 200 / 260;
+  transform-style: preserve-3d;
+  transform: rotateX(calc(var(--gx, 0) * 1deg)) rotateY(calc(9deg + var(--gy, 0) * 1deg));
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.brewery-cafe .bc-pour-idle {
+  position: relative;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+.brewery-cafe .bc-pour-plate {
+  position: absolute;
+  inset: 0;
+  transform: translateZ(var(--lz, 0px));
+  animation: bc-pour-assemble 760ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation-delay: var(--d, 0ms);
+}
+
+.brewery-cafe .bc-pour-plate > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+@keyframes bc-pour-assemble {
+  from {
+    opacity: 0;
+    transform: translateZ(calc(var(--lz, 0px) - 130px)) rotateY(-32deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateZ(var(--lz, 0px));
+  }
+}
+
+/* Every part below rests in its finished state, so a browser that asks for
+   reduced motion gets a full glass with the shot still running into it. */
+.brewery-cafe .bc-pour-halo {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.brewery-cafe .bc-pour-level {
+  transform-box: view-box;
+  transform-origin: 100px 206px;
+}
+
+.brewery-cafe .bc-pour-crema {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0.9;
+}
+
+.brewery-cafe .bc-pour-plume {
+  transform-box: fill-box;
+  transform-origin: center;
+  filter: blur(5px);
+  opacity: 0.32;
+}
+
+.brewery-cafe .bc-pour-ripple {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+}
+
+.brewery-cafe .bc-pour-stream {
+  stroke-dasharray: 100;
+}
+
+.brewery-cafe .bc-pour-shine {
+  opacity: 0.2;
+}
+
+.brewery-cafe .bc-pour-steam {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .brewery-cafe .bc-pour-idle {
+    animation: bc-pour-yaw 16s ease-in-out infinite;
+  }
+  .brewery-cafe .bc-pour-halo {
+    animation: bc-pour-halo var(--bc-loop) ease-in-out infinite;
+  }
+  .brewery-cafe .bc-pour-level {
+    animation: bc-pour-level var(--bc-loop) ease-in-out infinite;
+  }
+  .brewery-cafe .bc-pour-stream {
+    animation: bc-pour-stream var(--bc-loop) linear infinite;
+    animation-delay: calc(var(--k, 0) * -0.3s);
+  }
+  .brewery-cafe .bc-pour-crema {
+    animation: bc-pour-crema var(--bc-loop) ease-out infinite;
+  }
+  .brewery-cafe .bc-pour-plume {
+    animation: bc-pour-plume var(--bc-loop) ease-out infinite;
+    animation-delay: calc(var(--k, 0) * -0.55s);
+  }
+  .brewery-cafe .bc-pour-ripple {
+    animation: bc-pour-ripple 3s ease-out infinite;
+    animation-delay: calc(var(--k, 0) * 0.8s);
+  }
+  .brewery-cafe .bc-pour-shine {
+    animation: bc-pour-shine var(--bc-loop) ease-in-out infinite;
+    animation-delay: calc(var(--k, 0) * -1.2s);
+  }
+  .brewery-cafe .bc-pour-steam {
+    animation: bc-pour-steam var(--bc-loop) ease-out infinite;
+    animation-delay: calc(var(--k, 0) * -2.6s);
+  }
+}
+
+@keyframes bc-pour-yaw {
+  0%,
+  100% {
+    transform: rotateY(-6deg);
+  }
+  50% {
+    transform: rotateY(8deg);
+  }
+}
+
+@keyframes bc-pour-halo {
+  0%,
+  100% {
+    opacity: 0.86;
+    transform: scale(1);
+  }
+  44% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+}
+
+/* The shot lands, the level swells, then settles back over the rest of the loop. */
+@keyframes bc-pour-level {
+  0%,
+  12% {
+    transform: scaleY(1);
+  }
+  46% {
+    transform: scaleY(1.075);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes bc-pour-stream {
+  0%,
+  7% {
+    opacity: 0;
+    stroke-dashoffset: 100;
+  }
+  9% {
+    opacity: 1;
+    stroke-dashoffset: 100;
+  }
+  16%,
+  42% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+  48% {
+    opacity: 0;
+    stroke-dashoffset: 0;
+  }
+  100% {
+    opacity: 0;
+    stroke-dashoffset: 100;
+  }
+}
+
+/* The disc starts spreading the moment the shot reaches the surface. */
+@keyframes bc-pour-crema {
+  0%,
+  14% {
+    opacity: 0.55;
+    transform: scale(0.62);
+  }
+  34% {
+    opacity: 1;
+    transform: scale(1.14);
+  }
+  58% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.55;
+    transform: scale(0.62);
+  }
+}
+
+@keyframes bc-pour-plume {
+  0%,
+  16% {
+    opacity: 0;
+    transform: scale(0.4) rotate(-6deg);
+  }
+  40% {
+    opacity: 0.34;
+    transform: scale(1.05) rotate(5deg);
+  }
+  70% {
+    opacity: 0.2;
+    transform: scale(1.25) rotate(12deg);
+  }
+  92%,
+  100% {
+    opacity: 0;
+    transform: scale(1.4) rotate(16deg);
+  }
+}
+
+@keyframes bc-pour-ripple {
+  0% {
+    opacity: 0;
+    transform: scale(0.25);
+  }
+  22% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.1);
+  }
+}
+
+@keyframes bc-pour-shine {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  42% {
+    opacity: 0.46;
+  }
+}
+
+@keyframes bc-pour-steam {
+  0%,
+  48% {
+    opacity: 0;
+    transform: translateY(8px) scaleX(0.9);
+  }
+  60% {
+    opacity: 0.42;
+  }
+  84% {
+    opacity: 0.26;
+    transform: translateY(-14px) scaleX(1.08);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-22px) scaleX(1.12);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Scroll reveals still happen, they just arrive without the lift. */
+  .brewery-cafe .bc-reveal {
+    transition-duration: 1ms;
+  }
+  .brewery-cafe .bc-hero-grain,
+  .brewery-cafe .bc-pour-plate {
+    animation: none;
+  }
+  .brewery-cafe .bc-shot,
+  .brewery-cafe .bc-shot:hover {
+    transform: none;
+    transition: none;
+  }
+  .brewery-cafe .bc-btn:hover {
+    transform: none;
+  }
+  .brewery-cafe .bc-pick-wash {
+    animation: none;
+  }
+  .brewery-cafe .bc-beans {
+    animation: none;
+  }
+  .brewery-cafe .bc-bean {
+    animation: none;
+  }
+  .brewery-cafe .bc-carousel-btn:hover {
+    transform: none;
+  }
+  .brewery-cafe .bc-swipe-hint {
+    animation: none;
+    transition: none;
+    opacity: 1;
+  }
+  .brewery-cafe .bc-swipe-arrow {
+    animation: none;
+  }
+  .brewery-cafe .bc-tile,
+  .brewery-cafe .bc-tile:hover,
+  .brewery-cafe .bc-tile:active {
+    transform: none;
+    transition: none;
+    animation: none;
+    translate: none;
+    rotate: none;
+  }
+  .brewery-cafe .bc-tile-img img,
+  .brewery-cafe .bc-tile:hover .bc-tile-img img {
+    transform: none;
+    transition: none;
+  }
+  .brewery-cafe .bc-card-star {
+    animation: none;
+  }
+  .brewery-cafe .bc-card-star-label {
+    transition: none;
+  }
+  /* The barrel keeps its shape — the curve is geometry, not movement — but
+     it stops lifting, unfolding and easing between poses. JS snaps the spin
+     to the next card instantly for the same reason. */
+  .brewery-cafe .bc-barrel-stage {
+    cursor: default;
+  }
+  .brewery-cafe .bc-barrel-card,
+  .brewery-cafe .bc-barrel-card[data-active='true'] {
+    translate: none;
+    transition: none;
+  }
+  .brewery-cafe .bc-barrel-note,
+  .brewery-cafe .bc-barrel-cta,
+  .brewery-cafe .bc-barrel-dot::after,
+  .brewery-cafe .bc-barrel-nav {
+    transition: none;
+  }
+  .brewery-cafe .bc-tray-line,
+  .brewery-cafe .bc-ticket,
+  .brewery-cafe .bc-tray-total {
+    animation: none;
+  }
+  .brewery-cafe .bc-tray-step button:hover,
+  .brewery-cafe .bc-tray-step button:active,
+  .brewery-cafe .bc-dialog-add:hover,
+  .brewery-cafe .bc-dialog-add:active,
+  .brewery-cafe .bc-dialog-close:hover {
+    transform: none;
+  }
+  .brewery-cafe .bc-dialog-scrim,
+  .brewery-cafe .bc-dialog {
+    animation: none;
+  }
+  .brewery-cafe .bc-mode-pill {
+    transition: none;
+  }
+}

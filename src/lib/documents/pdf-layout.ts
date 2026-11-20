@@ -1,4 +1,5 @@
 import type { BillDocument } from "./types";
+import type { CaptureMode } from "@/lib/workspace/constants";
 
 /**
  * Pure geometry and money arithmetic for the PDF renderer. Nothing here touches
@@ -209,6 +210,27 @@ export function quotationValidUntil(createdAt: string, days = 15) {
     month: "short",
     year: "numeric",
   }).format(date);
+}
+
+/**
+ * The service-date line, in the words this brand uses. A cafe that hands a
+ * bowl over the counter should not be told about delivery and installation.
+ */
+export function serviceDateLabel(isQuote: boolean, capture: CaptureMode = "counter") {
+  if (capture === "project") return isQuote ? "Target delivery" : "Delivery / installation";
+  return isQuote ? "Ready by" : "Service date";
+}
+
+/**
+ * The tender line on a bill. Money taken later — a split bill especially, which
+ * has no single method — is recorded on the payment rows and never lands on
+ * `order.payment_method`, so cash already received must not print as pending.
+ */
+export function paymentLabel(doc: BillDocument) {
+  if (doc.paymentMethod) return doc.paymentMethod;
+  const paid = doc.amountPaid ?? 0;
+  if (paid <= 0) return "pending";
+  return paid >= doc.grandTotal - 0.005 ? "received" : "part received";
 }
 
 function round2(amount: number) {

@@ -4,6 +4,7 @@ import {
   computeTableColumns,
   formatPdfAmount,
   lineRowHeight,
+  paymentLabel,
   quotationValidUntil,
   splitStateTax,
 } from "./pdf-layout";
@@ -190,5 +191,20 @@ describe("quotationValidUntil", () => {
 
   it("falls back to a 15-day window", () => {
     expect(quotationValidUntil("2026-11-11T10:00:00.000Z")).toBe("26 Nov 2026");
+  });
+});
+
+describe("paymentLabel", () => {
+  it("names the tender the order was paid with", () => {
+    expect(paymentLabel(doc({ kind: "bill", paymentMethod: "UPI" }))).toBe("UPI");
+  });
+
+  it("says pending only when nothing has been taken", () => {
+    expect(paymentLabel(doc({ kind: "bill" }))).toBe("pending");
+  });
+
+  it("credits a bill paid from the payments table, where no single method is stored", () => {
+    expect(paymentLabel(doc({ kind: "bill", amountPaid: 64782 }))).toBe("received");
+    expect(paymentLabel(doc({ kind: "bill", amountPaid: 20000 }))).toBe("part received");
   });
 });

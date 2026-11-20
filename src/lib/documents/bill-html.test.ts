@@ -28,6 +28,7 @@ function doc(overrides: Partial<BillDocument> = {}): BillDocument {
     orderNumber: "CF-Q-1",
     brandName: "Cubig Furniture",
     brandCode: "BR-2",
+    capture: "project",
     issuer: ISSUER,
     receiptHeader: null,
     receiptFooter: null,
@@ -148,6 +149,17 @@ describe("renderBillHtml", () => {
     expect(renderBillHtml(doc({ kind: "bill", paymentMethod: null }))).toContain(
       "Payment <b>pending</b>",
     );
+  });
+
+  it("credits money taken after the bill was written", () => {
+    // A split bill records its tenders on the payment rows, so the order keeps
+    // no single method; the bill must still say the money arrived.
+    expect(
+      renderBillHtml(doc({ kind: "bill", paymentMethod: null, amountPaid: 74340 })),
+    ).toContain("Payment <b>received</b>");
+    expect(
+      renderBillHtml(doc({ kind: "bill", paymentMethod: null, amountPaid: 30000 })),
+    ).toContain("Payment <b>part received</b>");
   });
 
   it("falls back to a walk-in customer and the brand name without an issuer", () => {

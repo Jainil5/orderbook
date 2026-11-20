@@ -7,7 +7,9 @@ import {
   computeTableColumns,
   formatPdfAmount,
   lineRowHeight,
+  paymentLabel,
   quotationValidUntil,
+  serviceDateLabel,
   type TableColumns,
 } from "@/lib/documents/pdf-layout";
 
@@ -229,9 +231,13 @@ function drawMetaCards(layout: Layout, doc: BillDocument) {
   const left: string[] = [];
   if (doc.customerPhone) left.push(`Mobile: ${doc.customerPhone}`);
   if (doc.customerAddress?.trim()) {
+    const addressLabel = doc.capture === "project" ? "Site" : "Deliver to";
     left.push(
       ...pdf
-        .splitTextToSize(`Site: ${doc.customerAddress.trim()}`, colW - pad * 2)
+        .splitTextToSize(
+          `${addressLabel}: ${doc.customerAddress.trim()}`,
+          colW - pad * 2,
+        )
         .slice(0, 3),
     );
   }
@@ -243,7 +249,7 @@ function drawMetaCards(layout: Layout, doc: BillDocument) {
   ];
   if (doc.serviceDate) {
     right.push(
-      `${isQuote ? "Target delivery" : "Delivery / installation"}: ${formatDateOnly(doc.serviceDate)}`,
+      `${serviceDateLabel(isQuote, doc.capture)}: ${formatDateOnly(doc.serviceDate)}`,
     );
   }
   if (isQuote) {
@@ -253,7 +259,7 @@ function drawMetaCards(layout: Layout, doc: BillDocument) {
     if (doc.referenceNumber) {
       right.push(`Against quotation: ${doc.referenceNumber}`);
     }
-    right.push(`Payment: ${doc.paymentMethod ?? "pending"}`);
+    right.push(`Payment: ${paymentLabel(doc)}`);
   }
 
   const cardH =

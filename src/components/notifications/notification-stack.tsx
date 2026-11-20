@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { Bell, Check, Trash2 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useNotifications } from "./notifications-context";
@@ -145,7 +146,17 @@ export function NotificationStack() {
                       )}
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium">{item.title}</p>
+                      {item.href ? (
+                        <Link
+                          href={item.href}
+                          onClick={() => markRead(item.id)}
+                          className="font-medium hover:underline"
+                        >
+                          {item.title}
+                        </Link>
+                      ) : (
+                        <p className="font-medium">{item.title}</p>
+                      )}
                       {item.message ? (
                         <p className="mt-0.5 text-xs text-[var(--ob-text-muted)]">
                           {item.message}

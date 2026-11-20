@@ -27,6 +27,8 @@ export function OrderDocumentActions({
 
   const pdfLabel =
     document.kind === "quotation" ? "Download quotation PDF" : "Save bill PDF";
+  const htmlLabel =
+    document.kind === "quotation" ? "Open quotation" : "Open bill";
 
   async function onOpenHtml() {
     setHtmlBusy(true);
@@ -94,7 +96,7 @@ export function OrderDocumentActions({
         </p>
       ) : null}
       <p className="text-xs text-[var(--ob-text-muted)]">
-        Optional: open the document in a browser, send it on WhatsApp, or save a
+        Optional: open the bill in a new tab, send it on WhatsApp, or save a
         PDF. The order is already stored in Orders.
       </p>
       <div className="flex flex-col gap-2 sm:flex-row">
@@ -106,7 +108,7 @@ export function OrderDocumentActions({
           onClick={onOpenHtml}
         >
           <ExternalLink className="h-4 w-4" aria-hidden />
-          Open in browser
+          {htmlLabel}
         </Button>
         <Button
           type="button"

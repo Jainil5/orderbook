@@ -34,6 +34,7 @@ export default async function OrderDetailPage({
     receiptFooter: ws.settings.receipt_footer ?? null,
     currencyCode: ws.settings.currency_code,
     taxRatePercent: ws.settings.tax_rate_percent ?? 0,
+    capture: ws.profile.capture,
   };
 
   const demoCode = toDemoBrandCode(ws.brand.code);

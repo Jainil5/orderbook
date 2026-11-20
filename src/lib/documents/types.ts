@@ -1,4 +1,5 @@
 import type { DocumentBrandProfile } from "@/lib/documents/brand-profile";
+import type { CaptureMode } from "@/lib/workspace/constants";
 
 export type BillDocumentKind = "bill" | "quotation";
 
@@ -38,6 +39,8 @@ export type BillDocument = {
   createdAt: string;
   /** Delivery / installation date chosen at billing. */
   serviceDate?: string | null;
+  /** Whose words the document uses: a counter says "Service date", a project says "Delivery / installation". */
+  capture?: CaptureMode;
   lines: BillLineItem[];
   listSubtotal: number;
   productDiscountTotal: number;

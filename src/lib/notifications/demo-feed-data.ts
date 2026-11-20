@@ -13,15 +13,10 @@ type DemoRow = {
 // Repo-only demo feed: the notification bell gets rich content in demo
 // workspaces without any backend table. Delete this file (and its mount)
 // to remove the seed.
+//
+// No rows here claim an order number: those come from `NewOrderAlerts`, which
+// reads the real store, so the bell never points at an order that does not exist.
 const DEMO_ROWS: DemoRow[] = [
-  {
-    id: "demo-1",
-    kind: "order",
-    title: "New order BR-1-241",
-    message: "3 × Flat White, 1 × Croissant Basket · ₹860 · UPI",
-    href: "/orders",
-    minutesAgo: 4,
-  },
   {
     id: "demo-2",
     kind: "warning",
@@ -37,14 +32,6 @@ const DEMO_ROWS: DemoRow[] = [
     message: "14 orders served in the last hour · avg ticket ₹540.",
     href: "/kitchen",
     minutesAgo: 52,
-  },
-  {
-    id: "demo-4",
-    kind: "order",
-    title: "Kitchen ticket #92",
-    message: "2 items marked unavailable and refunded at billing.",
-    href: "/kitchen",
-    minutesAgo: 126,
   },
   {
     id: "demo-5",
@@ -78,15 +65,6 @@ const DEMO_ROWS: DemoRow[] = [
     message: "2 staff off duty during the 6–9 PM peak yesterday.",
     href: "/manager",
     minutesAgo: 1620,
-    read: true,
-  },
-  {
-    id: "demo-9",
-    kind: "order",
-    title: "Bulk order received",
-    message: "12 × Croissant Basket scheduled for Saturday pickup.",
-    href: "/orders",
-    minutesAgo: 2900,
     read: true,
   },
 ];

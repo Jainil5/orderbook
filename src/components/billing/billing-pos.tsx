@@ -520,6 +520,7 @@ export function BillingPos({
             serviceDate,
             siteAddress: deliveryAddress,
             depositPercent: deposit,
+            capture: captureMode,
           }),
         );
       }

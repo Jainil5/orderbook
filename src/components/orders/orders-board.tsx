@@ -126,11 +126,12 @@ function OngoingSections({
           </h2>
           <ul className="space-y-3">
             {completedToday.map((o) => (
-              <li key={o.id} className="ob-card p-4">
+              <li key={o.id} className="ob-card relative p-4">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <Link
-                      className="font-semibold text-[var(--ob-primary)]"
+                      className="font-semibold text-[var(--ob-primary)] after:absolute after:inset-0 after:content-['']"
+                      aria-label={`Open order ${o.order_number}`}
                       href={`/orders/${o.id}`}
                     >
                       {o.order_number}
@@ -143,7 +144,15 @@ function OngoingSections({
                     {formatMoney(o.grand_total, currencyCode)}
                   </p>
                 </div>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
+
+                {o.notes?.trim() ? (
+                  <p className="mt-2 line-clamp-2 text-xs text-[var(--ob-text-secondary)]">
+                    <span className="font-semibold">Notes · </span>
+                    {o.notes}
+                  </p>
+                ) : null}
+
+                <div className="relative mt-3 flex flex-wrap items-center gap-2">
                   {o.order_type ? (
                     <Badge tone="neutral">{ORDER_TYPE_LABELS[o.order_type]}</Badge>
                   ) : null}
@@ -189,11 +198,12 @@ function OngoingRow({
   }
 
   return (
-    <li className="ob-card p-4">
+    <li className="ob-card relative p-4">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <Link
-            className="font-semibold text-[var(--ob-primary)]"
+            className="font-semibold text-[var(--ob-primary)] after:absolute after:inset-0 after:content-['']"
+            aria-label={`Open order ${o.order_number}`}
             href={`/orders/${o.id}`}
           >
             {o.order_number}
@@ -210,6 +220,13 @@ function OngoingRow({
       {preview !== "—" ? (
         <p className="mt-2 line-clamp-2 text-xs text-[var(--ob-text-muted)]">
           {preview}
+        </p>
+      ) : null}
+
+      {o.notes?.trim() ? (
+        <p className="mt-2 line-clamp-2 text-xs text-[var(--ob-text-secondary)]">
+          <span className="font-semibold">Notes · </span>
+          {o.notes}
         </p>
       ) : null}
 
@@ -233,7 +250,8 @@ function OngoingRow({
         ) : null}
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
+      {/* `relative` keeps these above the card-wide link the order number paints. */}
+      <div className="relative mt-3 flex flex-wrap items-center gap-2">
         <Button
           type="button"
           loading={busy}
@@ -242,12 +260,12 @@ function OngoingRow({
         >
           Order Completed
         </Button>
-        <Link
-          href={`/orders/${o.id}`}
-          className="ob-press ob-btn-ghost ob-touch-target inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold"
+        <span
+          aria-hidden
+          className="text-sm font-semibold text-[var(--ob-primary)]"
         >
-          Cancel / detail
-        </Link>
+          Open order →
+        </span>
       </div>
 
       {error ? (

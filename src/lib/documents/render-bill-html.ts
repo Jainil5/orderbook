@@ -1,7 +1,9 @@
 import { formatMoney } from "@/lib/format";
 import {
   buildTotalsRows,
+  paymentLabel,
   quotationValidUntil,
+  serviceDateLabel,
   type TotalsRow,
 } from "@/lib/documents/pdf-layout";
 import type { BillDocument } from "@/lib/documents/types";
@@ -169,17 +171,20 @@ function letterhead(doc: BillDocument, logoDataUrl?: string | null): string {
 
 function metaCards(doc: BillDocument): string {
   const isQuote = doc.kind === "quotation";
+  const isProject = doc.capture === "project";
   const left: string[] = [];
   if (doc.customerPhone) left.push(`Mobile <b>${escapeHtml(doc.customerPhone)}</b>`);
   if (doc.customerAddress?.trim()) {
-    left.push(`Site <b>${escapeHtml(doc.customerAddress.trim())}</b>`);
+    left.push(
+      `${isProject ? "Site" : "Deliver to"} <b>${escapeHtml(doc.customerAddress.trim())}</b>`,
+    );
   }
   const right: string[] = [
     `Currency <b>${escapeHtml(doc.currencyCode)}</b>`,
   ];
   if (doc.serviceDate) {
     right.push(
-      `${isQuote ? "Target delivery" : "Delivery / installation"} <b>${escapeHtml(dayOnly(doc.serviceDate))}</b>`,
+      `${serviceDateLabel(isQuote, doc.capture)} <b>${escapeHtml(dayOnly(doc.serviceDate))}</b>`,
     );
   }
   if (isQuote) {
@@ -189,7 +194,7 @@ function metaCards(doc: BillDocument): string {
     if (doc.referenceNumber) {
       right.push(`Against quotation <b>${escapeHtml(doc.referenceNumber)}</b>`);
     }
-    right.push(`Payment <b>${escapeHtml(doc.paymentMethod ?? "pending")}</b>`);
+    right.push(`Payment <b>${escapeHtml(paymentLabel(doc))}</b>`);
   }
   return `
   <section class="meta">
@@ -289,7 +294,7 @@ export function renderBillHtml(
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="generator" content="OrderBook">
 <title>${escapeHtml(billHtmlTitle(doc))}</title>
-<style>:root{--accent:${accent};}${STYLE}</style>
+<style>${STYLE}:root{--accent:${accent};}</style>
 </head>
 <body>
 <p class="toolbar">This is the ${isQuote ? "quotation" : "bill"} as saved in Orders — use your browser's
