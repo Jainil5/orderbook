@@ -71,11 +71,6 @@
   --ob-glass: color-mix(in srgb, var(--ob-surface) 82%, transparent);
   --ob-glass-strong: color-mix(in srgb, var(--ob-surface) 96%, transparent);
   --ob-scrim-bg: color-mix(in srgb, #030a07 62%, transparent);
-  /* The flow field is a background, not a texture: on paper the same strokes
-     turn into fur, so the light theme keeps them barely there. */
-  --ob-flow-leaf: 0.15;
-  --ob-flow-sand: 0.12;
-  --ob-flow-fade: 0.07;
   --ob-crest: #ffffff;
   --ob-inset-light: inset 0 1px 0 rgb(190 235 205 / 0.07);
   --ob-shadow-sm: 0 18px 34px -26px rgb(0 0 0 / 0.7), var(--ob-inset-light);
@@ -160,9 +155,6 @@
   --ob-glass: color-mix(in srgb, var(--ob-surface) 88%, transparent);
   --ob-glass-strong: color-mix(in srgb, var(--ob-surface) 97%, transparent);
   --ob-scrim-bg: color-mix(in srgb, #06231a 38%, transparent);
-  --ob-flow-leaf: 0.06;
-  --ob-flow-sand: 0.05;
-  --ob-flow-fade: 0.11;
   /* On paper the crest dips deep instead of flashing white. */
   --ob-crest: #0b5c33;
   --ob-inset-light: inset 0 1px 0 rgb(255 255 255 / 0.75);
@@ -909,14 +901,6 @@ h1 {
   background: radial-gradient(circle, var(--ob-glow), transparent 68%);
   animation: ob-sheen 14s ease infinite;
   z-index: 0;
-}
-
-/* Flow-field canvas: fixed behind everything, still running while you scroll. */
-.ob-flow {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
 }
 
 /* Cursor-following radial highlight on every card. The delegated CardGlow

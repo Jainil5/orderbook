@@ -27,9 +27,9 @@ data are OrderBook's.
 - **Everything floats on glass.** Cards, sticky bars, drawers and popovers use
   one translucent recipe with a 1px inset top-edge light — that single line is
   what stops them looking flat against the field.
-- **The background is a live field, not a texture.** A curl-noise flow field
-  (`.ob-flow`) drifts behind the whole app, bends toward the pointer and retints
-  from the live theme tokens.
+- **The background is a lit field, not a texture.** `.ob-workspace` sits on two
+  soft radial glows (`--ob-ambient-a` / `--ob-ambient-b`) over `--ob-bg`, so the
+  page reads as space with light in it rather than a flat colour or an image.
 - Desktop-first workspace, responsive tablet/mobile, and motion that defers to
   `prefers-reduced-motion` in both CSS and JS.
 
@@ -145,21 +145,9 @@ flashing white.
 character in, 1900ms hold, 26ms per character out, 220ms between words, with a 3px
 leaf caret and a reserved `min-height` so the heading never jumps.
 
-`@media (prefers-reduced-motion: reduce)` kills all animation and transitions,
-zeroes the hover transforms, and the JS side (`useReducedMotion`, the flow-field
-canvas) renders static instead.
-
-### Flow field
-
-`src/components/effects/flow-field.tsx` draws 620 curl-noise streaks on a
-`fixed inset-0 -z-10` canvas. It reads `--ob-leaf`, `--ob-sand`, `--ob-bg` and the
-three intensity tokens through `getComputedStyle`, re-reads them every 90 frames
-and on `data-theme` mutation, so it retints live rather than baking the dark
-palette.
-
-`--ob-flow-leaf` / `--ob-flow-sand` / `--ob-flow-fade` are the per-theme
-intensities. Dark runs `0.15 / 0.12 / 0.07`; light drops to `0.06 / 0.05 / 0.11`
-because the same strokes read as fur on paper.
+`@media (prefers-reduced-motion: reduce)` kills all animation and transitions and
+zeroes the hover transforms; the JS side (`useReducedMotion`) renders static
+instead.
 
 ### Data viz
 
@@ -213,7 +201,7 @@ than separate banded sections.
   for a workspace page title.
 - The spec's mega-panel/flyout hover nav and the desktop "lamp" hero light were
   not ported: the first has no analogue in a sidebar IA, and the second is a
-  hero-only decoration that would fight the flow field.
+  hero-only decoration that would fight the ambient page field.
 - `.ob-tag-*` stock tints keep their old `navy/teal/amber/violet/slate` ordering
   but are renamed `leaf-faint / leaf / sand / leaf-strong / muted`; every value
   is a leaf/sand/muted mix, and no hue outside the family survives.

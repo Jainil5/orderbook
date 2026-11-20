@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { PageShell } from "@/components/workspace/page-shell";
 import { QuotationBuilderSetting } from "@/components/settings/quotation-builder-setting";
 import { ManagerModulesSetting } from "@/components/settings/manager-modules-setting";
@@ -14,7 +13,6 @@ import { ExportDataSetting } from "@/components/settings/export-data-setting";
 import { useWorkspace } from "@/components/workspace/workspace-provider";
 import { canEditWorkspaceFeatures } from "@/lib/workspace/settings-access";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Tabs } from "@/components/ui/tabs";
 
 const SETTINGS_TABS = [
@@ -22,7 +20,6 @@ const SETTINGS_TABS = [
   { id: "receipt", label: "Receipt" },
   { id: "hours", label: "Working hours" },
   { id: "features", label: "Features" },
-  { id: "catalog", label: "Catalog" },
   { id: "brand", label: "Brand website" },
   { id: "export", label: "Export data" },
   { id: "team", label: "Team" },
@@ -33,7 +30,6 @@ type SettingsTabId = (typeof SETTINGS_TABS)[number]["id"];
 function tabFromParam(value: string | null): SettingsTabId {
   if (
     value === "features" ||
-    value === "catalog" ||
     value === "brand" ||
     value === "export" ||
     value === "profile" ||
@@ -164,19 +160,6 @@ export default function SettingsPage() {
               canEdit={canEdit}
             />
             <ManagerModulesSetting hidden={ws.hiddenManagerModules} canEdit={canEdit} />
-          </Card>
-        ) : null}
-
-        {tab === "catalog" ? (
-          <Card className="max-w-2xl">
-            <h2 className="font-semibold">Catalog &amp; offers</h2>
-            <p className="mt-2 text-sm text-[var(--ob-text-muted)]">
-              Products, prices, photos, and promo codes live in one place. They
-              feed Quotation, Bill, and Billing checkout.
-            </p>
-            <Link href="/products" className="mt-4 inline-block">
-              <Button type="button">Open products</Button>
-            </Link>
           </Card>
         ) : null}
 

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 import { LogoMark } from "@/components/brand/logo-mark";
 import { Wordmark } from "@/components/brand/wordmark";
-import { FlowField } from "@/components/effects/flow-field";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { DemoShowcase } from "@/components/auth/demo-showcase";
 import { BrandCards } from "@/components/showcase/brand-cards";
@@ -40,8 +39,6 @@ export function DemoPicker({
 
   return (
     <div className="ob-workspace relative min-h-[100dvh] overflow-x-hidden">
-      <FlowField />
-
       <header className="ob-glass-bar sticky top-0 z-40 border-b border-[var(--ob-border)]">
         <div className="mx-auto flex min-h-[72px] max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2">
           <div className="flex items-center gap-3">
